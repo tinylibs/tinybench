@@ -49,20 +49,23 @@ on their names in a `Map`.
 ## Docs
 
 ### `Bench`
+
 The Benchmark instance for keeping track of the benchmark tasks and controlling
 them.
 
 Options:
+
 ```ts
 type Options = {
   /**
    * time needed for running a benchmark task (milliseconds)
    */
   time?: number;
+
   /**
-   * function to get the current timestamp in milliseconds (bigint)
+   * function to get the current timestamp in milliseconds
    */
-  now?: typeof now;
+  now?: () => number;
 
   /**
    * An AbortSignal for aborting the benchmark
@@ -70,6 +73,16 @@ type Options = {
   signal?: AbortSignal;
 };
 ```
+
+- `async run()`: run the added tasks that were registered using the `add` method
+- `reset()`: reset each task and remove its result
+- `add(name: string, fn: Fn)`: add a benchmark task to the task map
+- - `Fn`: `() => any | Promise<any>`
+- `remove(name: string)`: remove a benchmark task from the task map
+
+
+
+
 
 ## Authors
 

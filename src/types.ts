@@ -113,10 +113,11 @@ export type Options = {
    * time needed for running a benchmark task (milliseconds)
    */
   time?: number;
+
   /**
-   * function to get the current timestamp in milliseconds (bigint)
+   * function to get the current timestamp in milliseconds
    */
-  now?: typeof now;
+  now?: () => number;
 
   /**
    * An AbortSignal for aborting the benchmark

@@ -104,7 +104,9 @@ export type Events =
   | "error"
   | "reset"
   | "start"
-  | "cycle";
+  | "cycle"
+  | "add"
+  | "remove";
 
 export type Options = {
   /**

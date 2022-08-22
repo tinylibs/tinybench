@@ -46,6 +46,31 @@ use it to create an another task for that instance.
 Note that the task name should always be unique in an instance, because Tinybench stores the tasks based
 on their names in a `Map`.
 
+## Docs
+
+### `Bench`
+The Benchmark instance for keeping track of the benchmark tasks and controlling
+them.
+
+Options:
+```ts
+type Options = {
+  /**
+   * time needed for running a benchmark task (milliseconds)
+   */
+  time?: number;
+  /**
+   * function to get the current timestamp in milliseconds (bigint)
+   */
+  now?: typeof now;
+
+  /**
+   * An AbortSignal for aborting the benchmark
+   */
+  signal?: AbortSignal;
+};
+```
+
 ## Authors
 
 | <a href="https://github.com/Aslemammad"> <img width='150' src="https://avatars.githubusercontent.com/u/37929992?v=4" /><br> Mohammad Bagher </a> |

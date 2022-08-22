@@ -20,7 +20,7 @@ export class Bench extends EventTarget {
       this.signal.addEventListener(
         "abort",
         () => {
-          this.dispatchEvent(new Event("abort"));
+          this.dispatchEvent(createBenchEvent("abort"));
         },
         { once: true }
       );
@@ -28,9 +28,6 @@ export class Bench extends EventTarget {
   }
 
   private async runTask(task: Task) {
-    if (this.signal?.aborted) {
-      return task;
-    }
     const startTime = this.now(); // ms
     let totalTime = 0; // ms
     const samples: number[] = [];
@@ -109,10 +106,17 @@ export class Bench extends EventTarget {
     return task;
   }
 
+  /**
+   * run the added tasks that were registered using the
+   * `add` method
+   */
   async run() {
-    this.dispatchEvent(new Event("start"));
+    this.dispatchEvent(createBenchEvent("start"));
     const values = await Promise.all(
       [...this.#tasks.entries()].map(([_, task]) => {
+        if (this.signal?.aborted) {
+          return task;
+        }
         return this.runTask(task);
       })
     );
@@ -120,6 +124,9 @@ export class Bench extends EventTarget {
     return values;
   }
 
+  /**
+   * reset each task and remove its result
+   */
   reset() {
     this.dispatchEvent(createBenchEvent("reset"));
     this.#tasks.forEach((task) => {
@@ -127,13 +134,22 @@ export class Bench extends EventTarget {
     });
   }
 
+  /**
+   * add a benchmark task to the task map
+   */
   add(name: string, fn: Fn) {
     const task = new Task(name, fn);
     this.#tasks.set(name, task);
+    this.dispatchEvent(createBenchEvent("add", task));
     return this;
   }
 
+  /**
+   * remove a benchmark task from the task map
+   */
   remove(name: string) {
+    const task = this.getTask(name);
+    this.dispatchEvent(createBenchEvent("remove", task));
     this.#tasks.delete(name);
     return this;
   }
@@ -154,14 +170,23 @@ export class Bench extends EventTarget {
     super.removeEventListener(type, listener, options);
   }
 
+  /**
+   * tasks results as an array
+   */
   get results() {
     return [...this.#tasks.values()].map((task) => task.result);
   }
 
+  /**
+   * tasks as an array
+   */
   get tasks() {
     return [...this.#tasks.values()];
   }
 
+  /**
+   * get a task based on the task name
+   */
   getTask(name: string) {
     return this.#tasks.get(name);
   }

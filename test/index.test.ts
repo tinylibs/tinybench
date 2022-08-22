@@ -66,6 +66,14 @@ test("events order", async () => {
     events.push("abort");
   });
 
+  bench.addEventListener("add", () => {
+    events.push("add");
+  });
+
+  bench.addEventListener("remove", () => {
+    events.push("remove");
+  });
+
   bench.addEventListener("complete", () => {
     events.push("complete");
   });
@@ -74,10 +82,15 @@ test("events order", async () => {
     controller.abort();
   }, 150);
 
+  bench.add("temporary", () => {});
+  bench.remove("temporary");
+
   await bench.run();
   bench.reset();
 
   expect(events).toEqual([
+    "add",
+    "remove",
     "start",
     "error",
     "cycle",
@@ -130,8 +143,8 @@ test("detect faster task", async () => {
   expect(fasterTask.result!.max).toBeLessThan(slowerTask.result!.max);
 
   // moe should be smaller since it's faster
-  expect(fasterTask.result!.moe).toBeLessThan(slowerTask.result!.moe)
-}, 6000);
+  expect(fasterTask.result!.moe).toBeLessThan(slowerTask.result!.moe);
+});
 
 test("statistics", async () => {
   const bench = new Bench({ time: 200 });

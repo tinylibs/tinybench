@@ -11,6 +11,7 @@ test("basic", async () => {
     .add("bar", async () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
     });
+
   await bench.run();
 
   const tasks = bench.tasks;
@@ -110,7 +111,7 @@ test("error event", async () => {
 });
 
 test("detect faster task", async () => {
-  const bench = new Bench();
+  const bench = new Bench({ time: 200 });
   bench
     .add("faster", async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -127,4 +128,25 @@ test("detect faster task", async () => {
   expect(fasterTask.result!.mean).toBeLessThan(slowerTask.result!.mean);
   expect(fasterTask.result!.min).toBeLessThan(slowerTask.result!.min);
   expect(fasterTask.result!.max).toBeLessThan(slowerTask.result!.max);
+
+  // moe should be smaller since it's faster
+  expect(fasterTask.result!.moe).toBeLessThan(slowerTask.result!.moe)
+}, 6000);
+
+test("statistics", async () => {
+  const bench = new Bench({ time: 200 });
+  bench.add("foo", async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  await bench.run();
+
+  const fooTask = bench.getTask("foo");
+
+  expect(fooTask.result!.variance).toBeTypeOf("number");
+  expect(fooTask.result!.sd).toBeTypeOf("number");
+  expect(fooTask.result!.sem).toBeTypeOf("number");
+  expect(fooTask.result!.df).toBeTypeOf("number");
+  expect(fooTask.result!.critical).toBeTypeOf("number");
+  expect(fooTask.result!.moe).toBeTypeOf("number");
+  expect(fooTask.result!.rme).toBeTypeOf("number");
 });

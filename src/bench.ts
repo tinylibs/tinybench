@@ -12,8 +12,8 @@ export class Bench extends EventTarget {
 
   constructor(options: Options = {}) {
     super();
-    this.now = options.now || this.now;
-    this.time = options.time || this.time;
+    this.now = options.now ?? this.now;
+    this.time = options.time ?? this.time;
     this.signal = options.signal;
 
     if (this.signal) {
@@ -151,7 +151,7 @@ export class Bench extends EventTarget {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions
   ) {
-    super.removeEventListener(type, listener as any, options);
+    super.removeEventListener(type, listener, options);
   }
 
   get results() {

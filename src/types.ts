@@ -100,4 +100,9 @@ export type Options = {
    * function to get the current timestamp in milliseconds (bigint)
    */
   now?: typeof now;
+
+  /**
+   * An AbortSignal for aborting the benchmark
+   */
+  signal?: AbortSignal;
 };

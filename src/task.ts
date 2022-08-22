@@ -1,12 +1,14 @@
 import { Fn, TaskResult } from "./types";
 
 export class Task extends EventTarget {
+  name: string;
   fn: Fn;
   runs: number = 0;
   result?: TaskResult;
 
-  constructor(fn: Fn) {
+  constructor(name: string, fn: Fn) {
     super();
+    this.name = name;
     this.fn = fn;
   }
 

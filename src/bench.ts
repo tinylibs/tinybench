@@ -6,8 +6,7 @@ import type { Events, Fn, Options, TaskResult } from "./types";
 import { now, getMean, getVariance } from "./utils";
 
 export class Bench extends EventTarget {
-  private tasks: Map<string, Task> = new Map();
-  private results: Map<string, TaskResult> = new Map();
+  #tasks: Map<string, Task> = new Map();
   signal?: AbortSignal;
   time = 100;
   now = now;
@@ -105,14 +104,13 @@ export class Bench extends EventTarget {
 
     this.dispatchEvent(new BenchEvent("cycle", task));
 
-    console.log({ ...task });
     return task;
   }
 
   async run() {
     this.dispatchEvent(new Event("start"));
     const values = await Promise.all(
-      [...this.tasks.entries()].map(([_, task]) => {
+      [...this.#tasks.entries()].map(([_, task]) => {
         return this.runTask(task);
       })
     );
@@ -122,20 +120,19 @@ export class Bench extends EventTarget {
 
   reset() {
     this.dispatchEvent(new Event("reset"));
-    this.tasks.forEach((task) => {
+    this.#tasks.forEach((task) => {
       task.reset();
     });
-    this.results.clear();
   }
 
   add(name: string, fn: Fn) {
-    const task = new Task(fn);
-    this.tasks.set(name, task);
+    const task = new Task(name, fn);
+    this.#tasks.set(name, task);
     return this;
   }
 
   remove(name: string) {
-    this.tasks.delete(name);
+    this.#tasks.delete(name);
     return this;
   }
 
@@ -153,5 +150,19 @@ export class Bench extends EventTarget {
     options?: boolean | EventListenerOptions
   ) {
     super.removeEventListener(type, listener, options);
+  }
+
+  get results() {
+    return [...this.#tasks.values()].map((task) =>
+      Object.freeze({ ...task.result })
+    );
+  }
+
+  get tasks() {
+    return [...this.#tasks.values()];
+  }
+
+  getTask(name: string) {
+    return this.#tasks.get(name);
   }
 }

@@ -18,8 +18,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
-        run: yarn install --frozen-lockfile --ignore-engines --ignore-scripts
+        run: pnpm install --frozen-lockfile
       - name: Run unit tests
-        run: yarn test
+        run: pnpm test
         env:
           FORCE_COLOR: 2

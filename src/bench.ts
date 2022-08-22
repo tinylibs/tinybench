@@ -12,7 +12,7 @@ export class Bench extends EventTarget {
 
   constructor(options: Options = {}) {
     super();
-    this.now = options.now || now;
+    this.now = options.now || this.now;
     this.time = options.time || this.time;
     this.signal = options.signal;
 
@@ -155,9 +155,7 @@ export class Bench extends EventTarget {
   }
 
   get results() {
-    return [...this.#tasks.values()].map((task) =>
-      Object.freeze({ ...task.result })
-    );
+    return [...this.#tasks.values()].map((task) => task.result);
   }
 
   get tasks() {

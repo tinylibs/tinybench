@@ -77,9 +77,24 @@ export type TaskResult = {
    */
   rme: number;
 
+  /**
+   * p75 percentile
+   */
   p75: number;
+
+  /**
+   * p99 percentile
+   */
   p99: number;
+
+  /**
+   * p995 percentile
+   */
   p995: number;
+
+  /**
+   * p999 percentile
+   */
   p999: number;
 };
 

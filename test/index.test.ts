@@ -1,5 +1,6 @@
 import { test, expect } from "vitest";
 import { Bench } from "../src/";
+import { BenchEvent } from "../src/event";
 
 test("basic", async () => {
   const bench = new Bench({ time: 100 });
@@ -22,7 +23,7 @@ test("basic", async () => {
   expect(tasks[1].name).toEqual("bar");
   expect(tasks[1].result.totalTime).toBeGreaterThan(100);
 
-  expect(tasks[0].result.hz * tasks[0].result.period).toBe(1);
+  expect(tasks[0].result.hz * tasks[0].result.period).toBeCloseTo(1);
 });
 
 test("events order", async () => {
@@ -73,7 +74,7 @@ test("events order", async () => {
   }, 150);
 
   await bench.run();
-  bench.reset()
+  bench.reset();
 
   expect(events).toEqual([
     "start",
@@ -83,9 +84,47 @@ test("events order", async () => {
     "cycle",
     "abort",
     "complete",
-    "reset"
+    "reset",
   ]);
   // aborted has no results
-  expect(bench.getTask('abort').result).toBeUndefined()
+  expect(bench.getTask("abort").result).toBeUndefined();
 });
 
+test("error event", async () => {
+  const bench = new Bench({ time: 50 });
+
+  let err = new Error();
+  bench.add("error", () => {
+    throw err;
+  });
+
+  let taskErr: Error;
+  bench.addEventListener("error", (e: BenchEvent) => {
+    const task = e.currentTarget!;
+    taskErr = task.result.error as Error;
+  });
+
+  await bench.run();
+
+  expect(taskErr).toBe(err);
+});
+
+test("detect faster task", async () => {
+  const bench = new Bench();
+  bench
+    .add("faster", async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    })
+    .add("slower", async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+  await bench.run();
+
+  const fasterTask = bench.getTask("faster");
+  const slowerTask = bench.getTask("slower");
+
+  expect(fasterTask.result!.mean).toBeLessThan(slowerTask.result!.mean);
+  expect(fasterTask.result!.min).toBeLessThan(slowerTask.result!.min);
+  expect(fasterTask.result!.max).toBeLessThan(slowerTask.result!.max);
+});

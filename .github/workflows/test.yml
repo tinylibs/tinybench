@@ -11,17 +11,15 @@ jobs:
           - 14
     name: Node.js ${{ matrix.node-version }} Quick
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
 
-      - name: Install node
+      - name: Set node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: pnpm
+          node-version: 16.x
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

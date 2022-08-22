@@ -57,4 +57,4 @@ on their names in a `Map`.
 src="https://avatars.githubusercontent.com/u/5059100?v=4" /><br> Uzlopak </a> |
 <a href="https://github.com/poyoho"> <img width='150'
 src="https://avatars.githubusercontent.com/u/36070057?v=4" /><br> poyoho </a> |
-| --- | ----|
+| ---- | ----|

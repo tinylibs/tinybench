@@ -6,7 +6,6 @@ export const now = () => {
   return performance.now();
 };
 
-export const msToNano = (ms: number) => ms * 1e6;
 export const nanoToMs = (nano: number) => nano / 1e6;
 
 /**

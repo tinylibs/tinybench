@@ -1,6 +1,6 @@
 # tinybench
 
-Benchmark your code easily with Tinybench, a simple, tiny and light-weight `6KB` 
+Benchmark your code easily with Tinybench, a simple, tiny and light-weight `6KB`
 benchmarking library!
 You can run your benchmarks in multiple javascript runtimes, Tinybench is
 completely based on the Web APIs with proper timing using `process.hrtime` or
@@ -246,3 +246,7 @@ type BenchEvent = Event & {
 
 | <a href="https://github.com/uzploak"> <img width='150' src="https://avatars.githubusercontent.com/u/5059100?v=4" /><br> Uzlopak </a> | <a href="https://github.com/poyoho"> <img width='150' src="https://avatars.githubusercontent.com/u/36070057?v=4" /><br> poyoho </a> |
 | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+
+## Contributing
+
+Feel free to create issues/discussions and then PRs for the project!

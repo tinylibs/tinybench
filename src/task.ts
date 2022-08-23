@@ -44,7 +44,11 @@ export class Task extends EventTarget {
     const startTime = this.bench.now(); // ms
     let totalTime = 0; // ms
     const samples: number[] = [];
-    do {
+    while (
+      totalTime < this.bench.time &&
+      this.runs < this.bench.iterations &&
+      !this.bench.signal?.aborted
+    ) {
       const taskStart = this.bench.now();
 
       try {
@@ -57,7 +61,7 @@ export class Task extends EventTarget {
       this.runs++;
       samples.push(taskTime);
       totalTime = this.bench.now() - startTime;
-    } while (totalTime < this.bench.time && !this.bench.signal?.aborted);
+    }
 
     samples.sort();
 
@@ -118,6 +122,24 @@ export class Task extends EventTarget {
     }
 
     return this;
+  }
+
+  async warmup() {
+    const startTime = this.bench.now();
+    let totalTime = 0;
+    while (
+      totalTime < this.bench.warmupTime &&
+      this.runs < this.bench.warmupIterations &&
+      !this.bench.signal?.aborted
+    ) {
+      try {
+        await Promise.resolve().then(this.fn);
+      } catch {}
+
+      this.runs++;
+      totalTime = this.bench.now() - startTime;
+    }
+    this.runs = 0;
   }
 
   /**

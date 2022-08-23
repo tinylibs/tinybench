@@ -2,7 +2,7 @@
 
 Benchmark your code easily with Tinybench, a simple, tiny and light-weight `6KB`
 benchmarking library!
-You can run your benchmarks in multiple javascript runtimes, Tinybench is
+You can run your benchmarks in multiple JavaScript runtimes, Tinybench is
 completely based on the Web APIs with proper timing using `process.hrtime` or
 `performance.now`.
 
@@ -58,9 +58,14 @@ Options:
 ```ts
 type Options = {
   /**
-   * time needed for running a benchmark task (milliseconds)
+   * time needed for running a benchmark task (milliseconds) @default 500
    */
   time?: number;
+
+  /**
+   * number of times that a task should run if even the time option is finished @default 10
+   */
+  iterations?: number;
 
   /**
    * function to get the current timestamp in milliseconds
@@ -71,6 +76,16 @@ type Options = {
    * An AbortSignal for aborting the benchmark
    */
   signal?: AbortSignal;
+
+  /**
+   * warmup time (milliseconds) @default 100ms
+   */
+  warmupTime?: number;
+
+  /**
+   * warmup iterations @default 5
+   */
+  warmupIterations?: number;
 };
 ```
 
@@ -236,6 +251,11 @@ type BenchEvent = Event & {
   currentTarget: Task | null;
 };
 ```
+
+## Prior art
+
+- [Benchmark.js](https://github.com/bestiejs/benchmark.js)
+- [Mitata](https://github.com/evanwashere/mitata/)
 
 ## Authors
 

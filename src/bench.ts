@@ -3,16 +3,26 @@ import { Task } from "./task";
 import type { Events, Fn, Options, TaskResult } from "./types";
 import { now } from "./utils";
 
+/**
+ * The Benchmark instance for keeping track of the benchmark tasks and controlling
+ * them.
+ */
 export class Bench extends EventTarget {
   #tasks: Map<string, Task> = new Map();
   signal?: AbortSignal;
+  warmupTime = 100;
+  warmupIterations = 5;
   time = 500;
+  iterations = 10;
   now = now;
 
   constructor(options: Options = {}) {
     super();
     this.now = options.now ?? this.now;
+    this.warmupTime = options.warmupTime ?? this.warmupTime;
+    this.warmupIterations = options.warmupIterations ?? this.warmupIterations;
     this.time = options.time ?? this.time;
+    this.iterations = options.iterations ?? this.iterations;
     this.signal = options.signal;
 
     if (this.signal) {
@@ -31,6 +41,11 @@ export class Bench extends EventTarget {
    * `add` method
    */
   async run() {
+    this.dispatchEvent(createBenchEvent("warmup"));
+    for await (const [, task] of this.#tasks) {
+      await task.warmup();
+    }
+
     this.dispatchEvent(createBenchEvent("start"));
     const values = await Promise.all(
       [...this.#tasks.entries()].map(([_, task]) => {

@@ -29,19 +29,23 @@ test("basic", async () => {
 
 test("events order", async () => {
   const controller = new AbortController();
-  const bench = new Bench({ signal: controller.signal });
+  const bench = new Bench({
+    signal: controller.signal,
+    warmupIterations: 0,
+    warmupTime: 0,
+  });
   bench
     .add("foo", async () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
     })
     .add("bar", async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     })
     .add("error", async () => {
       throw new Error("fake");
     })
     .add("abort", async () => {
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     });
 
   const events: string[] = [];
@@ -80,7 +84,8 @@ test("events order", async () => {
 
   setTimeout(() => {
     controller.abort();
-  }, 150);
+    // the abort task takes 1000ms (500ms time || 10 iterations => 10 * 1000)
+  }, 900);
 
   bench.add("temporary", () => {});
   bench.remove("temporary");
@@ -102,7 +107,7 @@ test("events order", async () => {
   ]);
   // aborted has no results
   expect(bench.getTask("abort").result).toBeUndefined();
-});
+}, 10000);
 
 test("error event", async () => {
   const bench = new Bench({ time: 50 });

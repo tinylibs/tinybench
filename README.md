@@ -219,6 +219,24 @@ type Events =
   | "remove"; // when a Task gets removed to the Bench
 ```
 
+For instance:
+
+```ts
+bench.addEventListener("cycle", (e: BenchEvent) => {
+  const task = e.currentTarget!;
+  events.push("cycle");
+});
+```
+
+### `BenchEvent`
+
+```ts
+type BenchEvent = Event & {
+  target: Task | null;
+  currentTarget: Task | null;
+};
+```
+
 ## Authors
 
 | <a href="https://github.com/Aslemammad"> <img width='150' src="https://avatars.githubusercontent.com/u/37929992?v=4" /><br> Mohammad Bagher </a> |

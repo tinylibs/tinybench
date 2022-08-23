@@ -201,6 +201,24 @@ type TaskResult = {
 };
 ```
 
+### `Events`
+
+Both the `Task` and `Bench` objects extend the `EventTarget` object, so you can attach a listeners to different types of events
+to each class instance using the universal `addEventListener` and
+`removeEventListener`.
+
+```ts
+type Events =
+  | "abort" // when a signal aborts
+  | "complete" // when running a benchmark finishes
+  | "error" // when the benchmark task throws
+  | "reset" // when the reset function gets called
+  | "start" // when running the benchmarks gets started
+  | "cycle" // when running each benchmark task gets done (cycle)
+  | "add" // when a Task gets added to the Bench
+  | "remove"; // when a Task gets removed to the Bench
+```
+
 ## Authors
 
 | <a href="https://github.com/Aslemammad"> <img width='150' src="https://avatars.githubusercontent.com/u/37929992?v=4" /><br> Mohammad Bagher </a> |

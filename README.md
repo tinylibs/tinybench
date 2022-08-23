@@ -221,7 +221,7 @@ type TaskResult = {
 ### `Events`
 
 Both the `Task` and `Bench` objects extend the `EventTarget` object, so you can attach listeners to different types of events
-to each class instance using the universal `addEventListener` and
+in each class instance using the universal `addEventListener` and
 `removeEventListener`.
 
 ```ts

@@ -1,6 +1,6 @@
 # tinybench
 
-Benchmark your code easily with Tinybench, a simple, tiny and light-weight
+Benchmark your code easily with Tinybench, a simple, tiny and light-weight `6KB` 
 benchmarking library!
 You can run your benchmarks in multiple javascript runtimes, Tinybench is
 completely based on the Web APIs with proper timing using `process.hrtime` or

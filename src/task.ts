@@ -4,11 +4,30 @@ import { createBenchEvent } from "./event";
 import { Fn, TaskResult } from "./types";
 import { getMean, getVariance } from "./utils";
 
+/**
+ * A class that represents each benchmark task in Tinybench. It keeps track of the
+ * results, name, Bench instance, the task function and the number times the task
+ * function has been executed.
+ */
 export class Task extends EventTarget {
   bench: Bench;
+
+  /**
+   * task name
+   */
   name: string;
+
   fn: Fn;
+
+  /*
+   * the number of times the task
+   * function has been executed
+   */
   runs: number = 0;
+
+  /**
+   * the result object
+   */
   result?: TaskResult;
 
   constructor(bench: Bench, name: string, fn: Fn) {
@@ -18,6 +37,9 @@ export class Task extends EventTarget {
     this.fn = fn;
   }
 
+  /**
+   * run the current task and write the results in `Task.result` object
+   */
   async run() {
     const startTime = this.bench.now(); // ms
     let totalTime = 0; // ms
@@ -98,11 +120,18 @@ export class Task extends EventTarget {
     return this;
   }
 
+  /**
+   * change the result object values
+   */
   setResult(result: Partial<TaskResult>) {
     this.result = { ...this.result, ...result } as TaskResult;
     Object.freeze(this.reset);
   }
 
+  /**
+   * reset the task to make the `Task.runs` a zero-value and remove the `Task.result`
+   * object
+   */
   reset() {
     this.runs = 0;
     this.result = undefined;

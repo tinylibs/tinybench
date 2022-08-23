@@ -1,6 +1,6 @@
 import { createBenchEvent } from "./event";
 import { Task } from "./task";
-import type { Events, Fn, Options } from "./types";
+import type { Events, Fn, Options, TaskResult } from "./types";
 import { now } from "./utils";
 
 export class Bench extends EventTarget {
@@ -91,23 +91,23 @@ export class Bench extends EventTarget {
   }
 
   /**
-   * tasks results as an array
+   * (getter) tasks results as an array
    */
-  get results() {
+  get results(): (TaskResult | undefined)[] {
     return [...this.#tasks.values()].map((task) => task.result);
   }
 
   /**
-   * tasks as an array
+   * (getter) tasks as an array
    */
-  get tasks() {
+  get tasks(): Task[] {
     return [...this.#tasks.values()];
   }
 
   /**
    * get a task based on the task name
    */
-  getTask(name: string) {
+  getTask(name: string): Task | undefined {
     return this.#tasks.get(name);
   }
 }

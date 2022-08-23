@@ -1,5 +1,6 @@
-import { now } from "./utils";
-
+/**
+ * the task function
+ */
 export type Fn = () => any | Promise<any>;
 
 export type TaskResult = {

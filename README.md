@@ -90,6 +90,7 @@ type Options = {
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
+- `async warmup()`: warm up the benchmark tasks
 - `reset()`: reset each task and remove its result
 - `add(name: string, fn: Fn)`: add a benchmark task to the task map
 - - `Fn`: `() => any | Promise<any>`
@@ -111,6 +112,7 @@ function has been executed.
 - `runs: number`: the number of times the task function has been executed
 - `result?: TaskResult`: the result object
 - `async run()`: run the current task and write the results in `Task.result` object
+- `async warmup()`: warm up the current task
 - `setResult(result: Partial<TaskResult>)`: change the result object values
 - `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object
 
@@ -218,28 +220,49 @@ type TaskResult = {
 
 ### `Events`
 
-Both the `Task` and `Bench` objects extend the `EventTarget` object, so you can attach a listeners to different types of events
+Both the `Task` and `Bench` objects extend the `EventTarget` object, so you can attach listeners to different types of events
 to each class instance using the universal `addEventListener` and
 `removeEventListener`.
 
 ```ts
-type Events =
+/**
+ * Bench events
+ */
+export type BenchEvents =
   | "abort" // when a signal aborts
   | "complete" // when running a benchmark finishes
   | "error" // when the benchmark task throws
   | "reset" // when the reset function gets called
   | "start" // when running the benchmarks gets started
+  | "warmup" // when the benchmarks start getting warmed up (before start)
   | "cycle" // when running each benchmark task gets done (cycle)
   | "add" // when a Task gets added to the Bench
   | "remove"; // when a Task gets removed to the Bench
+
+/**
+ * task events
+ */
+export type TaskEvents =
+  | "abort"
+  | "complete"
+  | "error"
+  | "reset"
+  | "start"
+  | "warmup"
+  | "cycle";
 ```
 
 For instance:
 
 ```ts
+// runs on each benchmark task's cycle
 bench.addEventListener("cycle", (e: BenchEvent) => {
   const task = e.currentTarget!;
-  events.push("cycle");
+});
+
+// runs only on this benchmark task's cycle
+task.addEventListener("cycle", (e: BenchEvent) => {
+  const task = e.currentTarget!;
 });
 ```
 

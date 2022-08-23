@@ -50,6 +50,28 @@ test("events order", async () => {
 
   const events: string[] = [];
 
+  const error = bench.getTask('error')!
+
+  error.addEventListener('start', () => {
+    events.push('error-start')
+  })
+
+  error.addEventListener('error', () => {
+    events.push('error-error')
+  })
+
+  error.addEventListener('cycle', () => {
+    events.push('error-cycle')
+  })
+
+  error.addEventListener('complete', () => {
+    events.push('error-complete')
+  })
+
+  bench.addEventListener("warmup", () => {
+    events.push("warmup");
+  });
+
   bench.addEventListener("start", () => {
     events.push("start");
   });
@@ -90,15 +112,21 @@ test("events order", async () => {
   bench.add("temporary", () => {});
   bench.remove("temporary");
 
+  await bench.warmup();
   await bench.run();
   bench.reset();
 
   expect(events).toEqual([
     "add",
     "remove",
+    "warmup",
     "start",
+    "error-start",
+    "error-error",
     "error",
+    "error-cycle",
     "cycle",
+    "error-complete",
     "cycle",
     "cycle",
     "abort",

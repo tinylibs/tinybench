@@ -1,7 +1,7 @@
 import { Bench } from "./bench";
 import { tTable } from "./constants";
 import { createBenchEvent } from "./event";
-import { Fn, TaskResult } from "./types";
+import { Fn, TaskEvents, TaskResult } from "./types";
 import { getMean, getVariance } from "./utils";
 
 /**
@@ -35,12 +35,14 @@ export class Task extends EventTarget {
     this.bench = bench;
     this.name = name;
     this.fn = fn;
+    // TODO: support signals in Tasks
   }
 
   /**
    * run the current task and write the results in `Task.result` object
    */
   async run() {
+    this.dispatchEvent(createBenchEvent("start", this));
     const startTime = this.bench.now(); // ms
     let totalTime = 0; // ms
     const samples: number[] = [];
@@ -115,16 +117,23 @@ export class Task extends EventTarget {
 
     {
       if (this.result?.error) {
+        this.dispatchEvent(createBenchEvent("error", this));
         this.bench.dispatchEvent(createBenchEvent("error", this));
       }
 
+      this.dispatchEvent(createBenchEvent("cycle", this));
       this.bench.dispatchEvent(createBenchEvent("cycle", this));
+      this.dispatchEvent(createBenchEvent("complete", this));
     }
 
     return this;
   }
 
+  /**
+   * warmup the current task
+   */
   async warmup() {
+    this.dispatchEvent(createBenchEvent("warmup", this));
     const startTime = this.bench.now();
     let totalTime = 0;
     while (
@@ -142,6 +151,22 @@ export class Task extends EventTarget {
     this.runs = 0;
   }
 
+  addEventListener(
+    type: TaskEvents,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
+
+  removeEventListener(
+    type: TaskEvents,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | EventListenerOptions
+  ) {
+    super.removeEventListener(type, listener, options);
+  }
+
   /**
    * change the result object values
    */
@@ -155,6 +180,7 @@ export class Task extends EventTarget {
    * object
    */
   reset() {
+    this.dispatchEvent(createBenchEvent("reset", this));
     this.runs = 0;
     this.result = undefined;
   }

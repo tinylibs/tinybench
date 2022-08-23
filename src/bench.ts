@@ -41,11 +41,6 @@ export class Bench extends EventTarget {
    * `add` method
    */
   async run() {
-    this.dispatchEvent(createBenchEvent("warmup"));
-    for await (const [, task] of this.#tasks) {
-      await task.warmup();
-    }
-
     this.dispatchEvent(createBenchEvent("start"));
     const values = await Promise.all(
       [...this.#tasks.entries()].map(([_, task]) => {
@@ -57,6 +52,16 @@ export class Bench extends EventTarget {
     );
     this.dispatchEvent(createBenchEvent("complete"));
     return values;
+  }
+
+  /**
+   * warmup the benchmark tasks
+   */
+  async warmup() {
+    this.dispatchEvent(createBenchEvent("warmup"));
+    for (const [, task] of this.#tasks) {
+      await task.warmup();
+    }
   }
 
   /**

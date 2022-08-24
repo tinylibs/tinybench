@@ -1,6 +1,6 @@
 import { createBenchEvent } from "./event";
 import { Task } from "./task";
-import type { Events, Fn, Options, TaskResult } from "./types";
+import type { BenchEvents, Fn, Options, TaskResult } from "./types";
 import { now } from "./utils";
 
 /**
@@ -95,7 +95,7 @@ export class Bench extends EventTarget {
   }
 
   addEventListener(
-    type: Events,
+    type: BenchEvents,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions
   ) {
@@ -103,7 +103,7 @@ export class Bench extends EventTarget {
   }
 
   removeEventListener(
-    type: Events,
+    type: BenchEvents,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions
   ) {

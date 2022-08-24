@@ -108,7 +108,11 @@ export type TaskResult = {
  * to each class instance using the universal `addEventListener` and
  * `removeEventListener`
  */
-export type Events =
+
+/**
+ * Bench events
+ */
+export type BenchEvents =
   | "abort" // when a signal aborts
   | "complete" // when running a benchmark finishes
   | "error" // when the benchmark task throws
@@ -118,6 +122,18 @@ export type Events =
   | "cycle" // when running each benchmark task gets done (cycle)
   | "add" // when a Task gets added to the Bench
   | "remove"; // when a Task gets removed to the Bench
+
+/**
+ * task events
+ */
+export type TaskEvents =
+  | "abort"
+  | "complete"
+  | "error"
+  | "reset"
+  | "start"
+  | "warmup"
+  | "cycle";
 
 export type Options = {
   /**

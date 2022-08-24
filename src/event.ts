@@ -6,9 +6,11 @@ export type BenchEvent = Event & {
   currentTarget: Task | null;
 };
 
-export function createBenchEvent(eventType: BenchEvents, target: Task | null = null) {
+export function createBenchEvent(
+  eventType: BenchEvents,
+  target: Task | null = null
+) {
   const event = new Event(eventType);
   const obj: BenchEvent = { ...event, currentTarget: target, target };
-  Object.setPrototypeOf(obj, event);
-  return obj;
+  return Object.setPrototypeOf(obj, event);
 }

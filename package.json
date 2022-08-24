@@ -1,14 +1,13 @@
 {
   "name": "tinybench",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "type": "module",
   "packageManager": "pnpm@7.5.1",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
     "prepare": "husky install",
-    "publish": "npm run build && clean-publish",
-    "release": "bumpp package.json --commit --push --tag && npm run publish",
+    "release": "bumpp package.json --commit --push --tag",
     "test": "vitest --no-threads"
   },
   "main": "./dist/index.cjs",
@@ -37,7 +36,6 @@
     "@size-limit/time": "^7.0.4",
     "@types/node": "^18.7.6",
     "bumpp": "^8.2.0",
-    "clean-publish": "^3.4.4",
     "happy-dom": "^2.25.1",
     "husky": "^7.0.4",
     "nano-staged": "^0.5.0",

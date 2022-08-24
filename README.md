@@ -11,6 +11,7 @@ completely based on the Web APIs with proper timing using `process.hrtime` or
 - Statistically analyzed values
 - Calculated Percentiles
 - Fully detailed results
+- No dependencies
 
 _In case you need more tiny libraries like tinypool or tinyspy, please consider submitting an [RFC](https://github.com/tinylibs/rfcs)_
 

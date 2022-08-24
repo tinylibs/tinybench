@@ -27,6 +27,20 @@ test("basic", async () => {
   expect(tasks[0].result.hz * tasks[0].result.period).toBeCloseTo(1);
 });
 
+test("runs should be equal-more than time and iterations", async () => {
+  const bench = new Bench({ time: 100, iterations: 15 });
+  bench.add("foo", async () => {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  });
+
+  await bench.run();
+
+  const fooTask = bench.getTask("foo")!;
+
+  expect(fooTask.runs).toBeGreaterThanOrEqual(bench.iterations);
+  expect(fooTask.result.totalTime).toBeGreaterThanOrEqual(bench.time);
+});
+
 test("events order", async () => {
   const controller = new AbortController();
   const bench = new Bench({
@@ -35,12 +49,8 @@ test("events order", async () => {
     warmupTime: 0,
   });
   bench
-    .add("foo", async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    })
-    .add("bar", async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    })
+    .add("foo", async () => {})
+    .add("bar", async () => {})
     .add("error", async () => {
       throw new Error("fake");
     })
@@ -50,23 +60,23 @@ test("events order", async () => {
 
   const events: string[] = [];
 
-  const error = bench.getTask('error')!
+  const error = bench.getTask("error")!;
 
-  error.addEventListener('start', () => {
-    events.push('error-start')
-  })
+  error.addEventListener("start", () => {
+    events.push("error-start");
+  });
 
-  error.addEventListener('error', () => {
-    events.push('error-error')
-  })
+  error.addEventListener("error", () => {
+    events.push("error-error");
+  });
 
-  error.addEventListener('cycle', () => {
-    events.push('error-cycle')
-  })
+  error.addEventListener("cycle", () => {
+    events.push("error-cycle");
+  });
 
-  error.addEventListener('complete', () => {
-    events.push('error-complete')
-  })
+  error.addEventListener("complete", () => {
+    events.push("error-complete");
+  });
 
   bench.addEventListener("warmup", () => {
     events.push("warmup");
@@ -104,15 +114,15 @@ test("events order", async () => {
     events.push("complete");
   });
 
-  setTimeout(() => {
-    controller.abort();
-    // the abort task takes 1000ms (500ms time || 10 iterations => 10 * 1000)
-  }, 900);
-
   bench.add("temporary", () => {});
   bench.remove("temporary");
 
   await bench.warmup();
+
+  setTimeout(() => {
+    controller.abort();
+    // the abort task takes 1000ms (500ms time || 10 iterations => 10 * 1000)
+  }, 900);
   await bench.run();
   bench.reset();
 
@@ -122,13 +132,13 @@ test("events order", async () => {
     "warmup",
     "start",
     "error-start",
+    "cycle",
+    "cycle",
     "error-error",
     "error",
     "error-cycle",
     "cycle",
     "error-complete",
-    "cycle",
-    "cycle",
     "abort",
     "complete",
     "reset",

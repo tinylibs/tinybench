@@ -47,8 +47,7 @@ export class Task extends EventTarget {
     let totalTime = 0; // ms
     const samples: number[] = [];
     while (
-      totalTime < this.bench.time &&
-      this.runs < this.bench.iterations &&
+      (totalTime < this.bench.time || this.runs < this.bench.iterations) &&
       !this.bench.signal?.aborted
     ) {
       const taskStart = this.bench.now();
@@ -121,8 +120,10 @@ export class Task extends EventTarget {
         this.bench.dispatchEvent(createBenchEvent("error", this));
       }
 
+
       this.dispatchEvent(createBenchEvent("cycle", this));
       this.bench.dispatchEvent(createBenchEvent("cycle", this));
+      // cycle and complete are equal in Task
       this.dispatchEvent(createBenchEvent("complete", this));
     }
 
@@ -137,8 +138,8 @@ export class Task extends EventTarget {
     const startTime = this.bench.now();
     let totalTime = 0;
     while (
-      totalTime < this.bench.warmupTime &&
-      this.runs < this.bench.warmupIterations &&
+      (totalTime < this.bench.warmupTime ||
+        this.runs < this.bench.warmupIterations) &&
       !this.bench.signal?.aborted
     ) {
       try {

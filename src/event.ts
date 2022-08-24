@@ -10,7 +10,7 @@ export function createBenchEvent(
   eventType: BenchEvents,
   target: Task | null = null
 ) {
-  const event = new Event(eventType);
+  const event = new Event(eventType, {});
   const obj: BenchEvent = { ...event, currentTarget: target, target };
   return Object.setPrototypeOf(obj, event);
 }

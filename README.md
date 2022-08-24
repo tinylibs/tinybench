@@ -258,12 +258,12 @@ For instance:
 ```ts
 // runs on each benchmark task's cycle
 bench.addEventListener("cycle", (e: BenchEvent) => {
-  const task = e.currentTarget!;
+  const task = e.task!;
 });
 
 // runs only on this benchmark task's cycle
 task.addEventListener("cycle", (e: BenchEvent) => {
-  const task = e.currentTarget!;
+  const task = e.task!;
 });
 ```
 
@@ -271,8 +271,7 @@ task.addEventListener("cycle", (e: BenchEvent) => {
 
 ```ts
 type BenchEvent = Event & {
-  target: Task | null;
-  currentTarget: Task | null;
+  task: Task | null;
 };
 ```
 

@@ -147,7 +147,7 @@ test("error event", async () => {
 
   let taskErr: Error;
   bench.addEventListener("error", (e: BenchEvent) => {
-    const task = e.currentTarget!;
+    const task = e.task!;
     taskErr = task.result.error as Error;
   });
 

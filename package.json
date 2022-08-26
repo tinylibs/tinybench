@@ -1,6 +1,6 @@
 {
   "name": "tinybench",
-  "version": "2.0.9",
+  "version": "2.1.0",
   "type": "module",
   "packageManager": "pnpm@7.5.1",
   "scripts": {

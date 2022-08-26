@@ -27,7 +27,7 @@ You can start benchmarking by instantiating the `Bench` class and adding
 benchmark tasks to it.
 
 ```ts
-const { Bench } = require('tinybench');
+const { Bench } = require("tinybench");
 const bench = new Bench({ time: 100 });
 
 bench
@@ -58,7 +58,7 @@ them.
 Options:
 
 ```ts
-type Options = {
+export type Options = {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500
    */
@@ -88,7 +88,19 @@ type Options = {
    * warmup iterations @default 5
    */
   warmupIterations?: number;
+
+  /**
+   * setup function to run before each benchmark task (cycle)
+   */
+  setup?: Hook;
+
+  /**
+   * teardown function to run after each benchmark task (cycle)
+   */
+  teardown?: Hook;
 };
+
+export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method

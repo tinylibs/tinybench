@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, vi, Task } from "vitest";
 import Bench from "../src";
 import { BenchEvent } from "../src/event";
 
@@ -205,4 +205,22 @@ test("statistics", async () => {
   expect(fooTask.result!.critical).toBeTypeOf("number");
   expect(fooTask.result!.moe).toBeTypeOf("number");
   expect(fooTask.result!.rme).toBeTypeOf("number");
+});
+
+test("setup and teardown", async () => {
+  const setup = vi.fn();
+  const teardown = vi.fn();
+  const bench = new Bench({ time: 200, setup, teardown });
+  bench.add("foo", async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  const fooTask = bench.getTask("foo");
+
+  await bench.warmup();
+  await bench.run();
+
+  expect(setup).toBeCalledWith(fooTask, "warmup");
+  expect(setup).toBeCalledWith(fooTask, "run");
+  expect(teardown).toBeCalledWith(fooTask, "warmup");
+  expect(teardown).toBeCalledWith(fooTask, "run");
 });

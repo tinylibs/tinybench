@@ -1,7 +1,6 @@
 import Bench from "./bench";
 import tTable from "./constants";
 import { createBenchEvent } from "./event";
-import { Fn, TaskEvents, TaskResult } from "./types";
 import { getMean, getVariance } from "./utils";
 
 /**
@@ -28,7 +27,7 @@ export default class Task extends EventTarget {
   /**
    * the result object
    */
-  result?: TaskResult;
+  result?: ITaskResult;
 
   constructor(bench: Bench, name: string, fn: Fn) {
     super();
@@ -161,7 +160,7 @@ export default class Task extends EventTarget {
   }
 
   addEventListener(
-    type: TaskEvents,
+    type: ITaskEvents,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions
   ) {
@@ -169,7 +168,7 @@ export default class Task extends EventTarget {
   }
 
   removeEventListener(
-    type: TaskEvents,
+    type: ITaskEvents,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions
   ) {
@@ -179,8 +178,8 @@ export default class Task extends EventTarget {
   /**
    * change the result object values
    */
-  setResult(result: Partial<TaskResult>) {
-    this.result = { ...this.result, ...result } as TaskResult;
+  setResult(result: Partial<ITaskResult>) {
+    this.result = { ...this.result, ...result } as ITaskResult;
     Object.freeze(this.reset);
   }
 

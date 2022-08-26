@@ -1,12 +1,7 @@
 import Task from "./task";
-import { BenchEvents } from "./types";
-
-export type BenchEvent = Event & {
-  task: Task | null;
-};
 
 export function createBenchEvent(
-  eventType: BenchEvents,
+  eventType: IBenchEvents,
   target: Task | null = null
 ) {
   const event = new Event(eventType);

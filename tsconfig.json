@@ -7,6 +7,6 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": "."
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "@types/index.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

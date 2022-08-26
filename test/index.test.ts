@@ -1,6 +1,5 @@
-import { test, expect, vi, Task } from "vitest";
-import Bench from "../src";
-import { BenchEvent } from "../src/event";
+import { test, expect, vi } from "vitest";
+import { Bench, Task } from "../src";
 
 test("basic", async () => {
   const bench = new Bench({ time: 100 });
@@ -143,20 +142,22 @@ test("events order", async () => {
     "complete",
     "reset",
   ]);
+
+  const abortTask = bench.getTask("abort") as Task;
   // aborted has no results
-  expect(bench.getTask("abort").result).toBeUndefined();
+  expect(abortTask.result).toBeUndefined();
 }, 10000);
 
 test("error event", async () => {
   const bench = new Bench({ time: 50 });
+  const err = new Error();
 
-  let err = new Error();
   bench.add("error", () => {
     throw err;
   });
 
   let taskErr: Error;
-  bench.addEventListener("error", (e: BenchEvent) => {
+  bench.addEventListener("error", (e: IBenchEvent) => {
     const task = e.task!;
     taskErr = task.result.error as Error;
   });
@@ -178,8 +179,8 @@ test("detect faster task", async () => {
 
   await bench.run();
 
-  const fasterTask = bench.getTask("faster");
-  const slowerTask = bench.getTask("slower");
+  const fasterTask  = bench.getTask("faster") as Task;
+  const slowerTask = bench.getTask("slower") as Task;
 
   expect(fasterTask.result!.mean).toBeLessThan(slowerTask.result!.mean);
   expect(fasterTask.result!.min).toBeLessThan(slowerTask.result!.min);
@@ -196,7 +197,7 @@ test("statistics", async () => {
   });
   await bench.run();
 
-  const fooTask = bench.getTask("foo");
+  const fooTask = bench.getTask("foo") as Task;
 
   expect(fooTask.result!.variance).toBeTypeOf("number");
   expect(fooTask.result!.sd).toBeTypeOf("number");

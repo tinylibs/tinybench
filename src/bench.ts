@@ -1,6 +1,6 @@
-import { createBenchEvent } from "./event";
-import Task from "./task";
-import { now } from "./utils";
+import { createBenchEvent } from './event';
+import Task from './task';
+import { now } from './utils';
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
@@ -20,8 +20,10 @@ export default class Bench extends EventTarget {
   iterations = 10;
 
   now = now;
-  setup: IHook = () => {};
-  teardown: IHook = () => {};
+
+  setup: IHook;
+
+  teardown: IHook;
 
   constructor(options: IOptions = {}) {
     super();
@@ -31,8 +33,10 @@ export default class Bench extends EventTarget {
     this.time = options.time ?? this.time;
     this.iterations = options.iterations ?? this.iterations;
     this.signal = options.signal;
-    this.setup = options.setup ?? this.setup;
-    this.teardown = options.teardown ?? this.teardown;
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    this.setup = options.setup ?? (() => {});
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    this.teardown = options.teardown ?? (() => {});
 
     if (this.signal) {
       this.signal.addEventListener(

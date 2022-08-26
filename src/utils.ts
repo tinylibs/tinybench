@@ -1,22 +1,21 @@
+export const nanoToMs = (nano: number) => nano / 1e6;
+
 export const now = () => {
-  // @ts-ignore
-  if (globalThis.process?.hrtime) {
+  if (typeof globalThis.process?.hrtime === 'function') {
     return nanoToMs(Number(process.hrtime.bigint()));
   }
   return performance.now();
 };
 
-export const nanoToMs = (nano: number) => nano / 1e6;
-
 /**
  * Computes the arithmetic mean of a sample.
  */
-export const getMean = (samples: number[]) =>
-  samples.reduce((sum, n) => sum + n, 0) / samples.length || 0;
+export const getMean = (samples: number[]) => samples.reduce((sum, n) => sum + n, 0) / samples.length || 0;
 
 /**
  * Computes the variance of a sample.
  */
-export const getVariance = (samples: number[], mean: number) =>
-  samples.reduce((sum, n) => sum + Math.pow(n - mean, 2)) /
-    (samples.length - 1) || 0;
+export const getVariance = (samples: number[], mean: number) => {
+  const result = samples.reduce((sum, n) => sum + ((n - mean) ** 2));
+  return result / (samples.length - 1) || 0;
+};

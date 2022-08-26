@@ -1,4 +1,5 @@
 {
+  "strict": true,
   "compilerOptions": {
     "target": "esnext",
     "strict": true,
@@ -7,6 +8,8 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": "."
   },
-  "include": ["src/**/*", "tests/**/*", "@types/index.d.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "test", "@types"],
+  "exclude": ["node_modules", "dist"],
+  "removeComments": true,
+  "newLine": "lf",
 }

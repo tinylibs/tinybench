@@ -123,7 +123,7 @@ export type BenchEvents =
   | "warmup" // when the benchmarks start getting warmed up (before start)
   | "cycle" // when running each benchmark task gets done (cycle)
   | "add" // when a Task gets added to the Bench
-  | "remove"; // when a Task gets removed to the Bench
+  | "remove"; // when a Task gets removed of the Bench
 
 /**
  * task events

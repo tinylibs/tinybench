@@ -5,7 +5,7 @@ export function createBenchEvent(
   target: Task | null = null
 ) {
   const event = new Event(eventType);
-  Object.defineProperty(event, "task", {
+  Object.defineProperty(event, 'task', {
     value: target,
     enumerable: true,
     writable: false,

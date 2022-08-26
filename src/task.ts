@@ -41,15 +41,15 @@ export default class Task extends EventTarget {
    * run the current task and write the results in `Task.result` object
    */
   async run() {
-    this.dispatchEvent(createBenchEvent("start", this));
+    this.dispatchEvent(createBenchEvent('start', this));
     const startTime = this.bench.now(); // ms
     let totalTime = 0; // ms
     const samples: number[] = [];
 
     await this.bench.setup(this, "run");
     while (
-      (totalTime < this.bench.time || this.runs < this.bench.iterations) &&
-      !this.bench.signal?.aborted
+      (totalTime < this.bench.time || this.runs < this.bench.iterations)
+      && !this.bench.signal?.aborted
     ) {
       const taskStart = this.bench.now();
 
@@ -118,14 +118,15 @@ export default class Task extends EventTarget {
 
     {
       if (this.result?.error) {
-        this.dispatchEvent(createBenchEvent("error", this));
-        this.bench.dispatchEvent(createBenchEvent("error", this));
+        this.dispatchEvent(createBenchEvent('error', this));
+        this.bench.dispatchEvent(createBenchEvent('error', this));
       }
+
 
       this.dispatchEvent(createBenchEvent("cycle", this));
       this.bench.dispatchEvent(createBenchEvent("cycle", this));
       // cycle and complete are equal in Task
-      this.dispatchEvent(createBenchEvent("complete", this));
+      this.dispatchEvent(createBenchEvent('complete', this));
     }
 
     return this;
@@ -135,15 +136,15 @@ export default class Task extends EventTarget {
    * warmup the current task
    */
   async warmup() {
-    this.dispatchEvent(createBenchEvent("warmup", this));
+    this.dispatchEvent(createBenchEvent('warmup', this));
     const startTime = this.bench.now();
     let totalTime = 0;
 
     this.bench.setup(this, "warmup");
     while (
-      (totalTime < this.bench.warmupTime ||
-        this.runs < this.bench.warmupIterations) &&
-      !this.bench.signal?.aborted
+      (totalTime < this.bench.warmupTime
+        || this.runs < this.bench.warmupIterations)
+      && !this.bench.signal?.aborted
     ) {
       try {
         await Promise.resolve().then(this.fn);
@@ -162,7 +163,7 @@ export default class Task extends EventTarget {
   addEventListener(
     type: ITaskEvents,
     listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ) {
     super.addEventListener(type, listener, options);
   }
@@ -170,7 +171,7 @@ export default class Task extends EventTarget {
   removeEventListener(
     type: ITaskEvents,
     listener: EventListenerOrEventListenerObject,
-    options?: boolean | EventListenerOptions
+    options?: boolean | EventListenerOptions,
   ) {
     super.removeEventListener(type, listener, options);
   }
@@ -188,7 +189,7 @@ export default class Task extends EventTarget {
    * object
    */
   reset() {
-    this.dispatchEvent(createBenchEvent("reset", this));
+    this.dispatchEvent(createBenchEvent('reset', this));
     this.runs = 0;
     this.result = undefined;
   }

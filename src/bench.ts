@@ -1,19 +1,27 @@
-import { createBenchEvent } from "./event";
-import { Task } from "./task";
-import type { BenchEvents, Fn, Options, TaskResult } from "./types";
-import { now } from "./utils";
+import { createBenchEvent } from './event';
+import Task from './task';
+import type {
+  BenchEvents, Fn, Options, TaskResult,
+} from './types';
+import { now } from './utils';
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
  * them.
  */
-export class Bench extends EventTarget {
+export default class Bench extends EventTarget {
   #tasks: Map<string, Task> = new Map();
+
   signal?: AbortSignal;
+
   warmupTime = 100;
+
   warmupIterations = 5;
+
   time = 500;
+
   iterations = 10;
+
   now = now;
 
   constructor(options: Options = {}) {
@@ -27,11 +35,11 @@ export class Bench extends EventTarget {
 
     if (this.signal) {
       this.signal.addEventListener(
-        "abort",
+        'abort',
         () => {
-          this.dispatchEvent(createBenchEvent("abort"));
+          this.dispatchEvent(createBenchEvent('abort'));
         },
-        { once: true }
+        { once: true },
       );
     }
   }
@@ -41,16 +49,16 @@ export class Bench extends EventTarget {
    * `add` method
    */
   async run() {
-    this.dispatchEvent(createBenchEvent("start"));
+    this.dispatchEvent(createBenchEvent('start'));
     const values = await Promise.all(
       [...this.#tasks.entries()].map(([_, task]) => {
         if (this.signal?.aborted) {
           return task;
         }
         return task.run();
-      })
+      }),
     );
-    this.dispatchEvent(createBenchEvent("complete"));
+    this.dispatchEvent(createBenchEvent('complete'));
     return values;
   }
 
@@ -58,7 +66,7 @@ export class Bench extends EventTarget {
    * warmup the benchmark tasks
    */
   async warmup() {
-    this.dispatchEvent(createBenchEvent("warmup"));
+    this.dispatchEvent(createBenchEvent('warmup'));
     for (const [, task] of this.#tasks) {
       await task.warmup();
     }
@@ -68,7 +76,7 @@ export class Bench extends EventTarget {
    * reset each task and remove its result
    */
   reset() {
-    this.dispatchEvent(createBenchEvent("reset"));
+    this.dispatchEvent(createBenchEvent('reset'));
     this.#tasks.forEach((task) => {
       task.reset();
     });
@@ -80,7 +88,7 @@ export class Bench extends EventTarget {
   add(name: string, fn: Fn) {
     const task = new Task(this, name, fn);
     this.#tasks.set(name, task);
-    this.dispatchEvent(createBenchEvent("add", task));
+    this.dispatchEvent(createBenchEvent('add', task));
     return this;
   }
 
@@ -89,7 +97,7 @@ export class Bench extends EventTarget {
    */
   remove(name: string) {
     const task = this.getTask(name);
-    this.dispatchEvent(createBenchEvent("remove", task));
+    this.dispatchEvent(createBenchEvent('remove', task));
     this.#tasks.delete(name);
     return this;
   }
@@ -97,7 +105,7 @@ export class Bench extends EventTarget {
   addEventListener(
     type: BenchEvents,
     listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ) {
     super.addEventListener(type, listener, options);
   }
@@ -105,7 +113,7 @@ export class Bench extends EventTarget {
   removeEventListener(
     type: BenchEvents,
     listener: EventListenerOrEventListenerObject,
-    options?: boolean | EventListenerOptions
+    options?: boolean | EventListenerOptions,
   ) {
     super.removeEventListener(type, listener, options);
   }

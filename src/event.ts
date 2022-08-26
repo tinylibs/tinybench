@@ -1,5 +1,5 @@
-import { Task } from "./task";
-import { BenchEvents } from "./types";
+import Task from './task';
+import { BenchEvents } from './types';
 
 export type BenchEvent = Event & {
   task: Task | null;
@@ -7,10 +7,10 @@ export type BenchEvent = Event & {
 
 export function createBenchEvent(
   eventType: BenchEvents,
-  target: Task | null = null
+  target: Task | null = null,
 ) {
   const event = new Event(eventType);
-  Object.defineProperty(event, "task", {
+  Object.defineProperty(event, 'task', {
     value: target,
     enumerable: true,
     writable: false,

@@ -113,27 +113,27 @@ export type TaskResult = {
  * Bench events
  */
 export type BenchEvents =
-  | "abort" // when a signal aborts
-  | "complete" // when running a benchmark finishes
-  | "error" // when the benchmark task throws
-  | "reset" // when the reset function gets called
-  | "start" // when running the benchmarks gets started
-  | "warmup" // when the benchmarks start getting warmed up (before start)
-  | "cycle" // when running each benchmark task gets done (cycle)
-  | "add" // when a Task gets added to the Bench
-  | "remove"; // when a Task gets removed to the Bench
+  | 'abort' // when a signal aborts
+  | 'complete' // when running a benchmark finishes
+  | 'error' // when the benchmark task throws
+  | 'reset' // when the reset function gets called
+  | 'start' // when running the benchmarks gets started
+  | 'warmup' // when the benchmarks start getting warmed up (before start)
+  | 'cycle' // when running each benchmark task gets done (cycle)
+  | 'add' // when a Task gets added to the Bench
+  | 'remove'; // when a Task gets removed to the Bench
 
 /**
  * task events
  */
 export type TaskEvents =
-  | "abort"
-  | "complete"
-  | "error"
-  | "reset"
-  | "start"
-  | "warmup"
-  | "cycle";
+  | 'abort'
+  | 'complete'
+  | 'error'
+  | 'reset'
+  | 'start'
+  | 'warmup'
+  | 'cycle';
 
 export type Options = {
   /**

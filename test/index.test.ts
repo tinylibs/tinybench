@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { Bench } from "../src/";
+import Bench from "../src";
 import { BenchEvent } from "../src/event";
 
 test("basic", async () => {

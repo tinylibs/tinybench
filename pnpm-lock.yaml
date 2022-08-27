@@ -16,7 +16,7 @@ specifiers:
   husky: ^7.0.4
   nano-staged: ^0.5.0
   prettier: ^2.5.1
-  size-limit: ^7.0.4
+  size-limit: ^8.0.1
   tinyspy: '*'
   tsup: ^5.11.7
   typescript: ^4.5.4
@@ -24,8 +24,8 @@ specifiers:
   vitest: ^0.14.2
 
 devDependencies:
-  '@size-limit/preset-small-lib': 7.0.8_size-limit@7.0.8
-  '@size-limit/time': 7.0.8_size-limit@7.0.8
+  '@size-limit/preset-small-lib': 7.0.8_size-limit@8.0.1
+  '@size-limit/time': 7.0.8_size-limit@8.0.1
   '@types/node': 18.7.13
   '@typescript-eslint/eslint-plugin': 5.35.1_ktjxjibzrfqejavile4bhmzhjq
   '@typescript-eslint/parser': 5.35.1_4rv7y5c6xz3vfxwhbrcxxi73bq
@@ -39,7 +39,7 @@ devDependencies:
   husky: 7.0.4
   nano-staged: 0.5.0
   prettier: 2.7.1
-  size-limit: 7.0.8
+  size-limit: 8.0.1
   tinyspy: 1.0.0
   tsup: 5.12.9_typescript@4.7.4
   typescript: 4.7.4
@@ -128,7 +128,7 @@ packages:
       - supports-color
     dev: true
 
-  /@size-limit/esbuild/7.0.8_size-limit@7.0.8:
+  /@size-limit/esbuild/7.0.8_size-limit@8.0.1:
     resolution: {integrity: sha512-AzCrxJJThDvHrBNoolebYVgXu46c6HuS3fOxoXr3V0YWNM0qz81z5F3j7RruzboZnls8ZgME4WrH6GM5rB9gtA==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
     peerDependencies:
@@ -136,30 +136,30 @@ packages:
     dependencies:
       esbuild: 0.14.49
       nanoid: 3.3.4
-      size-limit: 7.0.8
+      size-limit: 8.0.1
     dev: true
 
-  /@size-limit/file/7.0.8_size-limit@7.0.8:
+  /@size-limit/file/7.0.8_size-limit@8.0.1:
     resolution: {integrity: sha512-1KeFQuMXIXAH/iELqIX7x+YNYDFvzIvmxcp9PrdwEoSNL0dXdaDIo9WE/yz8xvOmUcKaLfqbWkL75DM0k91WHQ==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
     peerDependencies:
       size-limit: 7.0.8
     dependencies:
       semver: 7.3.5
-      size-limit: 7.0.8
+      size-limit: 8.0.1
     dev: true
 
-  /@size-limit/preset-small-lib/7.0.8_size-limit@7.0.8:
+  /@size-limit/preset-small-lib/7.0.8_size-limit@8.0.1:
     resolution: {integrity: sha512-CT8nIYA/c2CSD+X4rAUgwqYccQMahJ6rBnaZxvi3YKFdkXIbuGNXHNjHsYaFksgwG9P4UjG/unyO5L73f3zQBw==}
     peerDependencies:
       size-limit: 7.0.8
     dependencies:
-      '@size-limit/esbuild': 7.0.8_size-limit@7.0.8
-      '@size-limit/file': 7.0.8_size-limit@7.0.8
-      size-limit: 7.0.8
+      '@size-limit/esbuild': 7.0.8_size-limit@8.0.1
+      '@size-limit/file': 7.0.8_size-limit@8.0.1
+      size-limit: 8.0.1
     dev: true
 
-  /@size-limit/time/7.0.8_size-limit@7.0.8:
+  /@size-limit/time/7.0.8_size-limit@8.0.1:
     resolution: {integrity: sha512-CS3pHTxeQXgrrMbhlqYfSR+b4QGp1rjEcYYkByIP+X/Go88R44yp19tyBFmmCQzs2Te2BAxfq3jv8FG+54oBew==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
     peerDependencies:
@@ -167,7 +167,7 @@ packages:
     dependencies:
       estimo: 2.3.6
       react: 17.0.2
-      size-limit: 7.0.8
+      size-limit: 8.0.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -2653,9 +2653,9 @@ packages:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
     dev: true
 
-  /size-limit/7.0.8:
-    resolution: {integrity: sha512-3h76c9E0e/nNhYLSR7IBI/bSoXICeo7EYkYjlyVqNIsu7KvN/PQmMbIXeyd2QKIF8iZKhaiZQoXLkGWbyPDtvQ==}
-    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+  /size-limit/8.0.1:
+    resolution: {integrity: sha512-VHrozqkQTYfcv1OlZIRIL0x6f+xhZ3TT+RTXC5AvKn/yA+3PIWERrKWqHMJPD7G/Vi0SuBtWAn3IvCGx2/UB1g==}
+    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
     hasBin: true
     dependencies:
       bytes-iec: 3.1.1

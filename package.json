@@ -63,15 +63,5 @@
   ],
   "engines": {
     "node": ">=16.0.0"
-  },
-  "size-limit": [
-    {
-      "path": "dist/index.js",
-      "limit": "10 kB"
-    },
-    {
-      "path": "dist/index.cjs",
-      "limit": "10 kB"
-    }
-  ]
+  }
 }

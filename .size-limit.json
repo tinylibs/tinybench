@@ -1,12 +1,10 @@
 [
   {
     "path": "dist/index.js",
-    "import": "{ createStore }",
     "limit": "10 kB"
   },
   {
     "path": "dist/index.cjs",
-    "import": "{ createStore }",
     "limit": "10 kB"
   }
 ]

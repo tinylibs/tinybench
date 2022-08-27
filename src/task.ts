@@ -1,8 +1,7 @@
-import Bench from "./bench";
-import tTable from "./constants";
-import { createBenchEvent } from "./event";
-import { Fn, TaskEvents, TaskResult } from "./types";
-import { getMean, getVariance } from "./utils";
+import Bench from './bench';
+import tTable from './constants';
+import { createBenchEvent } from './event';
+import { getMean, getVariance } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -28,7 +27,7 @@ export default class Task extends EventTarget {
   /**
    * the result object
    */
-  result?: TaskResult;
+  result?: ITaskResult;
 
   constructor(bench: Bench, name: string, fn: Fn) {
     super();
@@ -42,19 +41,20 @@ export default class Task extends EventTarget {
    * run the current task and write the results in `Task.result` object
    */
   async run() {
-    this.dispatchEvent(createBenchEvent("start", this));
+    this.dispatchEvent(createBenchEvent('start', this));
     const startTime = this.bench.now(); // ms
     let totalTime = 0; // ms
     const samples: number[] = [];
 
-    await this.bench.setup(this, "run");
+    await this.bench.setup(this, 'run');
     while (
-      (totalTime < this.bench.time || this.runs < this.bench.iterations) &&
-      !this.bench.signal?.aborted
+      (totalTime < this.bench.time || this.runs < this.bench.iterations)
+      && !this.bench.signal?.aborted
     ) {
       const taskStart = this.bench.now();
 
       try {
+        // eslint-disable-next-line no-await-in-loop
         await Promise.resolve().then(this.fn);
       } catch (e) {
         this.setResult({ error: e });
@@ -65,7 +65,7 @@ export default class Task extends EventTarget {
       samples.push(taskTime);
       totalTime = this.bench.now() - startTime;
     }
-    await this.bench.teardown(this, "run");
+    await this.bench.teardown(this, 'run');
 
     samples.sort();
 
@@ -117,16 +117,17 @@ export default class Task extends EventTarget {
       });
     }
 
+    // eslint-disable-next-line no-lone-blocks
     {
       if (this.result?.error) {
-        this.dispatchEvent(createBenchEvent("error", this));
-        this.bench.dispatchEvent(createBenchEvent("error", this));
+        this.dispatchEvent(createBenchEvent('error', this));
+        this.bench.dispatchEvent(createBenchEvent('error', this));
       }
 
-      this.dispatchEvent(createBenchEvent("cycle", this));
-      this.bench.dispatchEvent(createBenchEvent("cycle", this));
+      this.dispatchEvent(createBenchEvent('cycle', this));
+      this.bench.dispatchEvent(createBenchEvent('cycle', this));
       // cycle and complete are equal in Task
-      this.dispatchEvent(createBenchEvent("complete", this));
+      this.dispatchEvent(createBenchEvent('complete', this));
     }
 
     return this;
@@ -136,17 +137,18 @@ export default class Task extends EventTarget {
    * warmup the current task
    */
   async warmup() {
-    this.dispatchEvent(createBenchEvent("warmup", this));
+    this.dispatchEvent(createBenchEvent('warmup', this));
     const startTime = this.bench.now();
     let totalTime = 0;
 
-    this.bench.setup(this, "warmup");
+    this.bench.setup(this, 'warmup');
     while (
-      (totalTime < this.bench.warmupTime ||
-        this.runs < this.bench.warmupIterations) &&
-      !this.bench.signal?.aborted
+      (totalTime < this.bench.warmupTime
+        || this.runs < this.bench.warmupIterations)
+      && !this.bench.signal?.aborted
     ) {
       try {
+        // eslint-disable-next-line no-await-in-loop
         await Promise.resolve().then(this.fn);
       } catch {
         // todo
@@ -155,23 +157,23 @@ export default class Task extends EventTarget {
       this.runs += 1;
       totalTime = this.bench.now() - startTime;
     }
-    this.bench.teardown(this, "warmup");
+    this.bench.teardown(this, 'warmup');
 
     this.runs = 0;
   }
 
   addEventListener(
-    type: TaskEvents,
+    type: ITaskEvents,
     listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ) {
     super.addEventListener(type, listener, options);
   }
 
   removeEventListener(
-    type: TaskEvents,
+    type: ITaskEvents,
     listener: EventListenerOrEventListenerObject,
-    options?: boolean | EventListenerOptions
+    options?: boolean | EventListenerOptions,
   ) {
     super.removeEventListener(type, listener, options);
   }
@@ -179,8 +181,8 @@ export default class Task extends EventTarget {
   /**
    * change the result object values
    */
-  setResult(result: Partial<TaskResult>) {
-    this.result = { ...this.result, ...result } as TaskResult;
+  setResult(result: Partial<ITaskResult>) {
+    this.result = { ...this.result, ...result } as ITaskResult;
     Object.freeze(this.reset);
   }
 
@@ -189,7 +191,7 @@ export default class Task extends EventTarget {
    * object
    */
   reset() {
-    this.dispatchEvent(createBenchEvent("reset", this));
+    this.dispatchEvent(createBenchEvent('reset', this));
     this.runs = 0;
     this.result = undefined;
   }

@@ -1,9 +1,7 @@
-import Bench from "./bench";
-import Task from "./task";
+import Bench from './bench';
+import Task from './task';
 
-export { now } from "./utils";
-export type { BenchEvent } from "./event";
-export type { Fn, BenchEvents, TaskEvents, Options, TaskResult, Hook } from "./types";
+export { now } from './utils';
 
 export { Bench, Task };
 export default Bench;

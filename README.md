@@ -15,6 +15,9 @@ completely based on the Web APIs with proper timing using `process.hrtime` or
 
 _In case you need more tiny libraries like tinypool or tinyspy, please consider submitting an [RFC](https://github.com/tinylibs/rfcs)_
 
+## Requirements
+- node version >= v16
+
 ## Installing
 
 ```bash
@@ -27,7 +30,7 @@ You can start benchmarking by instantiating the `Bench` class and adding
 benchmark tasks to it.
 
 ```ts
-const { Bench } = require("tinybench");
+const { Bench } = require('tinybench');
 const bench = new Bench({ time: 100 });
 
 bench

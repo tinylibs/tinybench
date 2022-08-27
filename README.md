@@ -15,10 +15,6 @@ completely based on the Web APIs with proper timing using `process.hrtime` or
 
 _In case you need more tiny libraries like tinypool or tinyspy, please consider submitting an [RFC](https://github.com/tinylibs/rfcs)_
 
-## Requirements
-
-- node version >= v16
-
 ## Installing
 
 ```bash

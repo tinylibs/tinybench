@@ -56,10 +56,9 @@
     "vitest": "^0.14.2"
   },
   "keywords": [
-    "spy",
-    "mock",
-    "typescript",
-    "method"
+    "benchmark",
+    "tinylibs",
+    "tiny"
   ],
   "engines": {
     "node": ">=16.0.0"

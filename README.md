@@ -62,7 +62,7 @@ them.
 Options:
 
 ```ts
-export type Options = {
+export type IOptions = {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500
    */
@@ -96,15 +96,18 @@ export type Options = {
   /**
    * setup function to run before each benchmark task (cycle)
    */
-  setup?: Hook;
+  setup?: IHook;
 
   /**
    * teardown function to run after each benchmark task (cycle)
    */
-  teardown?: Hook;
+  teardown?: IHook;
 };
 
-export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
+export type IHook = (
+  task: Task,
+  mode: "warmup" | "run"
+) => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
@@ -139,7 +142,7 @@ function has been executed.
 the benchmark task result object.
 
 ```ts
-type TaskResult = {
+export type ITaskResult = {
   /*
    * the last error that was thrown while running the task
    */
@@ -246,7 +249,7 @@ in each class instance using the universal `addEventListener` and
 /**
  * Bench events
  */
-export type BenchEvents =
+export type IBenchEvents =
   | "abort" // when a signal aborts
   | "complete" // when running a benchmark finishes
   | "error" // when the benchmark task throws
@@ -260,7 +263,7 @@ export type BenchEvents =
 /**
  * task events
  */
-export type TaskEvents =
+export type ITaskEvents =
   | "abort"
   | "complete"
   | "error"
@@ -274,12 +277,12 @@ For instance:
 
 ```ts
 // runs on each benchmark task's cycle
-bench.addEventListener("cycle", (e: BenchEvent) => {
+bench.addEventListener("cycle", (e: IBenchEvent) => {
   const task = e.task!;
 });
 
 // runs only on this benchmark task's cycle
-task.addEventListener("cycle", (e: BenchEvent) => {
+task.addEventListener("cycle", (e: IBenchEvent) => {
   const task = e.task!;
 });
 ```
@@ -287,7 +290,7 @@ task.addEventListener("cycle", (e: BenchEvent) => {
 ### `BenchEvent`
 
 ```ts
-type BenchEvent = Event & {
+export type IBenchEvent = Event & {
   task: Task | null;
 };
 ```

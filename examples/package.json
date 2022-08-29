@@ -1,0 +1,15 @@
+{
+  "name": "examples",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "simple": "tsx src/simple.ts",
+    "dev:simple": "tsx watch src/simple.ts"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "tsx": "^3.9.0",
+    "typescript": "^4.5.4"
+  }
+}

@@ -2,6 +2,9 @@ import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
 import { getMean, getVariance } from './utils';
+import type {
+  Fn, TaskResult, TaskEvents,
+} from '../@types';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -27,7 +30,7 @@ export default class Task extends EventTarget {
   /**
    * the result object
    */
-  result?: ITaskResult;
+  result?: TaskResult;
 
   constructor(bench: Bench, name: string, fn: Fn) {
     super();
@@ -163,7 +166,7 @@ export default class Task extends EventTarget {
   }
 
   addEventListener(
-    type: ITaskEvents,
+    type: TaskEvents,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ) {
@@ -171,7 +174,7 @@ export default class Task extends EventTarget {
   }
 
   removeEventListener(
-    type: ITaskEvents,
+    type: TaskEvents,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions,
   ) {
@@ -181,8 +184,8 @@ export default class Task extends EventTarget {
   /**
    * change the result object values
    */
-  setResult(result: Partial<ITaskResult>) {
-    this.result = { ...this.result, ...result } as ITaskResult;
+  setResult(result: Partial<TaskResult>) {
+    this.result = { ...this.result, ...result } as TaskResult;
     Object.freeze(this.reset);
   }
 

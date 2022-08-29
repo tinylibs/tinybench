@@ -139,7 +139,7 @@ export interface BenchEventsMap{
   add: TaskEventListener
   remove: TaskEventListener
   cycle: TaskEventListener
-  error: NoopEventListener
+  error: TaskEventListener
 }
 
 /**

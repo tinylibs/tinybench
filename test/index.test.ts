@@ -1,4 +1,3 @@
-import { TaskEventListener } from '@types';
 import { test, expect, vi } from 'vitest';
 import { Bench, Task } from '../src';
 
@@ -18,13 +17,13 @@ test('basic', async () => {
 
   expect(tasks.length).toEqual(2);
 
-  expect(tasks[0].name).toEqual('foo');
-  expect(tasks[0].result.totalTime).toBeGreaterThan(50);
+  expect(tasks[0]!.name).toEqual('foo');
+  expect(tasks[0]!.result!.totalTime).toBeGreaterThan(50);
 
-  expect(tasks[1].name).toEqual('bar');
-  expect(tasks[1].result.totalTime).toBeGreaterThan(100);
+  expect(tasks[1]!.name).toEqual('bar');
+  expect(tasks[1]!.result!.totalTime).toBeGreaterThan(100);
 
-  expect(tasks[0].result.hz * tasks[0].result.period).toBeCloseTo(1);
+  expect(tasks[0]!.result!.hz * tasks[0]!.result!.period).toBeCloseTo(1);
 });
 
 test('runs should be equal-more than time and iterations', async () => {
@@ -35,10 +34,10 @@ test('runs should be equal-more than time and iterations', async () => {
 
   await bench.run();
 
-  const fooTask = bench.getTask('foo')! as Task;
+  const fooTask = bench.getTask('foo')!;
 
   expect(fooTask.runs).toBeGreaterThanOrEqual(bench.iterations);
-  expect(fooTask.result.totalTime).toBeGreaterThanOrEqual(bench.time);
+  expect(fooTask.result!.totalTime).toBeGreaterThanOrEqual(bench.time);
 });
 
 test('events order', async () => {
@@ -161,14 +160,14 @@ test('error event', async () => {
   });
 
   let taskErr: Error;
-  bench.addEventListener('error', (e: IBenchEvent) => {
-    const task = e.task!;
-    taskErr = task.result.error as Error;
+  bench.addEventListener('error', (e) => {
+    const task = e.task;
+    taskErr = task.result!.error as Error;
   });
 
   await bench.run();
 
-  expect(taskErr).toBe(err);
+  expect(taskErr!).toBe(err);
 });
 
 test('detect faster task', async () => {

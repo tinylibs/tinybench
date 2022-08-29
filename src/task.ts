@@ -1,10 +1,10 @@
+import type {
+  Fn, TaskEvents, TaskResult, TaskEventsMap,
+} from 'types/index';
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
 import { getMean, getVariance } from './utils';
-import type {
-  Fn, TaskResult, TaskEvents, TaskEventsMap,
-} from '../@types';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the

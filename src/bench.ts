@@ -1,10 +1,9 @@
+import type {
+  Hook, Options, Fn, BenchEvents, TaskResult, BenchEventsMap,
+} from 'types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
 import { now } from './utils';
-import type {
-  Hook, Options, Fn, BenchEvents, TaskResult, BenchEventsMap,
-} from '../@types';
-
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
  * them.

@@ -1,7 +1,5 @@
+import type { BenchEvents } from 'types';
 import Task from './task';
-import type {
-  BenchEvents,
-} from '../@types';
 
 function createBenchEvent(
   eventType: BenchEvents,

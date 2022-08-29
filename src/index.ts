@@ -1,7 +1,15 @@
 import Bench from './bench';
 import Task from './task';
 
-export type {} from '../@types/index';
+export type {
+  Fn,
+  TaskResult,
+  BenchEvents,
+  Options,
+  Hook,
+  TaskEvents,
+  BenchEvent,
+} from '../types';
 
 export { now } from './utils';
 

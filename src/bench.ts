@@ -53,7 +53,8 @@ export default class Bench extends EventTarget {
 
   /**
    * run the added tasks that were registered using the
-   * `add` method
+   * {@link add} method.
+   * Note: This method does not do any warmup. Call {@link warmup} for that.
    */
   async run() {
     this.dispatchEvent(createBenchEvent('start'));
@@ -70,13 +71,14 @@ export default class Bench extends EventTarget {
   }
 
   /**
-   * warmup the benchmark tasks
+   * warmup the benchmark tasks.
+   * This is not run by default by the {@link run} method.
    */
   async warmup() {
     this.dispatchEvent(createBenchEvent('warmup'));
-    for (const [, task] of this.#tasks) {
+    this.#tasks.forEach(async (task) => {
       await task.warmup();
-    }
+    });
   }
 
   /**

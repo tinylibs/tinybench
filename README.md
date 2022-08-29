@@ -27,18 +27,37 @@ You can start benchmarking by instantiating the `Bench` class and adding
 benchmark tasks to it.
 
 ```ts
-const { Bench } = require("tinybench");
+import { Bench } from 'tinybench';
+
 const bench = new Bench({ time: 100 });
 
 bench
-  .add("foo", () => {
-    // code
+  .add('switch 1', () => {
+    let a = 1;
+    let b = 2;
+    const c = a;
+    a = b;
+    b = c;
   })
-  .add("bar", async () => {
-    // code
+  .add('switch 2', () => {
+    let a = 1;
+    let b = 10;
+    a = b + a;
+    b = a - b;
+    a = b - a;
   });
 
 await bench.run();
+
+console.table(bench.results.map((result) => ({ "Task Name": result?.taskName, "Average Time (ps)": result?.mean! * 1000, "Variance (ps)": result?.variance! * 1000 })));
+
+// Output:
+// ┌─────────┬────────────┬────────────────────┬────────────────────┐
+// │ (index) │ Task Name  │ Average Time (ps)  │   Variance (ps)    │
+// ├─────────┼────────────┼────────────────────┼────────────────────┤
+// │    0    │ 'switch 1' │ 1.8458325710527104 │ 1.2113875253341617 │
+// │    1    │ 'switch 2' │ 1.8746935152109603 │ 1.2254725890767446 │
+// └─────────┴────────────┴────────────────────┴────────────────────┘
 ```
 
 The `add` method accepts a task name and a task function, so it can benchmark
@@ -47,6 +66,9 @@ use it to create an another task for that instance.
 
 Note that the task name should always be unique in an instance, because Tinybench stores the tasks based
 on their names in a `Map`.
+
+Also note that `tinybench` does not log any result by default. You can extract the relevant stats
+from `bench.results` after running the benchmark, and process them however you want.
 
 ## Docs
 
@@ -135,7 +157,13 @@ function has been executed.
 the benchmark task result object.
 
 ```ts
-export type TaskResult = {
+export type ITaskResult = {
+
+  /**
+   * The name of the task. Provided for commodity.
+   */
+  taskName: string;
+
   /*
    * the last error that was thrown while running the task
    */

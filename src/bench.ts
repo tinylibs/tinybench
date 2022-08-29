@@ -2,7 +2,7 @@ import { createBenchEvent } from './event';
 import Task from './task';
 import { now } from './utils';
 import type {
-  Hook, Options, Fn, BenchEvents, TaskResult,
+  Hook, Options, Fn, BenchEvents, TaskResult, BenchEventsMap,
 } from '../@types';
 
 /**
@@ -110,20 +110,20 @@ export default class Bench extends EventTarget {
     return this;
   }
 
-  addEventListener(
-    type: BenchEvents,
-    listener: EventListenerOrEventListenerObject,
+  addEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
+    type: K,
+    listener: T,
     options?: boolean | AddEventListenerOptions,
-  ) {
-    super.addEventListener(type, listener, options);
+  ): void {
+    super.addEventListener(type, listener as any, options);
   }
 
-  removeEventListener(
-    type: BenchEvents,
-    listener: EventListenerOrEventListenerObject,
+  removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
+    type: K,
+    listener: T,
     options?: boolean | EventListenerOptions,
   ) {
-    super.removeEventListener(type, listener, options);
+    super.removeEventListener(type, listener as any, options);
   }
 
   /**

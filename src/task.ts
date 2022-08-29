@@ -1,4 +1,6 @@
-import type { Fn, TaskEvents, TaskResult } from 'types/index';
+import type {
+  Fn, TaskEvents, TaskResult, TaskEventsMap,
+} from 'types/index';
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
@@ -163,20 +165,20 @@ export default class Task extends EventTarget {
     this.runs = 0;
   }
 
-  addEventListener(
-    type: TaskEvents,
-    listener: EventListenerOrEventListenerObject,
+  addEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
+    type: K,
+    listener: T,
     options?: boolean | AddEventListenerOptions,
   ) {
-    super.addEventListener(type, listener, options);
+    super.addEventListener(type, listener as any, options);
   }
 
-  removeEventListener(
-    type: TaskEvents,
-    listener: EventListenerOrEventListenerObject,
+  removeEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
+    type: K,
+    listener: T,
     options?: boolean | EventListenerOptions,
   ) {
-    super.removeEventListener(type, listener, options);
+    super.removeEventListener(type, listener as any, options);
   }
 
   /**

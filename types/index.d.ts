@@ -127,6 +127,21 @@ export type BenchEvents =
 
 export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 
+type NoopEventListener = () => any | Promise<any>
+type TaskEventListener = (e: Event & { task: Task }) => any | Promise<any>
+
+export interface BenchEventsMap{
+  abort: NoopEventListener
+  start: NoopEventListener
+  complete: NoopEventListener
+  warmup: NoopEventListener
+  reset: NoopEventListener
+  add: TaskEventListener
+  remove: TaskEventListener
+  cycle: TaskEventListener
+  error: NoopEventListener
+}
+
 /**
  * task events
  */
@@ -139,6 +154,15 @@ export type TaskEvents =
   | 'warmup'
   | 'cycle';
 
+export type TaskEventsMap = {
+  abort: NoopEventListener
+  start: TaskEventListener
+  error: TaskEventListener
+  cycle: TaskEventListener
+  complete: TaskEventListener
+  warmup: TaskEventListener
+  reset: TaskEventListener
+}
 export type Options = {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500

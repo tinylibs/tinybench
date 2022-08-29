@@ -1,3 +1,4 @@
+import { TaskEventListener } from '@types';
 import { test, expect, vi } from 'vitest';
 import { Bench, Task } from '../src';
 
@@ -93,7 +94,8 @@ test('events order', async () => {
     events.push('reset');
   });
 
-  bench.addEventListener('cycle', () => {
+  bench.addEventListener('cycle', (e) => {
+    expect(e.task.name).not.toBe('');
     events.push('cycle');
   });
 
@@ -113,7 +115,9 @@ test('events order', async () => {
     events.push('complete');
   });
 
-  bench.add('temporary', () => {});
+  bench.add('temporary', () => {
+    //
+  });
   bench.remove('temporary');
 
   await bench.warmup();

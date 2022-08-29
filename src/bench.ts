@@ -1,8 +1,9 @@
-import type { BenchEvents, Fn, Hook, Options, TaskResult } from 'types/index';
+import type {
+  Hook, Options, Fn, BenchEvents, TaskResult, BenchEventsMap,
+} from 'types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
 import { now } from './utils';
-
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
  * them.
@@ -108,20 +109,20 @@ export default class Bench extends EventTarget {
     return this;
   }
 
-  addEventListener(
-    type: BenchEvents,
-    listener: EventListenerOrEventListenerObject,
+  addEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
+    type: K,
+    listener: T,
     options?: boolean | AddEventListenerOptions,
-  ) {
-    super.addEventListener(type, listener, options);
+  ): void {
+    super.addEventListener(type, listener as any, options);
   }
 
-  removeEventListener(
-    type: BenchEvents,
-    listener: EventListenerOrEventListenerObject,
+  removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
+    type: K,
+    listener: T,
     options?: boolean | EventListenerOptions,
   ) {
-    super.removeEventListener(type, listener, options);
+    super.removeEventListener(type, listener as any, options);
   }
 
   /**

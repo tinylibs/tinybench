@@ -1,7 +1,8 @@
+import type { BenchEvents } from 'types';
 import Task from './task';
 
 function createBenchEvent(
-  eventType: IBenchEvents,
+  eventType: BenchEvents,
   target: Task | null = null,
 ) {
   const event = new Event(eventType);

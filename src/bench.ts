@@ -1,3 +1,4 @@
+import type { BenchEvents, Fn, Hook, Options, TaskResult } from 'types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
 import { now } from './utils';
@@ -21,11 +22,11 @@ export default class Bench extends EventTarget {
 
   now = now;
 
-  setup: IHook;
+  setup: Hook;
 
-  teardown: IHook;
+  teardown: Hook;
 
-  constructor(options: IOptions = {}) {
+  constructor(options: Options = {}) {
     super();
     this.now = options.now ?? this.now;
     this.warmupTime = options.warmupTime ?? this.warmupTime;
@@ -108,7 +109,7 @@ export default class Bench extends EventTarget {
   }
 
   addEventListener(
-    type: IBenchEvents,
+    type: BenchEvents,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ) {
@@ -116,7 +117,7 @@ export default class Bench extends EventTarget {
   }
 
   removeEventListener(
-    type: IBenchEvents,
+    type: BenchEvents,
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions,
   ) {
@@ -126,7 +127,7 @@ export default class Bench extends EventTarget {
   /**
    * (getter) tasks results as an array
    */
-  get results(): (ITaskResult | undefined)[] {
+  get results(): (TaskResult | undefined)[] {
     return [...this.#tasks.values()].map((task) => task.result);
   }
 

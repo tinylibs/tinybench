@@ -1,4 +1,12 @@
-export type {} from "../@types/index";
+export type {
+  Fn,
+  TaskResult,
+  BenchEvents,
+  Options,
+  Hook,
+  TaskEvents,
+  BenchEvent,
+} from "../types";
 import Bench from "./bench";
 import Task from "./task";
 

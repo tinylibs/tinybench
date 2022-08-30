@@ -1,6 +1,6 @@
 name: Test
-on:
-  push:
+on: [push, pull_request]
+
 jobs:
   short:
     runs-on: ubuntu-latest
@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

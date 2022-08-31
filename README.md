@@ -68,7 +68,7 @@ Note that the task name should always be unique in an instance, because Tinybenc
 on their names in a `Map`.
 
 Also note that `tinybench` does not log any result by default. You can extract the relevant stats
-from `bench.results` after running the benchmark, and process them however you want.
+from `bench.tasks` or any other API after running the benchmark, and process them however you want.
 
 ## Docs
 

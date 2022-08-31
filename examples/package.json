@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "all": "pnpm run simple",
     "simple": "tsx src/simple.ts",
     "dev:simple": "tsx watch src/simple.ts"
   },

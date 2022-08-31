@@ -24,7 +24,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Run unit tests
         run: pnpm test
         env:
           FORCE_COLOR: 2
+
+      - name: Run examples
+        run: cd examples && pnpm run all

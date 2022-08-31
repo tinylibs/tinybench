@@ -99,7 +99,6 @@ export default class Task extends EventTarget {
       }
 
       this.setResult({
-        taskName: this.name,
         totalTime,
         min,
         max,

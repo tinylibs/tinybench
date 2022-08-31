@@ -49,7 +49,7 @@ bench
 
 await bench.run();
 
-console.table(bench.results.map((result) => ({ "Task Name": result?.taskName, "Average Time (ps)": result?.mean! * 1000, "Variance (ps)": result?.variance! * 1000 })));
+console.table(bench.tasks.map(({ name, result }) => ({ "Task Name": name, "Average Time (ps)": result?.mean! * 1000, "Variance (ps)": result?.variance! * 1000 })));
 
 // Output:
 // ┌─────────┬────────────┬────────────────────┬────────────────────┐
@@ -157,12 +157,7 @@ function has been executed.
 the benchmark task result object.
 
 ```ts
-export type ITaskResult = {
-
-  /**
-   * The name of the task. Provided for commodity.
-   */
-  taskName: string;
+export type TaskResult = {
 
   /*
    * the last error that was thrown while running the task

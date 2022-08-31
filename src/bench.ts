@@ -76,9 +76,9 @@ export default class Bench extends EventTarget {
    */
   async warmup() {
     this.dispatchEvent(createBenchEvent('warmup'));
-    this.#tasks.forEach(async (task) => {
+    for (const [, task] of this.#tasks) {
       await task.warmup();
-    });
+    }
   }
 
   /**

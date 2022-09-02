@@ -313,9 +313,9 @@ export type BenchEvent = Event & {
 
 ## Prior art
 
-- [Bema](https://github.com/prisma-labs/bema)
 - [Benchmark.js](https://github.com/bestiejs/benchmark.js)
 - [Mitata](https://github.com/evanwashere/mitata/)
+- [Bema](https://github.com/prisma-labs/bema)
 
 ## Authors
 

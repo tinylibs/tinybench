@@ -59,11 +59,13 @@ export default class Bench extends EventTarget {
   async run() {
     this.dispatchEvent(createBenchEvent('start'));
     const values = await Promise.all(
-      [...this.#tasks.entries()].map(([_, task]) => {
+      [...this.#tasks.entries()].map(async ([_, task]) => {
         if (this.signal?.aborted) {
           return task;
         }
-        return task.run();
+        return await new Promise((resolve) => setTimeout(async () => {
+          resolve(await task.run());
+        }));
       }),
     );
     this.dispatchEvent(createBenchEvent('complete'));

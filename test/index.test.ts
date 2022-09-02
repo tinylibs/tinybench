@@ -133,9 +133,9 @@ test('events order', async () => {
     'remove',
     'warmup',
     'start',
+    'cycle',
+    'cycle',
     'error-start',
-    'cycle',
-    'cycle',
     'error-error',
     'error',
     'error-cycle',
@@ -150,6 +150,39 @@ test('events order', async () => {
   // aborted has no results
   expect(abortTask.result).toBeUndefined();
 }, 10000);
+
+test('events order 2', async () => {
+  const bench = new Bench({
+    warmupIterations: 0,
+    warmupTime: 0,
+  });
+
+  bench
+    .add('foo', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    })
+    .add('bar', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    });
+
+  const events: string[] = [];
+
+  const fooTask = bench.getTask('foo')!;
+  const barTask = bench.getTask('bar')!;
+  fooTask.addEventListener('complete', () => {
+    events.push('foo-complete');
+    expect(events).not.toContain('bar-complete');
+  });
+
+  barTask.addEventListener('complete', () => {
+    events.push('bar-complete');
+    expect(events).toContain('foo-complete');
+  });
+
+  await bench.run();
+
+  await new Promise((resolve) => setTimeout(resolve, 150));
+});
 
 test('error event', async () => {
   const bench = new Bench({ time: 50 });

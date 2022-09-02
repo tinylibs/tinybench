@@ -54,11 +54,14 @@ export default class Task extends EventTarget {
       (totalTime < this.bench.time || this.runs < this.bench.iterations)
       && !this.bench.signal?.aborted
     ) {
-      const taskStart = this.bench.now();
+      let taskStart = 0;
 
       try {
         // eslint-disable-next-line no-await-in-loop
-        await Promise.resolve().then(this.fn);
+        await Promise.resolve().then(() => {
+          taskStart = this.bench.now();
+          return this.fn();
+        });
       } catch (e) {
         this.setResult({ error: e });
       }

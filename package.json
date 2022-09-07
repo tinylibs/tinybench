@@ -23,15 +23,8 @@
   "files": [
     "dist/**"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tinylibs/tinybench.git"
-  },
+  "repository": "tinylibs/tinybench",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/tinylibs/tinybench/issues"
-  },
-  "homepage": "https://github.com/tinylibs/tinybench#readme",
   "devDependencies": {
     "@size-limit/preset-small-lib": "^7.0.4",
     "@size-limit/time": "^7.0.8",

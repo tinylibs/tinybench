@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "prepare": "husky install",
     "publish": "npm run build && clean-publish",
     "release": "bumpp package.json --commit --push --tag && npm run publish",
     "test": "vitest --no-threads"
@@ -33,8 +32,6 @@
   },
   "homepage": "https://github.com/tinylibs/tinyspy#readme",
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^7.0.4",
-    "@size-limit/time": "^7.0.8",
     "@types/node": "^18.7.13",
     "@typescript-eslint/eslint-plugin": "^5.35.1",
     "@typescript-eslint/parser": "^5.35.1",
@@ -44,15 +41,8 @@
     "eslint": "^8.22.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "happy-dom": "^2.25.1",
-    "husky": "^7.0.4",
-    "nano-staged": "^0.5.0",
-    "prettier": "^2.5.1",
-    "size-limit": "^8.0.1",
-    "tinyspy": "*",
     "tsup": "^5.11.7",
     "typescript": "^4.5.4",
-    "vite": "^2.9.12",
     "vitest": "^0.14.2"
   },
   "keywords": [

@@ -13,7 +13,7 @@ importers:
       eslint: ^8.22.0
       eslint-config-airbnb-base: ^15.0.0
       eslint-plugin-import: ^2.26.0
-      nano-staged: ^0.8.0
+      nano-staged: ^0.5.0
       tsup: ^5.11.7
       typescript: ^4.5.4
       vitest: ^0.14.2
@@ -27,7 +27,7 @@ importers:
       eslint: 8.22.0
       eslint-config-airbnb-base: 15.0.0_2iahngt3u2tkbdlu6s4gkur3pu
       eslint-plugin-import: 2.26.0_lewfh47l4outvz5ytnjtm3tbm4
-      nano-staged: 0.8.0
+      nano-staged: 0.5.0
       tsup: 5.12.9_typescript@4.7.4
       typescript: 4.7.4
       vitest: 0.14.2
@@ -1982,8 +1982,8 @@ packages:
       thenify-all: 1.6.0
     dev: true
 
-  /nano-staged/0.8.0:
-    resolution: {integrity: sha512-QSEqPGTCJbkHU2yLvfY6huqYPjdBrOaTMKatO1F8nCSrkQGXeKwtCiCnsdxnuMhbg3DTVywKaeWLGCE5oJpq0g==}
+  /nano-staged/0.5.0:
+    resolution: {integrity: sha512-5jkhLvyZM974RmCyI8vt7zo0QK6GIAOCBe6e7L36awXIlG+40/5zJiDvESFrFmO4PhBCRm9lUlnH0SsWAFLDLg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     hasBin: true
     dependencies:

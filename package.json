@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
+    "prepare": "git config core.hooksPath .hooks",
     "publish": "npm run build && clean-publish",
     "release": "bumpp package.json --commit --push --tag && npm run publish",
     "test": "vitest --no-threads"
@@ -22,15 +23,8 @@
   "files": [
     "dist/**"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tinylibs/tinyspy.git"
-  },
+  "repository": "tinylibs/tinybench",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/tinylibs/tinyspy/issues"
-  },
-  "homepage": "https://github.com/tinylibs/tinyspy#readme",
   "devDependencies": {
     "@types/node": "^18.7.13",
     "@typescript-eslint/eslint-plugin": "^5.35.1",
@@ -41,6 +35,7 @@
     "eslint": "^8.22.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
+    "nano-staged": "^0.8.0",
     "tsup": "^5.11.7",
     "typescript": "^4.5.4",
     "vitest": "^0.14.2"

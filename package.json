@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "prepare": "husky install",
+    "prepare": "git config core.hooksPath .hooks",
     "publish": "npm run build && clean-publish",
     "release": "bumpp package.json --commit --push --tag && npm run publish",
     "test": "vitest --no-threads"
@@ -38,7 +38,6 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "happy-dom": "^2.25.1",
-    "husky": "^7.0.4",
     "nano-staged": "^0.5.0",
     "prettier": "^2.5.1",
     "size-limit": "^8.0.1",

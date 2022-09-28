@@ -1,5 +1,10 @@
 import type {
-  Hook, Options, Fn, BenchEvents, TaskResult, BenchEventsMap,
+  Hook,
+  Options,
+  Fn,
+  BenchEvents,
+  TaskResult,
+  BenchEventsMap,
 } from 'types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
@@ -59,15 +64,29 @@ export default class Bench extends EventTarget {
   async run() {
     this.dispatchEvent(createBenchEvent('start'));
     const values = await Promise.all(
-      [...this.#tasks.entries()].map(async ([_, task]) => {
+      [...this.#tasks.entries()].map(([_, task]) => {
         if (this.signal?.aborted) {
           return task;
         }
-        return await new Promise((resolve) => setTimeout(async () => {
-          resolve(await task.run());
-        }));
+        return new Promise((resolve) => setTimeout(() => task.run().then(resolve)));
       }),
     );
+    this.dispatchEvent(createBenchEvent('complete'));
+    return values;
+  }
+
+  /**
+   * works like {@link run} but runs the tasks sequentially
+   */
+  async runSequentially() {
+    this.dispatchEvent(createBenchEvent('start'));
+    const values: Task[] = [];
+    for (const [_, task] of [...this.#tasks.entries()]) {
+      if (this.signal?.aborted) {
+        values.push(task);
+      }
+      values.push(await task.run());
+    }
     this.dispatchEvent(createBenchEvent('complete'));
     return values;
   }

@@ -76,7 +76,7 @@ export default class Bench extends EventTarget {
   }
 
   /**
-   * works like {@link run} but runs the tasks sequentially
+   * works like {@link run} but runs the tasks sequentially, see #17 for more information
    */
   async runSequentially() {
     this.dispatchEvent(createBenchEvent('start'));

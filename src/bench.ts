@@ -64,7 +64,7 @@ export default class Bench extends EventTarget {
   async run() {
     this.dispatchEvent(createBenchEvent('start'));
     const values = await Promise.all(
-      [...this.#tasks.entries()].map(([_, task]) => {
+      [...this.#tasks.values()].map((task) => {
         if (this.signal?.aborted) {
           return task;
         }
@@ -81,7 +81,7 @@ export default class Bench extends EventTarget {
   async runSequentially() {
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
-    for (const [_, task] of [...this.#tasks.entries()]) {
+    for (const task of [...this.#tasks.values()]) {
       if (this.signal?.aborted) {
         values.push(task);
       }

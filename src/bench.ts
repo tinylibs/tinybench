@@ -9,12 +9,16 @@ import type {
 import { createBenchEvent } from './event';
 import Task from './task';
 import { now } from './utils';
+
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
  * them.
  */
 export default class Bench extends EventTarget {
-  #tasks: Map<string, Task> = new Map();
+  /*
+   * @private the task map
+   */
+  _tasks: Map<string, Task> = new Map();
 
   signal?: AbortSignal;
 
@@ -64,7 +68,7 @@ export default class Bench extends EventTarget {
   async run() {
     this.dispatchEvent(createBenchEvent('start'));
     const values = await Promise.all(
-      [...this.#tasks.values()].map((task) => {
+      [...this._tasks.values()].map((task) => {
         if (this.signal?.aborted) {
           return task;
         }
@@ -81,7 +85,7 @@ export default class Bench extends EventTarget {
   async runSequentially() {
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
-    for (const task of [...this.#tasks.values()]) {
+    for (const task of [...this._tasks.values()]) {
       if (this.signal?.aborted) {
         values.push(task);
       }
@@ -97,7 +101,7 @@ export default class Bench extends EventTarget {
    */
   async warmup() {
     this.dispatchEvent(createBenchEvent('warmup'));
-    for (const [, task] of this.#tasks) {
+    for (const [, task] of this._tasks) {
       await task.warmup();
     }
   }
@@ -107,7 +111,7 @@ export default class Bench extends EventTarget {
    */
   reset() {
     this.dispatchEvent(createBenchEvent('reset'));
-    this.#tasks.forEach((task) => {
+    this._tasks.forEach((task) => {
       task.reset();
     });
   }
@@ -117,7 +121,7 @@ export default class Bench extends EventTarget {
    */
   add(name: string, fn: Fn) {
     const task = new Task(this, name, fn);
-    this.#tasks.set(name, task);
+    this._tasks.set(name, task);
     this.dispatchEvent(createBenchEvent('add', task));
     return this;
   }
@@ -128,7 +132,7 @@ export default class Bench extends EventTarget {
   remove(name: string) {
     const task = this.getTask(name);
     this.dispatchEvent(createBenchEvent('remove', task));
-    this.#tasks.delete(name);
+    this._tasks.delete(name);
     return this;
   }
 
@@ -152,20 +156,20 @@ export default class Bench extends EventTarget {
    * (getter) tasks results as an array
    */
   get results(): (TaskResult | undefined)[] {
-    return [...this.#tasks.values()].map((task) => task.result);
+    return [...this._tasks.values()].map((task) => task.result);
   }
 
   /**
    * (getter) tasks as an array
    */
   get tasks(): Task[] {
-    return [...this.#tasks.values()];
+    return [...this._tasks.values()];
   }
 
   /**
    * get a task based on the task name
    */
   getTask(name: string): Task | undefined {
-    return this.#tasks.get(name);
+    return this._tasks.get(name);
   }
 }

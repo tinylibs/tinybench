@@ -69,10 +69,8 @@ export default class Bench extends EventTarget {
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
     for (const task of [...this._tasks.values()]) {
-      if (this.signal?.aborted) {
-        values.push(task);
-      }
-      values.push(await task.run());
+      if (this.signal?.aborted) values.push(task);
+      else values.push(await task.run());
     }
     this.dispatchEvent(createBenchEvent('complete'));
     return values;

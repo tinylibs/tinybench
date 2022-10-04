@@ -18,7 +18,9 @@ test('sequential', async () => {
     })
     .add('sample 2', async () => {
       // sample 1 should be defined always
-      if (typeof sequentialBench.tasks[0]?.result === 'undefined') { isFirstTaskDefined = false; } else isFirstTaskDefined = true;
+      if (typeof sequentialBench.tasks[0]?.result === 'undefined')
+        isFirstTaskDefined = false;
+      else isFirstTaskDefined = true;
 
       await setTimeout(0);
       for (let i = 0; i < 1e7; i++);

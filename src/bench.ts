@@ -55,7 +55,7 @@ export default class Bench extends EventTarget {
         () => {
           this.dispatchEvent(createBenchEvent('abort'));
         },
-        { once: true },
+        { once: true }
       );
     }
   }
@@ -122,7 +122,7 @@ export default class Bench extends EventTarget {
   addEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | AddEventListenerOptions,
+    options?: boolean | AddEventListenerOptions
   ): void {
     super.addEventListener(type, listener as any, options);
   }
@@ -130,7 +130,7 @@ export default class Bench extends EventTarget {
   removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | EventListenerOptions,
+    options?: boolean | EventListenerOptions
   ) {
     super.removeEventListener(type, listener as any, options);
   }

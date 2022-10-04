@@ -49,13 +49,7 @@ bench
 
 await bench.run();
 
-console.table(
-  bench.tasks.map(({ name, result }) => ({
-    'Task Name': name,
-    'Average Time (ps)': result?.mean! * 1000,
-    'Variance (ps)': result?.variance! * 1000,
-  }))
-);
+console.table(bench.tasks.map(({ name, result }) => ({ "Task Name": name, "Average Time (ps)": result?.mean! * 1000, "Variance (ps)": result?.variance! * 1000 })));
 
 // Output:
 // ┌─────────┬────────────┬────────────────────┬────────────────────┐
@@ -128,7 +122,7 @@ export type Options = {
   teardown?: Hook;
 };
 
-export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
+export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
@@ -164,6 +158,7 @@ the benchmark task result object.
 
 ```ts
 export type TaskResult = {
+
   /*
    * the last error that was thrown while running the task
    */
@@ -271,39 +266,39 @@ in each class instance using the universal `addEventListener` and
  * Bench events
  */
 export type BenchEvents =
-  | 'abort' // when a signal aborts
-  | 'complete' // when running a benchmark finishes
-  | 'error' // when the benchmark task throws
-  | 'reset' // when the reset function gets called
-  | 'start' // when running the benchmarks gets started
-  | 'warmup' // when the benchmarks start getting warmed up (before start)
-  | 'cycle' // when running each benchmark task gets done (cycle)
-  | 'add' // when a Task gets added to the Bench
-  | 'remove'; // when a Task gets removed of the Bench
+  | "abort" // when a signal aborts
+  | "complete" // when running a benchmark finishes
+  | "error" // when the benchmark task throws
+  | "reset" // when the reset function gets called
+  | "start" // when running the benchmarks gets started
+  | "warmup" // when the benchmarks start getting warmed up (before start)
+  | "cycle" // when running each benchmark task gets done (cycle)
+  | "add" // when a Task gets added to the Bench
+  | "remove"; // when a Task gets removed of the Bench
 
 /**
  * task events
  */
 export type TaskEvents =
-  | 'abort'
-  | 'complete'
-  | 'error'
-  | 'reset'
-  | 'start'
-  | 'warmup'
-  | 'cycle';
+  | "abort"
+  | "complete"
+  | "error"
+  | "reset"
+  | "start"
+  | "warmup"
+  | "cycle";
 ```
 
 For instance:
 
 ```ts
 // runs on each benchmark task's cycle
-bench.addEventListener('cycle', (e: BenchEvent) => {
+bench.addEventListener("cycle", (e: BenchEvent) => {
   const task = e.task!;
 });
 
 // runs only on this benchmark task's cycle
-task.addEventListener('cycle', (e: BenchEvent) => {
+task.addEventListener("cycle", (e: BenchEvent) => {
   const task = e.task!;
 });
 ```

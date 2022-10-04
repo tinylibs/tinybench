@@ -67,23 +67,6 @@ export default class Bench extends EventTarget {
    */
   async run() {
     this.dispatchEvent(createBenchEvent('start'));
-    const values = await Promise.all(
-      [...this._tasks.values()].map((task) => {
-        if (this.signal?.aborted) {
-          return task;
-        }
-        return new Promise((resolve) => setTimeout(() => task.run().then(resolve)));
-      }),
-    );
-    this.dispatchEvent(createBenchEvent('complete'));
-    return values;
-  }
-
-  /**
-   * works like {@link run} but runs the tasks sequentially, see #17 for more information
-   */
-  async runSequentially() {
-    this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
     for (const task of [...this._tasks.values()]) {
       if (this.signal?.aborted) {

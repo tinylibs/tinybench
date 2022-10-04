@@ -126,8 +126,6 @@ export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
-- `async runSequentially()`: works like `run` but runs the tasks
-	sequentially, see [#17](https://github.com/tinylibs/tinybench/issues/17) for more information
 - `async warmup()`: warm up the benchmark tasks
 - `reset()`: reset each task and remove its result
 - `add(name: string, fn: Fn)`: add a benchmark task to the task map

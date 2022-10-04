@@ -55,7 +55,7 @@ export default class Bench extends EventTarget {
         () => {
           this.dispatchEvent(createBenchEvent('abort'));
         },
-        { once: true }
+        { once: true },
       );
     }
   }
@@ -66,6 +66,23 @@ export default class Bench extends EventTarget {
    * Note: This method does not do any warmup. Call {@link warmup} for that.
    */
   async run() {
+    this.dispatchEvent(createBenchEvent('start'));
+    const values = await Promise.all(
+      [...this._tasks.values()].map((task) => {
+        if (this.signal?.aborted) {
+          return task;
+        }
+        return new Promise((resolve) => setTimeout(() => task.run().then(resolve)));
+      }),
+    );
+    this.dispatchEvent(createBenchEvent('complete'));
+    return values;
+  }
+
+  /**
+   * works like {@link run} but runs the tasks sequentially, see #17 for more information
+   */
+  async runSequentially() {
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
     for (const task of [...this._tasks.values()]) {
@@ -122,7 +139,7 @@ export default class Bench extends EventTarget {
   addEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ): void {
     super.addEventListener(type, listener as any, options);
   }
@@ -130,7 +147,7 @@ export default class Bench extends EventTarget {
   removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | EventListenerOptions
+    options?: boolean | EventListenerOptions,
   ) {
     super.removeEventListener(type, listener as any, options);
   }

@@ -1,11 +1,10 @@
 import type {
   Fn, TaskEvents, TaskResult, TaskEventsMap,
 } from 'types/index';
-import { types } from 'util';
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
-import { getMean, getSum, getVariance } from './utils';
+import { getMean, getVariance } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -46,9 +45,9 @@ export default class Task extends EventTarget {
    */
   async run() {
     this.dispatchEvent(createBenchEvent('start', this));
-    const startTime = this.bench.now(); // ms
     let totalTime = 0; // ms
     const samples: number[] = [];
+    const isAsync = this.bench.isAsyncFunction(this.fn);
 
     await this.bench.setup(this, 'run');
     while (
@@ -56,7 +55,6 @@ export default class Task extends EventTarget {
       && !this.bench.signal?.aborted
     ) {
       let taskStart = 0;
-      const isAsync = types.isAsyncFunction(this.fn);
 
       try {
         taskStart = this.bench.now();
@@ -68,11 +66,10 @@ export default class Task extends EventTarget {
         const taskTime = this.bench.now() - taskStart;
         this.runs += 1;
         samples.push(taskTime);
+        totalTime += taskTime;
       } catch (e) {
         this.setResult({ error: e });
       }
-
-      totalTime = this.bench.now() - startTime;
     }
     await this.bench.teardown(this, 'run');
 
@@ -81,8 +78,8 @@ export default class Task extends EventTarget {
     {
       const min = samples[0]!;
       const max = samples[samples.length - 1]!;
-      const period = getSum(samples) / this.runs;
-      const hz = 1 / period;
+      const period = totalTime / this.runs;
+      const hz = 1000 / period;
 
       // benchmark.js: https://github.com/bestiejs/benchmark.js/blob/42f3b732bac3640eddb3ae5f50e445f3141016fd/benchmark.js#L1912-L1927
       const mean = getMean(samples);

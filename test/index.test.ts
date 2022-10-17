@@ -23,7 +23,8 @@ test('basic', async () => {
   expect(tasks[1]!.name).toEqual('bar');
   expect(tasks[1]!.result!.totalTime).toBeGreaterThan(100);
 
-  expect(tasks[0]!.result!.hz * tasks[0]!.result!.period).toBeCloseTo(1);
+  // hz is ops/sec, period is ms unit value
+  expect(tasks[0]!.result!.hz * tasks[0]!.result!.period).toBeCloseTo(1000);
 });
 
 test('runs should be equal-more than time and iterations', async () => {
@@ -48,7 +49,9 @@ test('events order', async () => {
     warmupTime: 0,
   });
   bench
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     .add('foo', async () => {})
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     .add('bar', async () => {})
     .add('error', async () => {
       throw new Error('fake');

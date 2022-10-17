@@ -1,3 +1,5 @@
+import { Fn } from 'types';
+
 export const nanoToMs = (nano: number) => nano / 1e6;
 
 export const now = () => {
@@ -20,7 +22,23 @@ export const getVariance = (samples: number[], mean: number) => {
   return result / (samples.length - 1) || 0;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const AsyncFunctionConstructor = (async () => {}).constructor;
+
 /**
- * Computes the sum of a sample
+ * an async function check method only consider runtime support async syntax
  */
-export const getSum = (samples: number[]) => samples.reduce((sum, n) => sum + n, 0);
+export const isAsyncFunction = (fn: Fn) => fn.constructor === AsyncFunctionConstructor;
+
+/**
+ * an async function check method consider runtime not support async syntax
+ */
+export const isAsyncFunctionDirty = (fn: Fn) => {
+  try {
+    const ret = fn();
+    return !!ret && typeof ret === 'object' && typeof ret.then === 'function';
+  } catch {
+    // if fn throw error directly, consider it's a sync function
+    return false;
+  }
+};

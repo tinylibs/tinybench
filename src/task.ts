@@ -63,13 +63,14 @@ export default class Task extends EventTarget {
         } else {
           this.fn();
         }
-        const taskTime = this.bench.now() - taskStart;
-        this.runs += 1;
-        samples.push(taskTime);
-        totalTime += taskTime;
       } catch (e) {
         this.setResult({ error: e });
       }
+
+      const taskTime = this.bench.now() - taskStart;
+      this.runs += 1;
+      samples.push(taskTime);
+      totalTime += taskTime;
     }
     await this.bench.teardown(this, 'run');
 

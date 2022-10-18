@@ -8,7 +8,7 @@ import type {
 } from 'types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
-import { isAsyncFunction, isAsyncFunctionDirty, now } from './utils';
+import { now } from './utils';
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
@@ -32,8 +32,6 @@ export default class Bench extends EventTarget {
 
   now = now;
 
-  isAsyncFunction: (fn: Fn) => boolean;
-
   setup: Hook;
 
   teardown: Hook;
@@ -44,7 +42,6 @@ export default class Bench extends EventTarget {
     this.warmupTime = options.warmupTime ?? this.warmupTime;
     this.warmupIterations = options.warmupIterations ?? this.warmupIterations;
     this.time = options.time ?? this.time;
-    this.isAsyncFunction = options.dirtyAsyncCheck ? isAsyncFunctionDirty : isAsyncFunction;
     this.iterations = options.iterations ?? this.iterations;
     this.signal = options.signal;
     // eslint-disable-next-line @typescript-eslint/no-empty-function

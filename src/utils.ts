@@ -29,16 +29,3 @@ const AsyncFunctionConstructor = (async () => {}).constructor;
  * an async function check method only consider runtime support async syntax
  */
 export const isAsyncFunction = (fn: Fn) => fn.constructor === AsyncFunctionConstructor;
-
-/**
- * an async function check method consider runtime not support async syntax
- */
-export const isAsyncFunctionDirty = (fn: Fn) => {
-  try {
-    const ret = fn();
-    return !!ret && typeof ret === 'object' && typeof ret.then === 'function';
-  } catch {
-    // if fn throw error directly, consider it's a sync function
-    return false;
-  }
-};

@@ -180,16 +180,6 @@ export type Options = {
   now?: () => number;
 
   /**
-   * decide use which way to check task's fn is a async function.
-   *
-   * when it's false, only compare function's constructor
-   * when is's true, run task's fn and check whether return a PromiseLike object
-   *
-   * @default false
-   */
-  dirtyAsyncCheck?: boolean;
-
-  /**
    * An AbortSignal for aborting the benchmark
    */
   signal?: AbortSignal;

@@ -4,7 +4,7 @@ import type {
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
-import { getMean, getVariance } from './utils';
+import { getMean, getVariance, isAsyncFunction } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -47,7 +47,7 @@ export default class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('start', this));
     let totalTime = 0; // ms
     const samples: number[] = [];
-    const isAsync = this.bench.isAsyncFunction(this.fn);
+    const isAsync = isAsyncFunction(this.fn);
 
     await this.bench.setup(this, 'run');
     while (

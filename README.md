@@ -26,7 +26,7 @@ $ npm install -D tinybench
 You can start benchmarking by instantiating the `Bench` class and adding
 benchmark tasks to it.
 
-```ts
+```js
 import { Bench } from 'tinybench';
 
 const bench = new Bench({ time: 100 });
@@ -49,7 +49,7 @@ bench
 
 await bench.run();
 
-console.table(bench.tasks.map(({ name, result }) => ({ "Task Name": name, "Average Time (ps)": result?.mean! * 1000, "Variance (ps)": result?.variance! * 1000 })));
+console.table(bench.tasks.map(({ name, result }) => ({ "Task Name": name, "Average Time (ps)": result?.mean * 1000, "Variance (ps)": result?.variance * 1000 })));
 
 // Output:
 // ┌─────────┬────────────┬────────────────────┬────────────────────┐
@@ -291,14 +291,14 @@ export type TaskEvents =
 
 For instance:
 
-```ts
+```js
 // runs on each benchmark task's cycle
-bench.addEventListener("cycle", (e: BenchEvent) => {
+bench.addEventListener("cycle", (e) => {
   const task = e.task!;
 });
 
 // runs only on this benchmark task's cycle
-task.addEventListener("cycle", (e: BenchEvent) => {
+task.addEventListener("cycle", (e) => {
   const task = e.task!;
 });
 ```

@@ -264,3 +264,29 @@ test('setup and teardown', async () => {
   expect(teardown).toBeCalledWith(fooTask, 'warmup');
   expect(teardown).toBeCalledWith(fooTask, 'run');
 });
+
+test('task before, after, beforeEach, afterEach', async () => {
+  const before = vi.fn();
+  const after = vi.fn();
+  const beforeEach = vi.fn();
+  const afterEach = vi.fn();
+  const bench = new Bench({ time: 200 });
+  bench.add('foo', async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }, {
+    before,
+    after,
+    beforeEach,
+    afterEach,
+  });
+  const fooTask = bench.getTask('foo');
+
+  await bench.warmup();
+  await bench.run();
+
+  expect(before.mock.calls.length).toBe(1);
+  expect(after.mock.calls.length).toBe(1);
+  expect(beforeEach.mock.calls.length).toBeGreaterThan(1);
+  expect(afterEach.mock.calls.length).toBeGreaterThan(1);
+  expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);
+});

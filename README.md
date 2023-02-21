@@ -128,8 +128,13 @@ export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
 - `async run()`: run the added tasks that were registered using the `add` method
 - `async warmup()`: warm up the benchmark tasks
 - `reset()`: reset each task and remove its result
-- `add(name: string, fn: Fn)`: add a benchmark task to the task map
-- - `Fn`: `() => any | Promise<any>`
+- `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map
+  - `Fn`: `() => any | Promise<any>`
+  - `FnOpts`: `{}`: a set of optional functions run during the benchmark lifecycle that can be used to set up or tear down test data or fixtures without affecting the timing of each task
+    - `before?: () => any | Promise<any>`: invoked once before iterations of `fn` begin
+    - `beforeEach?: () => any | Promise<any>`: invoked before each time `fn` is executed
+    - `afterEach?: () => any | Promise<any>`: invoked after each time `fn` is executed
+    - `after?: () => any | Promise<any>`: invoked once after all iterations of `fn` have finished
 - `remove(name: string)`: remove a benchmark task from the task map
 - `get results(): (TaskResult | undefined)[]`: (getter) tasks results as an array
 - `get tasks(): Task[]`: (getter) tasks as an array

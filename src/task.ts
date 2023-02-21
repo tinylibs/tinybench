@@ -98,7 +98,7 @@ export default class Task extends EventTarget {
 
     await this.bench.teardown(this, 'run');
 
-    samples.sort((a, b) => a - b);
+    samples.sort((a,b) => a - b);
 
     {
       const min = samples[0]!;

@@ -9,7 +9,7 @@ export interface FnOpts {
   /**
    * An optional function that is run before iterations of this task begin
    */
-  before?: () => any | Promise<any>;
+  beforeAll?: () => any | Promise<any>;
 
   /**
    * An optional function that is run before each iteration of this task
@@ -24,7 +24,7 @@ export interface FnOpts {
   /**
    * An optional function that is run after all iterations of this task end
    */
-  after?: () => any | Promise<any>;
+  afterAll?: () => any | Promise<any>;
 }
 
 /**

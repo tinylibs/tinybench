@@ -57,8 +57,8 @@ export default class Task extends EventTarget {
 
     await this.bench.setup(this, 'run');
 
-    if (this.opts.before != null) {
-      await this.opts.before();
+    if (this.opts.beforeAll != null) {
+      await this.opts.beforeAll();
     }
 
     while (
@@ -92,13 +92,13 @@ export default class Task extends EventTarget {
       }
     }
 
-    if (this.opts.after != null) {
-      await this.opts.after();
+    if (this.opts.afterAll != null) {
+      await this.opts.afterAll();
     }
 
     await this.bench.teardown(this, 'run');
 
-    samples.sort((a,b)=> a - b);
+    samples.sort((a, b) => a - b);
 
     {
       const min = samples[0]!;

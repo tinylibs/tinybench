@@ -5,7 +5,7 @@ import type {
   BenchEvents,
   TaskResult,
   BenchEventsMap,
-  FnOpts,
+  FnOptions,
 } from 'types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
@@ -101,7 +101,7 @@ export default class Bench extends EventTarget {
   /**
    * add a benchmark task to the task map
    */
-  add(name: string, fn: Fn, opts: FnOpts = {}) {
+  add(name: string, fn: Fn, opts: FnOptions = {}) {
     const task = new Task(this, name, fn, opts);
     this._tasks.set(name, task);
     this.dispatchEvent(createBenchEvent('add', task));

@@ -146,16 +146,41 @@ A class that represents each benchmark task in Tinybench. It keeps track of the
 results, name, Bench instance, the task function and the number of times the task
 function has been executed.
 
-- `constructor(bench: Bench, name: string, fn: Fn)`
+- `constructor(bench: Bench, name: string, fn: Fn, opts: FnOptions = {})`
 - `bench: Bench`
 - `name: string`: task name
 - `fn: Fn`: the task function
+- `opts: FnOptions`: Task options
 - `runs: number`: the number of times the task function has been executed
 - `result?: TaskResult`: the result object
 - `async run()`: run the current task and write the results in `Task.result` object
 - `async warmup()`: warm up the current task
 - `setResult(result: Partial<TaskResult>)`: change the result object values
 - `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object
+
+```ts
+export interface FnOptions {
+  /**
+   * An optional function that is run before iterations of this task begin
+   */
+  beforeAll?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run before each iteration of this task
+   */
+  beforeEach?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run after each iteration of this task
+   */
+  afterEach?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run after all iterations of this task end
+   */
+  afterAll?: (this: Task) => void | Promise<void>;
+}
+```
 
 ## `TaskResult`
 

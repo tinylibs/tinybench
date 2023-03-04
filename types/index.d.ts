@@ -5,26 +5,26 @@ import Task from '../src/task';
  */
 export type Fn = () => any | Promise<any>;
 
-export interface FnOpts {
+export interface FnOptions {
   /**
    * An optional function that is run before iterations of this task begin
    */
-  beforeAll?: () => any | Promise<any>;
+  beforeAll?: (this: Task) => void | Promise<void>;
 
   /**
    * An optional function that is run before each iteration of this task
    */
-  beforeEach?: () => any | Promise<any>;
+  beforeEach?: (this: Task) => void | Promise<void>;
 
   /**
    * An optional function that is run after each iteration of this task
    */
-  afterEach?: () => any | Promise<any>;
+  afterEach?: (this: Task) => void | Promise<void>;
 
   /**
    * An optional function that is run after all iterations of this task end
    */
-  afterAll?: () => any | Promise<any>;
+  afterAll?: (this: Task) => void | Promise<void>;
 }
 
 /**

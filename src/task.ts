@@ -1,5 +1,5 @@
 import type {
-  Fn, TaskEvents, TaskResult, TaskEventsMap, FnOpts,
+  Fn, TaskEvents, TaskResult, TaskEventsMap, FnOptions,
 } from 'types/index';
 import Bench from './bench';
 import tTable from './constants';
@@ -35,9 +35,9 @@ export default class Task extends EventTarget {
   /**
    * Task options
    */
-  opts: FnOpts;
+  opts: FnOptions;
 
-  constructor(bench: Bench, name: string, fn: Fn, opts: FnOpts = {}) {
+  constructor(bench: Bench, name: string, fn: Fn, opts: FnOptions = {}) {
     super();
     this.bench = bench;
     this.name = name;
@@ -58,7 +58,7 @@ export default class Task extends EventTarget {
     await this.bench.setup(this, 'run');
 
     if (this.opts.beforeAll != null) {
-      await this.opts.beforeAll();
+      await this.opts.beforeAll.call(this);
     }
 
     while (
@@ -66,7 +66,7 @@ export default class Task extends EventTarget {
       && !this.bench.signal?.aborted
     ) {
       if (this.opts.beforeEach != null) {
-        await this.opts.beforeEach();
+        await this.opts.beforeEach.call(this);
       }
 
       let taskStart = 0;
@@ -88,12 +88,12 @@ export default class Task extends EventTarget {
       totalTime += taskTime;
 
       if (this.opts.afterEach != null) {
-        await this.opts.afterEach();
+        await this.opts.afterEach.call(this);
       }
     }
 
     if (this.opts.afterAll != null) {
-      await this.opts.afterAll();
+      await this.opts.afterAll.call(this);
     }
 
     await this.bench.teardown(this, 'run');

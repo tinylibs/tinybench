@@ -264,3 +264,38 @@ test('setup and teardown', async () => {
   expect(teardown).toBeCalledWith(fooTask, 'warmup');
   expect(teardown).toBeCalledWith(fooTask, 'run');
 });
+
+test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
+  const bench = new Bench({ time: 50 });
+
+  const beforeAll = vi.fn(function hook(this: Task) {
+    expect(this).toBe(bench.getTask('foo'));
+  });
+  const afterAll = vi.fn(function hook(this: Task) {
+    expect(this).toBe(bench.getTask('foo'));
+  });
+  const beforeEach = vi.fn(function hook(this: Task) {
+    expect(this).toBe(bench.getTask('foo'));
+  });
+  const afterEach = vi.fn(function hook(this: Task) {
+    expect(this).toBe(bench.getTask('foo'));
+  });
+  bench.add('foo', async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }, {
+    beforeAll,
+    afterAll,
+    beforeEach,
+    afterEach,
+  });
+  const task = bench.getTask('foo')!;
+
+  await bench.warmup();
+  await bench.run();
+
+  expect(beforeAll.mock.calls.length).toBe(1);
+  expect(afterAll.mock.calls.length).toBe(1);
+  expect(beforeEach.mock.calls.length).toBe(task.runs);
+  expect(afterEach.mock.calls.length).toBe(task.runs);
+  expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);
+});

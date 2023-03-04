@@ -1,5 +1,5 @@
 import type {
-  Fn, TaskEvents, TaskResult, TaskEventsMap,
+  Fn, TaskEvents, TaskResult, TaskEventsMap, FnOptions,
 } from 'types/index';
 import Bench from './bench';
 import tTable from './constants';
@@ -32,11 +32,17 @@ export default class Task extends EventTarget {
    */
   result?: TaskResult;
 
-  constructor(bench: Bench, name: string, fn: Fn) {
+  /**
+   * Task options
+   */
+  opts: FnOptions;
+
+  constructor(bench: Bench, name: string, fn: Fn, opts: FnOptions = {}) {
     super();
     this.bench = bench;
     this.name = name;
     this.fn = fn;
+    this.opts = opts;
     // TODO: support signals in Tasks
   }
 
@@ -50,10 +56,19 @@ export default class Task extends EventTarget {
     const isAsync = isAsyncFunction(this.fn);
 
     await this.bench.setup(this, 'run');
+
+    if (this.opts.beforeAll != null) {
+      await this.opts.beforeAll.call(this);
+    }
+
     while (
       (totalTime < this.bench.time || this.runs < this.bench.iterations)
       && !this.bench.signal?.aborted
     ) {
+      if (this.opts.beforeEach != null) {
+        await this.opts.beforeEach.call(this);
+      }
+
       let taskStart = 0;
 
       try {
@@ -71,10 +86,19 @@ export default class Task extends EventTarget {
       this.runs += 1;
       samples.push(taskTime);
       totalTime += taskTime;
+
+      if (this.opts.afterEach != null) {
+        await this.opts.afterEach.call(this);
+      }
     }
+
+    if (this.opts.afterAll != null) {
+      await this.opts.afterAll.call(this);
+    }
+
     await this.bench.teardown(this, 'run');
 
-    samples.sort((a,b)=> a - b);
+    samples.sort((a, b) => a - b);
 
     {
       const min = samples[0]!;

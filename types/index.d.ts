@@ -5,6 +5,28 @@ import Task from '../src/task';
  */
 export type Fn = () => any | Promise<any>;
 
+export interface FnOptions {
+  /**
+   * An optional function that is run before iterations of this task begin
+   */
+  beforeAll?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run before each iteration of this task
+   */
+  beforeEach?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run after each iteration of this task
+   */
+  afterEach?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run after all iterations of this task end
+   */
+  afterAll?: (this: Task) => void | Promise<void>;
+}
+
 /**
  * the benchmark task result object
  */

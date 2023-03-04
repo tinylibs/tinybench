@@ -128,8 +128,13 @@ export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
 - `async run()`: run the added tasks that were registered using the `add` method
 - `async warmup()`: warm up the benchmark tasks
 - `reset()`: reset each task and remove its result
-- `add(name: string, fn: Fn)`: add a benchmark task to the task map
-- - `Fn`: `() => any | Promise<any>`
+- `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map
+  - `Fn`: `() => any | Promise<any>`
+  - `FnOpts`: `{}`: a set of optional functions run during the benchmark lifecycle that can be used to set up or tear down test data or fixtures without affecting the timing of each task
+    - `beforeAll?: () => any | Promise<any>`: invoked once before iterations of `fn` begin
+    - `beforeEach?: () => any | Promise<any>`: invoked before each time `fn` is executed
+    - `afterEach?: () => any | Promise<any>`: invoked after each time `fn` is executed
+    - `afterAll?: () => any | Promise<any>`: invoked once after all iterations of `fn` have finished
 - `remove(name: string)`: remove a benchmark task from the task map
 - `get results(): (TaskResult | undefined)[]`: (getter) tasks results as an array
 - `get tasks(): Task[]`: (getter) tasks as an array
@@ -141,16 +146,41 @@ A class that represents each benchmark task in Tinybench. It keeps track of the
 results, name, Bench instance, the task function and the number of times the task
 function has been executed.
 
-- `constructor(bench: Bench, name: string, fn: Fn)`
+- `constructor(bench: Bench, name: string, fn: Fn, opts: FnOptions = {})`
 - `bench: Bench`
 - `name: string`: task name
 - `fn: Fn`: the task function
+- `opts: FnOptions`: Task options
 - `runs: number`: the number of times the task function has been executed
 - `result?: TaskResult`: the result object
 - `async run()`: run the current task and write the results in `Task.result` object
 - `async warmup()`: warm up the current task
 - `setResult(result: Partial<TaskResult>)`: change the result object values
 - `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object
+
+```ts
+export interface FnOptions {
+  /**
+   * An optional function that is run before iterations of this task begin
+   */
+  beforeAll?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run before each iteration of this task
+   */
+  beforeEach?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run after each iteration of this task
+   */
+  afterEach?: (this: Task) => void | Promise<void>;
+
+  /**
+   * An optional function that is run after all iterations of this task end
+   */
+  afterAll?: (this: Task) => void | Promise<void>;
+}
+```
 
 ## `TaskResult`
 

@@ -360,3 +360,13 @@ export type BenchEvent = Event & {
 ## Contributing
 
 Feel free to create issues/discussions and then PRs for the project!
+
+## Sponsors
+
+Your sponsorship can make a huge difference in continuing our work in open source!
+
+<p align="center">
+  <a href="https://cdn.jsdelivr.net/gh/aslemammad/static/sponsors.svg">
+    <img src='https://cdn.jsdelivr.net/gh/aslemammad/static/sponsors.svg'/>
+  </a>
+</p>

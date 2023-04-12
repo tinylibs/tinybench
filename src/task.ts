@@ -172,7 +172,7 @@ export default class Task extends EventTarget {
     const startTime = this.bench.now();
     let totalTime = 0;
 
-    this.bench.setup(this, 'warmup');
+    await this.bench.setup(this, 'warmup');
     while (
       (totalTime < this.bench.warmupTime
         || this.runs < this.bench.warmupIterations)

@@ -56,7 +56,7 @@ export default class Bench extends EventTarget {
         () => {
           this.dispatchEvent(createBenchEvent('abort'));
         },
-        { once: true },
+        { once: true }
       );
     }
   }
@@ -121,7 +121,7 @@ export default class Bench extends EventTarget {
   addEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | AddEventListenerOptions,
+    options?: boolean | AddEventListenerOptions
   ): void {
     super.addEventListener(type, listener as any, options);
   }
@@ -129,7 +129,7 @@ export default class Bench extends EventTarget {
   removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | EventListenerOptions,
+    options?: boolean | EventListenerOptions
   ) {
     super.removeEventListener(type, listener as any, options);
   }
@@ -139,6 +139,23 @@ export default class Bench extends EventTarget {
    */
   get results(): (TaskResult | undefined)[] {
     return [...this._tasks.values()].map((task) => task.result);
+  }
+
+  /**
+   * table of the tasks results
+   */
+  table() {
+    return this.tasks.map(({ name, result }) =>
+      result
+        ? {
+            'Task Name': name,
+            'ops/sec': parseInt(result.hz, 10).toLocaleString(),
+            'Average Time (ns)': result.mean * 1000 * 1000,
+            Margin: `\xb1${result.rme.toFixed(2)}%`,
+            Samples: result.samples.length,
+          }
+        : null
+    );
   }
 
   /**

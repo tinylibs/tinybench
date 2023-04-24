@@ -135,27 +135,28 @@ export default class Bench extends EventTarget {
   }
 
   /**
+   * table of the tasks results
+   */
+  table() {
+    return this.tasks.map(({ name, result }) => {
+      if (result) {
+        return {
+          'Task Name': name,
+          'ops/sec': parseInt(result.hz, 10).toLocaleString(),
+          'Average Time (ns)': result.mean * 1000 * 1000,
+          Margin: `\xb1${result.rme.toFixed(2)}%`,
+          Samples: result.samples.length,
+        };
+      }
+      return null;
+    });
+  }
+
+  /**
    * (getter) tasks results as an array
    */
   get results(): (TaskResult | undefined)[] {
     return [...this._tasks.values()].map((task) => task.result);
-  }
-
-  /**
-   * table of the tasks results
-   */
-  table() {
-    return this.tasks.map(({ name, result }) =>
-      result
-        ? {
-            'Task Name': name,
-            'ops/sec': parseInt(result.hz, 10).toLocaleString(),
-            'Average Time (ns)': result.mean * 1000 * 1000,
-            Margin: `\xb1${result.rme.toFixed(2)}%`,
-            Samples: result.samples.length,
-          }
-        : null
-    );
   }
 
   /**

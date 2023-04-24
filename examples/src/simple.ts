@@ -34,23 +34,7 @@ bench
 
 await bench.run();
 
-console.log('bench.table()');
 console.table(bench.table());
-
-console.log('custom table');
-console.table(
-  bench.tasks.map(({ name, result }) =>
-    result
-      ? {
-          'Task Name': name,
-          'ops/sec': parseInt(result.hz, 10).toLocaleString(),
-          'Average Time (ns)': result.mean * 1000 * 1000,
-          Margin: `\xb1${result.rme.toFixed(2)}%`,
-          Samples: result.samples.length,
-        }
-      : null
-  )
-);
 
 // Output:
 // ┌─────────┬──────────────────┬──────────────┬────────────────────┬──────────┬─────────┐

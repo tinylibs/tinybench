@@ -142,7 +142,7 @@ export default class Bench extends EventTarget {
       if (result) {
         return {
           'Task Name': name,
-          'ops/sec': parseInt(result.hz, 10).toLocaleString(),
+          'ops/sec': parseInt(result.hz.toString(), 10).toLocaleString(),
           'Average Time (ns)': result.mean * 1000 * 1000,
           Margin: `\xb1${result.rme.toFixed(2)}%`,
           Samples: result.samples.length,

@@ -6,7 +6,7 @@ import type {
   TaskResult,
   BenchEventsMap,
   FnOptions,
-} from 'types/index';
+} from '../types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
 import { now } from './utils';
@@ -136,7 +136,7 @@ export default class Bench extends EventTarget {
     listener: T,
     options?: boolean | AddEventListenerOptions,
   ): void {
-    super.addEventListener(type, listener as any, options);
+    super.addEventListener(type as string, listener as any, options);
   }
 
   removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
@@ -144,7 +144,25 @@ export default class Bench extends EventTarget {
     listener: T,
     options?: boolean | EventListenerOptions,
   ) {
-    super.removeEventListener(type, listener as any, options);
+    super.removeEventListener(type as string, listener as any, options);
+  }
+
+  /**
+   * table of the tasks results
+   */
+  table() {
+    return this.tasks.map(({ name, result }) => {
+      if (result) {
+        return {
+          'Task Name': name,
+          'ops/sec': parseInt(result.hz.toString(), 10).toLocaleString(),
+          'Average Time (ns)': result.mean * 1000 * 1000,
+          Margin: `\xb1${result.rme.toFixed(2)}%`,
+          Samples: result.samples.length,
+        };
+      }
+      return null;
+    });
   }
 
   /**

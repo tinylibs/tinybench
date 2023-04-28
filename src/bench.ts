@@ -6,7 +6,7 @@ import type {
   TaskResult,
   BenchEventsMap,
   FnOptions,
-} from 'types/index';
+} from '../types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
 import { now } from './utils';
@@ -56,7 +56,7 @@ export default class Bench extends EventTarget {
         () => {
           this.dispatchEvent(createBenchEvent('abort'));
         },
-        { once: true }
+        { once: true },
       );
     }
   }
@@ -121,17 +121,17 @@ export default class Bench extends EventTarget {
   addEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ): void {
-    super.addEventListener(type, listener as any, options);
+    super.addEventListener(type as string, listener as any, options);
   }
 
   removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | EventListenerOptions
+    options?: boolean | EventListenerOptions,
   ) {
-    super.removeEventListener(type, listener as any, options);
+    super.removeEventListener(type as string, listener as any, options);
   }
 
   /**

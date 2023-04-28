@@ -32,32 +32,25 @@ import { Bench } from 'tinybench';
 const bench = new Bench({ time: 100 });
 
 bench
-  .add('switch 1', () => {
-    let a = 1;
-    let b = 2;
-    const c = a;
-    a = b;
-    b = c;
+  .add('faster task', () => {
+    console.log('I am faster')
   })
-  .add('switch 2', () => {
-    let a = 1;
-    let b = 10;
-    a = b + a;
-    b = a - b;
-    a = b - a;
-  });
+  .add('slower task', async () => {
+    await new Promise(r => setTimeout(r, 1)) // we wait 1ms :)
+    console.log('I am slower')
+  })
 
 await bench.run();
 
-console.table(bench.tasks.map(({ name, result }) => ({ "Task Name": name, "Average Time (ps)": result?.mean * 1000, "Variance (ps)": result?.variance * 1000 })));
+console.table(bench.table());
 
 // Output:
-// ┌─────────┬────────────┬────────────────────┬────────────────────┐
-// │ (index) │ Task Name  │ Average Time (ps)  │   Variance (ps)    │
-// ├─────────┼────────────┼────────────────────┼────────────────────┤
-// │    0    │ 'switch 1' │ 1.8458325710527104 │ 1.2113875253341617 │
-// │    1    │ 'switch 2' │ 1.8746935152109603 │ 1.2254725890767446 │
-// └─────────┴────────────┴────────────────────┴────────────────────┘
+// ┌─────────┬───────────────┬──────────┬────────────────────┬───────────┬─────────┐
+// │ (index) │   Task Name   │ ops/sec  │ Average Time (ns)  │  Margin   │ Samples │
+// ├─────────┼───────────────┼──────────┼────────────────────┼───────────┼─────────┤
+// │    0    │ 'faster task' │ '41,621' │ 24025.791819761525 │ '±20.50%' │  4257   │
+// │    1    │ 'slower task' │  '828'   │ 1207382.7838323202 │ '±7.07%'  │   83    │
+// └─────────┴───────────────┴──────────┴────────────────────┴───────────┴─────────┘
 ```
 
 The `add` method accepts a task name and a task function, so it can benchmark
@@ -136,6 +129,7 @@ export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
     - `afterEach?: () => any | Promise<any>`: invoked after each time `fn` is executed
     - `afterAll?: () => any | Promise<any>`: invoked once after all iterations of `fn` have finished
 - `remove(name: string)`: remove a benchmark task from the task map
+- `table()`: table of the tasks results
 - `get results(): (TaskResult | undefined)[]`: (getter) tasks results as an array
 - `get tasks(): Task[]`: (getter) tasks as an array
 - `getTask(name: string): Task | undefined`: get a task based on the name

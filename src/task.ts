@@ -1,6 +1,6 @@
 import type {
   Fn, TaskEvents, TaskResult, TaskEventsMap, FnOptions,
-} from 'types/index';
+} from '../types/index';
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';

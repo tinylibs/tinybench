@@ -39,6 +39,7 @@ bench
     await new Promise(r => setTimeout(r, 1)) // we wait 1ms :)
     console.log('I am slower')
   })
+  .todo('unimplemented bench')
 
 await bench.run();
 
@@ -51,6 +52,19 @@ console.table(bench.table());
 // │    0    │ 'faster task' │ '41,621' │ 24025.791819761525 │ '±20.50%' │  4257   │
 // │    1    │ 'slower task' │  '828'   │ 1207382.7838323202 │ '±7.07%'  │   83    │
 // └─────────┴───────────────┴──────────┴────────────────────┴───────────┴─────────┘
+
+console.table(
+  bench.todos.map(({ name }) => ({
+    'Task name': name,
+  })),
+);
+
+// Output:
+// ┌─────────┬───────────────────────┐
+// │ (index) │       Task name       │
+// ├─────────┼───────────────────────┤
+// │    0    │ 'unimplemented bench' │
+// └─────────┴───────────────────────┘
 ```
 
 The `add` method accepts a task name and a task function, so it can benchmark
@@ -133,6 +147,8 @@ export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
 - `get results(): (TaskResult | undefined)[]`: (getter) tasks results as an array
 - `get tasks(): Task[]`: (getter) tasks as an array
 - `getTask(name: string): Task | undefined`: get a task based on the name
+- `todo(name: string, fn?: Fn, opts: FnOptions)`: add a benchmark todo to the todo map
+- `get todos(): Task[]`: (getter) tasks todos as an array
 
 ### `Task`
 

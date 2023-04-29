@@ -187,6 +187,21 @@ test('events order 2', async () => {
   await new Promise((resolve) => setTimeout(resolve, 150));
 });
 
+test('todo event', async () => {
+  const bench = new Bench({ time: 50 });
+
+  let todoTask: Task;
+  bench.addEventListener('todo', ({ task }) => {
+    todoTask = task;
+  });
+
+  bench.todo('unimplemented bench');
+
+  await bench.run();
+
+  expect(todoTask!.name).toBe('unimplemented bench');
+});
+
 test('error event', async () => {
   const bench = new Bench({ time: 50 });
   const err = new Error();

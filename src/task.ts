@@ -1,5 +1,9 @@
 import type {
-  Fn, TaskEvents, TaskResult, TaskEventsMap, FnOptions,
+  Fn,
+  TaskEvents,
+  TaskResult,
+  TaskEventsMap,
+  FnOptions,
 } from '../types/index';
 import Bench from './bench';
 import tTable from './constants';
@@ -70,6 +74,7 @@ export default class Task extends EventTarget {
       }
 
       let taskStart = 0;
+      let taskTime = 0;
 
       try {
         taskStart = this.bench.now();
@@ -78,14 +83,14 @@ export default class Task extends EventTarget {
         } else {
           this.fn();
         }
+        taskTime = this.bench.now() - taskStart;
       } catch (e) {
         this.setResult({ error: e });
       }
 
-      const taskTime = this.bench.now() - taskStart;
+      totalTime += taskTime;
       this.runs += 1;
       samples.push(taskTime);
-      totalTime += taskTime;
 
       if (this.opts.afterEach != null) {
         await this.opts.afterEach.call(this);
@@ -173,11 +178,20 @@ export default class Task extends EventTarget {
     let totalTime = 0;
 
     await this.bench.setup(this, 'warmup');
+
+    if (this.opts.beforeAll != null) {
+      await this.opts.beforeAll.call(this);
+    }
+
     while (
       (totalTime < this.bench.warmupTime
         || this.runs < this.bench.warmupIterations)
       && !this.bench.signal?.aborted
     ) {
+      if (this.opts.beforeEach != null) {
+        await this.opts.beforeEach.call(this);
+      }
+
       try {
         // eslint-disable-next-line no-await-in-loop
         await Promise.resolve().then(this.fn);
@@ -187,6 +201,14 @@ export default class Task extends EventTarget {
 
       this.runs += 1;
       totalTime = this.bench.now() - startTime;
+
+      if (this.opts.afterEach != null) {
+        await this.opts.afterEach.call(this);
+      }
+    }
+
+    if (this.opts.afterAll != null) {
+      await this.opts.afterAll.call(this);
     }
     this.bench.teardown(this, 'warmup');
 

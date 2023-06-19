@@ -281,7 +281,10 @@ test('setup and teardown', async () => {
 });
 
 test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
-  const bench = new Bench({ time: 50 });
+  const iterations = 100;
+  const bench = new Bench({
+    time: 0, warmupTime: 0, iterations, warmupIterations: iterations,
+  });
 
   const beforeAll = vi.fn(function hook(this: Task) {
     expect(this).toBe(bench.getTask('foo'));
@@ -303,14 +306,13 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
     beforeEach,
     afterEach,
   });
-  const task = bench.getTask('foo')!;
 
   await bench.warmup();
   await bench.run();
 
-  expect(beforeAll.mock.calls.length).toBe(1);
-  expect(afterAll.mock.calls.length).toBe(1);
-  expect(beforeEach.mock.calls.length).toBe(task.runs);
-  expect(afterEach.mock.calls.length).toBe(task.runs);
+  expect(beforeAll.mock.calls.length).toBe(2);
+  expect(afterAll.mock.calls.length).toBe(2);
+  expect(beforeEach.mock.calls.length).toBe(iterations * 2 /* warmup + run */);
+  expect(afterEach.mock.calls.length).toBe(iterations * 2);
   expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);
 });

@@ -1,5 +1,9 @@
 import type {
-  Fn, TaskEvents, TaskResult, TaskEventsMap, FnOptions,
+  Fn,
+  TaskEvents,
+  TaskResult,
+  TaskEventsMap,
+  FnOptions,
 } from '../types/index';
 import Bench from './bench';
 import tTable from './constants';
@@ -61,35 +65,33 @@ export default class Task extends EventTarget {
       await this.opts.beforeAll.call(this);
     }
 
-    while (
-      (totalTime < this.bench.time || this.runs < this.bench.iterations)
-      && !this.bench.signal?.aborted
-    ) {
-      if (this.opts.beforeEach != null) {
-        await this.opts.beforeEach.call(this);
-      }
+    try {
+      while (
+        (totalTime < this.bench.time || this.runs < this.bench.iterations)
+        && !this.bench.signal?.aborted
+      ) {
+        if (this.opts.beforeEach != null) {
+          await this.opts.beforeEach.call(this);
+        }
 
-      let taskStart = 0;
-
-      try {
-        taskStart = this.bench.now();
+        const taskStart = this.bench.now();
         if (isAsync) {
           await this.fn();
         } else {
           this.fn();
         }
-      } catch (e) {
-        this.setResult({ error: e });
-      }
+        const taskTime = this.bench.now() - taskStart;
 
-      const taskTime = this.bench.now() - taskStart;
-      this.runs += 1;
-      samples.push(taskTime);
-      totalTime += taskTime;
+        samples.push(taskTime);
+        this.runs += 1;
+        totalTime += taskTime;
 
-      if (this.opts.afterEach != null) {
-        await this.opts.afterEach.call(this);
+        if (this.opts.afterEach != null) {
+          await this.opts.afterEach.call(this);
+        }
       }
+    } catch (e) {
+      this.setResult({ error: e });
     }
 
     if (this.opts.afterAll != null) {
@@ -100,7 +102,7 @@ export default class Task extends EventTarget {
 
     samples.sort((a, b) => a - b);
 
-    {
+    if (!this.result?.error) {
       const min = samples[0]!;
       const max = samples[samples.length - 1]!;
       const period = totalTime / this.runs;
@@ -169,24 +171,46 @@ export default class Task extends EventTarget {
    */
   async warmup() {
     this.dispatchEvent(createBenchEvent('warmup', this));
+    const isAsync = isAsyncFunction(this.fn);
     const startTime = this.bench.now();
     let totalTime = 0;
 
     await this.bench.setup(this, 'warmup');
+
+    if (this.opts.beforeAll != null) {
+      await this.opts.beforeAll.call(this);
+    }
+
     while (
       (totalTime < this.bench.warmupTime
         || this.runs < this.bench.warmupIterations)
       && !this.bench.signal?.aborted
     ) {
+      if (this.opts.beforeEach != null) {
+        await this.opts.beforeEach.call(this);
+      }
+
       try {
         // eslint-disable-next-line no-await-in-loop
-        await Promise.resolve().then(this.fn);
+        if (isAsync) {
+          await this.fn();
+        } else {
+          this.fn();
+        }
       } catch {
         // todo
       }
 
       this.runs += 1;
       totalTime = this.bench.now() - startTime;
+
+      if (this.opts.afterEach != null) {
+        await this.opts.afterEach.call(this);
+      }
+    }
+
+    if (this.opts.afterAll != null) {
+      await this.opts.afterAll.call(this);
     }
     this.bench.teardown(this, 'warmup');
 

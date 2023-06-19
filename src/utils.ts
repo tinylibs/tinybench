@@ -2,12 +2,9 @@ import type { Fn } from '../types/index';
 
 export const nanoToMs = (nano: number) => nano / 1e6;
 
-export const now = () => {
-  if (typeof globalThis.process?.hrtime === 'function') {
-    return nanoToMs(Number(process.hrtime.bigint()));
-  }
-  return performance.now();
-};
+export const hrtimeNow = () => nanoToMs(Number(process.hrtime.bigint()));
+
+export const now = () => performance.now();
 
 /**
  * Computes the arithmetic mean of a sample.

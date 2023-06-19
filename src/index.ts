@@ -11,7 +11,7 @@ export type {
   BenchEvent,
 } from '../types';
 
-export { now } from './utils';
+export { now, hrtimeNow } from './utils';
 
 export { Bench, Task };
 export default Bench;

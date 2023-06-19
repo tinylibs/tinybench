@@ -352,6 +352,15 @@ export type BenchEvent = Event & {
 };
 ```
 
+### `process.hrtime`
+if you want more accurate results for nodejs with `process.hrtime`, then import
+	the `hrtimeNow` function from the library and pass it to the `Bench` options.
+
+```ts
+import { hrtimeNow } from 'tinybench';
+```
+It may make your benchmarks slower, check #42.
+
 ## Prior art
 
 - [Benchmark.js](https://github.com/bestiejs/benchmark.js)

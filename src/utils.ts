@@ -15,7 +15,7 @@ export const getMean = (samples: number[]) => samples.reduce((sum, n) => sum + n
  * Computes the variance of a sample.
  */
 export const getVariance = (samples: number[], mean: number) => {
-  const result = samples.reduce((sum, n) => sum + ((n - mean) ** 2));
+  const result = samples.reduce((sum, n) => sum + ((n - mean) ** 2), 0);
   return result / (samples.length - 1) || 0;
 };
 

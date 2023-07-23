@@ -209,6 +209,11 @@ export type Options = {
   signal?: AbortSignal;
 
   /**
+   * Throw if a task fails (events will not work if true)
+   */
+  throws?: boolean;
+
+  /**
    * warmup time (milliseconds) @default 100ms
    */
   warmupTime?: number;

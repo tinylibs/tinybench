@@ -76,9 +76,9 @@ export default class Task extends EventTarget {
 
         const taskStart = this.bench.now();
         if (isAsync) {
-          await this.fn();
+          await this.fn.call(this);
         } else {
-          this.fn();
+          this.fn.call(this);
         }
         const taskTime = this.bench.now() - taskStart;
 
@@ -193,9 +193,9 @@ export default class Task extends EventTarget {
       try {
         // eslint-disable-next-line no-await-in-loop
         if (isAsync) {
-          await this.fn();
+          await this.fn.call(this);
         } else {
-          this.fn();
+          this.fn.call(this);
         }
       } catch {
         // todo

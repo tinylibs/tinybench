@@ -1,4 +1,4 @@
-import type { Fn } from '../types/index';
+import type Task from './task';
 
 export const nanoToMs = (nano: number) => nano / 1e6;
 
@@ -25,15 +25,21 @@ const AsyncFunctionConstructor = (async () => {}).constructor;
 /**
  * an async function check method only consider runtime support async syntax
  */
-export const isAsyncFunction = (fn: Fn) => {
-  if (fn.constructor === AsyncFunctionConstructor) {
+export const isAsyncFunction = async (task: Task) => {
+  if (task.fn.constructor === AsyncFunctionConstructor) {
     return true;
   }
   try {
-    const call = fn();
+    if (task.opts.beforeEach != null) {
+      await task.opts.beforeEach.call(task);
+    }
+    const call = task.fn();
     const result = call instanceof Promise;
     if (result) {
       call.catch(() => { /** skip Error */ });
+    }
+    if (task.opts.afterEach != null) {
+      await task.opts.afterEach.call(task);
     }
     return result;
   } catch (e) {

@@ -71,13 +71,13 @@ export default class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('start', this));
     let totalTime = 0; // ms
     const samples: number[] = [];
-    const isAsync = isAsyncFunction(this.fn);
 
     await this.bench.setup(this, 'run');
 
     if (this.opts.beforeAll != null) {
       await this.opts.beforeAll.call(this);
     }
+    const isAsync = await isAsyncFunction(this);
 
     try {
       while (

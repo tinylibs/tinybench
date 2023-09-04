@@ -1,3 +1,4 @@
+import type { Fn } from '../types/index';
 import type Task from './task';
 
 export const nanoToMs = (nano: number) => nano / 1e6;
@@ -25,8 +26,10 @@ const AsyncFunctionConstructor = (async () => {}).constructor;
 /**
  * an async function check method only consider runtime support async syntax
  */
-export const isAsyncFunction = async (task: Task) => {
-  if (task.fn.constructor === AsyncFunctionConstructor) {
+export const isAsyncFunction = (fn: Fn) => fn.constructor === AsyncFunctionConstructor;
+
+export const isAsyncTask = async (task: Task) => {
+  if (isAsyncFunction(task.fn)) {
     return true;
   }
   try {
@@ -34,8 +37,8 @@ export const isAsyncFunction = async (task: Task) => {
       await task.opts.beforeEach.call(task);
     }
     const call = task.fn();
-    const result = call instanceof Promise;
-    if (result) {
+    const result = typeof call?.then === 'function';
+    if (result && call?.catch) {
       call.catch(() => { /** skip Error */ });
     }
     if (task.opts.afterEach != null) {

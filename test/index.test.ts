@@ -316,3 +316,14 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   expect(afterEach.mock.calls.length).toBe(iterations * 2);
   expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);
 });
+
+test('task with promiseLike return', async () => {
+  const bench = new Bench();
+
+  bench.add('foo', () => ({
+    then: async (resolve: () => void) => setTimeout(resolve, 100),
+  }));
+  await bench.run();
+
+  expect(bench.getTask('foo')!.result!.mean).toBeGreaterThan(100);
+});

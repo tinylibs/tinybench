@@ -25,4 +25,18 @@ const AsyncFunctionConstructor = (async () => {}).constructor;
 /**
  * an async function check method only consider runtime support async syntax
  */
-export const isAsyncFunction = (fn: Fn) => fn.constructor === AsyncFunctionConstructor;
+export const isAsyncFunction = (fn: Fn) => {
+  if (fn.constructor === AsyncFunctionConstructor) {
+    return true;
+  }
+  try {
+    const call = fn();
+    const result = call instanceof Promise;
+    if (result) {
+      call.catch(() => { /** skip Error */ });
+    }
+    return result;
+  } catch (e) {
+    return false;
+  }
+};

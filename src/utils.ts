@@ -38,8 +38,12 @@ export const isAsyncTask = async (task: Task) => {
     }
     const call = task.fn();
     const result = typeof call?.then === 'function';
-    if (result && call?.catch) {
-      call.catch(() => { /** skip Error */ });
+    if (result) {
+      try {
+        await call;
+      } catch (e) {
+        // ignore
+      }
     }
     if (task.opts.afterEach != null) {
       await task.opts.afterEach.call(task);

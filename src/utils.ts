@@ -42,7 +42,11 @@ export const isAsyncTask = async (task: Task) => {
   }
   try {
     if (task.opts.beforeEach != null) {
-      await task.opts.beforeEach.call(task);
+      try {
+        await task.opts.beforeEach.call(task);
+      } catch (e) {
+        // ignore
+      }
     }
     const call = task.fn();
     const promiseLike = isPromiseLike(call);
@@ -54,7 +58,11 @@ export const isAsyncTask = async (task: Task) => {
       }
     }
     if (task.opts.afterEach != null) {
-      await task.opts.afterEach.call(task);
+      try {
+        await task.opts.afterEach.call(task);
+      } catch (e) {
+        // ignore
+      }
     }
     return promiseLike;
   } catch (e) {

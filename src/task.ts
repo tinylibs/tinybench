@@ -75,7 +75,11 @@ export default class Task extends EventTarget {
     await this.bench.setup(this, 'run');
 
     if (this.opts.beforeAll != null) {
-      await this.opts.beforeAll.call(this);
+      try {
+        await this.opts.beforeAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
     const isAsync = await isAsyncTask(this);
 
@@ -103,7 +107,11 @@ export default class Task extends EventTarget {
     }
 
     if (this.opts.afterAll != null) {
-      await this.opts.afterAll.call(this);
+      try {
+        await this.opts.afterAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
 
     await this.bench.teardown(this, 'run');
@@ -185,7 +193,11 @@ export default class Task extends EventTarget {
     await this.bench.setup(this, 'warmup');
 
     if (this.opts.beforeAll != null) {
-      await this.opts.beforeAll.call(this);
+      try {
+        await this.opts.beforeAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
     const isAsync = await isAsyncTask(this);
 
@@ -195,7 +207,11 @@ export default class Task extends EventTarget {
       && !this.bench.signal?.aborted
     ) {
       if (this.opts.beforeEach != null) {
-        await this.opts.beforeEach.call(this);
+        try {
+          await this.opts.beforeEach.call(this);
+        } catch (e) {
+          this.setResult({ error: e });
+        }
       }
 
       try {
@@ -213,12 +229,20 @@ export default class Task extends EventTarget {
       totalTime = this.bench.now() - startTime;
 
       if (this.opts.afterEach != null) {
-        await this.opts.afterEach.call(this);
+        try {
+          await this.opts.afterEach.call(this);
+        } catch (e) {
+          this.setResult({ error: e });
+        }
       }
     }
 
     if (this.opts.afterAll != null) {
-      await this.opts.afterAll.call(this);
+      try {
+        await this.opts.afterAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
     this.bench.teardown(this, 'warmup');
 

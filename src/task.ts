@@ -179,7 +179,6 @@ export default class Task extends EventTarget {
    */
   async warmup() {
     this.dispatchEvent(createBenchEvent('warmup', this));
-    const isAsync = isAsyncFunction(this.fn);
     const startTime = this.bench.now();
     let totalTime = 0;
 
@@ -188,6 +187,7 @@ export default class Task extends EventTarget {
     if (this.opts.beforeAll != null) {
       await this.opts.beforeAll.call(this);
     }
+    const isAsync = await isAsyncFunction(this);
 
     while (
       (totalTime < this.bench.warmupTime

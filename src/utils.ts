@@ -7,6 +7,14 @@ export const hrtimeNow = () => nanoToMs(Number(process.hrtime.bigint()));
 
 export const now = () => performance.now();
 
+function isPromiseLike<T>(maybePromiseLike: any): maybePromiseLike is PromiseLike<T> {
+  return (
+    maybePromiseLike !== null
+    && typeof maybePromiseLike === 'object'
+    && typeof maybePromiseLike.then === 'function'
+  );
+}
+
 /**
  * Computes the arithmetic mean of a sample.
  */
@@ -37,8 +45,8 @@ export const isAsyncTask = async (task: Task) => {
       await task.opts.beforeEach.call(task);
     }
     const call = task.fn();
-    const result = typeof call?.then === 'function';
-    if (result) {
+    const promiseLike = isPromiseLike(call);
+    if (promiseLike) {
       try {
         await call;
       } catch (e) {
@@ -48,7 +56,7 @@ export const isAsyncTask = async (task: Task) => {
     if (task.opts.afterEach != null) {
       await task.opts.afterEach.call(task);
     }
-    return result;
+    return promiseLike;
   } catch (e) {
     return false;
   }

@@ -50,6 +50,20 @@ export default class Task extends EventTarget {
     // TODO: support signals in Tasks
   }
 
+  private runSync() {
+    const taskStart = this.bench.now();
+    this.fn();
+    const taskTime = this.bench.now() - taskStart;
+    return taskTime;
+  }
+
+  private async runAsync() {
+    const taskStart = this.bench.now();
+    await this.fn();
+    const taskTime = this.bench.now() - taskStart;
+    return taskTime;
+  }
+
   /**
    * run the current task and write the results in `Task.result` object
    */
@@ -74,13 +88,7 @@ export default class Task extends EventTarget {
           await this.opts.beforeEach.call(this);
         }
 
-        const taskStart = this.bench.now();
-        if (isAsync) {
-          await this.fn();
-        } else {
-          this.fn();
-        }
-        const taskTime = this.bench.now() - taskStart;
+        const taskTime = isAsync ? await this.runAsync() : this.runSync();
 
         samples.push(taskTime);
         this.runs += 1;

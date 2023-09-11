@@ -8,7 +8,7 @@ import type {
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
-import { getMean, getVariance, isAsyncFunction } from './utils';
+import { getMean, getVariance, isAsyncTask } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -57,13 +57,17 @@ export default class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('start', this));
     let totalTime = 0; // ms
     const samples: number[] = [];
-    const isAsync = isAsyncFunction(this.fn);
 
     await this.bench.setup(this, 'run');
 
     if (this.opts.beforeAll != null) {
-      await this.opts.beforeAll.call(this);
+      try {
+        await this.opts.beforeAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
+    const isAsync = await isAsyncTask(this);
 
     try {
       while (
@@ -74,13 +78,16 @@ export default class Task extends EventTarget {
           await this.opts.beforeEach.call(this);
         }
 
-        const taskStart = this.bench.now();
+        let taskTime = 0;
         if (isAsync) {
+          const taskStart = this.bench.now();
           await this.fn();
+          taskTime = this.bench.now() - taskStart;
         } else {
+          const taskStart = this.bench.now();
           this.fn();
+          taskTime = this.bench.now() - taskStart;
         }
-        const taskTime = this.bench.now() - taskStart;
 
         samples.push(taskTime);
         this.runs += 1;
@@ -95,7 +102,11 @@ export default class Task extends EventTarget {
     }
 
     if (this.opts.afterAll != null) {
-      await this.opts.afterAll.call(this);
+      try {
+        await this.opts.afterAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
 
     await this.bench.teardown(this, 'run');
@@ -171,15 +182,19 @@ export default class Task extends EventTarget {
    */
   async warmup() {
     this.dispatchEvent(createBenchEvent('warmup', this));
-    const isAsync = isAsyncFunction(this.fn);
     const startTime = this.bench.now();
     let totalTime = 0;
 
     await this.bench.setup(this, 'warmup');
 
     if (this.opts.beforeAll != null) {
-      await this.opts.beforeAll.call(this);
+      try {
+        await this.opts.beforeAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
+    const isAsync = await isAsyncTask(this);
 
     while (
       (totalTime < this.bench.warmupTime
@@ -187,7 +202,11 @@ export default class Task extends EventTarget {
       && !this.bench.signal?.aborted
     ) {
       if (this.opts.beforeEach != null) {
-        await this.opts.beforeEach.call(this);
+        try {
+          await this.opts.beforeEach.call(this);
+        } catch (e) {
+          this.setResult({ error: e });
+        }
       }
 
       try {
@@ -205,12 +224,20 @@ export default class Task extends EventTarget {
       totalTime = this.bench.now() - startTime;
 
       if (this.opts.afterEach != null) {
-        await this.opts.afterEach.call(this);
+        try {
+          await this.opts.afterEach.call(this);
+        } catch (e) {
+          this.setResult({ error: e });
+        }
       }
     }
 
     if (this.opts.afterAll != null) {
-      await this.opts.afterAll.call(this);
+      try {
+        await this.opts.afterAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
     this.bench.teardown(this, 'warmup');
 

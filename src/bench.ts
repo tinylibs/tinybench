@@ -153,6 +153,9 @@ export default class Bench extends EventTarget {
   table(convert?: (result: TaskResult) => Record<string, string | number> | undefined) {
     return this.tasks.map(({ name, result }) => {
       if (result) {
+        if (result.error) {
+          throw result.error;
+        }
         return convert?.(result) || {
           'Task Name': name,
           'ops/sec': parseInt(result.hz.toString(), 10).toLocaleString(),

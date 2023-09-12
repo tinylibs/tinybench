@@ -1,5 +1,8 @@
 # tinybench
 
+[![Release](https://github.com/tinylibs/tinybench/actions/workflows/release.yml/badge.svg)](https://github.com/tinylibs/tinybench/actions/workflows/release.yml)
+[![NPM version](https://img.shields.io/npm/v/tinybench.svg?style=flat)](https://www.npmjs.com/package/tinybench)
+
 Benchmark your code easily with Tinybench, a simple, tiny and light-weight `7KB` (`2KB` minified and gzipped)
 benchmarking library!
 You can run your benchmarks in multiple JavaScript runtimes, Tinybench is

@@ -8,7 +8,7 @@ import type {
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
-import { getMean, getVariance, isAsyncTask } from './utils';
+import { getVariance, isAsyncTask } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -50,28 +50,21 @@ export default class Task extends EventTarget {
     // TODO: support signals in Tasks
   }
 
-  /**
-   * run the current task and write the results in `Task.result` object
-   */
-  async run() {
-    this.dispatchEvent(createBenchEvent('start', this));
+  private async loop(time: number, iterations: number): Promise<{ error?: unknown, samples?: number[] }> {
     let totalTime = 0; // ms
     const samples: number[] = [];
-
-    await this.bench.setup(this, 'run');
-
     if (this.opts.beforeAll != null) {
       try {
         await this.opts.beforeAll.call(this);
-      } catch (e) {
-        this.setResult({ error: e });
+      } catch (error) {
+        return { error };
       }
     }
     const isAsync = await isAsyncTask(this);
 
     try {
       while (
-        (totalTime < this.bench.time || this.runs < this.bench.iterations)
+        (totalTime < time || samples.length < iterations)
         && !this.bench.signal?.aborted
       ) {
         if (this.opts.beforeEach != null) {
@@ -90,37 +83,50 @@ export default class Task extends EventTarget {
         }
 
         samples.push(taskTime);
-        this.runs += 1;
         totalTime += taskTime;
 
         if (this.opts.afterEach != null) {
           await this.opts.afterEach.call(this);
         }
       }
-    } catch (e) {
-      this.setResult({ error: e });
+    } catch (error) {
+      return { error };
     }
 
     if (this.opts.afterAll != null) {
       try {
         await this.opts.afterAll.call(this);
-      } catch (e) {
-        this.setResult({ error: e });
+      } catch (error) {
+        return { error };
       }
     }
+    return { samples };
+  }
 
-    await this.bench.teardown(this, 'run');
+  /**
+   * run the current task and write the results in `Task.result` object
+   */
+  async run() {
+    if (this.result?.error) {
+      return this;
+    }
+    this.dispatchEvent(createBenchEvent('start', this));
+    await this.bench.setup(this, 'run');
+    const { samples, error } = await this.loop(this.bench.time, this.bench.iterations);
+    this.bench.teardown(this, 'run');
 
-    samples.sort((a, b) => a - b);
+    if (samples) {
+      const totalTime = samples.reduce((a, b) => a + b, 0);
+      this.runs = samples.length;
 
-    if (!this.result?.error) {
+      samples.sort((a, b) => a - b);
       const min = samples[0]!;
       const max = samples[samples.length - 1]!;
       const period = totalTime / this.runs;
       const hz = 1000 / period;
 
       // benchmark.js: https://github.com/bestiejs/benchmark.js/blob/42f3b732bac3640eddb3ae5f50e445f3141016fd/benchmark.js#L1912-L1927
-      const mean = getMean(samples);
+      const mean = totalTime / samples.length || 0;
       const variance = getVariance(samples, mean);
       const sd = Math.sqrt(variance);
       const sem = sd / Math.sqrt(samples.length);
@@ -161,18 +167,16 @@ export default class Task extends EventTarget {
       });
     }
 
-    // eslint-disable-next-line no-lone-blocks
-    {
-      if (this.result?.error) {
-        this.dispatchEvent(createBenchEvent('error', this));
-        this.bench.dispatchEvent(createBenchEvent('error', this));
-      }
-
-      this.dispatchEvent(createBenchEvent('cycle', this));
-      this.bench.dispatchEvent(createBenchEvent('cycle', this));
-      // cycle and complete are equal in Task
-      this.dispatchEvent(createBenchEvent('complete', this));
+    if (error) {
+      this.setResult({ error });
+      this.dispatchEvent(createBenchEvent('error', this));
+      this.bench.dispatchEvent(createBenchEvent('error', this));
     }
+
+    this.dispatchEvent(createBenchEvent('cycle', this));
+    this.bench.dispatchEvent(createBenchEvent('cycle', this));
+    // cycle and complete are equal in Task
+    this.dispatchEvent(createBenchEvent('complete', this));
 
     return this;
   }
@@ -181,67 +185,18 @@ export default class Task extends EventTarget {
    * warmup the current task
    */
   async warmup() {
+    if (this.result?.error) {
+      return;
+    }
     this.dispatchEvent(createBenchEvent('warmup', this));
-    const startTime = this.bench.now();
-    let totalTime = 0;
 
     await this.bench.setup(this, 'warmup');
-
-    if (this.opts.beforeAll != null) {
-      try {
-        await this.opts.beforeAll.call(this);
-      } catch (e) {
-        this.setResult({ error: e });
-      }
-    }
-    const isAsync = await isAsyncTask(this);
-
-    while (
-      (totalTime < this.bench.warmupTime
-        || this.runs < this.bench.warmupIterations)
-      && !this.bench.signal?.aborted
-    ) {
-      if (this.opts.beforeEach != null) {
-        try {
-          await this.opts.beforeEach.call(this);
-        } catch (e) {
-          this.setResult({ error: e });
-        }
-      }
-
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        if (isAsync) {
-          await this.fn();
-        } else {
-          this.fn();
-        }
-      } catch {
-        // todo
-      }
-
-      this.runs += 1;
-      totalTime = this.bench.now() - startTime;
-
-      if (this.opts.afterEach != null) {
-        try {
-          await this.opts.afterEach.call(this);
-        } catch (e) {
-          this.setResult({ error: e });
-        }
-      }
-    }
-
-    if (this.opts.afterAll != null) {
-      try {
-        await this.opts.afterAll.call(this);
-      } catch (e) {
-        this.setResult({ error: e });
-      }
-    }
+    const { error } = await this.loop(this.bench.warmupTime, this.bench.warmupIterations);
     this.bench.teardown(this, 'warmup');
 
-    this.runs = 0;
+    if (error) {
+      this.setResult({ error });
+    }
   }
 
   addEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(

@@ -367,7 +367,7 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach', async () => {
   expect(bench.getTask('AA test')!.result!.error).toBe(AAerror);
 });
 
-test('remove non-existent task', () => {
+test('removing non-existing task should not throw', () => {
   const bench = new Bench();
   bench.addEventListener('remove', () => {
     throw new Error('should not be called');

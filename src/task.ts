@@ -8,6 +8,7 @@ import type {
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
+import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
 import { getMean, getVariance, isAsyncTask } from './utils';
 
 /**
@@ -247,7 +248,7 @@ export default class Task extends EventTarget {
   addEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | AddEventListenerOptions,
+    options?: AddEventListenerOptionsArgument,
   ) {
     super.addEventListener(type, listener as any, options);
   }
@@ -255,7 +256,7 @@ export default class Task extends EventTarget {
   removeEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | EventListenerOptions,
+    options?: RemoveEventListenerOptionsArgument,
   ) {
     super.removeEventListener(type, listener as any, options);
   }

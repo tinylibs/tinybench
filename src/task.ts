@@ -90,9 +90,9 @@ export default class Task extends EventTarget {
           taskTime = this.bench.now() - taskStart;
         }
 
+        samples.push(taskTime);
         this.runs += 1;
         totalTime += taskTime;
-        samples.push(taskTime);
 
         if (this.opts.afterEach != null) {
           await this.opts.afterEach.call(this);

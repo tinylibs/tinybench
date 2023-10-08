@@ -57,8 +57,6 @@ export default class Task extends EventTarget {
   async run() {
     this.dispatchEvent(createBenchEvent('start', this));
     let totalTime = 0; // ms
-    let min = Infinity;
-    let max = -Infinity;
     const samples: number[] = [];
 
     await this.bench.setup(this, 'run');
@@ -95,8 +93,6 @@ export default class Task extends EventTarget {
         this.runs += 1;
         totalTime += taskTime;
         samples.push(taskTime);
-        if (taskTime > max) max = taskTime;
-        if (taskTime < min) min = taskTime;
 
         if (this.opts.afterEach != null) {
           await this.opts.afterEach.call(this);
@@ -117,16 +113,19 @@ export default class Task extends EventTarget {
     await this.bench.teardown(this, 'run');
 
     if (!this.result?.error) {
+      samples.sort((a, b) => a - b);
+
       const period = totalTime / this.runs;
       const hz = 1000 / period;
-
-      // benchmark.js: https://github.com/bestiejs/benchmark.js/blob/42f3b732bac3640eddb3ae5f50e445f3141016fd/benchmark.js#L1912-L1927
       const samplesLength = samples.length;
+      const df = samplesLength - 1;
+      const min = samples[0]!;
+      const max = samples[df]!;
+      // benchmark.js: https://github.com/bestiejs/benchmark.js/blob/42f3b732bac3640eddb3ae5f50e445f3141016fd/benchmark.js#L1912-L1927
       const mean = getMean(samples);
       const variance = getVariance(samples, mean);
       const sd = Math.sqrt(variance);
       const sem = sd / Math.sqrt(samplesLength);
-      const df = samplesLength - 1;
       const critical = tTable[String(Math.round(df) || 1)] || tTable.infinity!;
       const moe = sem * critical;
       const rme = (moe / mean) * 100 || 0;

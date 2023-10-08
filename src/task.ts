@@ -121,21 +121,21 @@ export default class Task extends EventTarget {
       const hz = 1000 / period;
 
       // benchmark.js: https://github.com/bestiejs/benchmark.js/blob/42f3b732bac3640eddb3ae5f50e445f3141016fd/benchmark.js#L1912-L1927
-      const simplesLength = samples.length;
+      const samplesLength = samples.length;
       const mean = getMean(samples);
       const variance = getVariance(samples, mean);
       const sd = Math.sqrt(variance);
-      const sem = sd / Math.sqrt(simplesLength);
-      const df = simplesLength - 1;
+      const sem = sd / Math.sqrt(samplesLength);
+      const df = samplesLength - 1;
       const critical = tTable[String(Math.round(df) || 1)] || tTable.infinity!;
       const moe = sem * critical;
       const rme = (moe / mean) * 100 || 0;
 
       // mitata: https://github.com/evanwashere/mitata/blob/3730a784c9d83289b5627ddd961e3248088612aa/src/lib.mjs#L12
-      const p75 = samples[Math.ceil(simplesLength * (75 / 100)) - 1]!;
-      const p99 = samples[Math.ceil(simplesLength * (99 / 100)) - 1]!;
-      const p995 = samples[Math.ceil(simplesLength * (99.5 / 100)) - 1]!;
-      const p999 = samples[Math.ceil(simplesLength * (99.9 / 100)) - 1]!;
+      const p75 = samples[Math.ceil(samplesLength * (75 / 100)) - 1]!;
+      const p99 = samples[Math.ceil(samplesLength * (99 / 100)) - 1]!;
+      const p995 = samples[Math.ceil(samplesLength * (99.5 / 100)) - 1]!;
+      const p999 = samples[Math.ceil(samplesLength * (99.9 / 100)) - 1]!;
 
       if (this.bench.signal?.aborted) {
         return this;

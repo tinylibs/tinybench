@@ -9,9 +9,7 @@ import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
-import {
-  getMean, getVariance, isAsyncTask, sort,
-} from './utils';
+import { getMean, getVariance, isAsyncTask } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -115,7 +113,7 @@ export default class Task extends EventTarget {
     await this.bench.teardown(this, 'run');
 
     if (!this.result?.error) {
-      samples.sort(sort);
+      samples.sort((a, b) => a - b);
 
       const period = totalTime / this.runs;
       const hz = 1000 / period;

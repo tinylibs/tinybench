@@ -9,7 +9,9 @@ import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
-import { getMean, getVariance, isAsyncTask } from './utils';
+import {
+  getMean, getVariance, isAsyncTask, sort,
+} from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -113,7 +115,7 @@ export default class Task extends EventTarget {
     await this.bench.teardown(this, 'run');
 
     if (!this.result?.error) {
-      samples.sort((a, b) => a - b);
+      samples.sort(sort);
 
       const period = totalTime / this.runs;
       const hz = 1000 / period;
@@ -128,13 +130,13 @@ export default class Task extends EventTarget {
       const sem = sd / Math.sqrt(samplesLength);
       const critical = tTable[String(Math.round(df) || 1)] || tTable.infinity!;
       const moe = sem * critical;
-      const rme = (moe / mean) * 100 || 0;
+      const rme = (moe / mean) * 100;
 
       // mitata: https://github.com/evanwashere/mitata/blob/3730a784c9d83289b5627ddd961e3248088612aa/src/lib.mjs#L12
-      const p75 = samples[Math.ceil(samplesLength * (75 / 100)) - 1]!;
-      const p99 = samples[Math.ceil(samplesLength * (99 / 100)) - 1]!;
-      const p995 = samples[Math.ceil(samplesLength * (99.5 / 100)) - 1]!;
-      const p999 = samples[Math.ceil(samplesLength * (99.9 / 100)) - 1]!;
+      const p75 = samples[Math.ceil(samplesLength * 0.75) - 1]!;
+      const p99 = samples[Math.ceil(samplesLength * 0.99) - 1]!;
+      const p995 = samples[Math.ceil(samplesLength * 0.995) - 1]!;
+      const p999 = samples[Math.ceil(samplesLength * 0.999) - 1]!;
 
       if (this.bench.signal?.aborted) {
         return this;

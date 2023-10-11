@@ -9,6 +9,7 @@ import type {
 } from '../types/index';
 import { createBenchEvent } from './event';
 import Task from './task';
+import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
 import { now } from './utils';
 
 /**
@@ -126,15 +127,17 @@ export default class Bench extends EventTarget {
    */
   remove(name: string) {
     const task = this.getTask(name);
-    this.dispatchEvent(createBenchEvent('remove', task));
-    this._tasks.delete(name);
+    if (task) {
+      this.dispatchEvent(createBenchEvent('remove', task));
+      this._tasks.delete(name);
+    }
     return this;
   }
 
   addEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | AddEventListenerOptions,
+    options?: AddEventListenerOptionsArgument,
   ): void {
     super.addEventListener(type as string, listener as any, options);
   }
@@ -142,7 +145,7 @@ export default class Bench extends EventTarget {
   removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | EventListenerOptions,
+    options?: RemoveEventListenerOptionsArgument,
   ) {
     super.removeEventListener(type as string, listener as any, options);
   }

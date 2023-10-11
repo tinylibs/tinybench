@@ -316,3 +316,62 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   expect(afterEach.mock.calls.length).toBe(iterations * 2);
   expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);
 });
+
+test('task with promiseLike return', async () => {
+  const bench = new Bench();
+
+  bench.add('foo', () => ({
+    then: async (resolve: () => void) => setTimeout(resolve, 100),
+  }));
+  bench.add('bar', () => new Promise((resolve) => setTimeout(resolve, 100)));
+  await bench.run();
+
+  expect(bench.getTask('foo')!.result!.mean).toBeGreaterThan(100);
+  expect(bench.getTask('bar')!.result!.mean).toBeGreaterThan(100);
+});
+
+test('throw error in return promise', async () => {
+  const bench = new Bench();
+
+  bench.add('bar', () => Promise.reject(new Error('fake')));
+  await bench.run();
+
+  expect(bench.getTask('bar')!.result!.error).toBeInstanceOf(Error);
+});
+
+test('throw error in beforeAll, afterAll, beforeEach, afterEach', async () => {
+  const bench = new Bench();
+
+  const BAerror = new Error('BeforeAll');
+  const BEerror = new Error('BeforeEach');
+  const AEerror = new Error('AfterEach');
+  const AAerror = new Error('AfterAll');
+
+  bench.add('BA test', () => 1, {
+    beforeAll: () => Promise.reject(BAerror),
+  });
+  bench.add('BE test', () => 1, {
+    beforeEach: () => Promise.reject(BEerror),
+  });
+  bench.add('AE test', () => 1, {
+    afterEach: () => Promise.reject(AEerror),
+  });
+  bench.add('AA test', () => 1, {
+    afterAll: () => Promise.reject(AAerror),
+  });
+  await bench.run();
+
+  expect(bench.getTask('BA test')!.result!.error).toBe(BAerror);
+  expect(bench.getTask('BE test')!.result!.error).toBe(BEerror);
+  expect(bench.getTask('AE test')!.result!.error).toBe(AEerror);
+  expect(bench.getTask('AA test')!.result!.error).toBe(AAerror);
+});
+
+test('removing non-existing task should not throw', () => {
+  const bench = new Bench();
+  bench.addEventListener('remove', () => {
+    expect.unreachable();
+  });
+
+  bench.remove('non-existent');
+});

@@ -8,7 +8,8 @@ import type {
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
-import { getMean, getVariance, isAsyncFunction } from './utils';
+import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
+import { getMean, getVariance, isAsyncTask } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -57,13 +58,17 @@ export default class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('start', this));
     let totalTime = 0; // ms
     const samples: number[] = [];
-    const isAsync = isAsyncFunction(this.fn);
 
     await this.bench.setup(this, 'run');
 
     if (this.opts.beforeAll != null) {
-      await this.opts.beforeAll.call(this);
+      try {
+        await this.opts.beforeAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
+    const isAsync = await isAsyncTask(this);
 
     try {
       while (
@@ -74,13 +79,16 @@ export default class Task extends EventTarget {
           await this.opts.beforeEach.call(this);
         }
 
-        const taskStart = this.bench.now();
+        let taskTime = 0;
         if (isAsync) {
+          const taskStart = this.bench.now();
           await this.fn.call(this);
+          taskTime = this.bench.now() - taskStart;
         } else {
+          const taskStart = this.bench.now();
           this.fn.call(this);
+          taskTime = this.bench.now() - taskStart;
         }
-        const taskTime = this.bench.now() - taskStart;
 
         samples.push(taskTime);
         this.runs += 1;
@@ -95,34 +103,38 @@ export default class Task extends EventTarget {
     }
 
     if (this.opts.afterAll != null) {
-      await this.opts.afterAll.call(this);
+      try {
+        await this.opts.afterAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
 
     await this.bench.teardown(this, 'run');
 
-    samples.sort((a, b) => a - b);
-
     if (!this.result?.error) {
-      const min = samples[0]!;
-      const max = samples[samples.length - 1]!;
+      samples.sort((a, b) => a - b);
+
       const period = totalTime / this.runs;
       const hz = 1000 / period;
-
+      const samplesLength = samples.length;
+      const df = samplesLength - 1;
+      const min = samples[0]!;
+      const max = samples[df]!;
       // benchmark.js: https://github.com/bestiejs/benchmark.js/blob/42f3b732bac3640eddb3ae5f50e445f3141016fd/benchmark.js#L1912-L1927
       const mean = getMean(samples);
       const variance = getVariance(samples, mean);
       const sd = Math.sqrt(variance);
-      const sem = sd / Math.sqrt(samples.length);
-      const df = samples.length - 1;
+      const sem = sd / Math.sqrt(samplesLength);
       const critical = tTable[String(Math.round(df) || 1)] || tTable.infinity!;
       const moe = sem * critical;
-      const rme = (moe / mean) * 100 || 0;
+      const rme = (moe / mean) * 100;
 
       // mitata: https://github.com/evanwashere/mitata/blob/3730a784c9d83289b5627ddd961e3248088612aa/src/lib.mjs#L12
-      const p75 = samples[Math.ceil(samples.length * (75 / 100)) - 1]!;
-      const p99 = samples[Math.ceil(samples.length * (99 / 100)) - 1]!;
-      const p995 = samples[Math.ceil(samples.length * (99.5 / 100)) - 1]!;
-      const p999 = samples[Math.ceil(samples.length * (99.9 / 100)) - 1]!;
+      const p75 = samples[Math.ceil(samplesLength * 0.75) - 1]!;
+      const p99 = samples[Math.ceil(samplesLength * 0.99) - 1]!;
+      const p995 = samples[Math.ceil(samplesLength * 0.995) - 1]!;
+      const p999 = samples[Math.ceil(samplesLength * 0.999) - 1]!;
 
       if (this.bench.signal?.aborted) {
         return this;
@@ -171,15 +183,19 @@ export default class Task extends EventTarget {
    */
   async warmup() {
     this.dispatchEvent(createBenchEvent('warmup', this));
-    const isAsync = isAsyncFunction(this.fn);
     const startTime = this.bench.now();
     let totalTime = 0;
 
     await this.bench.setup(this, 'warmup');
 
     if (this.opts.beforeAll != null) {
-      await this.opts.beforeAll.call(this);
+      try {
+        await this.opts.beforeAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
+    const isAsync = await isAsyncTask(this);
 
     while (
       (totalTime < this.bench.warmupTime
@@ -187,7 +203,11 @@ export default class Task extends EventTarget {
       && !this.bench.signal?.aborted
     ) {
       if (this.opts.beforeEach != null) {
-        await this.opts.beforeEach.call(this);
+        try {
+          await this.opts.beforeEach.call(this);
+        } catch (e) {
+          this.setResult({ error: e });
+        }
       }
 
       try {
@@ -205,12 +225,20 @@ export default class Task extends EventTarget {
       totalTime = this.bench.now() - startTime;
 
       if (this.opts.afterEach != null) {
-        await this.opts.afterEach.call(this);
+        try {
+          await this.opts.afterEach.call(this);
+        } catch (e) {
+          this.setResult({ error: e });
+        }
       }
     }
 
     if (this.opts.afterAll != null) {
-      await this.opts.afterAll.call(this);
+      try {
+        await this.opts.afterAll.call(this);
+      } catch (e) {
+        this.setResult({ error: e });
+      }
     }
     this.bench.teardown(this, 'warmup');
 
@@ -220,7 +248,7 @@ export default class Task extends EventTarget {
   addEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | AddEventListenerOptions,
+    options?: AddEventListenerOptionsArgument,
   ) {
     super.addEventListener(type, listener as any, options);
   }
@@ -228,7 +256,7 @@ export default class Task extends EventTarget {
   removeEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
     type: K,
     listener: T,
-    options?: boolean | EventListenerOptions,
+    options?: RemoveEventListenerOptionsArgument,
   ) {
     super.removeEventListener(type, listener as any, options);
   }

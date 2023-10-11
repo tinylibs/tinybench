@@ -10,7 +10,7 @@
     "publish": "npm run build && clean-publish",
     "typecheck": "tsc --noEmit",
     "release": "bumpp package.json --commit --push --tag && npm run publish",
-    "test": "vitest --no-threads"
+    "test": "vitest --run"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -43,7 +43,7 @@
     "tsup": "^5.11.7",
     "typescript": "^5.2.2",
     "vite": "^2.9.12",
-    "vitest": "^0.14.2"
+    "vitest": "^0.34.6"
   },
   "keywords": [
     "benchmark",

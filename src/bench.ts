@@ -127,8 +127,10 @@ export default class Bench extends EventTarget {
    */
   remove(name: string) {
     const task = this.getTask(name);
-    this.dispatchEvent(createBenchEvent('remove', task));
-    this._tasks.delete(name);
+    if (task) {
+      this.dispatchEvent(createBenchEvent('remove', task));
+      this._tasks.delete(name);
+    }
     return this;
   }
 

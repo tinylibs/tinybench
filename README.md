@@ -1,4 +1,6 @@
-# tinybench
+[![Pheno Agency](/banner.svg)](https://pheno.agency)
+
+# Tinybench
 
 Benchmark your code easily with Tinybench, a simple, tiny and light-weight `7KB` (`2KB` minified and gzipped)
 benchmarking library!

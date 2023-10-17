@@ -221,6 +221,16 @@ test('error event', async () => {
   expect(taskErr!).toBe(err);
 });
 
+test('throws', async () => {
+  const bench = new Bench({ iterations: 1, throws: true });
+  const err = new Error();
+
+  bench.add('error', () => {
+    throw err;
+  });
+  expect(() => bench.run()).rejects.toThrowError(err);
+});
+
 test('detect faster task', async () => {
   const bench = new Bench({ time: 200 });
   bench

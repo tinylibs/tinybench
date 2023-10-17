@@ -6,7 +6,7 @@ import type {
   TaskResult,
   BenchEventsMap,
   FnOptions,
-} from '../types/index';
+} from './types';
 import { createBenchEvent } from './event';
 import Task from './task';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
@@ -25,6 +25,8 @@ export default class Bench extends EventTarget {
   _todos: Map<string, Task> = new Map();
 
   signal?: AbortSignal;
+
+  throws: boolean;
 
   warmupTime = 100;
 
@@ -48,6 +50,7 @@ export default class Bench extends EventTarget {
     this.time = options.time ?? this.time;
     this.iterations = options.iterations ?? this.iterations;
     this.signal = options.signal;
+    this.throws = options.throws ?? false;
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.setup = options.setup ?? (() => {});
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -158,10 +161,10 @@ export default class Bench extends EventTarget {
       if (result) {
         return {
           'Task Name': name,
-          'ops/sec': parseInt(result.hz.toString(), 10).toLocaleString(),
-          'Average Time (ns)': result.mean * 1000 * 1000,
-          Margin: `\xb1${result.rme.toFixed(2)}%`,
-          Samples: result.samples.length,
+          'ops/sec': result.error ? 'NaN' : parseInt(result.hz.toString(), 10).toLocaleString(),
+          'Average Time (ns)': result.error ? 'NaN' : result.mean * 1000 * 1000,
+          Margin: result.error ? 'NaN' : `\xb1${result.rme.toFixed(2)}%`,
+          Samples: result.error ? 'NaN' : result.samples.length,
         };
       }
       return null;

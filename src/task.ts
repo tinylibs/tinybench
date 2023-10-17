@@ -4,7 +4,7 @@ import type {
   TaskResult,
   TaskEventsMap,
   FnOptions,
-} from '../types/index';
+} from './types';
 import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
@@ -100,6 +100,9 @@ export default class Task extends EventTarget {
       }
     } catch (e) {
       this.setResult({ error: e });
+      if (this.bench.throws) {
+        throw e;
+      }
     }
 
     if (this.opts.afterAll != null) {
@@ -217,8 +220,10 @@ export default class Task extends EventTarget {
         } else {
           this.fn.call(this);
         }
-      } catch {
-        // todo
+      } catch (e) {
+        if (this.bench.throws) {
+          throw e;
+        }
       }
 
       this.runs += 1;

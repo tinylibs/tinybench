@@ -9,7 +9,7 @@ export type {
   Hook,
   TaskEvents,
   BenchEvent,
-} from '../types';
+} from './types';
 
 export { now, hrtimeNow } from './utils';
 

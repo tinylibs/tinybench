@@ -42,12 +42,19 @@ export default class Task extends EventTarget {
    */
   opts: FnOptions;
 
+  /**
+   * Indicate if the task a todo task
+   */
+  isTodo: boolean;
+
   constructor(bench: Bench, name: string, fn: Fn, opts: FnOptions = {}) {
     super();
     this.bench = bench;
     this.name = name;
     this.fn = fn;
     this.opts = opts;
+    this.isTodo = opts.isTodo ?? false;
+
     // TODO: support signals in Tasks
   }
 

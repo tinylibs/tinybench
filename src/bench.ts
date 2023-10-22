@@ -22,8 +22,6 @@ export default class Bench extends EventTarget {
    */
   _tasks: Map<string, Task> = new Map();
 
-  _todos: Map<string, Task> = new Map();
-
   signal?: AbortSignal;
 
   throws: boolean;
@@ -108,7 +106,7 @@ export default class Bench extends EventTarget {
    * add a benchmark task to the task map
    */
   add(name: string, fn: Fn, opts: FnOptions = {}) {
-    const task = new Task(this, name, fn, opts);
+    const task = new Task(this, name, fn, { ...opts, isTodo: false });
     this._tasks.set(name, task);
     this.dispatchEvent(createBenchEvent('add', task));
     return this;
@@ -119,8 +117,8 @@ export default class Bench extends EventTarget {
    */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   todo(name: string, fn: Fn = () => {}, opts: FnOptions = {}) {
-    const task = new Task(this, name, fn, opts);
-    this._todos.set(name, task);
+    const task = new Task(this, name, fn, { ...opts, isTodo: true });
+    this._tasks.set(name, task);
     this.dispatchEvent(createBenchEvent('todo', task));
     return this;
   }
@@ -175,18 +173,18 @@ export default class Bench extends EventTarget {
    * (getter) tasks results as an array
    */
   get results(): (TaskResult | undefined)[] {
-    return [...this._tasks.values()].map((task) => task.result);
+    return this.tasks.map((task) => task.result);
   }
 
   /**
    * (getter) tasks as an array
    */
   get tasks(): Task[] {
-    return [...this._tasks.values()];
+    return [...this._tasks.values()].filter((task) => !task.isTodo);
   }
 
   get todos(): Task[] {
-    return [...this._todos.values()];
+    return [...this._tasks.values()].filter((task) => task.isTodo);
   }
 
   /**

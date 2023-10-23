@@ -1,4 +1,9 @@
-# tinybench
+[![Pheno Agency](/banner.svg)](https://pheno.agency)
+
+# Tinybench
+
+[![CI](https://github.com/tinylibs/tinybench/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tinylibs/tinybench/actions/workflows/test.yml)
+[![NPM version](https://img.shields.io/npm/v/tinybench.svg?style=flat)](https://www.npmjs.com/package/tinybench)
 
 Benchmark your code easily with Tinybench, a simple, tiny and light-weight `7KB` (`2KB` minified and gzipped)
 benchmarking library!
@@ -107,6 +112,11 @@ export type Options = {
    * An AbortSignal for aborting the benchmark
    */
   signal?: AbortSignal;
+
+  /**
+   * Throw if a task fails (events will not work if true)
+   */
+  throws?: boolean;
 
   /**
    * warmup time (milliseconds) @default 100ms

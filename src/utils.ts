@@ -1,4 +1,4 @@
-import type { Fn } from '../types/index';
+import type { Fn } from './types';
 import type Task from './task';
 
 export const nanoToMs = (nano: number) => nano / 1e6;

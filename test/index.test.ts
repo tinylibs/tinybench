@@ -221,6 +221,16 @@ test('error event', async () => {
   expect(taskErr!).toBe(err);
 });
 
+test('throws', async () => {
+  const bench = new Bench({ iterations: 1, throws: true });
+  const err = new Error();
+
+  bench.add('error', () => {
+    throw err;
+  });
+  expect(() => bench.run()).rejects.toThrowError(err);
+});
+
 test('detect faster task', async () => {
   const bench = new Bench({ time: 200 });
   bench
@@ -365,4 +375,13 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach', async () => {
   expect(bench.getTask('BE test')!.result!.error).toBe(BEerror);
   expect(bench.getTask('AE test')!.result!.error).toBe(AEerror);
   expect(bench.getTask('AA test')!.result!.error).toBe(AAerror);
+});
+
+test('removing non-existing task should not throw', () => {
+  const bench = new Bench();
+  bench.addEventListener('remove', () => {
+    expect.unreachable();
+  });
+
+  bench.remove('non-existent');
 });

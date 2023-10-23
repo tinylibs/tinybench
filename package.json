@@ -8,8 +8,9 @@
     "build": "tsup",
     "prepare": "git config core.hooksPath .hooks",
     "publish": "npm run build && clean-publish",
+    "typecheck": "tsc --noEmit",
     "release": "bumpp package.json --commit --push --tag && npm run publish",
-    "test": "vitest --no-threads"
+    "test": "vitest --retry=3 --run"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -40,9 +41,9 @@
     "nano-staged": "^0.5.0",
     "size-limit": "^7.0.8",
     "tsup": "^5.11.7",
-    "typescript": "^4.5.4",
+    "typescript": "^5.2.2",
     "vite": "^2.9.12",
-    "vitest": "^0.14.2"
+    "vitest": "^0.34.6"
   },
   "keywords": [
     "benchmark",

@@ -47,6 +47,8 @@ export default class Task extends EventTarget {
    */
   isTodo: boolean;
 
+  id: number;
+
   constructor(bench: Bench, name: string, fn: Fn, opts: FnOptions = {}) {
     super();
     this.bench = bench;
@@ -54,6 +56,7 @@ export default class Task extends EventTarget {
     this.fn = fn;
     this.opts = opts;
     this.isTodo = opts.isTodo ?? false;
+    this.id = bench._taskIdCounter++; // eslint-disable-line no-param-reassign
 
     // TODO: support signals in Tasks
   }

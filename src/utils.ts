@@ -69,3 +69,19 @@ export const isAsyncTask = async (task: Task) => {
     return false;
   }
 };
+
+export const isNode = (() => process?.release.name === 'node')();
+
+export const taskIdFromEnv = (): number => {
+  if (
+    isNode
+    && process.env.TINYBENCH_TASK_ID
+  ) {
+    return parseInt(process.env.TINYBENCH_TASK_ID, 10);
+  }
+  return -1;
+};
+
+export const isESM = (() => typeof __dirname !== 'string')();
+
+export const isCJS = !isESM;

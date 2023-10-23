@@ -10,7 +10,7 @@ import type {
 import { createBenchEvent } from './event';
 import Task from './task';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
-import { now } from './utils';
+import { now, taskIdFromEnv } from './utils';
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
@@ -20,7 +20,9 @@ export default class Bench extends EventTarget {
   /*
    * @private the task map
    */
-  _tasks: Map<string, Task> = new Map();
+  _tasks: Map<string | number, Task> = new Map();
+
+  _taskIdCounter = 0;
 
   signal?: AbortSignal;
 
@@ -73,6 +75,17 @@ export default class Bench extends EventTarget {
   async run() {
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
+
+    const taskId = taskIdFromEnv();
+    if (taskId !== -1) {
+      const task = this.getTask(taskId);
+      if (task) {
+        await task.run();
+        return [task];
+      }
+      return [];
+    }
+
     for (const task of [...this._tasks.values()]) {
       if (this.signal?.aborted) values.push(task);
       else values.push(await task.run());
@@ -155,9 +168,10 @@ export default class Bench extends EventTarget {
    * table of the tasks results
    */
   table() {
-    return this.tasks.map(({ name, result }) => {
+    return this.tasks.map(({ name, id, result }) => {
       if (result) {
         return {
+          TaskId: id,
           'Task Name': name,
           'ops/sec': result.error ? 'NaN' : parseInt(result.hz.toString(), 10).toLocaleString(),
           'Average Time (ns)': result.error ? 'NaN' : result.mean * 1000 * 1000,
@@ -188,9 +202,14 @@ export default class Bench extends EventTarget {
   }
 
   /**
-   * get a task based on the task name
+   * get a task based on the task name or task id
    */
-  getTask(name: string): Task | undefined {
-    return this._tasks.get(name);
+  getTask(t: string | number): Task | undefined {
+    if (typeof t === 'string') {
+      return this._tasks.get(t);
+    }
+    return [...this._tasks.values()].filter(
+      (task) => task.id === t,
+    )[0];
   }
 }

@@ -12,6 +12,8 @@ import Task from './task';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
 import { now, taskIdFromEnv } from './utils';
 
+let benchIdCounter = 0;
+
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
  * them.
@@ -20,7 +22,9 @@ export default class Bench extends EventTarget {
   /*
    * @private the task map
    */
-  _tasks: Map<string | number, Task> = new Map();
+  _tasks: Map<string, Task> = new Map();
+
+  _benchIdCounter = benchIdCounter++;
 
   _taskIdCounter = 0;
 
@@ -78,12 +82,12 @@ export default class Bench extends EventTarget {
 
     const taskId = taskIdFromEnv();
     if (taskId !== -1) {
-      const task = this.getTask(taskId);
+      const task = this.getTaskById(taskId);
       if (task) {
-        await task.run();
-        return [task];
+        values.push(await task.run());
       }
-      return [];
+      this.dispatchEvent(createBenchEvent('complete'));
+      return values;
     }
 
     for (const task of [...this._tasks.values()]) {
@@ -202,14 +206,18 @@ export default class Bench extends EventTarget {
   }
 
   /**
-   * get a task based on the task name or task id
+   * get a task based on the task name
    */
-  getTask(t: string | number): Task | undefined {
-    if (typeof t === 'string') {
-      return this._tasks.get(t);
-    }
-    return [...this._tasks.values()].filter(
+  getTask(t: string): Task | undefined {
+    return this._tasks.get(t);
+  }
+
+  /**
+   * get a task based on the task id
+   */
+  getTaskById(t: number): Task | undefined {
+    return [...this._tasks.values()].find(
       (task) => task.id === t,
-    )[0];
+    );
   }
 }

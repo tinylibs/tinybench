@@ -113,9 +113,10 @@ export default class Task extends EventTarget {
       }
     }
 
-    await this.bench.teardown(this, 'run');
-
-    if (!this.result?.error) {
+    if (this.result?.error) {
+      this.dispatchEvent(createBenchEvent('error', this));
+      this.bench.dispatchEvent(createBenchEvent('error', this));
+    } else {
       samples.sort((a, b) => a - b);
 
       const period = totalTime / this.runs;
@@ -165,18 +166,12 @@ export default class Task extends EventTarget {
       });
     }
 
-    // eslint-disable-next-line no-lone-blocks
-    {
-      if (this.result?.error) {
-        this.dispatchEvent(createBenchEvent('error', this));
-        this.bench.dispatchEvent(createBenchEvent('error', this));
-      }
+    await this.bench.teardown(this, 'run');
 
-      this.dispatchEvent(createBenchEvent('cycle', this));
-      this.bench.dispatchEvent(createBenchEvent('cycle', this));
-      // cycle and complete are equal in Task
-      this.dispatchEvent(createBenchEvent('complete', this));
-    }
+    this.dispatchEvent(createBenchEvent('cycle', this));
+    this.bench.dispatchEvent(createBenchEvent('cycle', this));
+    // cycle and complete are equal in Task
+    this.dispatchEvent(createBenchEvent('complete', this));
 
     return this;
   }

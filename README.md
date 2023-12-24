@@ -1,4 +1,3 @@
-[![Pheno Agency](/banner.svg)](https://pheno.agency)
 
 # Tinybench
 

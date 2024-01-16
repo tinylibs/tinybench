@@ -156,18 +156,18 @@ export default class Bench extends EventTarget {
   /**
    * table of the tasks results
    */
-  table(convert?: (result: TaskResult) => Record<string, string | number> | undefined) {
-    return this.tasks.map(({ name, result }) => {
-      if (result) {
-        if (result.error) {
-          throw result.error;
+  table(convert?: (task: Task) => Record<string, string | number> | undefined) {
+    return this.tasks.map((task) => {
+      if (task.result) {
+        if (task.result.error) {
+          throw task.result.error;
         }
-        return convert?.(result) || {
-          'Task Name': name,
-          'ops/sec': result.error ? 'NaN' : parseInt(result.hz.toString(), 10).toLocaleString(),
-          'Average Time (ns)': result.error ? 'NaN' : result.mean * 1000 * 1000,
-          Margin: result.error ? 'NaN' : `\xb1${result.rme.toFixed(2)}%`,
-          Samples: result.error ? 'NaN' : result.samples.length,
+        return convert?.(task) || {
+          'Task Name': task.name,
+          'ops/sec': task.result.error ? 'NaN' : parseInt(task.result.hz.toString(), 10).toLocaleString(),
+          'Average Time (ns)': task.result.error ? 'NaN' : task.result.mean * 1000 * 1000,
+          Margin: task.result.error ? 'NaN' : `\xb1${task.result.rme.toFixed(2)}%`,
+          Samples: task.result.error ? 'NaN' : task.result.samples.length,
         };
       }
       return null;

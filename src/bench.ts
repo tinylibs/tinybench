@@ -10,7 +10,9 @@ import type {
 import { createBenchEvent } from './event';
 import Task from './task';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
-import { now } from './utils';
+import { now, taskIdFromEnv } from './utils';
+
+let benchIdCounter = 0;
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
@@ -22,7 +24,9 @@ export default class Bench extends EventTarget {
    */
   _tasks: Map<string, Task> = new Map();
 
-  _todos: Map<string, Task> = new Map();
+  _benchIdCounter = benchIdCounter++;
+
+  _taskIdCounter = 0;
 
   signal?: AbortSignal;
 
@@ -75,6 +79,17 @@ export default class Bench extends EventTarget {
   async run() {
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
+
+    const taskId = taskIdFromEnv();
+    if (taskId !== -1) {
+      const task = this.getTaskById(taskId);
+      if (task) {
+        values.push(await task.run());
+      }
+      this.dispatchEvent(createBenchEvent('complete'));
+      return values;
+    }
+
     for (const task of [...this._tasks.values()]) {
       if (this.signal?.aborted) values.push(task);
       else values.push(await task.run());
@@ -108,7 +123,7 @@ export default class Bench extends EventTarget {
    * add a benchmark task to the task map
    */
   add(name: string, fn: Fn, opts: FnOptions = {}) {
-    const task = new Task(this, name, fn, opts);
+    const task = new Task(this, name, fn, { ...opts, isTodo: false });
     this._tasks.set(name, task);
     this.dispatchEvent(createBenchEvent('add', task));
     return this;
@@ -119,8 +134,8 @@ export default class Bench extends EventTarget {
    */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   todo(name: string, fn: Fn = () => {}, opts: FnOptions = {}) {
-    const task = new Task(this, name, fn, opts);
-    this._todos.set(name, task);
+    const task = new Task(this, name, fn, { ...opts, isTodo: true });
+    this._tasks.set(name, task);
     this.dispatchEvent(createBenchEvent('todo', task));
     return this;
   }
@@ -157,9 +172,10 @@ export default class Bench extends EventTarget {
    * table of the tasks results
    */
   table() {
-    return this.tasks.map(({ name, result }) => {
+    return this.tasks.map(({ name, id, result }) => {
       if (result) {
         return {
+          TaskId: id,
           'Task Name': name,
           'ops/sec': result.error ? 'NaN' : parseInt(result.hz.toString(), 10).toLocaleString(),
           'Average Time (ns)': result.error ? 'NaN' : result.mean * 1000 * 1000,
@@ -175,24 +191,33 @@ export default class Bench extends EventTarget {
    * (getter) tasks results as an array
    */
   get results(): (TaskResult | undefined)[] {
-    return [...this._tasks.values()].map((task) => task.result);
+    return this.tasks.map((task) => task.result);
   }
 
   /**
    * (getter) tasks as an array
    */
   get tasks(): Task[] {
-    return [...this._tasks.values()];
+    return [...this._tasks.values()].filter((task) => !task.isTodo);
   }
 
   get todos(): Task[] {
-    return [...this._todos.values()];
+    return [...this._tasks.values()].filter((task) => task.isTodo);
   }
 
   /**
    * get a task based on the task name
    */
-  getTask(name: string): Task | undefined {
-    return this._tasks.get(name);
+  getTask(t: string): Task | undefined {
+    return this._tasks.get(t);
+  }
+
+  /**
+   * get a task based on the task id
+   */
+  getTaskById(t: number): Task | undefined {
+    return [...this._tasks.values()].find(
+      (task) => task.id === t,
+    );
   }
 }

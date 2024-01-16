@@ -25,6 +25,11 @@ export interface FnOptions {
    * An optional function that is run after all iterations of this task end
    */
   afterAll?: (this: Task) => void | Promise<void>;
+
+  /**
+   * Task is a todo
+   */
+  isTodo?: boolean;
 }
 
 /**

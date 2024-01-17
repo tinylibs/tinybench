@@ -43,11 +43,18 @@ test('runs should be equal-more than time and iterations', async () => {
 
 test('events order', async () => {
   const controller = new AbortController();
+  const events: string[] = [];
   const bench = new Bench({
     signal: controller.signal,
     warmupIterations: 0,
     warmupTime: 0,
+    teardown: (task, mode) => {
+      if (mode === 'run') {
+        events.push('teardown');
+      }
+    },
   });
+
   bench
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     .add('foo', async () => {})
@@ -59,8 +66,6 @@ test('events order', async () => {
     .add('abort', async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     });
-
-  const events: string[] = [];
 
   const error = bench.getTask('error')!;
 
@@ -136,11 +141,14 @@ test('events order', async () => {
     'remove',
     'warmup',
     'start',
+    'teardown',
     'cycle',
+    'teardown',
     'cycle',
     'error-start',
     'error-error',
     'error',
+    'teardown',
     'error-cycle',
     'cycle',
     'error-complete',

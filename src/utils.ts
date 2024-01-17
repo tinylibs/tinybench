@@ -16,11 +16,6 @@ function isPromiseLike<T>(maybePromiseLike: any): maybePromiseLike is PromiseLik
 }
 
 /**
- * Computes the arithmetic mean of a sample.
- */
-export const getMean = (samples: number[]) => samples.reduce((sum, n) => sum + n, 0) / samples.length || 0;
-
-/**
  * Computes the variance of a sample.
  */
 export const getVariance = (samples: number[], mean: number) => {

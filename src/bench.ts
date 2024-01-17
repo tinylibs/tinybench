@@ -142,7 +142,7 @@ export default class Bench extends EventTarget {
     listener: T,
     options?: AddEventListenerOptionsArgument,
   ): void {
-    super.addEventListener(type as string, listener as any, options);
+    super.addEventListener(type, listener as any, options);
   }
 
   removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
@@ -150,21 +150,24 @@ export default class Bench extends EventTarget {
     listener: T,
     options?: RemoveEventListenerOptionsArgument,
   ) {
-    super.removeEventListener(type as string, listener as any, options);
+    super.removeEventListener(type, listener as any, options);
   }
 
   /**
    * table of the tasks results
    */
-  table() {
-    return this.tasks.map(({ name, result }) => {
-      if (result) {
-        return {
-          'Task Name': name,
-          'ops/sec': result.error ? 'NaN' : parseInt(result.hz.toString(), 10).toLocaleString(),
-          'Average Time (ns)': result.error ? 'NaN' : result.mean * 1000 * 1000,
-          Margin: result.error ? 'NaN' : `\xb1${result.rme.toFixed(2)}%`,
-          Samples: result.error ? 'NaN' : result.samples.length,
+  table(convert?: (task: Task) => Record<string, string | number> | undefined) {
+    return this.tasks.map((task) => {
+      if (task.result) {
+        if (task.result.error) {
+          throw task.result.error;
+        }
+        return convert?.(task) || {
+          'Task Name': task.name,
+          'ops/sec': task.result.error ? 'NaN' : parseInt(task.result.hz.toString(), 10).toLocaleString(),
+          'Average Time (ns)': task.result.error ? 'NaN' : task.result.mean * 1000 * 1000,
+          Margin: task.result.error ? 'NaN' : `\xb1${task.result.rme.toFixed(2)}%`,
+          Samples: task.result.error ? 'NaN' : task.result.samples.length,
         };
       }
       return null;

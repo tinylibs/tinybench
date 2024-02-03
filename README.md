@@ -59,7 +59,7 @@ console.table(bench.table());
 // └─────────┴───────────────┴──────────┴────────────────────┴───────────┴─────────┘
 
 console.table(
-  bench.table((task) => {'Task name': task.name})
+  bench.table((task) => ({'Task name': task.name}))
 );
 
 // Output:

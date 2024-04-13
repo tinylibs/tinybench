@@ -227,7 +227,7 @@ export default class Task extends EventTarget {
    */
   setResult(result: Partial<TaskResult>) {
     this.result = { ...this.result, ...result } as TaskResult;
-    Object.freeze(this.reset);
+    Object.freeze(this.result);
   }
 
   /**

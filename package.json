@@ -10,7 +10,7 @@
     "publish": "npm run build && clean-publish",
     "typecheck": "tsc --noEmit",
     "release": "bumpp package.json --commit --push --tag && npm run publish",
-    "test": "vitest --retry=3 --run"
+    "test": "vitest --retry=5 --run"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

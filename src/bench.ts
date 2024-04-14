@@ -67,6 +67,11 @@ export default class Bench extends EventTarget {
     }
   }
 
+  runTask(task: Task) {
+    if (this.signal?.aborted) return task;
+    return task.run();
+  }
+
   /**
    * run the added tasks that were registered using the
    * {@link add} method.
@@ -78,8 +83,41 @@ export default class Bench extends EventTarget {
     for (const task of [...this._tasks.values()]) {
       if (this.signal?.aborted) values.push(task);
       else values.push(await task.run());
+      values.push(await this.runTask(task));
     }
     this.dispatchEvent(createBenchEvent('complete'));
+    return values;
+  }
+
+  /**
+   * similar to the {@link run} method but runs concurrently rather than sequentially
+   */
+  async runConcurrently(limit = Infinity) {
+    this.dispatchEvent(createBenchEvent('start'));
+
+    const remainingTasks = [...this._tasks.values()];
+    const values: Task[] = [];
+
+    const handleConcurrency = async () => {
+      while (remainingTasks.length > 0) {
+        const runningTasks: (Promise<Task> | Task)[] = [];
+
+        // Start tasks up to the concurrency limit
+        while (runningTasks.length < limit && remainingTasks.length > 0) {
+          const task = remainingTasks.pop()!;
+          runningTasks.push(this.runTask(task));
+        }
+
+        // Wait for all running tasks to complete
+        const completedTasks = await Promise.all(runningTasks);
+        values.push(...completedTasks);
+      }
+    };
+
+    await handleConcurrency();
+
+    this.dispatchEvent(createBenchEvent('complete'));
+
     return values;
   }
 

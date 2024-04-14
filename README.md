@@ -141,6 +141,7 @@ export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
+- `async runConcurrently(limit: number = Infinity)`: similar to the `run` method but runs concurrently rather than sequentially
 - `async warmup()`: warm up the benchmark tasks
 - `reset()`: reset each task and remove its result
 - `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map

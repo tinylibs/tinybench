@@ -81,8 +81,6 @@ export default class Bench extends EventTarget {
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
     for (const task of [...this._tasks.values()]) {
-      if (this.signal?.aborted) values.push(task);
-      else values.push(await task.run());
       values.push(await this.runTask(task));
     }
     this.dispatchEvent(createBenchEvent('complete'));
@@ -91,6 +89,7 @@ export default class Bench extends EventTarget {
 
   /**
    * similar to the {@link run} method but runs concurrently rather than sequentially
+   * default limit is Infinity
    */
   async runConcurrently(limit = Infinity) {
     this.dispatchEvent(createBenchEvent('start'));

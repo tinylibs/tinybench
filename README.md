@@ -1,7 +1,7 @@
 _I'm transitioning to a full-time open source career. Your support would be greatly appreciated 🙌_
 <a href="https://polar.sh/tinylibs/subscriptions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/tiers.svg?org=tinylibs&darkmode"><img alt="Subscription Tiers on Polar" src="https://polar.sh/embed/tiers.svg?org=tinylibs"></picture></a>
 
-# Tinybench
+# Tinybench 🔎
 
 [![CI](https://github.com/tinylibs/tinybench/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tinylibs/tinybench/actions/workflows/test.yml)
 [![NPM version](https://img.shields.io/npm/v/tinybench.svg?style=flat)](https://www.npmjs.com/package/tinybench)

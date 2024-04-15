@@ -52,9 +52,8 @@ export default class Task extends EventTarget {
   }
 
   private async loop(time: number, iterations: number): Promise<{ error?: unknown, samples?: number[] }> {
-    console.log(this.bench._concurrencyLevel);
-    const isConcurrent = this.bench._concurrencyLevel === 'task';
-    const concurrencyLimit = this.bench._concurrencyLimit;
+    const concurrent = this.bench.concurrency === 'task';
+    const { threshold } = this.bench;
     let totalTime = 0; // ms
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
@@ -96,20 +95,18 @@ export default class Task extends EventTarget {
         (totalTime < time || ((samples.length + currentTasks.length) < iterations))
         && !this.bench.signal?.aborted
       ) {
-        console.log('start', samples.length, currentTasks.length, iterations, isConcurrent, currentTasks.length, concurrencyLimit);
-        if (isConcurrent) {
-          if (currentTasks.length < concurrencyLimit) {
+        if (concurrent) {
+          if (currentTasks.length < threshold) {
             currentTasks.push(executeTask());
           } else {
             await Promise.all(currentTasks);
             currentTasks.length = 0;
           }
         } else {
-          // console.log('non concurrent')
           await executeTask();
         }
       }
-      // The concurrencyLimit is Infinity
+      // The threshold is Infinity
       if (currentTasks.length) {
         await Promise.all(currentTasks);
         currentTasks.length = 0;

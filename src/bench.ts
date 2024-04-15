@@ -24,8 +24,18 @@ export default class Bench extends EventTarget {
 
   _todos: Map<string, Task> = new Map();
 
+  /**
+ * Executes tasks concurrently based on the specified concurrency mode.
+ *
+ * - When `mode` is set to `null` (default), concurrency is disabled.
+ * - When `mode` is set to 'task', each task's iterations run concurrently.
+ * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
+ */
   concurrency: 'task' | 'bench' | null = null;
 
+  /**
+   * The maximum number of concurrent tasks to run. Defaults to Infinity.
+   */
   threshold = Infinity;
 
   signal?: AbortSignal;
@@ -81,7 +91,11 @@ export default class Bench extends EventTarget {
    * {@link add} method.
    * Note: This method does not do any warmup. Call {@link warmup} for that.
    */
-  async run() {
+  async run(): Promise<Task[]> {
+    if (this.concurrency === 'bench') {
+      // TODO: in the next major, we should remove runConcurrently
+      return this.runConcurrently(this.threshold, this.concurrency);
+    }
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
     for (const task of [...this._tasks.values()]) {
@@ -92,15 +106,9 @@ export default class Bench extends EventTarget {
   }
 
   /**
- * Executes tasks concurrently based on the specified concurrency mode.
- *
- * - When `mode` is set to 'task', each task's iterations run concurrently.
- * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
- *
- * @param threshold - The maximum number of concurrent tasks to run. Defaults to Infinity.
- * @param mode - The concurrency mode to determine how tasks are run. Defaults to 'bench'.
- */
-  async runConcurrently(threshold = Infinity, mode: NonNullable<typeof this.concurrency> = 'bench') {
+   * See Bench.{@link concurrency}
+   */
+  async runConcurrently(threshold = Infinity, mode: NonNullable<Bench['concurrency']> = 'bench'): Promise<Task[]> {
     this.threshold = threshold;
     this.concurrency = mode;
 

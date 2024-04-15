@@ -141,7 +141,7 @@ export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
-- `async runConcurrently(limit: number = Infinity)`: similar to the `run` method but runs concurrently rather than sequentially
+- `async runConcurrently(limit: number = Infinity, mode: "bench" | "task" = "bench")`: similar to the `run` method but runs concurrently rather than sequentially. See the [Concurrency](#Concurrency) section. 
 - `async warmup()`: warm up the benchmark tasks
 - `reset()`: reset each task and remove its result
 - `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map
@@ -369,6 +369,24 @@ if you want more accurate results for nodejs with `process.hrtime`, then import
 import { hrtimeNow } from 'tinybench';
 ```
 It may make your benchmarks slower, check #42.
+
+## Concurrency
+
+- When `mode` is set to `null` (default), concurrency is disabled.
+- When `mode` is set to 'task', each task's iterations run concurrently.
+- When `mode` is set to 'bench', different tasks within the bench run concurrently
+
+```ts
+// options way (recommended)
+bench.threshold = 10 // The maximum number of concurrent tasks to run. Defaults to Infinity.
+bench.concurrency = "task" // The concurrency mode to determine how tasks are run.  
+await bench.run()
+
+// standalone method way
+await bench.runConcurrently(10, "task") // with runConcurrently, mode is set to 'bench' by default
+```
+
+The first way of doing concurrency also affects `bench.warmup` and makes it concurrent too.
 
 ## Prior art
 

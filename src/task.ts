@@ -52,6 +52,9 @@ export default class Task extends EventTarget {
   }
 
   private async loop(time: number, iterations: number): Promise<{ error?: unknown, samples?: number[] }> {
+    console.log(this.bench._concurrencyLevel);
+    const isConcurrent = this.bench._concurrencyLevel === 'task';
+    const concurrencyLimit = this.bench._concurrencyLimit;
     let totalTime = 0; // ms
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
@@ -63,32 +66,53 @@ export default class Task extends EventTarget {
     }
     const isAsync = await isAsyncTask(this);
 
+    const executeTask = async () => {
+      if (this.opts.beforeEach != null) {
+        await this.opts.beforeEach.call(this);
+      }
+
+      let taskTime = 0;
+      if (isAsync) {
+        const taskStart = this.bench.now();
+        await this.fn.call(this);
+        taskTime = this.bench.now() - taskStart;
+      } else {
+        const taskStart = this.bench.now();
+        this.fn.call(this);
+        taskTime = this.bench.now() - taskStart;
+      }
+
+      samples.push(taskTime);
+      totalTime += taskTime;
+
+      if (this.opts.afterEach != null) {
+        await this.opts.afterEach.call(this);
+      }
+    };
+
     try {
+      const currentTasks: Promise<void>[] = []; // only for task level concurrency
       while (
-        (totalTime < time || samples.length < iterations)
+        (totalTime < time || ((samples.length + currentTasks.length) < iterations))
         && !this.bench.signal?.aborted
       ) {
-        if (this.opts.beforeEach != null) {
-          await this.opts.beforeEach.call(this);
-        }
-
-        let taskTime = 0;
-        if (isAsync) {
-          const taskStart = this.bench.now();
-          await this.fn.call(this);
-          taskTime = this.bench.now() - taskStart;
+        console.log('start', samples.length, currentTasks.length, iterations, isConcurrent, currentTasks.length, concurrencyLimit);
+        if (isConcurrent) {
+          if (currentTasks.length < concurrencyLimit) {
+            currentTasks.push(executeTask());
+          } else {
+            await Promise.all(currentTasks);
+            currentTasks.length = 0;
+          }
         } else {
-          const taskStart = this.bench.now();
-          this.fn.call(this);
-          taskTime = this.bench.now() - taskStart;
+          // console.log('non concurrent')
+          await executeTask();
         }
-
-        samples.push(taskTime);
-        totalTime += taskTime;
-
-        if (this.opts.afterEach != null) {
-          await this.opts.afterEach.call(this);
-        }
+      }
+      // The concurrencyLimit is Infinity
+      if (currentTasks.length) {
+        await Promise.all(currentTasks);
+        currentTasks.length = 0;
       }
     } catch (error) {
       return { error };
@@ -236,6 +260,7 @@ export default class Task extends EventTarget {
    */
   reset() {
     this.dispatchEvent(createBenchEvent('reset', this));
+    console.log('reset');
     this.runs = 0;
     this.result = undefined;
   }

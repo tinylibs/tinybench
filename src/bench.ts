@@ -24,6 +24,10 @@ export default class Bench extends EventTarget {
 
   _todos: Map<string, Task> = new Map();
 
+  _concurrencyLevel?: 'task' | 'bench';
+
+  _concurrencyLimit = Infinity;
+
   signal?: AbortSignal;
 
   throws: boolean;
@@ -67,7 +71,7 @@ export default class Bench extends EventTarget {
     }
   }
 
-  runTask(task: Task) {
+  private runTask(task: Task) {
     if (this.signal?.aborted) return task;
     return task.run();
   }
@@ -78,6 +82,7 @@ export default class Bench extends EventTarget {
    * Note: This method does not do any warmup. Call {@link warmup} for that.
    */
   async run() {
+    console.log('here');
     this.dispatchEvent(createBenchEvent('start'));
     const values: Task[] = [];
     for (const task of [...this._tasks.values()]) {
@@ -91,7 +96,15 @@ export default class Bench extends EventTarget {
    * similar to the {@link run} method but runs concurrently rather than sequentially
    * default limit is Infinity
    */
-  async runConcurrently(limit = Infinity) {
+  async runConcurrently(limit = Infinity, level: typeof this._concurrencyLevel = 'bench') {
+    this._concurrencyLimit = limit;
+    this._concurrencyLevel = level;
+
+    console.log('level', level);
+    if (level === 'task') {
+      return this.run();
+    }
+
     this.dispatchEvent(createBenchEvent('start'));
 
     const remainingTasks = [...this._tasks.values()];

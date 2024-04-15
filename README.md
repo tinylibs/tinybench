@@ -380,13 +380,14 @@ It may make your benchmarks slower, check #42.
 // options way (recommended)
 bench.threshold = 10 // The maximum number of concurrent tasks to run. Defaults to Infinity.
 bench.concurrency = "task" // The concurrency mode to determine how tasks are run.  
+// await bench.warmup()
 await bench.run()
 
 // standalone method way
 await bench.runConcurrently(10, "task") // with runConcurrently, mode is set to 'bench' by default
 ```
 
-The first way of doing concurrency also affects `bench.warmup` and makes it concurrent too.
+The options way of doing concurrency also affects `bench.warmup` and makes it concurrent too. Useful for concurrent warm ups.
 
 ## Prior art
 

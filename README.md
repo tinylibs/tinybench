@@ -1,6 +1,5 @@
 _I'm transitioning to a full-time open source career. Your support would be greatly appreciated 🙌_
-
-<a href="https://polar.sh/tinylibs/tinybench"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=tinylibs&label=Subscribe&darkmode"><img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=tinylibs&label=Subscribe"></picture></a> 
+<a href="https://polar.sh/tinylibs/subscriptions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/tiers.svg?org=tinylibs&darkmode"><img alt="Subscription Tiers on Polar" src="https://polar.sh/embed/tiers.svg?org=tinylibs"></picture></a>
 
 # Tinybench
 

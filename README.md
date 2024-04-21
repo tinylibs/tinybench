@@ -374,7 +374,7 @@ It may make your benchmarks slower, check #42.
 ## Concurrency
 
 - When `mode` is set to `null` (default), concurrency is disabled.
-- When `mode` is set to 'task', each task's iterations run concurrently.
+- When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
 - When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
 
 ```ts
@@ -388,8 +388,6 @@ await bench.run()
 // await bench.warmupConcurrently(10, "task")
 await bench.runConcurrently(10, "task") // with runConcurrently, mode is set to 'bench' by default
 ```
-
-The options way of doing concurrency also affects `bench.warmup` and makes it concurrent too. Useful for concurrent warm ups.
 
 ## Prior art
 

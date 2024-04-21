@@ -29,7 +29,7 @@ export default class Bench extends EventTarget {
  * Executes tasks concurrently based on the specified concurrency mode.
  *
  * - When `mode` is set to `null` (default), concurrency is disabled.
- * - When `mode` is set to 'task', each task's iterations run concurrently.
+ * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
  * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
  */
   concurrency: 'task' | 'bench' | null = null;

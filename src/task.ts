@@ -1,3 +1,4 @@
+import pLimit from 'p-limit';
 import type {
   Fn,
   TaskEvents,
@@ -52,6 +53,8 @@ export default class Task extends EventTarget {
   }
 
   private async loop(time: number, iterations: number): Promise<{ error?: unknown, samples?: number[] }> {
+    const concurrent = this.bench.concurrency === 'task';
+    const { threshold } = this.bench;
     let totalTime = 0; // ms
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
@@ -63,32 +66,45 @@ export default class Task extends EventTarget {
     }
     const isAsync = await isAsyncTask(this);
 
+    const executeTask = async () => {
+      if (this.opts.beforeEach != null) {
+        await this.opts.beforeEach.call(this);
+      }
+
+      let taskTime = 0;
+      if (isAsync) {
+        const taskStart = this.bench.now();
+        await this.fn.call(this);
+        taskTime = this.bench.now() - taskStart;
+      } else {
+        const taskStart = this.bench.now();
+        this.fn.call(this);
+        taskTime = this.bench.now() - taskStart;
+      }
+
+      samples.push(taskTime);
+      totalTime += taskTime;
+
+      if (this.opts.afterEach != null) {
+        await this.opts.afterEach.call(this);
+      }
+    };
+
+    const limit = pLimit(threshold);
     try {
+      const promises: Promise<void>[] = []; // only for task level concurrency
       while (
-        (totalTime < time || samples.length < iterations)
+        (totalTime < time || ((samples.length + limit.activeCount + limit.pendingCount) < iterations))
         && !this.bench.signal?.aborted
       ) {
-        if (this.opts.beforeEach != null) {
-          await this.opts.beforeEach.call(this);
-        }
-
-        let taskTime = 0;
-        if (isAsync) {
-          const taskStart = this.bench.now();
-          await this.fn.call(this);
-          taskTime = this.bench.now() - taskStart;
+        if (concurrent) {
+          promises.push(limit(executeTask));
         } else {
-          const taskStart = this.bench.now();
-          this.fn.call(this);
-          taskTime = this.bench.now() - taskStart;
+          await executeTask();
         }
-
-        samples.push(taskTime);
-        totalTime += taskTime;
-
-        if (this.opts.afterEach != null) {
-          await this.opts.afterEach.call(this);
-        }
+      }
+      if (promises.length) {
+        await Promise.all(promises);
       }
     } catch (error) {
       return { error };

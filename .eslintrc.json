@@ -17,6 +17,7 @@
 		"commonjs": true
 	},
 	"rules": {
+		"import/no-extraneous-dependencies": "off",
 		"no-restricted-syntax": "off",
 		"no-await-in-loop": "off",
 		"no-plusplus": "off",

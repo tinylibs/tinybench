@@ -1,3 +1,4 @@
+import pLimit from 'p-limit';
 import type {
   Fn,
   TaskEvents,
@@ -89,27 +90,21 @@ export default class Task extends EventTarget {
       }
     };
 
+    const limit = pLimit(threshold);
     try {
-      const currentTasks: Promise<void>[] = []; // only for task level concurrency
+      const promises: Promise<void>[] = []; // only for task level concurrency
       while (
-        (totalTime < time || ((samples.length + currentTasks.length) < iterations))
+        (totalTime < time || ((samples.length + limit.activeCount + limit.pendingCount) < iterations))
         && !this.bench.signal?.aborted
       ) {
         if (concurrent) {
-          if (currentTasks.length < threshold) {
-            currentTasks.push(executeTask());
-          } else {
-            await Promise.all(currentTasks);
-            currentTasks.length = 0;
-          }
+          promises.push(limit(executeTask));
         } else {
           await executeTask();
         }
       }
-      // The threshold is Infinity
-      if (currentTasks.length) {
-        await Promise.all(currentTasks);
-        currentTasks.length = 0;
+      if (promises.length) {
+        await Promise.all(promises);
       }
     } catch (error) {
       return { error };
@@ -257,7 +252,6 @@ export default class Task extends EventTarget {
    */
   reset() {
     this.dispatchEvent(createBenchEvent('reset', this));
-    console.log('reset');
     this.runs = 0;
     this.result = undefined;
   }

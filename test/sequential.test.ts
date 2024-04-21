@@ -29,10 +29,11 @@ test('sequential', async () => {
   expect(isFirstTaskDefined).toBe(true);
 });
 
-test('concurrent (bench level)', async () => {
+test.each(['warmup', 'run'])('%s concurrent (bench level)', async (mode) => {
   const concurrentBench = new Bench({
     time: 0,
     iterations: 100,
+    throws: true,
   });
 
   let shouldBeDefined1: true;
@@ -52,7 +53,12 @@ test('concurrent (bench level)', async () => {
       shouldNotBeDefinedFirst2 = true;
     });
 
-  concurrentBench.runConcurrently();
+  if (mode === 'warmup') {
+    concurrentBench.warmupConcurrently();
+  } else {
+    concurrentBench.runConcurrently();
+  }
+
   await setTimeout(0);
   expect(shouldBeDefined1!).toBeDefined();
   expect(shouldBeDefined2!).toBeDefined();
@@ -63,12 +69,13 @@ test('concurrent (bench level)', async () => {
   expect(shouldNotBeDefinedFirst2!).toBeDefined();
 });
 
-test('concurrent (task level)', async () => {
-  console.log('here start');
+test.each(['warmup', 'run'])('%s concurrent (task level)', async (mode) => {
   const iterations = 10;
   const concurrentBench = new Bench({
     time: 0,
+    warmupTime: 0,
     iterations,
+    warmupIterations: iterations,
   });
   const key = 'sample 1';
 
@@ -78,30 +85,45 @@ test('concurrent (task level)', async () => {
       runs.value++;
       await setTimeout(10);
       // all task function should be here after 10ms
-      console.log(runs.value, iterations);
       expect(runs.value).toEqual(iterations);
       await setTimeout(10);
     });
 
-  await concurrentBench.run();
-  expect(concurrentBench.getTask(key)!.runs).toEqual(0);
-  for (const result of concurrentBench.results) {
-    expect(result?.error).toMatch(/AssertionError/);
+  if (mode === 'warmup') {
+    await concurrentBench.warmup();
+  } else {
+    await concurrentBench.run();
+    for (const result of concurrentBench.results) {
+      expect(result?.error).toMatch(/AssertionError/);
+    }
   }
+  expect(concurrentBench.getTask(key)!.runs).toEqual(0);
+
   concurrentBench.reset();
   runs.value = 0;
 
-  await concurrentBench.runConcurrently();
-  expect(concurrentBench.getTask(key)!.runs).toEqual(0);
-  for (const result of concurrentBench.results) {
-    expect(result?.error).toMatch(/AssertionError/);
+  if (mode === 'warmup') {
+    await concurrentBench.warmupConcurrently();
+  } else {
+    await concurrentBench.runConcurrently();
+    for (const result of concurrentBench.results) {
+      expect(result?.error).toMatch(/AssertionError/);
+    }
   }
+  expect(concurrentBench.getTask(key)!.runs).toEqual(0);
   concurrentBench.reset();
   runs.value = 0;
 
-  await concurrentBench.runConcurrently(Infinity, 'task');
-  expect(concurrentBench.getTask(key)!.runs).toEqual(10);
-  for (const result of concurrentBench.results) {
-    expect(result?.error).toBeUndefined();
+  if (mode === 'warmup') {
+    await concurrentBench.warmupConcurrently(Infinity, 'task');
+    expect(runs.value).toEqual(10);
+  } else {
+    await concurrentBench.runConcurrently(Infinity, 'task');
+
+    for (const result of concurrentBench.results) {
+      expect(result?.error).toBeUndefined();
+    }
+    expect(runs.value).toEqual(10);
+    expect(concurrentBench.getTask(key)!.runs).toEqual(10);
   }
 });

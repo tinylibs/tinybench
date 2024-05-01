@@ -40,6 +40,7 @@
     "eslint-plugin-import": "^2.26.0",
     "nano-staged": "^0.5.0",
     "p-limit": "^4.0.0",
+    "pkg-pr-new": "^0.0.2",
     "size-limit": "^7.0.8",
     "tsup": "^5.11.7",
     "typescript": "^5.2.2",

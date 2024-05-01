@@ -1,5 +1,5 @@
 name: Publish Any Commit
-on: [push, pull_reuqest]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -21,6 +21,6 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: pnpm pkg-pr-new publish
+      - run: pnpx pkg-pr-new publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

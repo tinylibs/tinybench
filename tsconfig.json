@@ -1,10 +1,10 @@
 {
-  "strict": true,
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ES2018",
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "skipLibCheck": true,

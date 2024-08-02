@@ -14,12 +14,11 @@
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.cts",
   "exports": {
-    "types": "./dist/index.d.ts",
-    "import": "./dist/index.js",
     "require": "./dist/index.cjs",
-    "default": "./dist/index.cjs"
+    "import": "./dist/index.js",
+    "default": "./dist/index.js"
   },
   "files": [
     "dist/**"
@@ -41,7 +40,7 @@
     "nano-staged": "^0.5.0",
     "p-limit": "^4.0.0",
     "size-limit": "^7.0.8",
-    "tsup": "^5.11.7",
+    "tsup": "^8.2.3",
     "typescript": "^5.2.2",
     "vite": "^2.9.12",
     "vitest": "^0.34.6"

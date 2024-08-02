@@ -16,6 +16,7 @@
 		"node": true,
 		"commonjs": true
 	},
+	"ignorePatterns": ["tsup.config.ts"],
 	"rules": {
 		"import/no-extraneous-dependencies": "off",
 		"no-restricted-syntax": "off",

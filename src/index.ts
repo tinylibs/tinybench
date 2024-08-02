@@ -14,4 +14,3 @@ export type {
 export { now, hrtimeNow } from './utils';
 
 export { Bench, Task };
-export default Bench;

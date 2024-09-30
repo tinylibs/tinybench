@@ -82,10 +82,8 @@ export const quantileSorted = (samples: number[], q: number) => {
   const baseIndex = Math.floor(base);
   if (samples[baseIndex + 1] != null) {
     return (
-      // @ts-expect-error: array cannot be empty
-      (samples[baseIndex])
-      // @ts-expect-error: false positive
-      + (base - baseIndex) * ((samples[baseIndex + 1]) - samples[baseIndex])
+      (samples[baseIndex]!)
+      + (base - baseIndex) * ((samples[baseIndex + 1]!) - samples[baseIndex]!)
     );
   }
   return samples[baseIndex];

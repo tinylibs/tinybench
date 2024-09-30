@@ -7,32 +7,6 @@ export const hrtimeNow = () => nanoToMs(Number(process.hrtime.bigint()));
 
 export const now = () => performance.now();
 
-export const quantileSorted = (arr: number[], q: number) => {
-  if (arr.length === 0) {
-    throw new Error('arr must not be empty');
-  }
-  if (q < 0 || q > 1) {
-    throw new Error('q must be between 0 and 1');
-  }
-  if (q === 0) {
-    return arr[0];
-  }
-  if (q === 1) {
-    return arr[arr.length - 1];
-  }
-  const base = (arr.length - 1) * q;
-  const baseIndex = Math.floor(base);
-  if (arr[baseIndex + 1] != null) {
-    return (
-      // @ts-expect-error: array cannot be empty
-      (arr[baseIndex])
-      // @ts-expect-error: false positive
-      + (base - baseIndex) * ((arr[baseIndex + 1]) - arr[baseIndex])
-    );
-  }
-  return arr[baseIndex];
-};
-
 function isPromiseLike<T>(maybePromiseLike: any): maybePromiseLike is PromiseLike<T> {
   return (
     maybePromiseLike !== null
@@ -40,14 +14,6 @@ function isPromiseLike<T>(maybePromiseLike: any): maybePromiseLike is PromiseLik
     && typeof maybePromiseLike.then === 'function'
   );
 }
-
-/**
- * Computes the variance of a sample with Bessel's correction.
- */
-export const getVariance = (samples: number[], mean: number) => {
-  const result = samples.reduce((sum, n) => sum + ((n - mean) ** 2), 0);
-  return result / (samples.length - 1) || 0;
-};
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const AsyncFunctionConstructor = (async () => {}).constructor;
@@ -89,4 +55,38 @@ export const isAsyncTask = async (task: Task) => {
   } catch (e) {
     return false;
   }
+};
+
+/**
+ * Computes the variance of a sample with Bessel's correction.
+ */
+export const getVariance = (samples: number[], mean: number) => {
+  const result = samples.reduce((sum, n) => sum + ((n - mean) ** 2), 0);
+  return result / (samples.length - 1) || 0;
+};
+
+export const quantileSorted = (samples: number[], q: number) => {
+  if (samples.length === 0) {
+    throw new Error('samples must not be empty');
+  }
+  if (q < 0 || q > 1) {
+    throw new Error('q must be between 0 and 1');
+  }
+  if (q === 0) {
+    return samples[0];
+  }
+  if (q === 1) {
+    return samples[samples.length - 1];
+  }
+  const base = (samples.length - 1) * q;
+  const baseIndex = Math.floor(base);
+  if (samples[baseIndex + 1] != null) {
+    return (
+      // @ts-expect-error: array cannot be empty
+      (samples[baseIndex])
+      // @ts-expect-error: false positive
+      + (base - baseIndex) * ((samples[baseIndex + 1]) - samples[baseIndex])
+    );
+  }
+  return samples[baseIndex];
 };

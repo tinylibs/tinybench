@@ -10,7 +10,10 @@ import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
-import { getVariance, isAsyncTask, quantileSorted } from './utils';
+import {
+  absoluteDeviation,
+  getVariance, isAsyncTask, medianSorted, quantileSorted,
+} from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -152,6 +155,9 @@ export default class Task extends EventTarget {
       const moe = sem * critical;
       const rme = (moe / mean) * 100;
 
+      const mad = absoluteDeviation(samples, medianSorted);
+
+      const p50 = medianSorted(samples);
       const p75 = quantileSorted(samples, 0.75);
       const p99 = quantileSorted(samples, 0.99);
       const p995 = quantileSorted(samples, 0.995);
@@ -176,6 +182,8 @@ export default class Task extends EventTarget {
         critical,
         moe,
         rme,
+        mad,
+        p50,
         p75,
         p99,
         p995,

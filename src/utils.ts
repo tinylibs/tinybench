@@ -7,6 +7,32 @@ export const hrtimeNow = () => nanoToMs(Number(process.hrtime.bigint()));
 
 export const now = () => performance.now();
 
+export const quantileSorted = (arr: number[], q: number) => {
+  if (arr.length === 0) {
+    throw new Error('arr must not be empty');
+  }
+  if (q < 0 || q > 1) {
+    throw new Error('q must be between 0 and 1');
+  }
+  if (q === 0) {
+    return arr[0];
+  }
+  if (q === 1) {
+    return arr[arr.length - 1];
+  }
+  const base = (arr.length - 1) * q;
+  const baseIndex = Math.floor(base);
+  if (arr[baseIndex + 1] != null) {
+    return (
+      // @ts-expect-error: array cannot be empty
+      (arr[baseIndex])
+      // @ts-expect-error: false positive
+      + (base - baseIndex) * ((arr[baseIndex + 1]) - arr[baseIndex])
+    );
+  }
+  return arr[baseIndex];
+};
+
 function isPromiseLike<T>(maybePromiseLike: any): maybePromiseLike is PromiseLike<T> {
   return (
     maybePromiseLike !== null
@@ -16,7 +42,7 @@ function isPromiseLike<T>(maybePromiseLike: any): maybePromiseLike is PromiseLik
 }
 
 /**
- * Computes the variance of a sample.
+ * Computes the variance of a sample with Bessel's correction.
  */
 export const getVariance = (samples: number[], mean: number) => {
   const result = samples.reduce((sum, n) => sum + ((n - mean) ** 2), 0);

@@ -95,8 +95,8 @@ export const absoluteDeviation = (samples: number[], aggFn: (arr: number[]) => n
   const value = aggFn(samples);
   const absoluteDeviations: number[] = [];
 
-  for (const elt of samples) {
-    absoluteDeviations.push(Math.abs(elt - value!));
+  for (const sample of samples) {
+    absoluteDeviations.push(Math.abs(sample - value!));
   }
 
   return aggFn(absoluteDeviations);

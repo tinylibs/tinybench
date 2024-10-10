@@ -7,8 +7,9 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 18
           - 16
+          - 18
+          - 20
     name: Node.js ${{ matrix.node-version }} Quick
     steps:
       - uses: actions/checkout@v3
@@ -19,7 +20,7 @@ jobs:
       - name: Set node
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: ${{ matrix.node-version }}
           cache: pnpm
 
       - name: Install dependencies

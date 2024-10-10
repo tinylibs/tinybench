@@ -4,6 +4,7 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.repository == 'tinylibs/tinybench'
 
     steps:
       - name: Checkout code

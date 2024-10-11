@@ -7,7 +7,9 @@ updates:
     labels:
       - 'github-actions'
   - package-ecosystem: 'npm'
-    directory: '/'
+    directories:
+      - '/'
+      - '/examples/'
     schedule:
       interval: 'daily'
     groups:

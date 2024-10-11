@@ -1,4 +1,4 @@
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from 'node:timers/promises';
 import { test, expect } from 'vitest';
 import { Bench } from '../src';
 

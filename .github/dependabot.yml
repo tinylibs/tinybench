@@ -17,9 +17,6 @@ updates:
         update-types:
           - 'minor'
           - 'patch'
-      major:
-        update-types:
-          - 'major'
     labels:
       - 'dependencies'
     versioning-strategy: increase

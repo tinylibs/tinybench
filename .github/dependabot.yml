@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    labels:
+      - 'github-actions'
+  - package-ecosystem: 'npm'
+    directories:
+      - '/'
+      - '/examples/'
+    schedule:
+      interval: 'daily'
+    groups:
+      regular:
+        update-types:
+          - 'minor'
+          - 'patch'
+      major:
+        update-types:
+          - 'major'
+    labels:
+      - 'dependencies'
+    versioning-strategy: increase

@@ -44,7 +44,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.31.0",
     "nano-staged": "^0.8.0",
-    "p-limit": "^4.0.0",
+    "p-limit": "^6.1.0",
     "size-limit": "^7.0.8",
     "tsup": "^8.3.0",
     "typescript": "~5.2.2",

@@ -18,7 +18,7 @@ import { now } from './utils';
  * them.
  */
 export default class Bench extends EventTarget {
-  /*
+  /**
    * @private the task map
    */
   _tasks: Map<string, Task> = new Map();
@@ -26,12 +26,12 @@ export default class Bench extends EventTarget {
   _todos: Map<string, Task> = new Map();
 
   /**
- * Executes tasks concurrently based on the specified concurrency mode.
- *
- * - When `mode` is set to `null` (default), concurrency is disabled.
- * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
- * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
- */
+   * Executes tasks concurrently based on the specified concurrency mode.
+   *
+   * - When `mode` is set to `null` (default), concurrency is disabled.
+   * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
+   * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
+   */
   concurrency: 'task' | 'bench' | null = null;
 
   /**

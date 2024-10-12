@@ -1,4 +1,4 @@
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from 'node:timers/promises';
 import { test, expect } from 'vitest';
 import { Bench } from '../src';
 
@@ -94,7 +94,7 @@ test.each(['warmup', 'run'])('%s concurrent (task level)', async (mode) => {
   } else {
     await concurrentBench.run();
     for (const result of concurrentBench.results) {
-      expect(result?.error).toMatch(/AssertionError/);
+      expect(result?.error).toMatchObject(/AssertionError/);
     }
   }
   expect(concurrentBench.getTask(key)!.runs).toEqual(0);
@@ -107,7 +107,7 @@ test.each(['warmup', 'run'])('%s concurrent (task level)', async (mode) => {
   } else {
     await concurrentBench.runConcurrently();
     for (const result of concurrentBench.results) {
-      expect(result?.error).toMatch(/AssertionError/);
+      expect(result?.error).toMatchObject(/AssertionError/);
     }
   }
   expect(concurrentBench.getTask(key)!.runs).toEqual(0);

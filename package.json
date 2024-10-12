@@ -13,8 +13,8 @@
     "prepare": "git config core.hooksPath .hooks",
     "publish": "npm run build && clean-publish",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src test",
-    "lint:fix": "eslint --fix src test",
+    "lint": "eslint src test examples",
+    "lint:fix": "eslint --fix src test examples",
     "release": "bumpp package.json --commit --push --tag && npm run publish",
     "test": "vitest --retry=5 --run"
   },

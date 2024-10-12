@@ -35,7 +35,7 @@
     "@size-limit/preset-small-lib": "^7.0.8",
     "@size-limit/time": "^7.0.8",
     "@types/node": "^18.19.55",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^6.21.0",
     "bumpp": "^9.7.1",
     "changelogithub": "^0.13.11",

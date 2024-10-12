@@ -18,7 +18,7 @@ import { now } from './utils';
  * them.
  */
 export default class Bench extends EventTarget {
-  /*
+  /**
    * @private the task map
    */
   _tasks: Map<string, Task> = new Map();

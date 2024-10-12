@@ -7,9 +7,9 @@
 		"@typescript-eslint/eslint-plugin"
 	],
 	"extends": [
+		"eslint:recommended",
 		"airbnb-base",
-		"plugin:@typescript-eslint/recommended",
-		"plugin:@typescript-eslint/eslint-recommended"
+		"plugin:@typescript-eslint/recommended"
 	],
 	"root": true,
 	"env": {

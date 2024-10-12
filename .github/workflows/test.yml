@@ -10,6 +10,7 @@ jobs:
           - 16
           - 18
           - 20
+          - 22
     name: Node.js ${{ matrix.node-version }} Quick
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +18,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Set node
+      - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
@@ -25,6 +26,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
 
       - name: Type check
         if: matrix.node-version == 20

@@ -13,7 +13,7 @@ test('basic', async () => {
 
   await bench.run();
 
-  const tasks = bench.tasks as Task[];
+  const { tasks } = bench;
 
   expect(tasks.length).toEqual(2);
 

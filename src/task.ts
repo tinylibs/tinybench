@@ -24,20 +24,20 @@ export default class Task extends EventTarget {
   bench: Bench;
 
   /**
-   * task name
+   * Task name
    */
   name: string;
 
   fn: Fn;
 
   /*
-   * the number of times the task
+   * The number of times the task
    * function has been executed
    */
   runs = 0;
 
   /**
-   * the result object
+   * The result object
    */
   result?: TaskResult;
 

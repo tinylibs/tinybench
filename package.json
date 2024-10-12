@@ -13,18 +13,23 @@
     "prepare": "git config core.hooksPath .hooks",
     "publish": "npm run build && clean-publish",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src test examples",
-    "lint:fix": "eslint --fix src test examples",
+    "lint": "eslint src test examples tsup.config.ts",
+    "lint:fix": "eslint --fix src test examples tsup.config.ts",
     "release": "bumpp package.json --commit --push --tag && npm run publish",
     "test": "vitest --retry=5 --run"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.cts",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "require": "./dist/index.cjs",
-    "import": "./dist/index.js",
-    "default": "./dist/index.js"
+    "require": {
+      "types": "./dist/index.d.cts",
+      "require": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "files": [
     "dist/**"

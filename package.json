@@ -12,7 +12,7 @@
     "build": "tsup",
     "prepare": "git config core.hooksPath .hooks",
     "publish": "npm run build && clean-publish",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --project examples/tsconfig.json --noEmit",
     "lint": "eslint src test examples tsup.config.ts",
     "lint:fix": "eslint --fix src test examples tsup.config.ts",
     "release": "bumpp package.json --commit --push --tag && npm run publish",

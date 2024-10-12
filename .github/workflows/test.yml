@@ -27,9 +27,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check
+        if: matrix.node-version == 20
         run: pnpm typecheck
 
       - name: Lint
+        if: matrix.node-version == 20
         run: pnpm lint
 
       - name: Run unit tests

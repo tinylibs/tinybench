@@ -9,7 +9,6 @@ updates:
   - package-ecosystem: 'npm'
     directories:
       - '/'
-      - '/examples/'
     schedule:
       interval: 'daily'
     groups:
@@ -17,9 +16,18 @@ updates:
         update-types:
           - 'minor'
           - 'patch'
-      major:
-        update-types:
-          - 'major'
+      typescript-eslint:
+        patterns:
+          - 'typescript-eslint'
+          - '@typescript-eslint/*'
+      size-limit:
+        patterns:
+          - 'size-limit'
+          - '@size-limit/*'
+      eslint:
+        patterns:
+          - 'eslint'
+          - '@eslint/*'
     labels:
       - 'dependencies'
     versioning-strategy: increase

@@ -40,8 +40,8 @@
     "@size-limit/preset-small-lib": "^7.0.8",
     "@size-limit/time": "^7.0.8",
     "@types/node": "^18.19.55",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "bumpp": "^9.7.1",
     "changelogithub": "^0.13.11",
     "clean-publish": "^3.4.5",
@@ -52,7 +52,7 @@
     "p-limit": "^6.1.0",
     "size-limit": "^7.0.8",
     "tsup": "^8.3.0",
-    "typescript": "~5.2.2",
+    "typescript": "~5.5.4",
     "vitest": "^2.1.2"
   },
   "keywords": [

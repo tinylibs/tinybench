@@ -186,8 +186,6 @@ test('events order 2', async () => {
   });
 
   await bench.run();
-
-  await new Promise((resolve) => setTimeout(resolve, 150));
 });
 
 test('todo event', async () => {
@@ -246,15 +244,20 @@ test('detect faster task', async () => {
 
   await bench.run();
 
-  const fasterTask = bench.getTask('faster') as Task;
-  const slowerTask = bench.getTask('slower') as Task;
+  const fasterTask = bench.getTask('faster')!;
+  const slowerTask = bench.getTask('slower')!;
 
-  expect(fasterTask.result!.mean).toBeLessThan(slowerTask.result!.mean);
-  expect(fasterTask.result!.min).toBeLessThan(slowerTask.result!.min);
-  expect(fasterTask.result!.max).toBeLessThan(slowerTask.result!.max);
+  expect(fasterTask.result!.latency.mean).toBeLessThan(slowerTask.result!.latency.mean);
+  expect(fasterTask.result!.latency.min).toBeLessThan(slowerTask.result!.latency.min);
+  expect(fasterTask.result!.latency.max).toBeLessThan(slowerTask.result!.latency.max);
+  // latency moe should be smaller since it's faster
+  expect(fasterTask.result!.latency.moe).toBeLessThan(slowerTask.result!.latency.moe);
 
-  // moe should be smaller since it's faster
-  expect(fasterTask.result!.moe).toBeLessThan(slowerTask.result!.moe);
+  expect(fasterTask.result!.throughput.mean).toBeGreaterThan(slowerTask.result!.throughput.mean);
+  expect(fasterTask.result!.throughput.min).toBeGreaterThan(slowerTask.result!.throughput.min);
+  expect(fasterTask.result!.throughput.max).toBeGreaterThan(slowerTask.result!.throughput.max);
+  // throughput moe should be greater since it's faster
+  expect(fasterTask.result!.throughput.moe).toBeGreaterThan(slowerTask.result!.throughput.moe);
 });
 
 test('statistics', async () => {
@@ -269,6 +272,7 @@ test('statistics', async () => {
   expect(fooTask.result!.totalTime).toBeTypeOf('number');
   expect(fooTask.result!.period).toBeTypeOf('number');
   // deprecated
+  expect(Array.isArray(fooTask.result!.samples)).toBe(true);
   expect(fooTask.result!.hz).toBeTypeOf('number');
   expect(fooTask.result!.mean).toBeTypeOf('number');
   expect(fooTask.result!.variance).toBeTypeOf('number');
@@ -278,12 +282,49 @@ test('statistics', async () => {
   expect(fooTask.result!.critical).toBeTypeOf('number');
   expect(fooTask.result!.moe).toBeTypeOf('number');
   expect(fooTask.result!.rme).toBeTypeOf('number');
-  expect(fooTask.result!.mad).toBeTypeOf('number');
-  expect(fooTask.result!.p50).toBeTypeOf('number');
   expect(fooTask.result!.p75).toBeTypeOf('number');
   expect(fooTask.result!.p99).toBeTypeOf('number');
   expect(fooTask.result!.p995).toBeTypeOf('number');
   expect(fooTask.result!.p999).toBeTypeOf('number');
+  // latency statistics
+  expect(fooTask.result!.latency).toBeTypeOf('object');
+  expect(Array.isArray(fooTask.result!.latency.samples)).toBe(true);
+  expect(fooTask.result!.latency.min).toBeTypeOf('number');
+  expect(fooTask.result!.latency.max).toBeTypeOf('number');
+  expect(fooTask.result!.latency.mean).toBeTypeOf('number');
+  expect(fooTask.result!.latency.variance).toBeTypeOf('number');
+  expect(fooTask.result!.latency.sd).toBeTypeOf('number');
+  expect(fooTask.result!.latency.sem).toBeTypeOf('number');
+  expect(fooTask.result!.latency.df).toBeTypeOf('number');
+  expect(fooTask.result!.latency.critical).toBeTypeOf('number');
+  expect(fooTask.result!.latency.moe).toBeTypeOf('number');
+  expect(fooTask.result!.latency.rme).toBeTypeOf('number');
+  expect(fooTask.result!.latency.aad).toBeTypeOf('number');
+  expect(fooTask.result!.latency.mad).toBeTypeOf('number');
+  expect(fooTask.result!.latency.p50).toBeTypeOf('number');
+  expect(fooTask.result!.latency.p75).toBeTypeOf('number');
+  expect(fooTask.result!.latency.p99).toBeTypeOf('number');
+  expect(fooTask.result!.latency.p995).toBeTypeOf('number');
+  expect(fooTask.result!.latency.p999).toBeTypeOf('number');
+  // throughput statistics
+  expect(fooTask.result!.throughput).toBeTypeOf('object');
+  expect(Array.isArray(fooTask.result!.throughput.samples)).toBe(true);
+  expect(fooTask.result!.throughput.max).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.mean).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.variance).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.sd).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.sem).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.df).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.critical).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.moe).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.rme).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.aad).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.mad).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.p50).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.p75).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.p99).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.p995).toBeTypeOf('number');
+  expect(fooTask.result!.throughput.p999).toBeTypeOf('number');
 });
 
 test('setup and teardown', async () => {
@@ -350,8 +391,8 @@ test('task with promiseLike return', async () => {
   bench.add('bar', () => new Promise((resolve) => setTimeout(resolve, 100)));
   await bench.run();
 
-  expect(bench.getTask('foo')!.result!.mean).toBeGreaterThan(100);
-  expect(bench.getTask('bar')!.result!.mean).toBeGreaterThan(100);
+  expect(bench.getTask('foo')!.result!.latency.mean).toBeGreaterThan(100);
+  expect(bench.getTask('bar')!.result!.latency.mean).toBeGreaterThan(100);
 });
 
 test('throw error in return promise', async () => {

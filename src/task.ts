@@ -7,7 +7,7 @@ import type {
   FnOptions,
 } from './types';
 import Bench from './bench';
-import tTable from './constants';
+import { tTable } from './constants';
 import { createBenchEvent } from './event';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
 import {
@@ -196,7 +196,6 @@ export default class Task extends EventTarget {
       this.setResult({
         totalTime,
         period: totalTime / this.runs,
-        hz: throughputMean,
         latency: {
           samples: latencySamples,
           min: latencyMin,
@@ -237,6 +236,7 @@ export default class Task extends EventTarget {
           p995: throughputP995,
           p999: throughputP999,
         },
+        hz: throughputMean,
         samples: latencySamples,
         min: latencyMin,
         max: latencyMax,
@@ -248,8 +248,6 @@ export default class Task extends EventTarget {
         critical: latencyCritical,
         moe: latencyMoe,
         rme: latencyRme,
-        mad: latencyMad,
-        p50: latencyP50,
         p75: latencyP75,
         p99: latencyP99,
         p995: latencyP995,

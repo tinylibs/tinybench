@@ -148,6 +148,12 @@ export type TaskResult = {
   throughput: Statistics;
 
   /**
+   * the number of operations per second
+   * @deprecated use `.throughput.mean` instead
+   */
+  hz: number;
+
+  /**
    * latency samples (ms)
    * @deprecated use `.latency.samples` instead
    */
@@ -163,12 +169,6 @@ export type TaskResult = {
    * @deprecated use `.latency.max` instead
    */
   max: number;
-
-  /**
-   * the number of operations per second
-   * @deprecated use `.throughput.mean` instead
-   */
-  hz: number;
 
   /**
    * the latency samples mean/average (estimate of the population mean/average)
@@ -217,18 +217,6 @@ export type TaskResult = {
    * @deprecated use `.latency.rme` instead
    */
   rme: number;
-
-  /**
-   * the latency samples median absolute deviation
-   * @deprecated use `.latency.mad` instead
-   */
-  mad: number;
-
-  /**
-   * the latency samples p50/median percentile
-   * @deprecated use `.latency.p50` instead
-   */
-  p50: number;
 
   /**
    * the latency samples p75 percentile
@@ -316,6 +304,7 @@ export type TaskEventsMap = {
   warmup: TaskEventListener
   reset: TaskEventListener
 }
+
 export type Options = {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500
@@ -368,6 +357,5 @@ export type BenchEvent = Event & {
 };
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
-
 export type RemoveEventListenerOptionsArgument = Parameters<typeof EventTarget.prototype.removeEventListener>[2];
 export type AddEventListenerOptionsArgument = Parameters<typeof EventTarget.prototype.addEventListener>[2];

@@ -1,7 +1,7 @@
 /**
  * Student t-distribution two-tailed critical values for 95% confidence level.
  */
-const tTable: Record<string, number> = {
+export const tTable: Record<string, number> = Object.freeze({
   1: 12.706204736432102,
   2: 4.3026527299112765,
   3: 3.182446305284264,
@@ -123,6 +123,12 @@ const tTable: Record<string, number> = {
   119: 1.9800998764260065,
   120: 1.979930405052777,
   infinity: 1.96,
-};
+});
 
-export default tTable;
+export const defaultMinimumTime = 500;
+
+export const defaultMinimumIterations = 10;
+
+export const defaultMinimumWarmupTime = 100;
+
+export const defaultMinimumWarmupIterations = 5;

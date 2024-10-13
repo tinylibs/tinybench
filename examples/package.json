@@ -2,11 +2,16 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@8.15.9",
+  "volta": {
+    "node": "20.18.0",
+    "pnpm": "8.15.9"
+  },
   "scripts": {
     "build": "tsc",
-    "all": "pnpm run simple",
+    "all": "pnpm simple",
     "simple": "tsx src/simple.ts",
-    "dev:simple": "tsx watch src/simple.ts"
+    "dev:simple": "tsx --watch src/simple.ts"
   },
   "license": "ISC",
   "devDependencies": {

@@ -142,8 +142,8 @@ export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 
 - `async run()`: run the added tasks that were registered using the `add` method
 - `async runConcurrently(threshold: number = Infinity, mode: "bench" | "task" = "bench")`: similar to the `run` method but runs concurrently rather than sequentially. See the [Concurrency](#Concurrency) section.
-- `async warmup()`: warm up the benchmark tasks
-- `async warmupConcurrently(threshold: number = Infinity, mode: "bench" | "task" = "bench")`: warm up the benchmark tasks concurrently
+- `async warmup()`: warmup the benchmark tasks
+- `async warmupConcurrently(threshold: number = Infinity, mode: "bench" | "task" = "bench")`: warmup the benchmark tasks concurrently
 - `reset()`: reset each task and remove its result
 - `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map
   - `Fn`: `() => any | Promise<any>`
@@ -174,7 +174,7 @@ function has been executed.
 - `runs: number`: the number of times the task function has been executed
 - `result?: TaskResult`: the result object
 - `async run()`: run the current task and write the results in `Task.result` object
-- `async warmup()`: warm up the current task
+- `async warmup()`: warmup the current task
 - `setResult(result: Partial<TaskResult>)`: change the result object values
 - `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object
 
@@ -387,6 +387,7 @@ await bench.runConcurrently(10, 'task'); // with runConcurrently, mode is set to
 
 - [Benchmark.js](https://github.com/bestiejs/benchmark.js)
 - [Mitata](https://github.com/evanwashere/mitata/)
+- [tatami-ng](https://github.com/poolifier/tatami-ng)
 - [Bema](https://github.com/prisma-labs/bema)
 
 ## Authors

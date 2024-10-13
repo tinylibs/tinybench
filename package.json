@@ -11,20 +11,25 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "prepare": "git config core.hooksPath .hooks",
-    "publish": "npm run build && clean-publish",
+    "publish": "pnpm build && clean-publish",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src test examples",
-    "lint:fix": "eslint --fix src test examples",
-    "release": "bumpp package.json --commit --push --tag && npm run publish",
+    "lint": "eslint src test examples tsup.config.ts",
+    "lint:fix": "eslint --fix src test examples tsup.config.ts",
+    "release": "bumpp package.json --commit --push --tag && pnpm publish",
     "test": "vitest --retry=5 --run"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.cts",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "require": "./dist/index.cjs",
-    "import": "./dist/index.js",
-    "default": "./dist/index.js"
+    "require": {
+      "types": "./dist/index.d.cts",
+      "require": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "files": [
     "dist/**"
@@ -39,7 +44,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "bumpp": "^9.7.1",
     "changelogithub": "^0.13.11",
-    "clean-publish": "^3.4.5",
+    "clean-publish": "^5.0.0",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.31.0",

@@ -39,13 +39,13 @@ const bench = new Bench({ time: 100 });
 
 bench
   .add('faster task', () => {
-    console.log('I am faster')
+    console.log('I am faster');
   })
   .add('slower task', async () => {
-    await new Promise(r => setTimeout(r, 1)) // we wait 1ms :)
-    console.log('I am slower')
+    await new Promise((r) => setTimeout(r, 1)); // we wait 1ms :)
+    console.log('I am slower');
   })
-  .todo('unimplemented bench')
+  .todo('unimplemented bench');
 
 await bench.warmup(); // make results more reliable, ref: https://github.com/tinylibs/tinybench/pull/50
 await bench.run();
@@ -60,9 +60,7 @@ console.table(bench.table());
 // │    1    │ 'slower task' │  '828'   │ 1207382.7838323202 │ '±7.07%'  │   83    │
 // └─────────┴───────────────┴──────────┴────────────────────┴───────────┴─────────┘
 
-console.table(
-  bench.table((task) => ({'Task name': task.name}))
-);
+console.table(bench.table((task) => ({ 'Task name': task.name })));
 
 // Output:
 // ┌─────────┬───────────────────────┐
@@ -139,11 +137,11 @@ export type Options = {
   teardown?: Hook;
 };
 
-export type Hook = (task: Task, mode: "warmup" | "run") => void | Promise<void>;
+export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
-- `async runConcurrently(threshold: number = Infinity, mode: "bench" | "task" = "bench")`: similar to the `run` method but runs concurrently rather than sequentially. See the [Concurrency](#Concurrency) section. 
+- `async runConcurrently(threshold: number = Infinity, mode: "bench" | "task" = "bench")`: similar to the `run` method but runs concurrently rather than sequentially. See the [Concurrency](#Concurrency) section.
 - `async warmup()`: warm up the benchmark tasks
 - `async warmupConcurrently(threshold: number = Infinity, mode: "bench" | "task" = "bench")`: warm up the benchmark tasks concurrently
 - `reset()`: reset each task and remove its result
@@ -210,7 +208,6 @@ the benchmark task result object.
 
 ```ts
 export type TaskResult = {
-
   /*
    * the last error that was thrown while running the task
    */
@@ -318,40 +315,33 @@ in each class instance using the universal `addEventListener` and
  * Bench events
  */
 export type BenchEvents =
-  | "abort" // when a signal aborts
-  | "complete" // when running a benchmark finishes
-  | "error" // when the benchmark task throws
-  | "reset" // when the reset function gets called
-  | "start" // when running the benchmarks gets started
-  | "warmup" // when the benchmarks start getting warmed up (before start)
-  | "cycle" // when running each benchmark task gets done (cycle)
-  | "add" // when a Task gets added to the Bench
-  | "remove" // when a Task gets removed of the Bench
-  | "todo"; // when a todo Task gets added to the Bench
+  | 'abort' // when a signal aborts
+  | 'complete' // when running a benchmark finishes
+  | 'error' // when the benchmark task throws
+  | 'reset' // when the reset function gets called
+  | 'start' // when running the benchmarks gets started
+  | 'warmup' // when the benchmarks start getting warmed up (before start)
+  | 'cycle' // when running each benchmark task gets done (cycle)
+  | 'add' // when a Task gets added to the Bench
+  | 'remove' // when a Task gets removed of the Bench
+  | 'todo'; // when a todo Task gets added to the Bench
 
 /**
  * task events
  */
-export type TaskEvents =
-  | "abort"
-  | "complete"
-  | "error"
-  | "reset"
-  | "start"
-  | "warmup"
-  | "cycle";
+export type TaskEvents = 'abort' | 'complete' | 'error' | 'reset' | 'start' | 'warmup' | 'cycle';
 ```
 
 For instance:
 
 ```js
 // runs on each benchmark task's cycle
-bench.addEventListener("cycle", (e) => {
+bench.addEventListener('cycle', (e) => {
   const task = e.task!;
 });
 
 // runs only on this benchmark task's cycle
-task.addEventListener("cycle", (e) => {
+task.addEventListener('cycle', (e) => {
   const task = e.task!;
 });
 ```
@@ -365,12 +355,14 @@ export type BenchEvent = Event & {
 ```
 
 ### `process.hrtime`
+
 if you want more accurate results for nodejs with `process.hrtime`, then import
-	the `hrtimeNow` function from the library and pass it to the `Bench` options.
+the `hrtimeNow` function from the library and pass it to the `Bench` options.
 
 ```ts
 import { hrtimeNow } from 'tinybench';
 ```
+
 It may make your benchmarks slower, check #42.
 
 ## Concurrency
@@ -381,14 +373,14 @@ It may make your benchmarks slower, check #42.
 
 ```ts
 // options way (recommended)
-bench.threshold = 10 // The maximum number of concurrent tasks to run. Defaults to Infinity.
-bench.concurrency = "task" // The concurrency mode to determine how tasks are run.  
+bench.threshold = 10; // The maximum number of concurrent tasks to run. Defaults to Infinity.
+bench.concurrency = 'task'; // The concurrency mode to determine how tasks are run.
 // await bench.warmup()
-await bench.run()
+await bench.run();
 
 // standalone method way
-// await bench.warmupConcurrently(10, "task")
-await bench.runConcurrently(10, "task") // with runConcurrently, mode is set to 'bench' by default
+// await bench.warmupConcurrently(10, 'task')
+await bench.runConcurrently(10, 'task'); // with runConcurrently, mode is set to 'bench' by default
 ```
 
 ## Prior art

@@ -1,41 +1,44 @@
 {
-	"parser": "@typescript-eslint/parser",
-	"parserOptions": {
-		"project": ["tsconfig.json", "examples/tsconfig.json"]
-	},
-	"plugins": [
-		"@typescript-eslint/eslint-plugin"
-	],
-	"extends": [
-		"eslint:recommended",
-		"airbnb-base",
-		"plugin:@typescript-eslint/recommended"
-	],
-	"root": true,
-	"env": {
-		"node": true,
-		"commonjs": true
-	},
-	"rules": {
-		"import/no-extraneous-dependencies": "off",
-		"no-restricted-syntax": "off",
-		"no-await-in-loop": "off",
-		"no-plusplus": "off",
-		"no-promise-executor-return": "off",
-		"@typescript-eslint/no-non-null-assertion": "off",
-		"@typescript-eslint/interface-name-prefix": "off",
-		"@typescript-eslint/explicit-function-return-type": "off",
-		"@typescript-eslint/no-explicit-any": "off",
-		"@typescript-eslint/explicit-module-boundary-types": "off",
-		"@typescript-eslint/no-unused-vars": "off",
-		"@typescript-eslint/ban-types": "off",
-		"import/no-unresolved": "off",
-		"import/extensions": "off",
-		"no-underscore-dangle": "off",
-		"indent": [
-			"error",
-			2
-		],
-		"max-len": 0
-	}
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": [
+      "tsconfig.json",
+      "examples/tsconfig.json"
+    ]
+  },
+  "plugins": [
+    "@typescript-eslint/eslint-plugin"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "root": true,
+  "env": {
+    "node": true,
+    "commonjs": true
+  },
+  "rules": {
+    "import/no-extraneous-dependencies": "off",
+    "no-restricted-syntax": "off",
+    "no-await-in-loop": "off",
+    "no-plusplus": "off",
+    "no-promise-executor-return": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/ban-types": "off",
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "no-underscore-dangle": "off",
+    "indent": [
+      "error",
+      2
+    ],
+    "max-len": 0
+  }
 }

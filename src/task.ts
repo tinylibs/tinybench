@@ -10,7 +10,7 @@ import Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
-import { getVariance, isAsyncTask } from './utils';
+import { getVariance, isAsyncTask, quantileSorted } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -152,11 +152,10 @@ export default class Task extends EventTarget {
       const moe = sem * critical;
       const rme = (moe / mean) * 100;
 
-      // mitata: https://github.com/evanwashere/mitata/blob/3730a784c9d83289b5627ddd961e3248088612aa/src/lib.mjs#L12
-      const p75 = samples[Math.ceil(samplesLength * 0.75) - 1]!;
-      const p99 = samples[Math.ceil(samplesLength * 0.99) - 1]!;
-      const p995 = samples[Math.ceil(samplesLength * 0.995) - 1]!;
-      const p999 = samples[Math.ceil(samplesLength * 0.999) - 1]!;
+      const p75 = quantileSorted(samples, 0.75);
+      const p99 = quantileSorted(samples, 0.99);
+      const p995 = quantileSorted(samples, 0.995);
+      const p999 = quantileSorted(samples, 0.999);
 
       if (this.bench.signal?.aborted) {
         return this;

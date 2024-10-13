@@ -19,15 +19,18 @@ test('basic', async () => {
 
   expect(tasks[0]!.name).toEqual('foo');
   expect(tasks[0]!.result!.totalTime).toBeGreaterThan(50);
+  expect(tasks[0]!.result!.latency.mean).toBeGreaterThan(50);
+  // throughput mean is ops/sec, period is ms unit value
+  expect(tasks[0]!.result!.throughput.mean * tasks[0]!.result!.period).toBeCloseTo(1000, 1);
 
   expect(tasks[1]!.name).toEqual('bar');
   expect(tasks[1]!.result!.totalTime).toBeGreaterThan(100);
-
-  // hz is ops/sec, period is ms unit value
-  expect(tasks[0]!.result!.hz * tasks[0]!.result!.period).toBeCloseTo(1000);
+  expect(tasks[1]!.result!.latency.mean).toBeGreaterThan(100);
+  // throughput mean is ops/sec, period is ms unit value
+  expect(tasks[1]!.result!.throughput.mean * tasks[1]!.result!.period).toBeCloseTo(1000, 1);
 });
 
-test('runs should be equal-more than time and iterations', async () => {
+test('runs should be more than or equal to bench iterations, totalTime should be more than or equal to bench time', async () => {
   const bench = new Bench({ time: 100, iterations: 15 });
   bench.add('foo', async () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -263,6 +266,11 @@ test('statistics', async () => {
 
   const fooTask = bench.getTask('foo') as Task;
 
+  expect(fooTask.result!.totalTime).toBeTypeOf('number');
+  expect(fooTask.result!.period).toBeTypeOf('number');
+  // deprecated
+  expect(fooTask.result!.hz).toBeTypeOf('number');
+  expect(fooTask.result!.mean).toBeTypeOf('number');
   expect(fooTask.result!.variance).toBeTypeOf('number');
   expect(fooTask.result!.sd).toBeTypeOf('number');
   expect(fooTask.result!.sem).toBeTypeOf('number');
@@ -270,6 +278,12 @@ test('statistics', async () => {
   expect(fooTask.result!.critical).toBeTypeOf('number');
   expect(fooTask.result!.moe).toBeTypeOf('number');
   expect(fooTask.result!.rme).toBeTypeOf('number');
+  expect(fooTask.result!.mad).toBeTypeOf('number');
+  expect(fooTask.result!.p50).toBeTypeOf('number');
+  expect(fooTask.result!.p75).toBeTypeOf('number');
+  expect(fooTask.result!.p99).toBeTypeOf('number');
+  expect(fooTask.result!.p995).toBeTypeOf('number');
+  expect(fooTask.result!.p999).toBeTypeOf('number');
 });
 
 test('setup and teardown', async () => {

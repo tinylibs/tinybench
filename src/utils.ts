@@ -58,13 +58,38 @@ export const isAsyncTask = async (task: Task) => {
 };
 
 /**
- * Computes the variance of a sample with Bessel's correction.
+ * Computes the average of a sample.
+ *
+ * @param samples the sample
+ * @returns the average of the sample
  */
-export const getVariance = (samples: number[], mean: number) => {
-  const result = samples.reduce((sum, n) => sum + ((n - mean) ** 2), 0);
+export const average = (samples: number[]) => {
+  if (samples.length === 0) {
+    throw new Error('samples must not be empty');
+  }
+
+  return samples.reduce((a, b) => a + b, 0) / samples.length;
+};
+
+/**
+ * Computes the variance of a sample with Bessel's correction.
+ *
+ * @param samples the sample
+ * @param avg the average of the sample
+ * @returns the variance of the sample
+ */
+export const getVariance = (samples: number[], avg = average(samples)) => {
+  const result = samples.reduce((sum, n) => sum + ((n - avg) ** 2), 0);
   return result / (samples.length - 1) || 0;
 };
 
+/**
+ * Computes the q-quantile of a sample.
+ *
+ * @param samples the sample
+ * @param q the quantile to compute
+ * @returns the q-quantile of the sample
+ */
 export const quantileSorted = (samples: number[], q: number) => {
   if (samples.length === 0) {
     throw new Error('samples must not be empty');

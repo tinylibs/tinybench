@@ -20,13 +20,13 @@ test('basic', async () => {
   expect(tasks[0]!.name).toEqual('foo');
   expect(tasks[0]!.result!.totalTime).toBeGreaterThan(50);
   expect(tasks[0]!.result!.latency.mean).toBeGreaterThan(50);
-  // throughput mean is ops/sec, period is ms unit value
+  // throughput mean is ops/s, period is ms unit value
   expect(tasks[0]!.result!.throughput.mean * tasks[0]!.result!.period).toBeCloseTo(1000, 1);
 
   expect(tasks[1]!.name).toEqual('bar');
   expect(tasks[1]!.result!.totalTime).toBeGreaterThan(100);
   expect(tasks[1]!.result!.latency.mean).toBeGreaterThan(100);
-  // throughput mean is ops/sec, period is ms unit value
+  // throughput mean is ops/s, period is ms unit value
   expect(tasks[1]!.result!.throughput.mean * tasks[1]!.result!.period).toBeCloseTo(1000, 1);
 });
 

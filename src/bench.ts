@@ -147,7 +147,7 @@ export default class Bench extends EventTarget {
       return;
     }
     this.dispatchEvent(createBenchEvent('warmup'));
-    for (const [, task] of this._tasks) {
+    for (const task of this._tasks.values()) {
       await task.warmup();
     }
   }
@@ -169,7 +169,7 @@ export default class Bench extends EventTarget {
     const limit = pLimit(threshold);
     const promises: Promise<void>[] = [];
 
-    for (const [, task] of this._tasks) {
+    for (const task of this._tasks.values()) {
       promises.push(limit(() => task.warmup()));
     }
 

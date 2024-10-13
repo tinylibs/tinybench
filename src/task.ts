@@ -32,6 +32,9 @@ export default class Task extends EventTarget {
    */
   name: string;
 
+  /**
+   * The task function
+   */
   fn: Fn;
 
   /*

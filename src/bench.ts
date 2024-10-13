@@ -242,10 +242,11 @@ export default class Bench extends EventTarget {
           throw task.result.error;
         }
         return convert?.(task) || {
-          'Task Name': task.name,
+          'Task name': task.name,
           'ops/sec': task.result.error ? 'NaN' : parseInt(task.result.hz.toString(), 10).toLocaleString(),
-          'Average Time (ns)': task.result.error ? 'NaN' : task.result.mean * 1000 * 1000,
+          'Average time/op (ns)': task.result.error ? 'NaN' : task.result.mean * 1e6,
           Margin: task.result.error ? 'NaN' : `\xb1${task.result.rme.toFixed(2)}%`,
+          'Median time/op (ns)': task.result.error ? 'NaN' : `${task.result.p50 * 1e6}${task.result.mad * 1e6 > 0 ? `\xb1${(task.result.mad * 1e6).toFixed(10)}` : ''}`,
           Samples: task.result.error ? 'NaN' : task.result.samples.length,
         };
       }

@@ -106,6 +106,16 @@ export type TaskResult = {
   rme: number;
 
   /**
+   * median absolute deviation
+   */
+  mad: number;
+
+  /**
+   * p50/median percentile
+   */
+  p50: number;
+
+  /**
    * p75 percentile
    */
   p75: number;

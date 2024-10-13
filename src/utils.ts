@@ -19,7 +19,7 @@ function isPromiseLike<T>(maybePromiseLike: any): maybePromiseLike is PromiseLik
 const AsyncFunctionConstructor = (async () => {}).constructor;
 
 /**
- * an async function check method only consider runtime support async syntax
+ * An async function check method only consider runtime support async syntax
  */
 export const isAsyncFunction = (fn: Fn) => fn.constructor === AsyncFunctionConstructor;
 
@@ -112,4 +112,30 @@ export const quantileSorted = (samples: number[], q: number) => {
     );
   }
   return samples[baseIndex];
+};
+
+/**
+ * Computes the median of a sorted sample.
+ *
+ * @param samples the sorted sample
+ * @returns the median of the sample
+ */
+export const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5);
+
+/**
+ * Computes the absolute deviation of a sample given an aggregation.
+ *
+ * @param samples the sample
+ * @param aggFn the aggregation function to use
+ * @returns the absolute deviation of the sample given the aggregation
+ */
+export const absoluteDeviation = (samples: number[], aggFn: (arr: number[]) => number | undefined) => {
+  const value = aggFn(samples);
+  const absoluteDeviations: number[] = [];
+
+  for (const sample of samples) {
+    absoluteDeviations.push(Math.abs(sample - value!));
+  }
+
+  return aggFn(absoluteDeviations);
 };

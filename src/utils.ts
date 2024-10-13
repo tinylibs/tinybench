@@ -84,9 +84,9 @@ export const getVariance = (samples: number[], avg = average(samples)) => {
 };
 
 /**
- * Computes the q-quantile of a sample.
+ * Computes the q-quantile of a sorted sample.
  *
- * @param samples the sample
+ * @param samples the sorted sample
  * @param q the quantile to compute
  * @returns the q-quantile of the sample
  */

@@ -117,7 +117,7 @@ export const quantileSorted = (samples: number[], q: number) => {
 /**
  * Computes the median of a sorted sample.
  *
- * @param samples the sample
+ * @param samples the sorted sample
  * @returns the median of the sample
  */
 export const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5);

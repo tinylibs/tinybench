@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Bench } from '../../src';
 
 const bench = new Bench({ time: 100 });

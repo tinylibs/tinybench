@@ -43,4 +43,4 @@ jobs:
           FORCE_COLOR: 2
 
       - name: Run examples
-        run: cd examples && pnpm run all
+        run: cd examples && pnpm all

@@ -68,7 +68,7 @@ export const average = (samples: number[]) => {
     throw new Error('samples must not be empty');
   }
 
-  return samples.reduce((a, b) => a + b, 0) / samples.length;
+  return samples.reduce((a, b) => a + b, 0) / samples.length || 0;
 };
 
 /**

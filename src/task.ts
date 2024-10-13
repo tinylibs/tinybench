@@ -12,7 +12,10 @@ import { createBenchEvent } from './event';
 import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
 import {
   absoluteDeviation,
-  getVariance, isAsyncTask, medianSorted, quantileSorted,
+  getVariance,
+  isAsyncTask,
+  medianSorted,
+  quantileSorted,
 } from './utils';
 
 /**

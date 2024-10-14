@@ -121,13 +121,13 @@ export default class Bench extends EventTarget {
     this.threshold = threshold;
     this.concurrency = mode;
 
-    if (mode === 'task') {
+    if (this.concurrency === 'task') {
       return this.run();
     }
 
     this.dispatchEvent(createBenchEvent('start'));
 
-    const limit = pLimit(threshold);
+    const limit = pLimit(this.threshold);
 
     const promises: Promise<Task>[] = [];
     for (const task of [...this._tasks.values()]) {
@@ -168,13 +168,13 @@ export default class Bench extends EventTarget {
     this.threshold = threshold;
     this.concurrency = mode;
 
-    if (mode === 'task') {
+    if (this.concurrency === 'task') {
       await this.warmup();
       return;
     }
 
     this.dispatchEvent(createBenchEvent('warmup'));
-    const limit = pLimit(threshold);
+    const limit = pLimit(this.threshold);
     const promises: Promise<void>[] = [];
 
     for (const task of this._tasks.values()) {
@@ -189,9 +189,9 @@ export default class Bench extends EventTarget {
    */
   reset() {
     this.dispatchEvent(createBenchEvent('reset'));
-    this._tasks.forEach((task) => {
+    for (const task of this._tasks.values()) {
       task.reset();
-    });
+    }
   }
 
   /**

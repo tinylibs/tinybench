@@ -67,7 +67,6 @@ export default class Task extends EventTarget {
     iterations: number,
   ): Promise<{ samples?: number[]; error?: unknown }> {
     const concurrent = this.bench.concurrency === 'task';
-    const { threshold } = this.bench;
     let totalTime = 0; // ms
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
@@ -103,7 +102,7 @@ export default class Task extends EventTarget {
       }
     };
 
-    const limit = pLimit(threshold);
+    const limit = pLimit(this.bench.threshold);
     try {
       const promises: Promise<void>[] = []; // only for task level concurrency
       while (

@@ -1,4 +1,4 @@
-import Task from '../src/task';
+import type Task from '../src/task';
 
 /**
  * the task function
@@ -244,9 +244,9 @@ export type TaskResult = {
 };
 
 /**
-  * Both the `Task` and `Bench` objects extend the `EventTarget` object,
-  * so you can attach a listeners to different types of events
-  * to each class instance using the universal `addEventListener` and
+ * Both the `Task` and `Bench` objects extend the `EventTarget` object,
+ * so you can attach a listeners to different types of events
+ * to each class instance using the universal `addEventListener` and
  * `removeEventListener`
  */
 
@@ -267,21 +267,21 @@ export type BenchEvents =
 
 export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 
-type NoopEventListener = () => any | Promise<any>
-type TaskEventListener = (e: Event & { task: Task }) => any | Promise<any>
+type NoopEventListener = () => any | Promise<any>;
+type TaskEventListener = (e: Event & { task: Task }) => any | Promise<any>;
 
-export interface BenchEventsMap{
-  abort: NoopEventListener
-  start: NoopEventListener
-  complete: NoopEventListener
-  warmup: NoopEventListener
-  reset: NoopEventListener
-  add: TaskEventListener
-  remove: TaskEventListener
-  cycle: TaskEventListener
-  error: TaskEventListener
-  todo: TaskEventListener
-}
+export type BenchEventsMap = {
+  abort: NoopEventListener;
+  start: NoopEventListener;
+  complete: NoopEventListener;
+  warmup: NoopEventListener;
+  reset: NoopEventListener;
+  add: TaskEventListener;
+  remove: TaskEventListener;
+  cycle: TaskEventListener;
+  error: TaskEventListener;
+  todo: TaskEventListener;
+};
 
 /**
  * task events
@@ -296,14 +296,14 @@ export type TaskEvents =
   | 'cycle';
 
 export type TaskEventsMap = {
-  abort: NoopEventListener
-  start: TaskEventListener
-  error: TaskEventListener
-  cycle: TaskEventListener
-  complete: TaskEventListener
-  warmup: TaskEventListener
-  reset: TaskEventListener
-}
+  abort: NoopEventListener;
+  start: TaskEventListener;
+  error: TaskEventListener;
+  cycle: TaskEventListener;
+  complete: TaskEventListener;
+  warmup: TaskEventListener;
+  reset: TaskEventListener;
+};
 
 export type Options = {
   /**
@@ -357,5 +357,9 @@ export type BenchEvent = Event & {
 };
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
-export type RemoveEventListenerOptionsArgument = Parameters<typeof EventTarget.prototype.removeEventListener>[2];
-export type AddEventListenerOptionsArgument = Parameters<typeof EventTarget.prototype.addEventListener>[2];
+export type RemoveEventListenerOptionsArgument = Parameters<
+  typeof EventTarget.prototype.removeEventListener
+>[2];
+export type AddEventListenerOptionsArgument = Parameters<
+  typeof EventTarget.prototype.addEventListener
+>[2];

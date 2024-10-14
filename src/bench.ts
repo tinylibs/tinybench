@@ -1,20 +1,24 @@
 import pLimit from 'p-limit';
-import type {
-  Hook,
-  Options,
-  Fn,
-  BenchEvents,
-  TaskResult,
-  BenchEventsMap,
-  FnOptions,
-} from './types';
+import {
+  defaultMinimumIterations,
+  defaultMinimumTime,
+  defaultMinimumWarmupIterations,
+  defaultMinimumWarmupTime,
+} from './constants';
 import { createBenchEvent } from './event';
 import Task from './task';
-import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
+import type {
+  AddEventListenerOptionsArgument,
+  BenchEvents,
+  BenchEventsMap,
+  Fn,
+  FnOptions,
+  Hook,
+  Options,
+  RemoveEventListenerOptionsArgument,
+  TaskResult,
+} from './types';
 import { now } from './utils';
-import {
-  defaultMinimumIterations, defaultMinimumTime, defaultMinimumWarmupIterations, defaultMinimumWarmupTime,
-} from './constants';
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
@@ -40,7 +44,7 @@ export default class Bench extends EventTarget {
   /**
    * The maximum number of concurrent tasks to run. Defaults to Infinity.
    */
-  threshold = Infinity;
+  threshold = Number.POSITIVE_INFINITY;
 
   signal?: AbortSignal;
 
@@ -112,7 +116,10 @@ export default class Bench extends EventTarget {
   /**
    * See Bench.{@link concurrency}
    */
-  async runConcurrently(threshold = Infinity, mode: NonNullable<Bench['concurrency']> = 'bench'): Promise<Task[]> {
+  async runConcurrently(
+    threshold = Number.POSITIVE_INFINITY,
+    mode: NonNullable<Bench['concurrency']> = 'bench',
+  ): Promise<Task[]> {
     this.threshold = threshold;
     this.concurrency = mode;
 
@@ -156,7 +163,10 @@ export default class Bench extends EventTarget {
    * warmup the benchmark tasks concurrently.
    * This is not run by default by the {@link runConcurrently} method.
    */
-  async warmupConcurrently(threshold = Infinity, mode: NonNullable<Bench['concurrency']> = 'bench'): Promise<void> {
+  async warmupConcurrently(
+    threshold = Number.POSITIVE_INFINITY,
+    mode: NonNullable<Bench['concurrency']> = 'bench',
+  ): Promise<void> {
     this.threshold = threshold;
     this.concurrency = mode;
 
@@ -244,14 +254,26 @@ export default class Bench extends EventTarget {
         if (task.result.error) {
           throw task.result.error;
         }
-        return convert?.(task) || {
-          'Task name': task.name,
-          'Throughput average (ops/s)': task.result.error ? 'NaN' : `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
-          'Throughput median (ops/s)': task.result.error ? 'NaN' : `${task.result.throughput.p50?.toFixed(0)}${parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
-          'Latency average (ns)': task.result.error ? 'NaN' : `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
-          'Latency median (ns)': task.result.error ? 'NaN' : `${(task.result.latency.p50! * 1e6).toFixed(2)}${parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
-          Samples: task.result.error ? 'NaN' : task.result.latency.samples.length,
-        };
+        return (
+          convert?.(task) || {
+            'Task name': task.name,
+            'Throughput average (ops/s)': task.result.error
+              ? 'NaN'
+              : `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+            'Throughput median (ops/s)': task.result.error
+              ? 'NaN'
+              : `${task.result.throughput.p50?.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+            'Latency average (ns)': task.result.error
+              ? 'NaN'
+              : `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+            'Latency median (ns)': task.result.error
+              ? 'NaN'
+              : `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
+            Samples: task.result.error
+              ? 'NaN'
+              : task.result.latency.samples.length,
+          }
+        );
       }
       return null;
     });

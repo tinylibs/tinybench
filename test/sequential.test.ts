@@ -1,5 +1,5 @@
 import { setTimeout } from 'node:timers/promises';
-import { test, expect } from 'vitest';
+import { expect, test } from 'vitest';
 import { Bench } from '../src';
 
 test('sequential', async () => {
@@ -18,7 +18,9 @@ test('sequential', async () => {
     })
     .add('sample 2', async () => {
       // sample 1 should be defined always
-      if (typeof sequentialBench.tasks[0]?.result === 'undefined') { isFirstTaskDefined = false; } else isFirstTaskDefined = true;
+      if (typeof sequentialBench.tasks[0]?.result === 'undefined') {
+        isFirstTaskDefined = false;
+      } else isFirstTaskDefined = true;
 
       await setTimeout(0);
       for (let i = 0; i < 1e7; i++);
@@ -80,14 +82,13 @@ test.each(['warmup', 'run'])('%s concurrent (task level)', async (mode) => {
   const key = 'sample 1';
 
   const runs = { value: 0 };
-  concurrentBench
-    .add(key, async () => {
-      runs.value++;
-      await setTimeout(10);
-      // all task function should be here after 10ms
-      expect(runs.value).toEqual(iterations);
-      await setTimeout(10);
-    });
+  concurrentBench.add(key, async () => {
+    runs.value++;
+    await setTimeout(10);
+    // all task function should be here after 10ms
+    expect(runs.value).toEqual(iterations);
+    await setTimeout(10);
+  });
 
   if (mode === 'warmup') {
     await concurrentBench.warmup();
@@ -115,10 +116,10 @@ test.each(['warmup', 'run'])('%s concurrent (task level)', async (mode) => {
   runs.value = 0;
 
   if (mode === 'warmup') {
-    await concurrentBench.warmupConcurrently(Infinity, 'task');
+    await concurrentBench.warmupConcurrently(Number.POSITIVE_INFINITY, 'task');
     expect(runs.value).toEqual(10);
   } else {
-    await concurrentBench.runConcurrently(Infinity, 'task');
+    await concurrentBench.runConcurrently(Number.POSITIVE_INFINITY, 'task');
 
     for (const result of concurrentBench.results) {
       expect(result?.error).toBeUndefined();

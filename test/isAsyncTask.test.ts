@@ -1,4 +1,4 @@
-import { test, expect } from 'vitest';
+import { expect, test } from 'vitest';
 import { Bench, Task } from '../src';
 import { isAsyncTask } from '../src/utils';
 
@@ -33,7 +33,9 @@ test('isAsyncTask promise with catch', () => {
 
 test('isAsyncTask beforeEach with error', () => {
   const task = new Task(bench, 'foo', async () => 1, {
-    beforeEach: () => { throw new Error('foo'); },
+    beforeEach: () => {
+      throw new Error('foo');
+    },
   });
   expect(isAsyncTask(task)).resolves.toBe(true);
 });
@@ -47,7 +49,9 @@ test('isAsyncTask beforeEach with promise error', () => {
 
 test('isAsyncTask afterEach with error', () => {
   const task = new Task(bench, 'foo', async () => 1, {
-    afterEach: () => { throw new Error('foo'); },
+    afterEach: () => {
+      throw new Error('foo');
+    },
   });
   expect(isAsyncTask(task)).resolves.toBe(true);
 });
@@ -61,7 +65,9 @@ test('isAsyncTask afterEach with promise error', () => {
 
 test('isAsyncTask beforeAll with error', () => {
   const task = new Task(bench, 'foo', async () => 1, {
-    beforeAll: () => { throw new Error('foo'); },
+    beforeAll: () => {
+      throw new Error('foo');
+    },
   });
   expect(isAsyncTask(task)).resolves.toBe(true);
 });
@@ -75,7 +81,9 @@ test('isAsyncTask beforeAll with promise error', () => {
 
 test('isAsyncTask afterAll with error', () => {
   const task = new Task(bench, 'foo', async () => 1, {
-    afterAll: () => { throw new Error('foo'); },
+    afterAll: () => {
+      throw new Error('foo');
+    },
   });
   expect(isAsyncTask(task)).resolves.toBe(true);
 });

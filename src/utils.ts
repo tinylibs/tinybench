@@ -1,5 +1,5 @@
-import type { Fn } from './types';
 import type Task from './task';
+import type { Fn } from './types';
 
 export const nanoToMs = (nano: number) => nano / 1e6;
 
@@ -7,7 +7,9 @@ export const hrtimeNow = () => nanoToMs(Number(process.hrtime.bigint()));
 
 export const now = () => performance.now();
 
-function isPromiseLike<T>(maybePromiseLike: any): maybePromiseLike is PromiseLike<T> {
+function isPromiseLike<T>(
+  maybePromiseLike: any,
+): maybePromiseLike is PromiseLike<T> {
   return (
     maybePromiseLike !== null
     && typeof maybePromiseLike === 'object'
@@ -79,7 +81,7 @@ export const average = (samples: number[]) => {
  * @returns the variance of the sample
  */
 export const variance = (samples: number[], avg = average(samples)) => {
-  const result = samples.reduce((sum, n) => sum + ((n - avg) ** 2), 0);
+  const result = samples.reduce((sum, n) => sum + (n - avg) ** 2, 0);
   return result / (samples.length - 1) || 0;
 };
 
@@ -107,8 +109,8 @@ export const quantileSorted = (samples: number[], q: number) => {
   const baseIndex = Math.floor(base);
   if (samples[baseIndex + 1] != null) {
     return (
-      (samples[baseIndex]!)
-      + (base - baseIndex) * ((samples[baseIndex + 1]!) - samples[baseIndex]!)
+      samples[baseIndex]!
+      + (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
     );
   }
   return samples[baseIndex];
@@ -129,7 +131,10 @@ export const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5);
  * @param aggFn the aggregation function to use
  * @returns the absolute deviation of the sample given the aggregation
  */
-export const absoluteDeviation = (samples: number[], aggFn: (arr: number[]) => number | undefined) => {
+export const absoluteDeviation = (
+  samples: number[],
+  aggFn: (arr: number[]) => number | undefined,
+) => {
   const value = aggFn(samples);
   const absoluteDeviations: number[] = [];
 

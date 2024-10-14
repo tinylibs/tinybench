@@ -1,11 +1,11 @@
-import { test, expect, vi } from 'vitest';
-import { Bench, Task } from '../src';
+import { expect, test, vi } from 'vitest';
+import { Bench, type Task } from '../src';
 
 test('basic', async () => {
   const bench = new Bench({ time: 100 });
   bench
     .add('foo', async () => {
-      await new Promise((resolve) => setTimeout((resolve), 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     })
     .add('bar', async () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -21,13 +21,17 @@ test('basic', async () => {
   expect(tasks[0]!.result!.totalTime).toBeGreaterThan(50);
   expect(tasks[0]!.result!.latency.mean).toBeGreaterThan(50);
   // throughput mean is ops/s, period is ms unit value
-  expect(tasks[0]!.result!.throughput.mean * tasks[0]!.result!.period).toBeCloseTo(1000, 1);
+  expect(
+    tasks[0]!.result!.throughput.mean * tasks[0]!.result!.period,
+  ).toBeCloseTo(1000, 1);
 
   expect(tasks[1]!.name).toEqual('bar');
   expect(tasks[1]!.result!.totalTime).toBeGreaterThan(100);
   expect(tasks[1]!.result!.latency.mean).toBeGreaterThan(100);
   // throughput mean is ops/s, period is ms unit value
-  expect(tasks[1]!.result!.throughput.mean * tasks[1]!.result!.period).toBeCloseTo(1000, 1);
+  expect(
+    tasks[1]!.result!.throughput.mean * tasks[1]!.result!.period,
+  ).toBeCloseTo(1000, 1);
 });
 
 test('bench and task runs, time consistency', async () => {
@@ -246,17 +250,33 @@ test('detect faster task', async () => {
   const fasterTask = bench.getTask('faster')!;
   const slowerTask = bench.getTask('slower')!;
 
-  expect(fasterTask.result!.latency.mean).toBeLessThan(slowerTask.result!.latency.mean);
-  expect(fasterTask.result!.latency.min).toBeLessThan(slowerTask.result!.latency.min);
-  expect(fasterTask.result!.latency.max).toBeLessThan(slowerTask.result!.latency.max);
+  expect(fasterTask.result!.latency.mean).toBeLessThan(
+    slowerTask.result!.latency.mean,
+  );
+  expect(fasterTask.result!.latency.min).toBeLessThan(
+    slowerTask.result!.latency.min,
+  );
+  expect(fasterTask.result!.latency.max).toBeLessThan(
+    slowerTask.result!.latency.max,
+  );
   // latency moe should be smaller since it's faster
-  expect(fasterTask.result!.latency.moe).toBeLessThan(slowerTask.result!.latency.moe);
+  expect(fasterTask.result!.latency.moe).toBeLessThan(
+    slowerTask.result!.latency.moe,
+  );
 
-  expect(fasterTask.result!.throughput.mean).toBeGreaterThan(slowerTask.result!.throughput.mean);
-  expect(fasterTask.result!.throughput.min).toBeGreaterThan(slowerTask.result!.throughput.min);
-  expect(fasterTask.result!.throughput.max).toBeGreaterThan(slowerTask.result!.throughput.max);
+  expect(fasterTask.result!.throughput.mean).toBeGreaterThan(
+    slowerTask.result!.throughput.mean,
+  );
+  expect(fasterTask.result!.throughput.min).toBeGreaterThan(
+    slowerTask.result!.throughput.min,
+  );
+  expect(fasterTask.result!.throughput.max).toBeGreaterThan(
+    slowerTask.result!.throughput.max,
+  );
   // throughput moe should be greater since it's faster
-  expect(fasterTask.result!.throughput.moe).toBeGreaterThan(slowerTask.result!.throughput.moe);
+  expect(fasterTask.result!.throughput.moe).toBeGreaterThan(
+    slowerTask.result!.throughput.moe,
+  );
 });
 
 test('statistics', async () => {
@@ -347,7 +367,10 @@ test('setup and teardown', async () => {
 test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   const iterations = 100;
   const bench = new Bench({
-    time: 0, warmupTime: 0, iterations, warmupIterations: iterations,
+    time: 0,
+    warmupTime: 0,
+    iterations,
+    warmupIterations: iterations,
   });
 
   const beforeAll = vi.fn(function hook(this: Task) {
@@ -362,14 +385,18 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   const afterEach = vi.fn(function hook(this: Task) {
     expect(this).toBe(bench.getTask('foo'));
   });
-  bench.add('foo', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }, {
-    beforeAll,
-    afterAll,
-    beforeEach,
-    afterEach,
-  });
+  bench.add(
+    'foo',
+    async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    },
+    {
+      beforeAll,
+      afterAll,
+      beforeEach,
+      afterEach,
+    },
+  );
 
   await bench.warmup();
   await bench.run();

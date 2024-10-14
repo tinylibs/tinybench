@@ -1,14 +1,9 @@
 {
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": [
-      "tsconfig.json",
-      "examples/tsconfig.json"
-    ]
+    "project": ["tsconfig.json", "examples/tsconfig.json"]
   },
-  "plugins": [
-    "@typescript-eslint/eslint-plugin"
-  ],
+  "plugins": ["@typescript-eslint/eslint-plugin"],
   "extends": [
     "eslint:recommended",
     "airbnb-base",
@@ -35,10 +30,7 @@
     "import/no-unresolved": "off",
     "import/extensions": "off",
     "no-underscore-dangle": "off",
-    "indent": [
-      "error",
-      2
-    ],
+    "indent": ["error", 2],
     "max-len": 0
   }
 }

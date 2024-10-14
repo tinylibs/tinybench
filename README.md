@@ -6,8 +6,7 @@ _I'm transitioning to a full-time open source career. Your support would be grea
 [![CI](https://github.com/tinylibs/tinybench/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tinylibs/tinybench/actions/workflows/test.yml)
 [![NPM version](https://img.shields.io/npm/v/tinybench.svg?style=flat)](https://www.npmjs.com/package/tinybench)
 
-Benchmark your code easily with Tinybench, a simple, tiny and light-weight `7KB` (`2KB` minified and gzipped)
-benchmarking library!
+Benchmark your code easily with Tinybench, a simple, tiny and light-weight `7KB` (`2KB` minified and gzipped) benchmarking library!
 You can run your benchmarks in multiple JavaScript runtimes, Tinybench is
 completely based on the Web APIs with proper timing using `process.hrtime` or
 `performance.now`.
@@ -178,6 +177,8 @@ function has been executed.
 - `setResult(result: Partial<TaskResult>)`: change the result object values
 - `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object
 
+FnOptions:
+
 ```ts
 export interface FnOptions {
   /**
@@ -204,33 +205,19 @@ export interface FnOptions {
 
 ## `TaskResult`
 
-the benchmark task result object.
+The benchmark task result object:
 
 ```ts
 export type TaskResult = {
   /*
-   * the last error that was thrown while running the task
+   * the last task error that was thrown
    */
   error?: Error;
 
   /**
-   * The amount of time in milliseconds to run the benchmark task (cycle).
+   * the time to run the task benchmark cycle (ms)
    */
   totalTime: number;
-
-  /**
-   * the minimum value in the samples
-   */
-  min: number;
-  /**
-   * the maximum value in the samples
-   */
-  max: number;
-
-  /**
-   * the number of operations per second
-   */
-  hz: number;
 
   /**
    * how long each operation takes (ms)
@@ -238,77 +225,107 @@ export type TaskResult = {
   period: number;
 
   /**
-   * task samples of each task iteration time (ms)
+   * the task latency statistics
+   */
+  latency: Statistics;
+
+  /**
+   * the task throughput statistics
+   */
+  throughput: Statistics;
+
+  /**
+   * the number of operations per second
+   * @deprecated use `.throughput.mean` instead
+   */
+  hz: number;
+
+  /**
+   * latency samples (ms)
+   * @deprecated use `.latency.samples` instead
    */
   samples: number[];
 
   /**
-   * samples mean/average (estimate of the population mean)
+   * the minimum latency samples value
+   * @deprecated use `.latency.min` instead
+   */
+  min: number;
+  /**
+   * the maximum latency samples value
+   * @deprecated use `.latency.max` instead
+   */
+  max: number;
+
+  /**
+   * the latency samples mean/average (estimate of the population mean/average)
+   * @deprecated use `.latency.mean` instead
    */
   mean: number;
 
   /**
-   * samples variance (estimate of the population variance)
+   * the latency samples variance (estimate of the population variance)
+   * @deprecated use `.latency.variance` instead
    */
   variance: number;
 
   /**
-   * samples standard deviation (estimate of the population standard deviation)
+   * the latency samples standard deviation (estimate of the population standard deviation)
+   * @deprecated use `.latency.sd` instead
    */
   sd: number;
 
   /**
-   * standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean)
+   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * @deprecated use `.latency.sem` instead
    */
   sem: number;
 
   /**
-   * degrees of freedom
+   * the latency samples degrees of freedom
+   * @deprecated use `.latency.df` instead
    */
   df: number;
 
   /**
-   * critical value of the samples
+   * the latency samples critical value
+   * @deprecated use `.latency.critical` instead
    */
   critical: number;
 
   /**
-   * margin of error
+   * the latency samples margin of error
+   * @deprecated use `.latency.moe` instead
    */
   moe: number;
 
   /**
-   * relative margin of error
+   * the latency samples relative margin of error
+   * @deprecated use `.latency.rme` instead
    */
   rme: number;
 
   /**
-   * median absolute deviation
-   */
-  mad: number;
-
-  /**
-   * p50/median percentile
-   */
-  p50: number;
-
-  /**
-   * p75 percentile
+   * the latency samples p75 percentile
+   * @deprecated use `.latency.p75` instead
    */
   p75: number;
 
   /**
-   * p99 percentile
+   * the latency samples p99 percentile
+   * @deprecated use `.latency.p99` instead
    */
   p99: number;
 
   /**
-   * p995 percentile
+   * the latency samples p995 percentile
+   * @deprecated use `.latency.p995` instead
    */
   p995: number;
 
   /**
-   * p999 percentile
+   * the latency samples p999 percentile
+   * @deprecated use `.latency.p999` instead
    */
   p999: number;
 };

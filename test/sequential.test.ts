@@ -18,7 +18,7 @@ test('sequential', async () => {
     })
     .add('sample 2', async () => {
       // sample 1 should be defined always
-      if (typeof sequentialBench.tasks[0]?.result === 'undefined') {
+      if (sequentialBench.tasks[0]?.result === undefined) {
         isFirstTaskDefined = false;
       } else isFirstTaskDefined = true;
 

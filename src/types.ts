@@ -5,7 +5,7 @@ import type Task from '../src/task';
  */
 export type Fn = () => any | Promise<any>;
 
-export interface FnOptions {
+export type FnOptions = {
   /**
    * An optional function that is run before iterations of this task begin
    */
@@ -25,7 +25,7 @@ export interface FnOptions {
    * An optional function that is run after all iterations of this task end
    */
   afterAll?: (this: Task) => void | Promise<void>;
-}
+};
 
 export type Statistics = {
   /**
@@ -262,7 +262,7 @@ export type BenchEvents =
   | 'warmup' // when the benchmarks start getting warmed up (before start)
   | 'cycle' // when running each benchmark task gets done (cycle)
   | 'add' // when a Task gets added to the Bench
-  | 'remove' // when a Task gets removed of the Bench
+  | 'remove'; // when a Task gets removed of the Bench
 
 export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 

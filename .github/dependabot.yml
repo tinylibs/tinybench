@@ -14,17 +14,32 @@ updates:
     groups:
       regular:
         update-types:
-          - 'minor'
           - 'patch'
+          - 'minor'
+        exclude-patterns:
+          - 'typescript'
+      typescript:
+        update-types:
+          - 'patch'
+          - 'minor'
+          - 'major'
+        patterns:
+          - 'typescript'
       typescript-eslint:
+        update-types:
+          - 'major'
         patterns:
           - 'typescript-eslint'
           - '@typescript-eslint/*'
       size-limit:
+        update-types:
+          - 'major'
         patterns:
           - 'size-limit'
           - '@size-limit/*'
       eslint:
+        update-types:
+          - 'major'
         patterns:
           - 'eslint'
           - '@eslint/*'

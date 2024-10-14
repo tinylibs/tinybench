@@ -30,8 +30,6 @@ export default class Bench extends EventTarget {
    */
   private readonly _tasks: Map<string, Task> = new Map();
 
-  private readonly _todos: Map<string, Task> = new Map();
-
   /**
    * Executes tasks concurrently based on the specified concurrency mode.
    *
@@ -207,17 +205,6 @@ export default class Bench extends EventTarget {
   }
 
   /**
-   * add a benchmark todo to the todo map
-   */
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  todo(name: string, fn: Fn = () => {}, opts: FnOptions = {}) {
-    const task = new Task(this, name, fn, opts);
-    this._todos.set(name, task);
-    this.dispatchEvent(createBenchEvent('todo', task));
-    return this;
-  }
-
-  /**
    * remove a benchmark task from the task map
    */
   remove(name: string) {
@@ -291,10 +278,6 @@ export default class Bench extends EventTarget {
    */
   get tasks(): Task[] {
     return [...this._tasks.values()];
-  }
-
-  get todos(): Task[] {
-    return [...this._todos.values()];
   }
 
   /**

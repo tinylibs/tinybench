@@ -44,7 +44,6 @@ bench
     await new Promise((r) => setTimeout(r, 1)); // we wait 1ms :)
     console.log('I am slower');
   })
-  .todo('unimplemented bench');
 
 await bench.warmup(); // make results more reliable, ref: https://github.com/tinylibs/tinybench/pull/50
 await bench.run();
@@ -58,15 +57,6 @@ console.table(bench.table());
 // │ 0       │ 'faster task' │ '38,832' │ 25751.297631307978   │ '±3.48%' │ '22016.49999997812±5.5000000145' │ 3884    │
 // │ 1       │ 'slower task' │ '669'    │ 1493338.567164177    │ '±5.98%' │ '1445076.0000000286'             │ 67      │
 // └─────────┴───────────────┴──────────┴──────────────────────┴──────────┴──────────────────────────────────┴─────────┘
-
-console.table(bench.table((task) => ({ 'Task name': task.name })));
-
-// Output:
-// ┌─────────┬───────────────────────┐
-// │ (index) │       Task name       │
-// ├─────────┼───────────────────────┤
-// │    0    │ 'unimplemented bench' │
-// └─────────┴───────────────────────┘
 ```
 
 The `add` method accepts a task name and a task function, so it can benchmark
@@ -156,8 +146,6 @@ export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 - `get results(): (TaskResult | undefined)[]`: (getter) tasks results as an array
 - `get tasks(): Task[]`: (getter) tasks as an array
 - `getTask(name: string): Task | undefined`: get a task based on the name
-- `todo(name: string, fn?: Fn, opts: FnOptions)`: add a benchmark todo to the todo map
-- `get todos(): Task[]`: (getter) tasks todos as an array
 
 ### `Task`
 
@@ -351,7 +339,6 @@ export type BenchEvents =
   | 'cycle' // when running each benchmark task gets done (cycle)
   | 'add' // when a Task gets added to the Bench
   | 'remove' // when a Task gets removed of the Bench
-  | 'todo'; // when a todo Task gets added to the Bench
 
 /**
  * task events

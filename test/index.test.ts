@@ -244,7 +244,7 @@ test('detect faster task', async () => {
   expect(fasterTask.result!.latency.max).toBeLessThan(
     slowerTask.result!.latency.max,
   );
-  // latency moe should be smaller since it's faster
+  // latency moe should be lesser since it's faster
   expect(fasterTask.result!.latency.moe).toBeLessThan(
     slowerTask.result!.latency.moe,
   );

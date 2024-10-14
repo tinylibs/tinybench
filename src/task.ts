@@ -61,7 +61,7 @@ export default class Task extends EventTarget {
     // TODO: support signals in Tasks
   }
 
-  private async loop(time: number, iterations: number): Promise<{ error?: unknown, samples?: number[] }> {
+  private async loop(time: number, iterations: number): Promise<{ samples?: number[], error?: unknown }> {
     const concurrent = this.bench.concurrency === 'task';
     const { threshold } = this.bench;
     let totalTime = 0; // ms
@@ -138,7 +138,7 @@ export default class Task extends EventTarget {
     }
     this.dispatchEvent(createBenchEvent('start', this));
     await this.bench.setup(this, 'run');
-    const { samples: latencySamples, error } = await this.loop(this.bench.time, this.bench.iterations);
+    const { samples: latencySamples, error } = await this.loop(this.bench.time, this.bench.iterations) as { samples?: number[], error?: Error };
     this.bench.teardown(this, 'run');
 
     if (latencySamples) {
@@ -283,9 +283,8 @@ export default class Task extends EventTarget {
       return;
     }
     this.dispatchEvent(createBenchEvent('warmup', this));
-
     await this.bench.setup(this, 'warmup');
-    const { error } = await this.loop(this.bench.warmupTime, this.bench.warmupIterations);
+    const { error } = await this.loop(this.bench.warmupTime, this.bench.warmupIterations) as { error?: Error };
     this.bench.teardown(this, 'warmup');
 
     if (error) {

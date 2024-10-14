@@ -30,7 +30,7 @@ test('basic', async () => {
   expect(tasks[1]!.result!.throughput.mean * tasks[1]!.result!.period).toBeCloseTo(1000, 1);
 });
 
-test('runs should be more than or equal to bench iterations, totalTime should be more than or equal to bench time', async () => {
+test('bench and task runs, time consistency', async () => {
   const bench = new Bench({ time: 100, iterations: 15 });
   bench.add('foo', async () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -120,9 +120,7 @@ test('events order', async () => {
     events.push('complete');
   });
 
-  bench.add('temporary', () => {
-    //
-  });
+  bench.add('temporary', () => {});
   bench.remove('temporary');
 
   await bench.warmup();
@@ -134,7 +132,7 @@ test('events order', async () => {
   await bench.run();
   bench.reset();
 
-  expect(events).toEqual([
+  expect(events).toStrictEqual([
     'add',
     'remove',
     'warmup',
@@ -157,7 +155,7 @@ test('events order', async () => {
   expect(abortTask.result).toBeUndefined();
 }, 10000);
 
-test('events order 2', async () => {
+test('events order at task completion', async () => {
   const bench = new Bench({
     warmupIterations: 0,
     warmupTime: 0,
@@ -179,13 +177,14 @@ test('events order 2', async () => {
     events.push('foo-complete');
     expect(events).not.toContain('bar-complete');
   });
-
   barTask.addEventListener('complete', () => {
     events.push('bar-complete');
     expect(events).toContain('foo-complete');
   });
 
   await bench.run();
+
+  expect(events).toStrictEqual(['foo-complete', 'bar-complete']);
 });
 
 test('todo event', async () => {
@@ -214,7 +213,7 @@ test('error event', async () => {
   let taskErr: Error;
   bench.addEventListener('error', (e) => {
     const { task } = e;
-    taskErr = task.result!.error as Error;
+    taskErr = task.result!.error!;
   });
 
   await bench.run();

@@ -125,7 +125,7 @@ export type TaskResult = {
   /*
    * the last task error that was thrown
    */
-  error?: unknown;
+  error?: Error;
 
   /**
    * the time to run the task benchmark cycle (ms)

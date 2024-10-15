@@ -80,7 +80,7 @@ them.
 Options:
 
 ```ts
-export interface Options = {
+export interface Options {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500
    */
@@ -125,7 +125,7 @@ export interface Options = {
    * teardown function to run after each benchmark task (cycle)
    */
   teardown?: Hook;
-};
+}
 
 export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 ```
@@ -195,7 +195,7 @@ export interface FnOptions {
 the benchmark task result object.
 
 ```ts
-export interface TaskResult = {
+export interface TaskResult {
   /*
    * the last error that was thrown while running the task
    */
@@ -299,7 +299,7 @@ export interface TaskResult = {
    * p999 percentile
    */
   p999: number;
-};
+}
 ```
 
 ### `Events`

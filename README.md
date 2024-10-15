@@ -44,7 +44,7 @@ bench
   .add('slower task', async () => {
     await new Promise((r) => setTimeout(r, 1)); // we wait 1ms :)
     console.log('I am slower');
-  })
+  });
 
 await bench.warmup(); // make results more reliable, ref: https://github.com/tinylibs/tinybench/pull/50
 await bench.run();
@@ -80,7 +80,7 @@ them.
 Options:
 
 ```ts
-export type Options = {
+export interface Options = {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500
    */
@@ -195,7 +195,7 @@ export interface FnOptions {
 the benchmark task result object.
 
 ```ts
-export type TaskResult = {
+export interface TaskResult = {
   /*
    * the last error that was thrown while running the task
    */
@@ -321,7 +321,7 @@ export type BenchEvents =
   | 'warmup' // when the benchmarks start getting warmed up (before start)
   | 'cycle' // when running each benchmark task gets done (cycle)
   | 'add' // when a Task gets added to the Bench
-  | 'remove' // when a Task gets removed of the Bench
+  | 'remove'; // when a Task gets removed of the Bench
 
 /**
  * task events

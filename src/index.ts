@@ -2,15 +2,15 @@ import Bench from './bench';
 import Task from './task';
 
 export type {
-  Fn,
-  TaskResult,
-  BenchEvents,
-  Options,
-  Hook,
-  TaskEvents,
   BenchEvent,
+  BenchEvents,
+  Fn,
+  Hook,
+  Options,
+  TaskEvents,
+  TaskResult,
 } from './types';
 
-export { now, hrtimeNow } from './utils';
+export { hrtimeNow, now } from './utils';
 
 export { Bench, Task };

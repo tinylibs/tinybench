@@ -1,15 +1,16 @@
 import pLimit from 'p-limit';
-import type {
-  Fn,
-  TaskEvents,
-  TaskResult,
-  TaskEventsMap,
-  FnOptions,
-} from './types';
-import Bench from './bench';
+import type Bench from './bench';
 import tTable from './constants';
 import { createBenchEvent } from './event';
-import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
+import type {
+  AddEventListenerOptionsArgument,
+  Fn,
+  FnOptions,
+  RemoveEventListenerOptionsArgument,
+  TaskEvents,
+  TaskEventsMap,
+  TaskResult,
+} from './types';
 import {
   absoluteDeviation,
   getVariance,
@@ -58,7 +59,10 @@ export default class Task extends EventTarget {
     // TODO: support signals in Tasks
   }
 
-  private async loop(time: number, iterations: number): Promise<{ error?: unknown, samples?: number[] }> {
+  private async loop(
+    time: number,
+    iterations: number,
+  ): Promise<{ error?: unknown; samples?: number[] }> {
     const concurrent = this.bench.concurrency === 'task';
     const { threshold } = this.bench;
     let totalTime = 0; // ms
@@ -100,7 +104,8 @@ export default class Task extends EventTarget {
     try {
       const promises: Promise<void>[] = []; // only for task level concurrency
       while (
-        (totalTime < time || ((samples.length + limit.activeCount + limit.pendingCount) < iterations))
+        (totalTime < time
+          || samples.length + limit.activeCount + limit.pendingCount < iterations)
         && !this.bench.signal?.aborted
       ) {
         if (concurrent) {
@@ -135,7 +140,10 @@ export default class Task extends EventTarget {
     }
     this.dispatchEvent(createBenchEvent('start', this));
     await this.bench.setup(this, 'run');
-    const { samples, error } = await this.loop(this.bench.time, this.bench.iterations);
+    const { samples, error } = await this.loop(
+      this.bench.time,
+      this.bench.iterations,
+    );
     this.bench.teardown(this, 'run');
 
     if (samples) {
@@ -221,7 +229,10 @@ export default class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('warmup', this));
 
     await this.bench.setup(this, 'warmup');
-    const { error } = await this.loop(this.bench.warmupTime, this.bench.warmupIterations);
+    const { error } = await this.loop(
+      this.bench.warmupTime,
+      this.bench.warmupIterations,
+    );
     this.bench.teardown(this, 'warmup');
 
     if (error) {

@@ -1,11 +1,11 @@
-import { test, expect, vi } from 'vitest';
-import { Bench, Task } from '../src';
+import { expect, test, vi } from 'vitest';
+import { Bench, type Task } from '../src';
 
 test('basic', async () => {
   const bench = new Bench({ time: 100 });
   bench
     .add('foo', async () => {
-      await new Promise((resolve) => setTimeout((resolve), 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     })
     .add('bar', async () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -278,7 +278,10 @@ test('setup and teardown', async () => {
 test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   const iterations = 100;
   const bench = new Bench({
-    time: 0, warmupTime: 0, iterations, warmupIterations: iterations,
+    time: 0,
+    warmupTime: 0,
+    iterations,
+    warmupIterations: iterations,
   });
 
   const beforeAll = vi.fn(function hook(this: Task) {
@@ -293,14 +296,18 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   const afterEach = vi.fn(function hook(this: Task) {
     expect(this).toBe(bench.getTask('foo'));
   });
-  bench.add('foo', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }, {
-    beforeAll,
-    afterAll,
-    beforeEach,
-    afterEach,
-  });
+  bench.add(
+    'foo',
+    async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    },
+    {
+      beforeAll,
+      afterAll,
+      beforeEach,
+      afterEach,
+    },
+  );
 
   await bench.warmup();
   await bench.run();

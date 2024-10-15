@@ -1,16 +1,17 @@
 import pLimit from 'p-limit';
-import type {
-  Hook,
-  Options,
-  Fn,
-  BenchEvents,
-  TaskResult,
-  BenchEventsMap,
-  FnOptions,
-} from './types';
 import { createBenchEvent } from './event';
 import Task from './task';
-import { AddEventListenerOptionsArgument, RemoveEventListenerOptionsArgument } from './types';
+import type {
+  AddEventListenerOptionsArgument,
+  BenchEvents,
+  BenchEventsMap,
+  Fn,
+  FnOptions,
+  Hook,
+  Options,
+  RemoveEventListenerOptionsArgument,
+  TaskResult,
+} from './types';
 import { now } from './utils';
 
 /**
@@ -21,7 +22,7 @@ export default class Bench extends EventTarget {
   /**
    * @private the task map
    */
-  private readonly _tasks: Map<string, Task> = new Map();
+  private readonly _tasks = new Map<string, Task>();
 
   /**
    * Executes tasks concurrently based on the specified concurrency mode.
@@ -35,7 +36,7 @@ export default class Bench extends EventTarget {
   /**
    * The maximum number of concurrent tasks to run. Defaults to Infinity.
    */
-  threshold = Infinity;
+  threshold = Number.POSITIVE_INFINITY;
 
   signal?: AbortSignal;
 
@@ -107,7 +108,10 @@ export default class Bench extends EventTarget {
   /**
    * See Bench.{@link concurrency}
    */
-  async runConcurrently(threshold = Infinity, mode: NonNullable<Bench['concurrency']> = 'bench'): Promise<Task[]> {
+  async runConcurrently(
+    threshold = Number.POSITIVE_INFINITY,
+    mode: NonNullable<Bench['concurrency']> = 'bench',
+  ): Promise<Task[]> {
     this.threshold = threshold;
     this.concurrency = mode;
 
@@ -151,7 +155,10 @@ export default class Bench extends EventTarget {
    * warmup the benchmark tasks concurrently.
    * This is not run by default by the {@link runConcurrently} method.
    */
-  async warmupConcurrently(threshold = Infinity, mode: NonNullable<Bench['concurrency']> = 'bench'): Promise<void> {
+  async warmupConcurrently(
+    threshold = Number.POSITIVE_INFINITY,
+    mode: NonNullable<Bench['concurrency']> = 'bench',
+  ): Promise<void> {
     this.threshold = threshold;
     this.concurrency = mode;
 
@@ -228,14 +235,24 @@ export default class Bench extends EventTarget {
         if (task.result.error) {
           throw task.result.error;
         }
-        return convert?.(task) || {
-          'Task name': task.name,
-          'ops/sec': task.result.error ? 'NaN' : parseInt(task.result.hz.toString(), 10).toLocaleString(),
-          'Average time/op (ns)': task.result.error ? 'NaN' : task.result.mean * 1e6,
-          Margin: task.result.error ? 'NaN' : `\xb1${task.result.rme.toFixed(2)}%`,
-          'Median time/op (ns)': task.result.error ? 'NaN' : `${task.result.p50 * 1e6}${task.result.mad * 1e6 > 0 ? `\xb1${(task.result.mad * 1e6).toFixed(10)}` : ''}`,
-          Samples: task.result.error ? 'NaN' : task.result.samples.length,
-        };
+        return (
+          convert?.(task) || {
+            'Task name': task.name,
+            'ops/sec': task.result.error
+              ? 'NaN'
+              : Number.parseInt(task.result.hz.toString(), 10).toLocaleString(),
+            'Average time/op (ns)': task.result.error
+              ? 'NaN'
+              : task.result.mean * 1e6,
+            Margin: task.result.error
+              ? 'NaN'
+              : `\xb1${task.result.rme.toFixed(2)}%`,
+            'Median time/op (ns)': task.result.error
+              ? 'NaN'
+              : `${task.result.p50 * 1e6}${task.result.mad * 1e6 > 0 ? `\xb1${(task.result.mad * 1e6).toFixed(10)}` : ''}`,
+            Samples: task.result.error ? 'NaN' : task.result.samples.length,
+          }
+        );
       }
       return null;
     });

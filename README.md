@@ -79,7 +79,7 @@ them.
 Options:
 
 ```ts
-export interface Options = {
+export interface Options {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500
    */
@@ -124,7 +124,7 @@ export interface Options = {
    * teardown function to run after each benchmark task (cycle)
    */
   teardown?: Hook;
-};
+}
 
 export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 ```
@@ -196,7 +196,7 @@ export interface FnOptions = {
 The benchmark task result object:
 
 ```ts
-export interface TaskResult = {
+export interface TaskResult {
   /*
    * the last task error that was thrown
    */
@@ -316,7 +316,7 @@ export interface TaskResult = {
    * @deprecated use `.latency.p999` instead
    */
   p999: number;
-};
+}
 ```
 
 [Statistics](https://github.com/tinylibs/tinybench/blob/main/src/types.ts#L30) type definition.

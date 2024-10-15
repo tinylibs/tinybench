@@ -168,7 +168,7 @@ function has been executed.
 FnOptions:
 
 ```ts
-export interface FnOptions = {
+export interface FnOptions {
   /**
    * An optional function that is run before iterations of this task begin
    */
@@ -188,7 +188,7 @@ export interface FnOptions = {
    * An optional function that is run after all iterations of this task end
    */
   afterAll?: (this: Task) => void | Promise<void>;
-};
+}
 ```
 
 ### `TaskResult`

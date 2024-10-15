@@ -124,6 +124,7 @@ test('events order', async () => {
     events.push('complete');
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   bench.add('temporary', () => {});
   bench.remove('temporary');
 

@@ -79,7 +79,7 @@ them.
 Options:
 
 ```ts
-export type Options = {
+export interface Options = {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500
    */
@@ -196,7 +196,7 @@ export type FnOptions = {
 The benchmark task result object:
 
 ```ts
-export type TaskResult = {
+export interface TaskResult = {
   /*
    * the last task error that was thrown
    */

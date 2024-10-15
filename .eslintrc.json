@@ -1,19 +1,20 @@
 {
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "project": ["tsconfig.json", "examples/tsconfig.json"]
-  },
-  "plugins": ["@typescript-eslint/eslint-plugin"],
-  "extends": [
-    "eslint:recommended",
-    "airbnb-base",
-    "plugin:@typescript-eslint/recommended"
-  ],
   "root": true,
   "env": {
     "node": true,
     "commonjs": true
   },
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/stylistic"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": ["tsconfig.json", "examples/tsconfig.json"]
+  },
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "import/no-extraneous-dependencies": "off",
     "no-restricted-syntax": "off",

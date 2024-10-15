@@ -5,7 +5,7 @@ import type Task from '../src/task';
  */
 export type Fn = () => any | Promise<any>;
 
-export type FnOptions = {
+export interface FnOptions {
   /**
    * An optional function that is run before iterations of this task begin
    */
@@ -25,9 +25,9 @@ export type FnOptions = {
    * An optional function that is run after all iterations of this task end
    */
   afterAll?: (this: Task) => void | Promise<void>;
-};
+}
 
-export type Statistics = {
+export interface Statistics {
   /**
    * samples
    */
@@ -116,12 +116,12 @@ export type Statistics = {
    * p999 percentile
    */
   p999: number | undefined;
-};
+}
 
 /**
  * the benchmark task result object
  */
-export type TaskResult = {
+export interface TaskResult {
   /*
    * the last task error that was thrown
    */
@@ -241,7 +241,7 @@ export type TaskResult = {
    * @deprecated use `.latency.p999` instead
    */
   p999: number;
-};
+}
 
 /**
  * Both the `Task` and `Bench` objects extend the `EventTarget` object,
@@ -269,7 +269,7 @@ export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 type NoopEventListener = () => any | Promise<any>;
 type TaskEventListener = (e: Event & { task: Task }) => any | Promise<any>;
 
-export type BenchEventsMap = {
+export interface BenchEventsMap {
   abort: NoopEventListener;
   start: NoopEventListener;
   complete: NoopEventListener;
@@ -279,8 +279,7 @@ export type BenchEventsMap = {
   remove: TaskEventListener;
   cycle: TaskEventListener;
   error: TaskEventListener;
-  todo: TaskEventListener;
-};
+}
 
 /**
  * task events
@@ -294,7 +293,7 @@ export type TaskEvents =
   | 'warmup'
   | 'cycle';
 
-export type TaskEventsMap = {
+export interface TaskEventsMap {
   abort: NoopEventListener;
   start: TaskEventListener;
   error: TaskEventListener;
@@ -302,9 +301,9 @@ export type TaskEventsMap = {
   complete: TaskEventListener;
   warmup: TaskEventListener;
   reset: TaskEventListener;
-};
+}
 
-export type Options = {
+export interface Options {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500
    */
@@ -349,7 +348,7 @@ export type Options = {
    * teardown function to run after each benchmark task (cycle)
    */
   teardown?: Hook;
-};
+}
 
 export type BenchEvent = Event & {
   task: Task | null;

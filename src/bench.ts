@@ -28,7 +28,7 @@ export default class Bench extends EventTarget {
   /**
    * @private the task map
    */
-  private readonly _tasks: Map<string, Task> = new Map();
+  private readonly _tasks = new Map<string, Task>();
 
   /**
    * Executes tasks concurrently based on the specified concurrency mode.

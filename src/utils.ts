@@ -38,7 +38,7 @@ const isAsyncFunction = (
  * @param fn - the function to check
  * @returns true if the function is an async function or returns a promise
  */
-export const isAsyncFnResource = async (fn: Fn) => {
+export const isAsyncFnResource = async (fn: Fn): Promise<boolean> => {
   if (fn == null) {
     return false;
   }
@@ -49,6 +49,7 @@ export const isAsyncFnResource = async (fn: Fn) => {
     const fnCall = fn();
     const promiseLike = isPromiseLike(fnCall);
     if (promiseLike) {
+      // silence promise rejection
       try {
         await fnCall;
       } catch {
@@ -67,7 +68,7 @@ export const isAsyncFnResource = async (fn: Fn) => {
  * @param task - the task to check
  * @returns true if the task is an async task
  */
-export const isAsyncTask = async (task: Task) => isAsyncFnResource(task?.fn);
+export const isAsyncTask = async (task: Task): Promise<boolean> => isAsyncFnResource(task?.fn);
 
 /**
  * Computes the average of a sample.

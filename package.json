@@ -42,7 +42,7 @@
   "devDependencies": {
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",
-    "@types/node": "^18.19.55",
+    "@types/node": "^22.7.5",
     "@typescript-eslint/eslint-plugin": "^8.9.0",
     "@typescript-eslint/parser": "^8.9.0",
     "bumpp": "^9.7.1",

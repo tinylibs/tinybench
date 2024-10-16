@@ -14,5 +14,5 @@ function createBenchEvent(eventType: BenchEvents, target: Task | null = null) {
   return event;
 }
 
-export default createBenchEvent;
+// eslint-disable-next-line import/prefer-default-export
 export { createBenchEvent };

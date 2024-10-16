@@ -312,10 +312,14 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   await bench.warmup();
   await bench.run();
 
-  expect(beforeAll.mock.calls.length).toBe(2);
-  expect(afterAll.mock.calls.length).toBe(2);
-  expect(beforeEach.mock.calls.length).toBe(iterations * 2 /* warmup + run */);
-  expect(afterEach.mock.calls.length).toBe(iterations * 2);
+  expect(beforeAll.mock.calls.length).toBe(4 /* async check + warmup + run */);
+  expect(afterAll.mock.calls.length).toBe(4 /* async check + warmup + run */);
+  expect(beforeEach.mock.calls.length).toBe(
+    2 + iterations * 2 /* async check + warmup + run */,
+  );
+  expect(afterEach.mock.calls.length).toBe(
+    2 + iterations * 2 /* async check + warmup + run */,
+  );
   expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);
 });
 

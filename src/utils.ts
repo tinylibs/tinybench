@@ -7,57 +7,67 @@ export const hrtimeNow = () => nanoToMs(Number(process.hrtime.bigint()));
 
 export const now = () => performance.now();
 
-function isPromiseLike<T>(
+/**
+ * Checks if a value is a promise-like object.
+ *
+ * @param maybePromiseLike - the value to check
+ * @returns true if the value is a promise-like object
+ */
+const isPromiseLike = <T>(
   maybePromiseLike: any,
-): maybePromiseLike is PromiseLike<T> {
-  return (
-    maybePromiseLike !== null
-    && typeof maybePromiseLike === 'object'
-    && typeof maybePromiseLike.then === 'function'
-  );
-}
+): maybePromiseLike is PromiseLike<T> => maybePromiseLike !== null
+  && typeof maybePromiseLike === 'object'
+  && typeof maybePromiseLike.then === 'function';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const AsyncFunctionConstructor = (async () => {}).constructor;
+type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>;
 
 /**
- * An async function check method only consider runtime support async syntax
+ * An async function check helper only considering runtime support async syntax
+ *
+ * @param fn - the function to check
+ * @returns true if the function is an async function
  */
-export const isAsyncFunction = (fn: Fn) => fn.constructor === AsyncFunctionConstructor;
+const isAsyncFunction = (
+  fn: Fn,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+): fn is AsyncFunctionType<unknown[], unknown> => fn?.constructor === (async () => {}).constructor;
 
-export const isAsyncTask = async (task: Task) => {
-  if (isAsyncFunction(task.fn)) {
+/**
+ * An async function check helper considering runtime support async syntax and promise return
+ *
+ * @param fn - the function to check
+ * @returns true if the function is an async function or returns a promise
+ */
+export const isAsyncFnResource = async (fn: Fn) => {
+  if (fn == null) {
+    return false;
+  }
+  if (isAsyncFunction(fn)) {
     return true;
   }
   try {
-    if (task.opts.beforeEach != null) {
-      try {
-        await task.opts.beforeEach.call(task);
-      } catch (e) {
-        // ignore
-      }
-    }
-    const call = task.fn();
-    const promiseLike = isPromiseLike(call);
+    const fnCall = fn();
+    const promiseLike = isPromiseLike(fnCall);
     if (promiseLike) {
       try {
-        await call;
-      } catch (e) {
-        // ignore
-      }
-    }
-    if (task.opts.afterEach != null) {
-      try {
-        await task.opts.afterEach.call(task);
-      } catch (e) {
+        await fnCall;
+      } catch {
         // ignore
       }
     }
     return promiseLike;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
+
+/**
+ * An async task check helper considering runtime support async syntax and promise return
+ *
+ * @param task - the task to check
+ * @returns true if the task is an async task
+ */
+export const isAsyncTask = async (task: Task) => isAsyncFnResource(task?.fn);
 
 /**
  * Computes the average of a sample.
@@ -69,7 +79,6 @@ export const average = (samples: number[]) => {
   if (samples.length === 0) {
     throw new Error('samples must not be empty');
   }
-
   return samples.reduce((a, b) => a + b, 0) / samples.length || 0;
 };
 

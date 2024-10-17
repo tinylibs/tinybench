@@ -346,9 +346,7 @@ task.addEventListener('cycle', (evt) => {
 ### `BenchEvent`
 
 ```ts
-export type BenchEvent = Event & {
-  task?: Task;
-};
+export type BenchEvent = Event & { task?: Task };
 ```
 
 ### `process.hrtime`

@@ -159,9 +159,9 @@ export type BenchEvents =
 
 export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 
-export type EventListener = (
-  evt: Event & { task?: Task },
-) => void | Promise<void>;
+export type BenchEvent = Event & { task?: Task };
+
+export type EventListener = (evt: BenchEvent) => void;
 
 export interface BenchEventsMap {
   abort: EventListener;
@@ -243,12 +243,7 @@ export interface Options {
   teardown?: Hook;
 }
 
-export type BenchEvent = Event & {
-  task: Task | null;
-};
-
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
-
 export type RemoveEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.removeEventListener
 >[2];

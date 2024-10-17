@@ -131,9 +131,7 @@ export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
-- `async runConcurrently(threshold: number = Infinity, mode: "bench" | "task" = "bench")`: similar to the `run` method but runs concurrently rather than sequentially. See the [Concurrency](#Concurrency) section.
 - `async warmup()`: warmup the benchmark tasks
-- `async warmupConcurrently(threshold: number = Infinity, mode: "bench" | "task" = "bench")`: warmup the benchmark tasks concurrently
 - `reset()`: reset each task and remove its result
 - `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map
   - `Fn`: `() => any | Promise<any>`
@@ -367,15 +365,10 @@ It may make your benchmarks slower, check #42.
 - When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
 
 ```ts
-// options way (recommended)
-bench.threshold = 10; // The maximum number of concurrent tasks to run. Defaults to Infinity.
+bench.threshold = 10; // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
 bench.concurrency = 'task'; // The concurrency mode to determine how tasks are run.
-// await bench.warmup();
+await bench.warmup();
 await bench.run();
-
-// standalone method way
-// await bench.warmupConcurrently(10, 'task');
-await bench.runConcurrently(10, 'task'); // with runConcurrently, mode is set to 'bench' by default
 ```
 
 ## Prior art

@@ -14,6 +14,7 @@ import type {
 import {
   absoluteDeviation,
   getVariance,
+  isAsyncFnResource,
   isAsyncTask,
   medianSorted,
   quantileSorted,
@@ -32,6 +33,9 @@ export default class Task extends EventTarget {
    */
   name: string;
 
+  /**
+   * Task function
+   */
   fn: Fn;
 
   /*
@@ -69,26 +73,40 @@ export default class Task extends EventTarget {
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
       try {
-        await this.opts.beforeAll.call(this);
+        if (await isAsyncFnResource(this.opts.beforeAll)) {
+          await this.opts.beforeAll.call(this);
+        } else {
+          this.opts.beforeAll.call(this);
+        }
       } catch (error) {
         return { error };
       }
     }
-    const isAsync = await isAsyncTask(this);
 
+    const asyncBeforeEach = this.opts.beforeEach != null
+      && (await isAsyncFnResource(this.opts.beforeEach));
+    const asyncTask = await isAsyncTask(this);
+    const asyncAfterEach = this.opts.afterEach != null
+      && (await isAsyncFnResource(this.opts.afterEach));
+
+    // TODO: factor out
     const executeTask = async () => {
       if (this.opts.beforeEach != null) {
-        await this.opts.beforeEach.call(this);
+        if (asyncBeforeEach) {
+          await this.opts.beforeEach.call(this);
+        } else {
+          this.opts.beforeEach.call(this);
+        }
       }
 
       let taskTime = 0;
-      if (isAsync) {
+      if (asyncTask) {
         const taskStart = this.bench.now();
-        await this.fn.call(this);
+        await this.fn();
         taskTime = this.bench.now() - taskStart;
       } else {
         const taskStart = this.bench.now();
-        this.fn.call(this);
+        this.fn();
         taskTime = this.bench.now() - taskStart;
       }
 
@@ -96,7 +114,11 @@ export default class Task extends EventTarget {
       totalTime += taskTime;
 
       if (this.opts.afterEach != null) {
-        await this.opts.afterEach.call(this);
+        if (asyncAfterEach) {
+          await this.opts.afterEach.call(this);
+        } else {
+          this.opts.afterEach.call(this);
+        }
       }
     };
 
@@ -123,7 +145,11 @@ export default class Task extends EventTarget {
 
     if (this.opts.afterAll != null) {
       try {
-        await this.opts.afterAll.call(this);
+        if (await isAsyncFnResource(this.opts.afterAll)) {
+          await this.opts.afterAll.call(this);
+        } else {
+          this.opts.afterAll.call(this);
+        }
       } catch (error) {
         return { error };
       }

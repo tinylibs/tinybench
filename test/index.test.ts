@@ -103,8 +103,8 @@ test('events order', async () => {
     events.push('reset');
   });
 
-  bench.addEventListener('cycle', (e) => {
-    expect(e.task.name).not.toBe('');
+  bench.addEventListener('cycle', (evt) => {
+    expect(evt.task?.name).not.toBe('');
     events.push('cycle');
   });
 
@@ -200,15 +200,15 @@ test('error event', async () => {
     throw err;
   });
 
-  let taskErr: Error;
-  bench.addEventListener('error', (e) => {
-    const { task } = e;
-    taskErr = task.result!.error!;
+  let taskErr: Error | undefined;
+  bench.addEventListener('error', (evt) => {
+    const { task } = evt;
+    taskErr = task?.result?.error;
   });
 
   await bench.run();
 
-  expect(taskErr!).toBe(err);
+  expect(taskErr).toBe(err);
 });
 
 test('throws', async () => {
@@ -387,14 +387,11 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   await bench.warmup();
   await bench.run();
 
-  expect(beforeAll.mock.calls.length).toBe(4 /* async check + warmup + run */);
-  expect(afterAll.mock.calls.length).toBe(4 /* async check + warmup + run */);
-  expect(beforeEach.mock.calls.length).toBe(
-    2 + iterations * 2 /* async check + warmup + run */,
-  );
-  expect(afterEach.mock.calls.length).toBe(
-    2 + iterations * 2 /* async check + warmup + run */,
-  );
+  expect(beforeAll.mock.calls.length).toBe(2 /* warmup + run */);
+  expect(afterAll.mock.calls.length).toBe(2 /* warmup + run */);
+  expect(beforeAll.mock.calls.length).toBe(afterAll.mock.calls.length);
+  expect(beforeEach.mock.calls.length).toBe(iterations * 2 /* warmup + run */);
+  expect(afterEach.mock.calls.length).toBe(iterations * 2 /* warmup + run */);
   expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);
 });
 

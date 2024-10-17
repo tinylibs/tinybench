@@ -1,7 +1,7 @@
 import type Task from './task';
 import type { BenchEvents } from './types';
 
-function createBenchEvent(eventType: BenchEvents, target: Task | null = null) {
+function createBenchEvent(eventType: BenchEvents, target?: Task) {
   const event = new Event(eventType);
   if (target) {
     Object.defineProperty(event, 'task', {

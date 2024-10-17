@@ -14,7 +14,7 @@ import type {
 import {
   absoluteDeviation,
   getVariance,
-  isAsyncFnResource,
+  isAsyncFunction,
   isAsyncTask,
   medianSorted,
   quantileSorted,
@@ -34,7 +34,7 @@ export default class Task extends EventTarget {
   name: string;
 
   /**
-   * Task function
+   * The task function
    */
   fn: Fn;
 
@@ -73,7 +73,7 @@ export default class Task extends EventTarget {
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
       try {
-        if (await isAsyncFnResource(this.opts.beforeAll)) {
+        if (isAsyncFunction(this.opts.beforeAll)) {
           await this.opts.beforeAll.call(this);
         } else {
           this.opts.beforeAll.call(this);
@@ -83,11 +83,9 @@ export default class Task extends EventTarget {
       }
     }
 
-    const asyncBeforeEach = this.opts.beforeEach != null
-      && (await isAsyncFnResource(this.opts.beforeEach));
+    const asyncBeforeEach = this.opts.beforeEach != null && isAsyncFunction(this.opts.beforeEach);
     const asyncTask = await isAsyncTask(this);
-    const asyncAfterEach = this.opts.afterEach != null
-      && (await isAsyncFnResource(this.opts.afterEach));
+    const asyncAfterEach = this.opts.afterEach != null && isAsyncFunction(this.opts.afterEach);
 
     // TODO: factor out
     const executeTask = async () => {
@@ -145,7 +143,7 @@ export default class Task extends EventTarget {
 
     if (this.opts.afterAll != null) {
       try {
-        if (await isAsyncFnResource(this.opts.afterAll)) {
+        if (isAsyncFunction(this.opts.afterAll)) {
           await this.opts.afterAll.call(this);
         } else {
           this.opts.afterAll.call(this);

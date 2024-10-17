@@ -27,7 +27,7 @@ type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>;
  * @param fn - the function to check
  * @returns true if the function is an async function
  */
-export const isAsyncFunction = (
+const isAsyncFunction = (
   fn: Fn,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
 ): fn is AsyncFunctionType<unknown[], unknown> => fn?.constructor === (async () => {}).constructor;

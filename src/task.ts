@@ -14,7 +14,6 @@ import type {
 import {
   absoluteDeviation,
   getVariance,
-  isAsyncFunction,
   isAsyncTask,
   medianSorted,
   quantileSorted,
@@ -73,28 +72,18 @@ export default class Task extends EventTarget {
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
       try {
-        if (isAsyncFunction(this.opts.beforeAll)) {
-          await this.opts.beforeAll.call(this);
-        } else {
-          this.opts.beforeAll.call(this);
-        }
+        await this.opts.beforeAll.call(this);
       } catch (error) {
         return { error };
       }
     }
 
-    const asyncBeforeEach = this.opts.beforeEach != null && isAsyncFunction(this.opts.beforeEach);
     const asyncTask = await isAsyncTask(this);
-    const asyncAfterEach = this.opts.afterEach != null && isAsyncFunction(this.opts.afterEach);
 
     // TODO: factor out
     const executeTask = async () => {
       if (this.opts.beforeEach != null) {
-        if (asyncBeforeEach) {
-          await this.opts.beforeEach.call(this);
-        } else {
-          this.opts.beforeEach.call(this);
-        }
+        await this.opts.beforeEach.call(this);
       }
 
       let taskTime = 0;
@@ -112,11 +101,7 @@ export default class Task extends EventTarget {
       totalTime += taskTime;
 
       if (this.opts.afterEach != null) {
-        if (asyncAfterEach) {
-          await this.opts.afterEach.call(this);
-        } else {
-          this.opts.afterEach.call(this);
-        }
+        await this.opts.afterEach.call(this);
       }
     };
 
@@ -143,11 +128,7 @@ export default class Task extends EventTarget {
 
     if (this.opts.afterAll != null) {
       try {
-        if (isAsyncFunction(this.opts.afterAll)) {
-          await this.opts.afterAll.call(this);
-        } else {
-          this.opts.afterAll.call(this);
-        }
+        await this.opts.afterAll.call(this);
       } catch (error) {
         return { error };
       }

@@ -4,6 +4,16 @@ import { isAsyncTask } from '../src/utils';
 
 const bench = new Bench();
 
+test('isAsyncTask undefined', () => {
+  // @ts-expect-error: testing with undefined
+  expect(isAsyncTask(undefined)).resolves.toBe(false);
+});
+
+test('isAsyncTask null', () => {
+  // @ts-expect-error: testing with null
+  expect(isAsyncTask(null)).resolves.toBe(false);
+});
+
 test('isAsyncTask sync', () => {
   const task = new Task(bench, 'foo', () => 1);
   expect(isAsyncTask(task)).resolves.toBe(false);
@@ -26,7 +36,7 @@ test('isAsyncTask promiseLike', () => {
   expect(isAsyncTask(task)).resolves.toBe(true);
 });
 
-test('isAsyncTask promise with catch', () => {
+test('isAsyncTask promise with error', () => {
   const task = new Task(bench, 'foo', () => Promise.reject(new Error('foo')));
   expect(isAsyncTask(task)).resolves.toBe(true);
 });

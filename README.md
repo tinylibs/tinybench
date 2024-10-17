@@ -333,13 +333,13 @@ For instance:
 
 ```js
 // runs on each benchmark task's cycle
-bench.addEventListener('cycle', (e) => {
-  const task = e.task!;
+bench.addEventListener('cycle', (evt) => {
+  const task = evt.task!;
 });
 
 // runs only on this benchmark task's cycle
-task.addEventListener('cycle', (e) => {
-  const task = e.task!;
+task.addEventListener('cycle', (evt) => {
+  const task = evt.task!;
 });
 ```
 
@@ -347,7 +347,7 @@ task.addEventListener('cycle', (e) => {
 
 ```ts
 export type BenchEvent = Event & {
-  task: Task | null;
+  task?: Task;
 };
 ```
 

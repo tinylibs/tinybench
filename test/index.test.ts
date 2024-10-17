@@ -96,8 +96,8 @@ test('events order', async () => {
     events.push('reset');
   });
 
-  bench.addEventListener('cycle', (e) => {
-    expect(e.task.name).not.toBe('');
+  bench.addEventListener('cycle', (evt) => {
+    expect(evt.task?.name).not.toBe('');
     events.push('cycle');
   });
 
@@ -196,9 +196,9 @@ test('error event', async () => {
   });
 
   let taskErr: Error;
-  bench.addEventListener('error', (e) => {
-    const { task } = e;
-    taskErr = task.result!.error as Error;
+  bench.addEventListener('error', (evt) => {
+    const { task } = evt;
+    taskErr = task?.result!.error as Error;
   });
 
   await bench.run();

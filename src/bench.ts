@@ -5,6 +5,7 @@ import type {
   AddEventListenerOptionsArgument,
   BenchEvents,
   BenchEventsMap,
+  EventListener,
   Fn,
   FnOptions,
   Hook,
@@ -210,20 +211,18 @@ export default class Bench extends EventTarget {
     return this;
   }
 
-  addEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
-    type: K,
-    listener: T,
-    options?: AddEventListenerOptionsArgument,
-  ): void {
-    super.addEventListener(type, listener as any, options);
+  addEventListener<
+    K extends BenchEvents,
+    T extends EventListener = BenchEventsMap[K],
+  >(type: K, listener: T, options?: AddEventListenerOptionsArgument): void {
+    super.addEventListener(type, listener, options);
   }
 
-  removeEventListener<K extends BenchEvents, T = BenchEventsMap[K]>(
-    type: K,
-    listener: T,
-    options?: RemoveEventListenerOptionsArgument,
-  ) {
-    super.removeEventListener(type, listener as any, options);
+  removeEventListener<
+    K extends BenchEvents,
+    T extends EventListener = BenchEventsMap[K],
+  >(type: K, listener: T, options?: RemoveEventListenerOptionsArgument) {
+    super.removeEventListener(type, listener, options);
   }
 
   /**

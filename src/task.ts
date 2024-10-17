@@ -4,6 +4,7 @@ import tTable from './constants';
 import { createBenchEvent } from './event';
 import type {
   AddEventListenerOptionsArgument,
+  EventListener,
   Fn,
   FnOptions,
   RemoveEventListenerOptionsArgument,
@@ -248,20 +249,18 @@ export default class Task extends EventTarget {
     }
   }
 
-  addEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
-    type: K,
-    listener: T,
-    options?: AddEventListenerOptionsArgument,
-  ) {
-    super.addEventListener(type, listener as any, options);
+  addEventListener<
+    K extends TaskEvents,
+    T extends EventListener = TaskEventsMap[K],
+  >(type: K, listener: T, options?: AddEventListenerOptionsArgument) {
+    super.addEventListener(type, listener, options);
   }
 
-  removeEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
-    type: K,
-    listener: T,
-    options?: RemoveEventListenerOptionsArgument,
-  ) {
-    super.removeEventListener(type, listener as any, options);
+  removeEventListener<
+    K extends TaskEvents,
+    T extends EventListener = TaskEventsMap[K],
+  >(type: K, listener: T, options?: RemoveEventListenerOptionsArgument) {
+    super.removeEventListener(type, listener, options);
   }
 
   /**

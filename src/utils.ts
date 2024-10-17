@@ -14,10 +14,10 @@ export const now = () => performance.now();
  * @returns true if the value is a promise-like object
  */
 const isPromiseLike = <T>(
-  maybePromiseLike: any,
+  maybePromiseLike: unknown,
 ): maybePromiseLike is PromiseLike<T> => maybePromiseLike !== null
   && typeof maybePromiseLike === 'object'
-  && typeof maybePromiseLike.then === 'function';
+  && typeof (maybePromiseLike as PromiseLike<T>).then === 'function';
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>;
 

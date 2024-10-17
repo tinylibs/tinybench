@@ -3,7 +3,7 @@ import type Task from '../src/task';
 /**
  * the task function
  */
-export type Fn = () => any | Promise<any>;
+export type Fn = (...arg: unknown[]) => unknown | Promise<unknown>;
 
 export interface FnOptions {
   /**
@@ -159,19 +159,20 @@ export type BenchEvents =
 
 export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 
-type NoopEventListener = () => any | Promise<any>;
-type TaskEventListener = (e: Event & { task: Task }) => any | Promise<any>;
+export type EventListener = (
+  evt: Event & { task?: Task },
+) => void | Promise<void>;
 
 export interface BenchEventsMap {
-  abort: NoopEventListener;
-  start: NoopEventListener;
-  complete: NoopEventListener;
-  warmup: NoopEventListener;
-  reset: NoopEventListener;
-  add: TaskEventListener;
-  remove: TaskEventListener;
-  cycle: TaskEventListener;
-  error: TaskEventListener;
+  abort: EventListener;
+  start: EventListener;
+  complete: EventListener;
+  warmup: EventListener;
+  reset: EventListener;
+  add: EventListener;
+  remove: EventListener;
+  cycle: EventListener;
+  error: EventListener;
 }
 
 /**
@@ -187,13 +188,13 @@ export type TaskEvents =
   | 'cycle';
 
 export interface TaskEventsMap {
-  abort: NoopEventListener;
-  start: TaskEventListener;
-  error: TaskEventListener;
-  cycle: TaskEventListener;
-  complete: TaskEventListener;
-  warmup: TaskEventListener;
-  reset: TaskEventListener;
+  abort: EventListener;
+  start: EventListener;
+  error: EventListener;
+  cycle: EventListener;
+  complete: EventListener;
+  warmup: EventListener;
+  reset: EventListener;
 }
 export interface Options {
   /**

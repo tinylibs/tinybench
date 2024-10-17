@@ -4,6 +4,7 @@ import tTable from './constants';
 import { createBenchEvent } from './event';
 import type {
   AddEventListenerOptionsArgument,
+  EventListener,
   Fn,
   FnOptions,
   RemoveEventListenerOptionsArgument,
@@ -14,7 +15,6 @@ import type {
 import {
   absoluteDeviation,
   getVariance,
-  isAsyncFnResource,
   isAsyncTask,
   medianSorted,
   quantileSorted,
@@ -34,7 +34,7 @@ export default class Task extends EventTarget {
   name: string;
 
   /**
-   * Task function
+   * The task function
    */
   fn: Fn;
 
@@ -73,30 +73,18 @@ export default class Task extends EventTarget {
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
       try {
-        if (await isAsyncFnResource(this.opts.beforeAll)) {
-          await this.opts.beforeAll.call(this);
-        } else {
-          this.opts.beforeAll.call(this);
-        }
+        await this.opts.beforeAll.call(this);
       } catch (error) {
         return { error };
       }
     }
 
-    const asyncBeforeEach = this.opts.beforeEach != null
-      && (await isAsyncFnResource(this.opts.beforeEach));
     const asyncTask = await isAsyncTask(this);
-    const asyncAfterEach = this.opts.afterEach != null
-      && (await isAsyncFnResource(this.opts.afterEach));
 
     // TODO: factor out
     const executeTask = async () => {
       if (this.opts.beforeEach != null) {
-        if (asyncBeforeEach) {
-          await this.opts.beforeEach.call(this);
-        } else {
-          this.opts.beforeEach.call(this);
-        }
+        await this.opts.beforeEach.call(this);
       }
 
       let taskTime = 0;
@@ -114,11 +102,7 @@ export default class Task extends EventTarget {
       totalTime += taskTime;
 
       if (this.opts.afterEach != null) {
-        if (asyncAfterEach) {
-          await this.opts.afterEach.call(this);
-        } else {
-          this.opts.afterEach.call(this);
-        }
+        await this.opts.afterEach.call(this);
       }
     };
 
@@ -145,11 +129,7 @@ export default class Task extends EventTarget {
 
     if (this.opts.afterAll != null) {
       try {
-        if (await isAsyncFnResource(this.opts.afterAll)) {
-          await this.opts.afterAll.call(this);
-        } else {
-          this.opts.afterAll.call(this);
-        }
+        await this.opts.afterAll.call(this);
       } catch (error) {
         return { error };
       }
@@ -269,20 +249,18 @@ export default class Task extends EventTarget {
     }
   }
 
-  addEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
-    type: K,
-    listener: T,
-    options?: AddEventListenerOptionsArgument,
-  ) {
-    super.addEventListener(type, listener as any, options);
+  addEventListener<
+    K extends TaskEvents,
+    T extends EventListener = TaskEventsMap[K],
+  >(type: K, listener: T, options?: AddEventListenerOptionsArgument) {
+    super.addEventListener(type, listener, options);
   }
 
-  removeEventListener<K extends TaskEvents, T = TaskEventsMap[K]>(
-    type: K,
-    listener: T,
-    options?: RemoveEventListenerOptionsArgument,
-  ) {
-    super.removeEventListener(type, listener as any, options);
+  removeEventListener<
+    K extends TaskEvents,
+    T extends EventListener = TaskEventsMap[K],
+  >(type: K, listener: T, options?: RemoveEventListenerOptionsArgument) {
+    super.removeEventListener(type, listener, options);
   }
 
   /**

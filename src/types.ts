@@ -27,61 +27,38 @@ export interface FnOptions {
   afterAll?: (this: Task) => void | Promise<void>;
 }
 
-/**
- * the benchmark task result object
- */
-export interface TaskResult {
-  /*
-   * the last error that was thrown while running the task
-   */
-  error?: unknown;
-
+export interface Statistics {
   /**
-   * The amount of time in milliseconds to run the benchmark task (cycle).
-   */
-  totalTime: number;
-
-  /**
-   * the minimum value in the samples
-   */
-  min: number;
-  /**
-   * the maximum value in the samples
-   */
-  max: number;
-
-  /**
-   * the number of operations per second
-   */
-  hz: number;
-
-  /**
-   * how long each operation takes (ms)
-   */
-  period: number;
-
-  /**
-   * task samples of each task iteration time (ms)
+   * samples
    */
   samples: number[];
 
   /**
-   * samples mean/average (estimate of the population mean)
+   * the minimum value
+   */
+  min: number;
+  /**
+   * the maximum value
+   */
+  max: number;
+
+  /**
+   * mean/average (estimate of the population mean/average)
    */
   mean: number;
 
   /**
-   * samples variance (estimate of the population variance)
+   * variance (estimate of the population variance)
    */
   variance: number;
 
   /**
-   * samples standard deviation (estimate of the population standard deviation)
+   * standard deviation (estimate of the population standard deviation)
    */
   sd: number;
 
   /**
-   * standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean)
+   * standard error of the mean/average (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
    */
   sem: number;
 
@@ -91,7 +68,7 @@ export interface TaskResult {
   df: number;
 
   /**
-   * critical value of the samples
+   * critical value
    */
   critical: number;
 
@@ -106,32 +83,162 @@ export interface TaskResult {
   rme: number;
 
   /**
+   * mean/average absolute deviation
+   */
+  aad: number | undefined;
+
+  /**
    * median absolute deviation
    */
-  mad: number;
+  mad: number | undefined;
 
   /**
    * p50/median percentile
    */
-  p50: number;
+  p50: number | undefined;
 
   /**
    * p75 percentile
    */
-  p75: number;
+  p75: number | undefined;
 
   /**
    * p99 percentile
    */
-  p99: number;
+  p99: number | undefined;
 
   /**
    * p995 percentile
    */
-  p995: number;
+  p995: number | undefined;
 
   /**
    * p999 percentile
+   */
+  p999: number | undefined;
+}
+
+/**
+ * the benchmark task result object
+ */
+export interface TaskResult {
+  /*
+   * the last task error that was thrown
+   */
+  error?: Error;
+
+  /**
+   * the time to run the task benchmark cycle (ms)
+   */
+  totalTime: number;
+
+  /**
+   * how long each operation takes (ms)
+   */
+  period: number;
+
+  /**
+   * the task latency statistics
+   */
+  latency: Statistics;
+
+  /**
+   * the task throughput statistics
+   */
+  throughput: Statistics;
+
+  /**
+   * the number of operations per second
+   * @deprecated use `.throughput.mean` instead
+   */
+  hz: number;
+
+  /**
+   * latency samples (ms)
+   * @deprecated use `.latency.samples` instead
+   */
+  samples: number[];
+
+  /**
+   * the minimum latency samples value
+   * @deprecated use `.latency.min` instead
+   */
+  min: number;
+  /**
+   * the maximum latency samples value
+   * @deprecated use `.latency.max` instead
+   */
+  max: number;
+
+  /**
+   * the latency samples mean/average (estimate of the population mean/average)
+   * @deprecated use `.latency.mean` instead
+   */
+  mean: number;
+
+  /**
+   * the latency samples variance (estimate of the population variance)
+   * @deprecated use `.latency.variance` instead
+   */
+  variance: number;
+
+  /**
+   * the latency samples standard deviation (estimate of the population standard deviation)
+   * @deprecated use `.latency.sd` instead
+   */
+  sd: number;
+
+  /**
+   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * @deprecated use `.latency.sem` instead
+   */
+  sem: number;
+
+  /**
+   * the latency samples degrees of freedom
+   * @deprecated use `.latency.df` instead
+   */
+  df: number;
+
+  /**
+   * the latency samples critical value
+   * @deprecated use `.latency.critical` instead
+   */
+  critical: number;
+
+  /**
+   * the latency samples margin of error
+   * @deprecated use `.latency.moe` instead
+   */
+  moe: number;
+
+  /**
+   * the latency samples relative margin of error
+   * @deprecated use `.latency.rme` instead
+   */
+  rme: number;
+
+  /**
+   * the latency samples p75 percentile
+   * @deprecated use `.latency.p75` instead
+   */
+  p75: number;
+
+  /**
+   * the latency samples p99 percentile
+   * @deprecated use `.latency.p99` instead
+   */
+  p99: number;
+
+  /**
+   * the latency samples p995 percentile
+   * @deprecated use `.latency.p995` instead
+   */
+  p995: number;
+
+  /**
+   * the latency samples p999 percentile
+   * @deprecated use `.latency.p999` instead
    */
   p999: number;
 }
@@ -196,6 +303,7 @@ export interface TaskEventsMap {
   warmup: EventListener;
   reset: EventListener;
 }
+
 export interface Options {
   /**
    * time needed for running a benchmark task (milliseconds) @default 500

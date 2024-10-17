@@ -1,4 +1,10 @@
 import pLimit from 'p-limit';
+import {
+  defaultMinimumIterations,
+  defaultMinimumTime,
+  defaultMinimumWarmupIterations,
+  defaultMinimumWarmupTime,
+} from './constants';
 import { createBenchEvent } from './event';
 import Task from './task';
 import type {
@@ -43,13 +49,13 @@ export default class Bench extends EventTarget {
 
   throws: boolean;
 
-  warmupTime = 100;
+  warmupTime = defaultMinimumWarmupTime;
 
-  warmupIterations = 5;
+  warmupIterations = defaultMinimumWarmupIterations;
 
-  time = 500;
+  time = defaultMinimumTime;
 
-  iterations = 10;
+  iterations = defaultMinimumIterations;
 
   now = now;
 
@@ -116,13 +122,13 @@ export default class Bench extends EventTarget {
     this.threshold = threshold;
     this.concurrency = mode;
 
-    if (mode === 'task') {
+    if (this.concurrency === 'task') {
       return this.run();
     }
 
     this.dispatchEvent(createBenchEvent('start'));
 
-    const limit = pLimit(threshold);
+    const limit = pLimit(this.threshold);
 
     const promises: Promise<Task>[] = [];
     for (const task of [...this._tasks.values()]) {
@@ -147,7 +153,7 @@ export default class Bench extends EventTarget {
       return;
     }
     this.dispatchEvent(createBenchEvent('warmup'));
-    for (const [, task] of this._tasks) {
+    for (const task of this._tasks.values()) {
       await task.warmup();
     }
   }
@@ -163,16 +169,16 @@ export default class Bench extends EventTarget {
     this.threshold = threshold;
     this.concurrency = mode;
 
-    if (mode === 'task') {
+    if (this.concurrency === 'task') {
       await this.warmup();
       return;
     }
 
     this.dispatchEvent(createBenchEvent('warmup'));
-    const limit = pLimit(threshold);
+    const limit = pLimit(this.threshold);
     const promises: Promise<void>[] = [];
 
-    for (const [, task] of this._tasks) {
+    for (const task of this._tasks.values()) {
       promises.push(limit(() => task.warmup()));
     }
 
@@ -184,9 +190,9 @@ export default class Bench extends EventTarget {
    */
   reset() {
     this.dispatchEvent(createBenchEvent('reset'));
-    this._tasks.forEach((task) => {
+    for (const task of this._tasks.values()) {
       task.reset();
-    });
+    }
   }
 
   /**
@@ -237,19 +243,21 @@ export default class Bench extends EventTarget {
         return (
           convert?.(task) || {
             'Task name': task.name,
-            'ops/sec': task.result.error
+            'Throughput average (ops/s)': task.result.error
               ? 'NaN'
-              : Number.parseInt(task.result.hz.toString(), 10).toLocaleString(),
-            'Average time/op (ns)': task.result.error
+              : `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+            'Throughput median (ops/s)': task.result.error
               ? 'NaN'
-              : task.result.mean * 1e6,
-            Margin: task.result.error
+              : `${task.result.throughput.p50?.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+            'Latency average (ns)': task.result.error
               ? 'NaN'
-              : `\xb1${task.result.rme.toFixed(2)}%`,
-            'Median time/op (ns)': task.result.error
+              : `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+            'Latency median (ns)': task.result.error
               ? 'NaN'
-              : `${task.result.p50 * 1e6}${task.result.mad * 1e6 > 0 ? `\xb1${(task.result.mad * 1e6).toFixed(10)}` : ''}`,
-            Samples: task.result.error ? 'NaN' : task.result.samples.length,
+              : `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
+            Samples: task.result.error
+              ? 'NaN'
+              : task.result.latency.samples.length,
           }
         );
       }

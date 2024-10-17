@@ -314,6 +314,7 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
 
   expect(beforeAll.mock.calls.length).toBe(2 /* warmup + run */);
   expect(afterAll.mock.calls.length).toBe(2 /* warmup + run */);
+  expect(beforeAll.mock.calls.length).toBe(afterAll.mock.calls.length);
   expect(beforeEach.mock.calls.length).toBe(iterations * 2 /* warmup + run */);
   expect(afterEach.mock.calls.length).toBe(iterations * 2 /* warmup + run */);
   expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);

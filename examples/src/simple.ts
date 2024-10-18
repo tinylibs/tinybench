@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { Bench } from '../../src';
 
-const bench = new Bench({ time: 100 });
+const bench = new Bench({ name: 'simple benchmark', time: 100 });
 
 bench
   .add('faster task', () => {
@@ -14,9 +14,11 @@ bench
 
 await bench.run();
 
+console.log(bench.name);
 console.table(bench.table());
 
 // Output:
+// simple benchmark
 // ┌─────────┬───────────────┬────────────────────────────┬───────────────────────────┬──────────────────────┬─────────────────────┬─────────┐
 // │ (index) │ Task name     │ Throughput average (ops/s) │ Throughput median (ops/s) │ Latency average (ns) │ Latency median (ns) │ Samples │
 // ├─────────┼───────────────┼────────────────────────────┼───────────────────────────┼──────────────────────┼─────────────────────┼─────────┤

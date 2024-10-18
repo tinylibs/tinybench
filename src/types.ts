@@ -308,6 +308,11 @@ export interface TaskEventsMap {
 
 export interface Options {
   /**
+   * benchmark name
+   */
+  name?: string;
+
+  /**
    * time needed for running a benchmark task (milliseconds) @default 500
    */
   time?: number;

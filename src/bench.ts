@@ -31,6 +31,8 @@ export default class Bench extends EventTarget {
    */
   private readonly _tasks = new Map<string, Task>();
 
+  name?: string;
+
   /**
    * Executes tasks concurrently based on the specified concurrency mode.
    *
@@ -65,6 +67,7 @@ export default class Bench extends EventTarget {
 
   constructor(options: Options = {}) {
     super();
+    this.name = options.name;
     this.now = options.now ?? this.now;
     this.warmupTime = options.warmupTime ?? this.warmupTime;
     this.warmupIterations = options.warmupIterations ?? this.warmupIterations;

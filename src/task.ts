@@ -92,11 +92,11 @@ export default class Task extends EventTarget {
       let taskTime = 0; // ms;
       if (this.async) {
         const taskStart = this.bench.now();
-        await this.fn();
+        await this.fn.call(this);
         taskTime = this.bench.now() - taskStart;
       } else {
         const taskStart = this.bench.now();
-        this.fn();
+        this.fn.call(this);
         taskTime = this.bench.now() - taskStart;
       }
 
@@ -152,7 +152,7 @@ export default class Task extends EventTarget {
       this.bench.time,
       this.bench.iterations,
     )) as { samples?: number[]; error?: Error };
-    this.bench.teardown(this, 'run');
+    await this.bench.teardown(this, 'run');
 
     if (latencySamples) {
       this.runs = latencySamples.length;
@@ -301,7 +301,7 @@ export default class Task extends EventTarget {
       this.bench.warmupTime,
       this.bench.warmupIterations,
     )) as { error?: Error };
-    this.bench.teardown(this, 'warmup');
+    await this.bench.teardown(this, 'warmup');
 
     if (error) {
       this.setResult({ error });

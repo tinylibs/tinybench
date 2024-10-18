@@ -104,7 +104,7 @@ test('events order', async () => {
   });
 
   bench.addEventListener('cycle', (evt) => {
-    expect(evt.task?.name).not.toBe('');
+    expect(evt.task?.name?.trim()).not.toBe('');
     events.push('cycle');
   });
 

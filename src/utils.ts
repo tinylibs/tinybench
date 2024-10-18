@@ -1,4 +1,3 @@
-import type Task from './task';
 import type { Fn } from './types';
 
 export const nanoToMs = (nano: number) => nano / 1e6;
@@ -38,7 +37,7 @@ const isAsyncFunction = (
  * @param fn - the function to check
  * @returns true if the function is an async function or returns a promise
  */
-const isAsyncFnResource = async (fn: Fn): Promise<boolean> => {
+export const isFnAsyncResource = (fn: Fn): boolean => {
   if (fn == null) {
     return false;
   }
@@ -51,7 +50,8 @@ const isAsyncFnResource = async (fn: Fn): Promise<boolean> => {
     if (promiseLike) {
       // silence promise rejection
       try {
-        await fnCall;
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        (fnCall as Promise<unknown>).then(() => {})?.catch(() => {});
       } catch {
         // ignore
       }
@@ -61,14 +61,6 @@ const isAsyncFnResource = async (fn: Fn): Promise<boolean> => {
     return false;
   }
 };
-
-/**
- * An async task check helper considering runtime support async syntax and promise return
- *
- * @param task - the task to check
- * @returns true if the task is an async task
- */
-export const isAsyncTask = async (task: Task): Promise<boolean> => isAsyncFnResource(task?.fn);
 
 /**
  * Computes the average of a sample.

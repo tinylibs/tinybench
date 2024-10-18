@@ -90,7 +90,7 @@ export const average = (samples: number[]) => {
  * @param avg the average of the sample
  * @returns the variance of the sample
  */
-export const getVariance = (samples: number[], avg = average(samples)) => {
+export const variance = (samples: number[], avg = average(samples)) => {
   const result = samples.reduce((sum, n) => sum + (n - avg) ** 2, 0);
   return result / (samples.length - 1) || 0;
 };

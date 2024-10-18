@@ -6,8 +6,7 @@ _I'm transitioning to a full-time open source career. Your support would be grea
 [![CI](https://github.com/tinylibs/tinybench/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tinylibs/tinybench/actions/workflows/test.yml)
 [![NPM version](https://img.shields.io/npm/v/tinybench.svg?style=flat)](https://www.npmjs.com/package/tinybench)
 
-Benchmark your code easily with Tinybench, a simple, tiny and light-weight `7KB` (`2KB` minified and gzipped)
-benchmarking library!
+Benchmark your code easily with Tinybench, a simple, tiny and light-weight `10KB` (`2KB` minified and gzipped) benchmarking library!
 You can run your benchmarks in multiple JavaScript runtimes, Tinybench is
 completely based on the Web APIs with proper timing using `process.hrtime` or
 `performance.now`.
@@ -23,7 +22,7 @@ _In case you need more tiny libraries like tinypool or tinyspy, please consider 
 
 ## Installing
 
-```bash
+```shell
 $ npm install -D tinybench
 ```
 
@@ -52,12 +51,12 @@ await bench.run();
 console.table(bench.table());
 
 // Output:
-// ┌─────────┬───────────────┬──────────┬──────────────────────┬──────────┬──────────────────────────────────┬─────────┐
-// │ (index) │ Task name     │ ops/sec  │ Average time/op (ns) │ Margin   │ Median time/op (ns)              │ Samples │
-// ├─────────┼───────────────┼──────────┼──────────────────────┼──────────┼──────────────────────────────────┼─────────┤
-// │ 0       │ 'faster task' │ '38,832' │ 25751.297631307978   │ '±3.48%' │ '22016.49999997812±5.5000000145' │ 3884    │
-// │ 1       │ 'slower task' │ '669'    │ 1493338.567164177    │ '±5.98%' │ '1445076.0000000286'             │ 67      │
-// └─────────┴───────────────┴──────────┴──────────────────────┴──────────┴──────────────────────────────────┴─────────┘
+// ┌─────────┬───────────────┬────────────────────────────┬───────────────────────────┬──────────────────────┬─────────────────────┬─────────┐
+// │ (index) │ Task name     │ Throughput average (ops/s) │ Throughput median (ops/s) │ Latency average (ns) │ Latency median (ns) │ Samples │
+// ├─────────┼───────────────┼────────────────────────────┼───────────────────────────┼──────────────────────┼─────────────────────┼─────────┤
+// │ 0       │ 'faster task' │ '102906 ± 0.89%'           │ '82217 ± 14'              │ '11909.14 ± 3.95%'   │ '12163.00 ± 2.00'   │ 8398    │
+// │ 1       │ 'slower task' │ '988 ± 26.26%'             │ '710'                     │ '1379560.47 ± 6.72%' │ '1408552.00'        │ 73      │
+// └─────────┴───────────────┴────────────────────────────┴───────────────────────────┴──────────────────────┴─────────────────────┴─────────┘
 ```
 
 The `add` method accepts a task name and a task function, so it can benchmark
@@ -164,6 +163,8 @@ function has been executed.
 - `setResult(result: Partial<TaskResult>)`: change the result object values
 - `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object
 
+FnOptions:
+
 ```ts
 export interface FnOptions {
   /**
@@ -188,35 +189,21 @@ export interface FnOptions {
 }
 ```
 
-## `TaskResult`
+### `TaskResult`
 
-the benchmark task result object.
+The benchmark task result object:
 
 ```ts
 export interface TaskResult {
   /*
-   * the last error that was thrown while running the task
+   * the last task error that was thrown
    */
-  error?: unknown;
+  error?: Error;
 
   /**
-   * The amount of time in milliseconds to run the benchmark task (cycle).
+   * the time to run the task benchmark cycle (ms)
    */
   totalTime: number;
-
-  /**
-   * the minimum value in the samples
-   */
-  min: number;
-  /**
-   * the maximum value in the samples
-   */
-  max: number;
-
-  /**
-   * the number of operations per second
-   */
-  hz: number;
 
   /**
    * how long each operation takes (ms)
@@ -224,81 +211,113 @@ export interface TaskResult {
   period: number;
 
   /**
-   * task samples of each task iteration time (ms)
+   * the task latency statistics
+   */
+  latency: Statistics;
+
+  /**
+   * the task throughput statistics
+   */
+  throughput: Statistics;
+
+  /**
+   * the number of operations per second
+   * @deprecated use `.throughput.mean` instead
+   */
+  hz: number;
+
+  /**
+   * latency samples (ms)
+   * @deprecated use `.latency.samples` instead
    */
   samples: number[];
 
   /**
-   * samples mean/average (estimate of the population mean)
+   * the minimum latency samples value
+   * @deprecated use `.latency.min` instead
+   */
+  min: number;
+  /**
+   * the maximum latency samples value
+   * @deprecated use `.latency.max` instead
+   */
+  max: number;
+
+  /**
+   * the latency samples mean/average (estimate of the population mean/average)
+   * @deprecated use `.latency.mean` instead
    */
   mean: number;
 
   /**
-   * samples variance (estimate of the population variance)
+   * the latency samples variance (estimate of the population variance)
+   * @deprecated use `.latency.variance` instead
    */
   variance: number;
 
   /**
-   * samples standard deviation (estimate of the population standard deviation)
+   * the latency samples standard deviation (estimate of the population standard deviation)
+   * @deprecated use `.latency.sd` instead
    */
   sd: number;
 
   /**
-   * standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean)
+   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * @deprecated use `.latency.sem` instead
    */
   sem: number;
 
   /**
-   * degrees of freedom
+   * the latency samples degrees of freedom
+   * @deprecated use `.latency.df` instead
    */
   df: number;
 
   /**
-   * critical value of the samples
+   * the latency samples critical value
+   * @deprecated use `.latency.critical` instead
    */
   critical: number;
 
   /**
-   * margin of error
+   * the latency samples margin of error
+   * @deprecated use `.latency.moe` instead
    */
   moe: number;
 
   /**
-   * relative margin of error
+   * the latency samples relative margin of error
+   * @deprecated use `.latency.rme` instead
    */
   rme: number;
 
   /**
-   * median absolute deviation
-   */
-  mad: number;
-
-  /**
-   * p50/median percentile
-   */
-  p50: number;
-
-  /**
-   * p75 percentile
+   * the latency samples p75 percentile
+   * @deprecated use `.latency.p75` instead
    */
   p75: number;
 
   /**
-   * p99 percentile
+   * the latency samples p99 percentile
+   * @deprecated use `.latency.p99` instead
    */
   p99: number;
 
   /**
-   * p995 percentile
+   * the latency samples p995 percentile
+   * @deprecated use `.latency.p995` instead
    */
   p995: number;
 
   /**
-   * p999 percentile
+   * the latency samples p999 percentile
+   * @deprecated use `.latency.p999` instead
    */
   p999: number;
 }
 ```
+
+[Statistics](https://github.com/tinylibs/tinybench/blob/main/src/types.ts#L30) type definition.
 
 ### `Events`
 

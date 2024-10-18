@@ -84,7 +84,7 @@ export default class Task extends EventTarget {
     // TODO: factor out
     let totalTime = 0; // ms
     const samples: number[] = [];
-    const executeTask = async () => {
+    const benchmarkTask = async () => {
       if (this.opts.beforeEach != null) {
         await this.opts.beforeEach.call(this);
       }
@@ -117,9 +117,9 @@ export default class Task extends EventTarget {
         && !this.bench.signal?.aborted
       ) {
         if (this.bench.concurrency === 'task') {
-          promises.push(limit(executeTask));
+          promises.push(limit(benchmarkTask));
         } else {
-          await executeTask();
+          await benchmarkTask();
         }
       }
       if (promises.length > 0) {

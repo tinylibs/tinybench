@@ -236,7 +236,7 @@ export interface TaskResult {
    * @deprecated use `.latency.min` instead
    */
   min: number;
-  
+
   /**
    * the maximum latency samples value
    * @deprecated use `.latency.max` instead
@@ -375,7 +375,7 @@ the `hrtimeNow` function from the library and pass it to the `Bench` options.
 import { hrtimeNow } from 'tinybench';
 ```
 
-It may make your benchmarks slower, check #42.
+It may make your benchmarks slower, check [#42](https://github.com/tinylibs/tinybench/issues/42).
 
 ## Concurrency
 

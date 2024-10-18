@@ -36,12 +36,12 @@ export default class Bench extends EventTarget {
    *
    * - When `mode` is set to `null` (default), concurrency is disabled.
    * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
-   * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
+   * - When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
    */
   concurrency: 'task' | 'bench' | null = null;
 
   /**
-   * The maximum number of concurrent tasks to run. Defaults to Infinity.
+   * The maximum number of concurrent tasks to run @default Number.POSITIVE_INFINITY
    */
   threshold = Number.POSITIVE_INFINITY;
 
@@ -94,51 +94,25 @@ export default class Bench extends EventTarget {
   }
 
   /**
-   * run the added tasks that were registered using the
-   * {@link add} method.
+   * run the added tasks that were registered using the {@link add} method.
    * Note: This method does not do any warmup. Call {@link warmup} for that.
    */
   async run(): Promise<Task[]> {
+    let values: Task[] = [];
+    this.dispatchEvent(createBenchEvent('start'));
     if (this.concurrency === 'bench') {
-      // TODO: in the next major, we should remove runConcurrently
-      return this.runConcurrently(this.threshold, this.concurrency);
-    }
-    this.dispatchEvent(createBenchEvent('start'));
-    const values: Task[] = [];
-    for (const task of [...this._tasks.values()]) {
-      values.push(await this.runTask(task));
+      const limit = pLimit(this.threshold);
+      const promises: Promise<Task>[] = [];
+      for (const task of this._tasks.values()) {
+        promises.push(limit(() => this.runTask(task)));
+      }
+      values = await Promise.all(promises);
+    } else {
+      for (const task of this._tasks.values()) {
+        values.push(await this.runTask(task));
+      }
     }
     this.dispatchEvent(createBenchEvent('complete'));
-    return values;
-  }
-
-  /**
-   * See Bench.{@link concurrency}
-   */
-  async runConcurrently(
-    threshold = Number.POSITIVE_INFINITY,
-    mode: NonNullable<Bench['concurrency']> = 'bench',
-  ): Promise<Task[]> {
-    this.threshold = threshold;
-    this.concurrency = mode;
-
-    if (this.concurrency === 'task') {
-      return this.run();
-    }
-
-    this.dispatchEvent(createBenchEvent('start'));
-
-    const limit = pLimit(this.threshold);
-
-    const promises: Promise<Task>[] = [];
-    for (const task of [...this._tasks.values()]) {
-      promises.push(limit(() => this.runTask(task)));
-    }
-
-    const values = await Promise.all(promises);
-
-    this.dispatchEvent(createBenchEvent('complete'));
-
     return values;
   }
 
@@ -147,42 +121,19 @@ export default class Bench extends EventTarget {
    * This is not run by default by the {@link run} method.
    */
   async warmup(): Promise<void> {
+    this.dispatchEvent(createBenchEvent('warmup'));
     if (this.concurrency === 'bench') {
-      // TODO: in the next major, we should remove *Concurrently methods
-      await this.warmupConcurrently(this.threshold, this.concurrency);
-      return;
+      const limit = pLimit(this.threshold);
+      const promises: Promise<void>[] = [];
+      for (const task of this._tasks.values()) {
+        promises.push(limit(() => task.warmup()));
+      }
+      await Promise.all(promises);
+    } else {
+      for (const task of this._tasks.values()) {
+        await task.warmup();
+      }
     }
-    this.dispatchEvent(createBenchEvent('warmup'));
-    for (const task of this._tasks.values()) {
-      await task.warmup();
-    }
-  }
-
-  /**
-   * warmup the benchmark tasks concurrently.
-   * This is not run by default by the {@link runConcurrently} method.
-   */
-  async warmupConcurrently(
-    threshold = Number.POSITIVE_INFINITY,
-    mode: NonNullable<Bench['concurrency']> = 'bench',
-  ): Promise<void> {
-    this.threshold = threshold;
-    this.concurrency = mode;
-
-    if (this.concurrency === 'task') {
-      await this.warmup();
-      return;
-    }
-
-    this.dispatchEvent(createBenchEvent('warmup'));
-    const limit = pLimit(this.threshold);
-    const promises: Promise<void>[] = [];
-
-    for (const task of this._tasks.values()) {
-      promises.push(limit(() => task.warmup()));
-    }
-
-    await Promise.all(promises);
   }
 
   /**

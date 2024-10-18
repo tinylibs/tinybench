@@ -60,14 +60,13 @@ export default class Task extends EventTarget {
     this.name = name;
     this.fn = fn;
     this.opts = opts;
-    // TODO: support signals in Tasks
+    // TODO: support signal in Tasks
   }
 
   private async loop(
     time: number,
     iterations: number,
   ): Promise<{ samples?: number[]; error?: unknown }> {
-    const concurrent = this.bench.concurrency === 'task';
     let totalTime = 0; // ms
     const samples: number[] = [];
     if (this.opts.beforeAll != null) {
@@ -104,22 +103,21 @@ export default class Task extends EventTarget {
         await this.opts.afterEach.call(this);
       }
     };
-
-    const limit = pLimit(this.bench.threshold);
     try {
+      const limit = pLimit(this.bench.threshold); // only for task level concurrency
       const promises: Promise<void>[] = []; // only for task level concurrency
       while (
         (totalTime < time
           || samples.length + limit.activeCount + limit.pendingCount < iterations)
         && !this.bench.signal?.aborted
       ) {
-        if (concurrent) {
+        if (this.bench.concurrency === 'task') {
           promises.push(limit(executeTask));
         } else {
           await executeTask();
         }
       }
-      if (promises.length) {
+      if (promises.length > 0) {
         await Promise.all(promises);
       }
     } catch (error) {
@@ -137,7 +135,7 @@ export default class Task extends EventTarget {
   }
 
   /**
-   * run the current task and write the results in `Task.result` object
+   * run the current task and write the results in `Task.result` object property
    */
   async run() {
     if (this.result?.error) {
@@ -331,8 +329,7 @@ export default class Task extends EventTarget {
   }
 
   /**
-   * reset the task to make the `Task.runs` a zero-value and remove the `Task.result`
-   * object
+   * reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
    */
   reset() {
     this.dispatchEvent(createBenchEvent('reset', this));

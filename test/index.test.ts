@@ -180,16 +180,18 @@ test('events order at task completion', async () => {
   const barTask = bench.getTask('bar')!;
   fooTask.addEventListener('complete', () => {
     events.push('foo-complete');
-    expect(events).not.toContain('bar-complete');
+    expect(events).toStrictEqual(['foo-complete']);
   });
   barTask.addEventListener('complete', () => {
     events.push('bar-complete');
-    expect(events).toContain('foo-complete');
+    expect(events).toStrictEqual(['foo-complete', 'bar-complete']);
   });
 
-  await bench.run();
+  const tasks = await bench.run();
 
-  expect(events).toStrictEqual(['foo-complete', 'bar-complete']);
+  expect(tasks.length).toBe(2);
+  expect(tasks[0]?.name).toBe('foo');
+  expect(tasks[1]?.name).toBe('bar');
 });
 
 test('error event', async () => {

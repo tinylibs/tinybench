@@ -12,10 +12,9 @@ completely based on the Web APIs with proper timing using `process.hrtime` or
 `performance.now`.
 
 - Accurate and precise timing based on the environment
+- Statistically analyzed latency and throughput values: standard deviation, margin of error, variance, percentiles, etc.
+- Concurrency support
 - `Event` and `EventTarget` compatible events
-- Statistically analyzed values
-- Calculated Percentiles
-- Fully detailed results
 - No dependencies
 
 _In case you need more tiny libraries like tinypool or tinyspy, please consider submitting an [RFC](https://github.com/tinylibs/rfcs)_
@@ -106,7 +105,7 @@ export interface Options {
   throws?: boolean;
 
   /**
-   * warmup time (milliseconds) @default 100ms
+   * warmup time (milliseconds) @default 100
    */
   warmupTime?: number;
 
@@ -133,12 +132,12 @@ export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 - `async warmup()`: warmup the benchmark tasks
 - `reset()`: reset each task and remove its result
 - `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map
-  - `Fn`: `() => any | Promise<any>`
+  - `Fn`: `() => unknown | Promise<unknown>`
   - `FnOpts`: `{}`: a set of optional functions run during the benchmark lifecycle that can be used to set up or tear down test data or fixtures without affecting the timing of each task
-    - `beforeAll?: () => any | Promise<any>`: invoked once before iterations of `fn` begin
-    - `beforeEach?: () => any | Promise<any>`: invoked before each time `fn` is executed
-    - `afterEach?: () => any | Promise<any>`: invoked after each time `fn` is executed
-    - `afterAll?: () => any | Promise<any>`: invoked once after all iterations of `fn` have finished
+    - `beforeAll?: () => void | Promise<void>`: invoked once before iterations of `fn` begin
+    - `beforeEach?: () => void | Promise<void>`: invoked before each time `fn` is executed
+    - `afterEach?: () => void | Promise<void>`: invoked after each time `fn` is executed
+    - `afterAll?: () => void | Promise<void>`: invoked once after all iterations of `fn` have finished
 - `remove(name: string)`: remove a benchmark task from the task map
 - `table()`: table of the tasks results
 - `get results(): (TaskResult | undefined)[]`: (getter) tasks results as an array
@@ -158,10 +157,10 @@ function has been executed.
 - `opts: FnOptions`: Task options
 - `runs: number`: the number of times the task function has been executed
 - `result?: TaskResult`: the result object
-- `async run()`: run the current task and write the results in `Task.result` object
+- `async run()`: run the current task and write the results in `Task.result` object property
 - `async warmup()`: warmup the current task
 - `setResult(result: Partial<TaskResult>)`: change the result object values
-- `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object
+- `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
 
 FnOptions:
 
@@ -237,6 +236,7 @@ export interface TaskResult {
    * @deprecated use `.latency.min` instead
    */
   min: number;
+  
   /**
    * the maximum latency samples value
    * @deprecated use `.latency.max` instead
@@ -393,7 +393,7 @@ await bench.run();
 ## Prior art
 
 - [Benchmark.js](https://github.com/bestiejs/benchmark.js)
-- [Mitata](https://github.com/evanwashere/mitata/)
+- [mitata](https://github.com/evanwashere/mitata/)
 - [tatami-ng](https://github.com/poolifier/tatami-ng)
 - [Bema](https://github.com/prisma-labs/bema)
 

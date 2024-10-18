@@ -34,6 +34,7 @@ test('sequential', async () => {
   const tasks = await sequentialBench.run();
 
   expect(tasks.length).toBe(3);
+  expect(benchTasks.length).toBeGreaterThanOrEqual(tasks.length);
   expect(tasks[0]?.name).toBe('sample 1');
   expect(tasks[1]?.name).toBe('sample 2');
   expect(tasks[2]?.name).toBe('sample 3');

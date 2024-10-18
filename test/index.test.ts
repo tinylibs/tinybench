@@ -281,6 +281,8 @@ test('statistics', async () => {
   // deprecated
   expect(Array.isArray(fooTask.result!.samples)).toBe(true);
   expect(fooTask.result!.hz).toBeTypeOf('number');
+  expect(fooTask.result!.min).toBeTypeOf('number');
+  expect(fooTask.result!.max).toBeTypeOf('number');
   expect(fooTask.result!.mean).toBeTypeOf('number');
   expect(fooTask.result!.variance).toBeTypeOf('number');
   expect(fooTask.result!.sd).toBeTypeOf('number');

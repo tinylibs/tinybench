@@ -37,6 +37,7 @@ export interface Statistics {
    * the minimum value
    */
   min: number;
+
   /**
    * the maximum value
    */
@@ -164,6 +165,7 @@ export interface TaskResult {
    * @deprecated use `.latency.min` instead
    */
   min: number;
+
   /**
    * the maximum latency samples value
    * @deprecated use `.latency.max` instead
@@ -331,7 +333,7 @@ export interface Options {
   throws?: boolean;
 
   /**
-   * warmup time (milliseconds) @default 100ms
+   * warmup time (milliseconds) @default 100
    */
   warmupTime?: number;
 

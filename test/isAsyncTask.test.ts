@@ -1,106 +1,65 @@
 import { expect, test } from 'vitest';
-import { Bench, Task } from '../src';
-import { isAsyncTask } from '../src/utils';
+import { isFnAsyncResource } from '../src/utils';
 
-const bench = new Bench();
-
-test('isAsyncTask undefined', () => {
+test('isFnAsyncResource undefined', () => {
   // @ts-expect-error: testing with undefined
-  expect(isAsyncTask(undefined)).resolves.toBe(false);
+  expect(isFnAsyncResource(undefined)).toBe(false);
 });
 
-test('isAsyncTask null', () => {
+test('isFnAsyncResource null', () => {
   // @ts-expect-error: testing with null
-  expect(isAsyncTask(null)).resolves.toBe(false);
+  expect(isFnAsyncResource(null)).toBe(false);
 });
 
-test('isAsyncTask sync', () => {
-  const task = new Task(bench, 'foo', () => 1);
-  expect(isAsyncTask(task)).resolves.toBe(false);
+test('isFnAsyncResource sync', () => {
+  expect(isFnAsyncResource(() => 1)).toBe(false);
 });
 
-test('isAsyncTask async', () => {
-  const task = new Task(bench, 'foo', async () => 1);
-  expect(isAsyncTask(task)).resolves.toBe(true);
+test('isFnAsyncResource async', () => {
+  expect(isFnAsyncResource(async () => 1)).toBe(true);
 });
 
-test('isAsyncTask promise', () => {
-  const task = new Task(bench, 'foo', () => Promise.resolve(1));
-  expect(isAsyncTask(task)).resolves.toBe(true);
+test('isFnAsyncResource promise', () => {
+  expect(isFnAsyncResource(() => Promise.resolve(1))).toBe(true);
 });
 
-test('isAsyncTask promiseLike', () => {
-  const task = new Task(bench, 'foo', () => ({
-    then: (resolve: () => void) => setTimeout(resolve, 100),
-  }));
-  expect(isAsyncTask(task)).resolves.toBe(true);
+test('isFnAsyncResource async promise', () => {
+  expect(isFnAsyncResource(async () => Promise.resolve(1))).toBe(true);
 });
 
-test('isAsyncTask promise with error', () => {
-  const task = new Task(bench, 'foo', () => Promise.reject(new Error('foo')));
-  expect(isAsyncTask(task)).resolves.toBe(true);
+test('isFnAsyncResource promise with error', () => {
+  expect(isFnAsyncResource(() => Promise.reject(new Error('error')))).toBe(
+    true,
+  );
 });
 
-test('isAsyncTask beforeEach with error', () => {
-  const task = new Task(bench, 'foo', async () => 1, {
-    beforeEach: () => {
-      throw new Error('foo');
-    },
-  });
-  expect(isAsyncTask(task)).resolves.toBe(true);
+test('isFnAsyncResource async promise with error', () => {
+  expect(
+    isFnAsyncResource(async () => Promise.reject(new Error('error'))),
+  ).toBe(true);
 });
 
-test('isAsyncTask beforeEach with promise error', () => {
-  const task = new Task(bench, 'foo', async () => 1, {
-    beforeEach: () => Promise.reject(new Error('foo')),
-  });
-  expect(isAsyncTask(task)).resolves.toBe(true);
-});
-
-test('isAsyncTask afterEach with error', () => {
-  const task = new Task(bench, 'foo', async () => 1, {
-    afterEach: () => {
-      throw new Error('foo');
-    },
-  });
-  expect(isAsyncTask(task)).resolves.toBe(true);
-});
-
-test('isAsyncTask afterEach with promise error', () => {
-  const task = new Task(bench, 'foo', async () => 1, {
-    afterEach: () => Promise.reject(new Error('foo')),
-  });
-  expect(isAsyncTask(task)).resolves.toBe(true);
-});
-
-test('isAsyncTask beforeAll with error', () => {
-  const task = new Task(bench, 'foo', async () => 1, {
-    beforeAll: () => {
-      throw new Error('foo');
-    },
-  });
-  expect(isAsyncTask(task)).resolves.toBe(true);
-});
-
-test('isAsyncTask beforeAll with promise error', () => {
-  const task = new Task(bench, 'foo', async () => 1, {
-    beforeAll: () => Promise.reject(new Error('foo')),
-  });
-  expect(isAsyncTask(task)).resolves.toBe(true);
-});
-
-test('isAsyncTask afterAll with error', () => {
-  const task = new Task(bench, 'foo', async () => 1, {
-    afterAll: () => {
-      throw new Error('foo');
-    },
-  });
-  expect(isAsyncTask(task)).resolves.toBe(true);
-});
-
-test('isAsyncTask afterAll with promise error', () => {
-  const task = new Task(bench, 'foo', async () => 1, {
-    afterAll: () => Promise.reject(new Error('foo')),
-  });
-  expect(isAsyncTask(task)).resolves.toBe(true);
+test('isFnAsyncResource promiseLike', () => {
+  expect(
+    isFnAsyncResource(() => ({
+      then: () => 1,
+    })),
+  ).toBe(true);
+  expect(isFnAsyncResource(() => ({ then: async () => 1 }))).toBe(true);
+  expect(isFnAsyncResource(() => ({ then: () => Promise.resolve(1) }))).toBe(
+    true,
+  );
+  expect(
+    isFnAsyncResource(() => ({ then: async () => Promise.resolve(1) })),
+  ).toBe(true);
+  expect(
+    isFnAsyncResource(() => ({
+      then: () => Promise.reject(new Error('error')),
+    })),
+  ).toBe(true);
+  expect(
+    isFnAsyncResource(() => ({
+      then: async () => Promise.reject(new Error('error')),
+    })),
+  ).toBe(true);
 });

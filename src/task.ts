@@ -15,7 +15,7 @@ import type {
 import {
   absoluteDeviation,
   average,
-  isAsyncTask,
+  isFnAsyncResource,
   medianSorted,
   quantileSorted,
   variance,
@@ -39,6 +39,11 @@ export default class Task extends EventTarget {
    */
   fn: Fn;
 
+  /**
+   * The task synchronous status
+   */
+  async: boolean;
+
   /*
    * The number of times the task function has been executed
    */
@@ -59,6 +64,7 @@ export default class Task extends EventTarget {
     this.bench = bench;
     this.name = name;
     this.fn = fn;
+    this.async = isFnAsyncResource(fn);
     this.opts = opts;
     // TODO: support signal in Tasks
   }
@@ -77,8 +83,6 @@ export default class Task extends EventTarget {
       }
     }
 
-    const asyncTask = await isAsyncTask(this);
-
     // TODO: factor out
     const executeTask = async () => {
       if (this.opts.beforeEach != null) {
@@ -86,7 +90,7 @@ export default class Task extends EventTarget {
       }
 
       let taskTime = 0;
-      if (asyncTask) {
+      if (this.async) {
         const taskStart = this.bench.now();
         await this.fn();
         taskTime = this.bench.now() - taskStart;

@@ -73,8 +73,6 @@ export default class Task extends EventTarget {
     time: number,
     iterations: number,
   ): Promise<{ samples?: number[]; error?: unknown }> {
-    let totalTime = 0; // ms
-    const samples: number[] = [];
     if (this.opts.beforeAll != null) {
       try {
         await this.opts.beforeAll.call(this);
@@ -84,6 +82,8 @@ export default class Task extends EventTarget {
     }
 
     // TODO: factor out
+    let totalTime = 0; // ms
+    const samples: number[] = [];
     const executeTask = async () => {
       if (this.opts.beforeEach != null) {
         await this.opts.beforeEach.call(this);

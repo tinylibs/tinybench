@@ -69,7 +69,7 @@ export default class Task extends EventTarget {
     // TODO: support signal in Tasks
   }
 
-  private async loop(
+  private async benchmark(
     time: number,
     iterations: number,
   ): Promise<{ samples?: number[]; error?: unknown }> {
@@ -89,7 +89,7 @@ export default class Task extends EventTarget {
         await this.opts.beforeEach.call(this);
       }
 
-      let taskTime = 0;
+      let taskTime = 0; // ms;
       if (this.async) {
         const taskStart = this.bench.now();
         await this.fn();
@@ -107,6 +107,7 @@ export default class Task extends EventTarget {
         await this.opts.afterEach.call(this);
       }
     };
+
     try {
       const limit = pLimit(this.bench.threshold); // only for task level concurrency
       const promises: Promise<void>[] = []; // only for task level concurrency
@@ -147,7 +148,7 @@ export default class Task extends EventTarget {
     }
     this.dispatchEvent(createBenchEvent('start', this));
     await this.bench.setup(this, 'run');
-    const { samples: latencySamples, error } = (await this.loop(
+    const { samples: latencySamples, error } = (await this.benchmark(
       this.bench.time,
       this.bench.iterations,
     )) as { samples?: number[]; error?: Error };
@@ -296,7 +297,7 @@ export default class Task extends EventTarget {
     }
     this.dispatchEvent(createBenchEvent('warmup', this));
     await this.bench.setup(this, 'warmup');
-    const { error } = (await this.loop(
+    const { error } = (await this.benchmark(
       this.bench.warmupTime,
       this.bench.warmupIterations,
     )) as { error?: Error };

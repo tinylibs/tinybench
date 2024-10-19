@@ -1,6 +1,5 @@
 import pLimit from 'p-limit';
 import type Bench from './bench';
-import { tTable } from './constants';
 import { createBenchEvent } from './event';
 import type {
   AddEventListenerOptionsArgument,
@@ -12,14 +11,7 @@ import type {
   TaskEventsMap,
   TaskResult,
 } from './types';
-import {
-  absoluteDeviation,
-  average,
-  isFnAsyncResource,
-  medianSorted,
-  quantileSorted,
-  variance,
-} from './utils';
+import { getStatisticsSorted, isFnAsyncResource } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -156,54 +148,52 @@ export default class Task extends EventTarget {
 
     if (latencySamples) {
       this.runs = latencySamples.length;
-      // Latency statistics
       const totalTime = latencySamples.reduce((a, b) => a + b, 0);
 
-      latencySamples.sort((a, b) => a - b);
-      const latencyDf = this.runs - 1;
-      const latencyMin = latencySamples[0]!;
-      const latencyMax = latencySamples[latencyDf]!;
-      // benchmark.js: https://github.com/bestiejs/benchmark.js/blob/42f3b732bac3640eddb3ae5f50e445f3141016fd/benchmark.js#L1912-L1927
-      const latencyMean = average(latencySamples);
-      const latencyVariance = variance(latencySamples, latencyMean);
-      const latencySd = Math.sqrt(latencyVariance);
-      const latencySem = latencySd / Math.sqrt(this.runs);
-      const latencyCritical = tTable[String(Math.round(latencyDf) || 1)] || tTable.infinity!;
-      const latencyMoe = latencySem * latencyCritical;
-      const latencyRme = (latencyMoe / latencyMean) * 100;
-
-      const latencyAad = absoluteDeviation(latencySamples, average);
-      const latencyMad = absoluteDeviation(latencySamples, medianSorted);
-
-      const latencyP50 = medianSorted(latencySamples);
-      const latencyP75 = quantileSorted(latencySamples, 0.75);
-      const latencyP99 = quantileSorted(latencySamples, 0.99);
-      const latencyP995 = quantileSorted(latencySamples, 0.995);
-      const latencyP999 = quantileSorted(latencySamples, 0.999);
+      // Latency statistics
+      const {
+        min: latencyMin,
+        max: latencyMax,
+        mean: latencyMean,
+        variance: latencyVariance,
+        sd: latencySd,
+        sem: latencySem,
+        df: latencyDf,
+        critical: latencyCritical,
+        moe: latencyMoe,
+        rme: latencyRme,
+        aad: latencyAad,
+        mad: latencyMad,
+        p50: latencyP50,
+        p75: latencyP75,
+        p99: latencyP99,
+        p995: latencyP995,
+        p999: latencyP999,
+      } = getStatisticsSorted(latencySamples.sort((a, b) => a - b));
 
       // Throughput statistics
       const throughputSamples = latencySamples
         .map((sample) => (sample !== 0 ? 1000 / sample : 1000 / latencyMean)) // Use latency average as imputed sample
         .sort((a, b) => a - b);
-      const throughputDf = this.runs - 1;
-      const throughputMin = throughputSamples[0]!;
-      const throughputMax = throughputSamples[throughputDf]!;
-      const throughputMean = average(throughputSamples);
-      const throughputVariance = variance(throughputSamples, throughputMean);
-      const throughputSd = Math.sqrt(throughputVariance);
-      const throughputSem = throughputSd / Math.sqrt(this.runs);
-      const throughputCritical = tTable[String(Math.round(throughputDf) || 1)] || tTable.infinity!;
-      const throughputMoe = throughputSem * throughputCritical;
-      const throughputRme = (throughputMoe / throughputMean) * 100;
-
-      const throughputAad = absoluteDeviation(throughputSamples, average);
-      const throughputMad = absoluteDeviation(throughputSamples, medianSorted);
-
-      const throughputP50 = medianSorted(throughputSamples);
-      const throughputP75 = quantileSorted(throughputSamples, 0.75);
-      const throughputP99 = quantileSorted(throughputSamples, 0.99);
-      const throughputP995 = quantileSorted(throughputSamples, 0.995);
-      const throughputP999 = quantileSorted(throughputSamples, 0.999);
+      const {
+        min: throughputMin,
+        max: throughputMax,
+        mean: throughputMean,
+        variance: throughputVariance,
+        sd: throughputSd,
+        sem: throughputSem,
+        df: throughputDf,
+        critical: throughputCritical,
+        moe: throughputMoe,
+        rme: throughputRme,
+        aad: throughputAad,
+        mad: throughputMad,
+        p50: throughputP50,
+        p75: throughputP75,
+        p99: throughputP99,
+        p995: throughputP995,
+        p999: throughputP999,
+      } = getStatisticsSorted(throughputSamples);
 
       if (this.bench.signal?.aborted) {
         return this;

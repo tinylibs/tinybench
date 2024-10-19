@@ -134,18 +134,18 @@ const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5);
  *
  * @param samples the sample
  * @param aggFn the aggregation function to use
+ * @param aggValue the aggregated value to use
  * @returns the absolute deviation of the sample given the aggregation
  */
 const absoluteDeviation = (
   samples: number[],
   aggFn: (arr: number[]) => number | undefined,
-  aggValue?: number,
+  aggValue = aggFn(samples),
 ) => {
-  const value = aggValue ?? aggFn(samples);
   const absoluteDeviations: number[] = [];
 
   for (const sample of samples) {
-    absoluteDeviations.push(Math.abs(sample - value!));
+    absoluteDeviations.push(Math.abs(sample - aggValue!));
   }
 
   return aggFn(absoluteDeviations);

@@ -151,49 +151,15 @@ export default class Task extends EventTarget {
       const totalTime = latencySamples.reduce((a, b) => a + b, 0);
 
       // Latency statistics
-      const {
-        min: latencyMin,
-        max: latencyMax,
-        mean: latencyMean,
-        variance: latencyVariance,
-        sd: latencySd,
-        sem: latencySem,
-        df: latencyDf,
-        critical: latencyCritical,
-        moe: latencyMoe,
-        rme: latencyRme,
-        aad: latencyAad,
-        mad: latencyMad,
-        p50: latencyP50,
-        p75: latencyP75,
-        p99: latencyP99,
-        p995: latencyP995,
-        p999: latencyP999,
-      } = getStatisticsSorted(latencySamples.sort((a, b) => a - b));
+      const latencyStatistics = getStatisticsSorted(
+        latencySamples.sort((a, b) => a - b),
+      );
 
       // Throughput statistics
       const throughputSamples = latencySamples
-        .map((sample) => (sample !== 0 ? 1000 / sample : 1000 / latencyMean)) // Use latency average as imputed sample
+        .map((sample) => (sample !== 0 ? 1000 / sample : 1000 / latencyStatistics.mean)) // Use latency average as imputed sample
         .sort((a, b) => a - b);
-      const {
-        min: throughputMin,
-        max: throughputMax,
-        mean: throughputMean,
-        variance: throughputVariance,
-        sd: throughputSd,
-        sem: throughputSem,
-        df: throughputDf,
-        critical: throughputCritical,
-        moe: throughputMoe,
-        rme: throughputRme,
-        aad: throughputAad,
-        mad: throughputMad,
-        p50: throughputP50,
-        p75: throughputP75,
-        p99: throughputP99,
-        p995: throughputP995,
-        p999: throughputP999,
-      } = getStatisticsSorted(throughputSamples);
+      const throughputStatistics = getStatisticsSorted(throughputSamples);
 
       if (this.bench.signal?.aborted) {
         return this;
@@ -202,62 +168,24 @@ export default class Task extends EventTarget {
       this.setResult({
         totalTime,
         period: totalTime / this.runs,
-        latency: {
-          samples: latencySamples,
-          min: latencyMin,
-          max: latencyMax,
-          mean: latencyMean,
-          variance: latencyVariance,
-          sd: latencySd,
-          sem: latencySem,
-          df: latencyDf,
-          critical: latencyCritical,
-          moe: latencyMoe,
-          rme: latencyRme,
-          aad: latencyAad,
-          mad: latencyMad,
-          p50: latencyP50,
-          p75: latencyP75,
-          p99: latencyP99,
-          p995: latencyP995,
-          p999: latencyP999,
-        },
-        throughput: {
-          samples: throughputSamples,
-          min: throughputMin,
-          max: throughputMax,
-          mean: throughputMean,
-          variance: throughputVariance,
-          sd: throughputSd,
-          sem: throughputSem,
-          df: throughputDf,
-          critical: throughputCritical,
-          moe: throughputMoe,
-          rme: throughputRme,
-          aad: throughputAad,
-          mad: throughputMad,
-          p50: throughputP50,
-          p75: throughputP75,
-          p99: throughputP99,
-          p995: throughputP995,
-          p999: throughputP999,
-        },
-        hz: throughputMean,
-        samples: latencySamples,
-        min: latencyMin,
-        max: latencyMax,
-        mean: latencyMean,
-        variance: latencyVariance,
-        sd: latencySd,
-        sem: latencySem,
-        df: latencyDf,
-        critical: latencyCritical,
-        moe: latencyMoe,
-        rme: latencyRme,
-        p75: latencyP75,
-        p99: latencyP99,
-        p995: latencyP995,
-        p999: latencyP999,
+        latency: latencyStatistics,
+        throughput: throughputStatistics,
+        hz: throughputStatistics.mean,
+        samples: latencyStatistics.samples,
+        min: latencyStatistics.min,
+        max: latencyStatistics.max,
+        mean: latencyStatistics.mean,
+        variance: latencyStatistics.variance,
+        sd: latencyStatistics.sd,
+        sem: latencyStatistics.sem,
+        df: latencyStatistics.df,
+        critical: latencyStatistics.critical,
+        moe: latencyStatistics.moe,
+        rme: latencyStatistics.rme,
+        p75: latencyStatistics.p75,
+        p99: latencyStatistics.p99,
+        p995: latencyStatistics.p995,
+        p999: latencyStatistics.p999,
       });
     }
 

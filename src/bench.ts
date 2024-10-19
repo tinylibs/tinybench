@@ -1,3 +1,4 @@
+/* eslint-disable operator-linebreak */
 import pLimit from 'p-limit';
 import {
   defaultMinimumIterations,
@@ -11,7 +12,6 @@ import type {
   AddEventListenerOptionsArgument,
   BenchEvents,
   BenchEventsMap,
-  EventListener,
   Fn,
   FnOptions,
   Hook,
@@ -171,17 +171,19 @@ export default class Bench extends EventTarget {
     return this;
   }
 
-  addEventListener<
-    K extends BenchEvents,
-    T extends EventListener = BenchEventsMap[K],
-  >(type: K, listener: T, options?: AddEventListenerOptionsArgument): void {
+  addEventListener<K extends BenchEvents>(
+    type: K,
+    listener: BenchEventsMap[K],
+    options?: AddEventListenerOptionsArgument,
+  ): void {
     super.addEventListener(type, listener, options);
   }
 
-  removeEventListener<
-    K extends BenchEvents,
-    T extends EventListener = BenchEventsMap[K],
-  >(type: K, listener: T, options?: RemoveEventListenerOptionsArgument) {
+  removeEventListener<K extends BenchEvents>(
+    type: K,
+    listener: BenchEventsMap[K],
+    options?: RemoveEventListenerOptionsArgument,
+  ) {
     super.removeEventListener(type, listener, options);
   }
 
@@ -195,20 +197,28 @@ export default class Bench extends EventTarget {
           throw task.result.error;
         }
         return (
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
           convert?.(task) || {
             'Task name': task.name,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             'Throughput average (ops/s)': task.result.error
               ? 'NaN'
               : `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             'Throughput median (ops/s)': task.result.error
               ? 'NaN'
-              : `${task.result.throughput.p50?.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+              : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             'Latency average (ns)': task.result.error
               ? 'NaN'
               : `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             'Latency median (ns)': task.result.error
               ? 'NaN'
-              : `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
+              : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             Samples: task.result.error
               ? 'NaN'
               : task.result.latency.samples.length,

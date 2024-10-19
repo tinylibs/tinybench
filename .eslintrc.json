@@ -7,8 +7,8 @@
   "extends": [
     "eslint:recommended",
     "airbnb-base",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/stylistic"
+    "plugin:@typescript-eslint/strict-type-checked",
+    "plugin:@typescript-eslint/stylistic-type-checked"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {

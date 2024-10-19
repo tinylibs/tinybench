@@ -1,7 +1,7 @@
 /**
  * Student t-distribution two-tailed critical values for 95% confidence level.
  */
-export const tTable: Record<string, number> = Object.freeze({
+export const tTable: Readonly<Record<string, number>> = Object.freeze({
   1: 12.706204736432102,
   2: 4.3026527299112765,
   3: 3.182446305284264,

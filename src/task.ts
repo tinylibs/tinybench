@@ -3,7 +3,6 @@ import type Bench from './bench';
 import { createBenchEvent } from './event';
 import type {
   AddEventListenerOptionsArgument,
-  EventListener,
   Fn,
   FnOptions,
   RemoveEventListenerOptionsArgument,
@@ -229,17 +228,19 @@ export default class Task extends EventTarget {
     }
   }
 
-  addEventListener<
-    K extends TaskEvents,
-    T extends EventListener = TaskEventsMap[K],
-  >(type: K, listener: T, options?: AddEventListenerOptionsArgument) {
+  addEventListener<K extends TaskEvents>(
+    type: K,
+    listener: TaskEventsMap[K],
+    options?: AddEventListenerOptionsArgument,
+  ) {
     super.addEventListener(type, listener, options);
   }
 
-  removeEventListener<
-    K extends TaskEvents,
-    T extends EventListener = TaskEventsMap[K],
-  >(type: K, listener: T, options?: RemoveEventListenerOptionsArgument) {
+  removeEventListener<K extends TaskEvents>(
+    type: K,
+    listener: TaskEventsMap[K],
+    options?: RemoveEventListenerOptionsArgument,
+  ) {
     super.removeEventListener(type, listener, options);
   }
 

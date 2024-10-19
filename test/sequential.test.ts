@@ -51,11 +51,11 @@ test.each(['warmup', 'run'])('%s bench concurrency', async (mode) => {
   concurrentBench.concurrency = 'bench';
   expect(concurrentBench.concurrency).toBe('bench');
 
-  let shouldBeDefined1: true;
-  let shouldBeDefined2: true;
+  let shouldBeDefined1: true | undefined;
+  let shouldBeDefined2: true | undefined;
 
-  let shouldNotBeDefinedFirst1: true;
-  let shouldNotBeDefinedFirst2: true;
+  let shouldNotBeDefinedFirst1: true | undefined;
+  let shouldNotBeDefinedFirst2: true | undefined;
   concurrentBench
     .add('sample 1', async () => {
       shouldBeDefined1 = true;
@@ -70,20 +70,22 @@ test.each(['warmup', 'run'])('%s bench concurrency', async (mode) => {
 
   if (mode === 'warmup') {
     // not awaited on purpose
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     concurrentBench.warmup();
   } else if (mode === 'run') {
     // not awaited on purpose
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     concurrentBench.run();
   }
 
   await setTimeout(0);
-  expect(shouldBeDefined1!).toBeDefined();
-  expect(shouldBeDefined2!).toBeDefined();
-  expect(shouldNotBeDefinedFirst1!).toBeUndefined();
-  expect(shouldNotBeDefinedFirst2!).toBeUndefined();
+  expect(shouldBeDefined1).toBeDefined();
+  expect(shouldBeDefined2).toBeDefined();
+  expect(shouldNotBeDefinedFirst1).toBeUndefined();
+  expect(shouldNotBeDefinedFirst2).toBeUndefined();
   await setTimeout(100);
-  expect(shouldNotBeDefinedFirst1!).toBeDefined();
-  expect(shouldNotBeDefinedFirst2!).toBeDefined();
+  expect(shouldNotBeDefinedFirst1).toBeDefined();
+  expect(shouldNotBeDefinedFirst2).toBeDefined();
 });
 
 test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
@@ -116,7 +118,7 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
       expect(result?.error).toMatchObject(/AssertionError/);
     }
   }
-  expect(concurrentBench.getTask(taskName)!.runs).toEqual(0);
+  expect(concurrentBench.getTask(taskName)?.runs).toEqual(0);
   expect(runs).toEqual(1);
   concurrentBench.reset();
   runs = 0;
@@ -134,7 +136,7 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
     for (const result of concurrentBench.results) {
       expect(result?.error).toBeUndefined();
     }
-    expect(concurrentBench.getTask(taskName)!.runs).toEqual(10);
+    expect(concurrentBench.getTask(taskName)?.runs).toEqual(10);
   }
   expect(runs).toEqual(10);
 });

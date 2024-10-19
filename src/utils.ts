@@ -68,6 +68,7 @@ export const isFnAsyncResource = (fn: Fn): boolean => {
  *
  * @param samples the sample
  * @returns the average of the sample
+ * @throws if the sample is empty
  */
 const average = (samples: number[]) => {
   if (samples.length === 0) {
@@ -94,6 +95,7 @@ const variance = (samples: number[], avg = average(samples)) => {
  * @param samples the sorted sample
  * @param q the quantile to compute
  * @returns the q-quantile of the sample
+ * @throws if the sample is empty
  */
 const quantileSorted = (samples: number[], q: number) => {
   if (samples.length === 0) {
@@ -149,7 +151,15 @@ const absoluteDeviation = (
   return aggFn(absoluteDeviations);
 };
 
-export const getStatistics = (samples: number[]): Statistics => {
+/**
+ * Computes the statistics of a sample.
+ * The sample must be sorted.
+ *
+ * @param samples the sorted sample
+ * @returns the statistics of the sample
+ * @throws if the sample is empty
+ */
+export const getStatisticsSorted = (samples: number[]): Statistics => {
   const mean = average(samples);
   const vr = variance(samples, mean);
   const sd = Math.sqrt(vr);

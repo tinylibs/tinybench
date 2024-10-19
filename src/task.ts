@@ -11,7 +11,7 @@ import type {
   TaskEventsMap,
   TaskResult,
 } from './types';
-import { getStatistics, isFnAsyncResource } from './utils';
+import { getStatisticsSorted, isFnAsyncResource } from './utils';
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -169,7 +169,7 @@ export default class Task extends EventTarget {
         p99: latencyP99,
         p995: latencyP995,
         p999: latencyP999,
-      } = getStatistics(latencySamples.sort((a, b) => a - b));
+      } = getStatisticsSorted(latencySamples.sort((a, b) => a - b));
 
       // Throughput statistics
       const throughputSamples = latencySamples
@@ -193,7 +193,7 @@ export default class Task extends EventTarget {
         p99: throughputP99,
         p995: throughputP995,
         p999: throughputP999,
-      } = getStatistics(throughputSamples);
+      } = getStatisticsSorted(throughputSamples);
 
       if (this.bench.signal?.aborted) {
         return this;

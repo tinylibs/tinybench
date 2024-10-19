@@ -334,7 +334,7 @@ export interface Options {
   signal?: AbortSignal;
 
   /**
-   * Throw if a task fails (events will not work if true)
+   * Throw if a task fails (events will not work if true) @default false
    */
   throws?: boolean;
 

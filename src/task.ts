@@ -133,7 +133,7 @@ export default class Task extends EventTarget {
   /**
    * run the current task and write the results in `Task.result` object property
    */
-  async run() {
+  async run(): Promise<Task> {
     if (this.result?.error) {
       return this;
     }
@@ -208,7 +208,7 @@ export default class Task extends EventTarget {
   /**
    * warmup the current task
    */
-  async warmup() {
+  async warmup(): Promise<void> {
     if (this.result?.error) {
       return;
     }
@@ -232,7 +232,7 @@ export default class Task extends EventTarget {
     type: K,
     listener: TaskEventsMap[K],
     options?: AddEventListenerOptionsArgument,
-  ) {
+  ): void {
     super.addEventListener(type, listener, options);
   }
 
@@ -240,14 +240,14 @@ export default class Task extends EventTarget {
     type: K,
     listener: TaskEventsMap[K],
     options?: RemoveEventListenerOptionsArgument,
-  ) {
+  ): void {
     super.removeEventListener(type, listener, options);
   }
 
   /**
    * change the result object values
    */
-  setResult(result: Partial<TaskResult>) {
+  private setResult(result: Partial<TaskResult>): void {
     this.result = Object.freeze({
       ...this.result,
       ...result,
@@ -257,7 +257,7 @@ export default class Task extends EventTarget {
   /**
    * reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
    */
-  reset() {
+  reset(): void {
     this.dispatchEvent(createBenchEvent('reset', this));
     this.runs = 0;
     this.result = undefined;

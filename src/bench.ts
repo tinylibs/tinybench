@@ -49,7 +49,7 @@ export default class Bench extends EventTarget {
 
   signal?: AbortSignal;
 
-  throws: boolean;
+  throws = false;
 
   warmupTime = defaultMinimumWarmupTime;
 
@@ -74,7 +74,7 @@ export default class Bench extends EventTarget {
     this.time = options.time ?? this.time;
     this.iterations = options.iterations ?? this.iterations;
     this.signal = options.signal;
-    this.throws = options.throws ?? false;
+    this.throws = options.throws ?? this.throws;
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.setup = options.setup ?? (() => {});
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -91,9 +91,11 @@ export default class Bench extends EventTarget {
     }
   }
 
-  private runTask(task: Task) {
-    if (this.signal?.aborted) return task;
-    return task.run();
+  private async runTask(task: Task): Promise<Task> {
+    if (this.signal?.aborted) {
+      return task;
+    }
+    return await task.run();
   }
 
   /**
@@ -142,7 +144,7 @@ export default class Bench extends EventTarget {
   /**
    * reset each task and remove its result
    */
-  reset() {
+  reset(): void {
     this.dispatchEvent(createBenchEvent('reset'));
     for (const task of this._tasks.values()) {
       task.reset();
@@ -152,7 +154,7 @@ export default class Bench extends EventTarget {
   /**
    * add a benchmark task to the task map
    */
-  add(name: string, fn: Fn, opts: FnOptions = {}) {
+  add(name: string, fn: Fn, opts: FnOptions = {}): this {
     const task = new Task(this, name, fn, opts);
     this._tasks.set(name, task);
     this.dispatchEvent(createBenchEvent('add', task));
@@ -162,7 +164,7 @@ export default class Bench extends EventTarget {
   /**
    * remove a benchmark task from the task map
    */
-  remove(name: string) {
+  remove(name: string): this {
     const task = this.getTask(name);
     if (task) {
       this.dispatchEvent(createBenchEvent('remove', task));
@@ -183,14 +185,16 @@ export default class Bench extends EventTarget {
     type: K,
     listener: BenchEventsMap[K],
     options?: RemoveEventListenerOptionsArgument,
-  ) {
+  ): void {
     super.removeEventListener(type, listener, options);
   }
 
   /**
    * table of the tasks results
    */
-  table(convert?: (task: Task) => Record<string, string | number> | undefined) {
+  table(
+    convert?: (task: Task) => Record<string, string | number> | undefined,
+  ): (Record<string, string | number> | undefined | null)[] {
     return this.tasks.map((task) => {
       if (task.result) {
         if (task.result.error) {

@@ -107,7 +107,7 @@ export interface Options {
   signal?: AbortSignal;
 
   /**
-   * Throw if a task fails (events will not work if true)
+   * Throw if a task fails (events will not work if true) @default false
    */
   throws?: boolean;
 
@@ -166,7 +166,6 @@ function has been executed.
 - `result?: TaskResult`: the result object
 - `async run()`: run the current task and write the results in `Task.result` object property
 - `async warmup()`: warmup the current task
-- `setResult(result: Partial<TaskResult>)`: change the result object values
 - `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
 
 FnOptions:

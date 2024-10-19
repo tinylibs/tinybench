@@ -1,4 +1,5 @@
-import type { Fn } from './types';
+import { tTable } from './constants';
+import type { Fn, Statistics } from './types';
 
 export const nanoToMs = (nano: number) => nano / 1e6;
 
@@ -68,7 +69,7 @@ export const isFnAsyncResource = (fn: Fn): boolean => {
  * @param samples the sample
  * @returns the average of the sample
  */
-export const average = (samples: number[]) => {
+const average = (samples: number[]) => {
   if (samples.length === 0) {
     throw new Error('samples must not be empty');
   }
@@ -82,7 +83,7 @@ export const average = (samples: number[]) => {
  * @param avg the average of the sample
  * @returns the variance of the sample
  */
-export const variance = (samples: number[], avg = average(samples)) => {
+const variance = (samples: number[], avg = average(samples)) => {
   const result = samples.reduce((sum, n) => sum + (n - avg) ** 2, 0);
   return result / (samples.length - 1) || 0;
 };
@@ -94,7 +95,7 @@ export const variance = (samples: number[], avg = average(samples)) => {
  * @param q the quantile to compute
  * @returns the q-quantile of the sample
  */
-export const quantileSorted = (samples: number[], q: number) => {
+const quantileSorted = (samples: number[], q: number) => {
   if (samples.length === 0) {
     throw new Error('samples must not be empty');
   }
@@ -124,7 +125,7 @@ export const quantileSorted = (samples: number[], q: number) => {
  * @param samples the sorted sample
  * @returns the median of the sample
  */
-export const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5);
+const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5);
 
 /**
  * Computes the absolute deviation of a sample given an aggregation.
@@ -133,11 +134,12 @@ export const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5);
  * @param aggFn the aggregation function to use
  * @returns the absolute deviation of the sample given the aggregation
  */
-export const absoluteDeviation = (
+const absoluteDeviation = (
   samples: number[],
   aggFn: (arr: number[]) => number | undefined,
+  aggValue?: number,
 ) => {
-  const value = aggFn(samples);
+  const value = aggValue ?? aggFn(samples);
   const absoluteDeviations: number[] = [];
 
   for (const sample of samples) {
@@ -145,4 +147,36 @@ export const absoluteDeviation = (
   }
 
   return aggFn(absoluteDeviations);
+};
+
+export const getStatistics = (samples: number[]): Statistics => {
+  const mean = average(samples);
+  const vr = variance(samples, mean);
+  const sd = Math.sqrt(vr);
+  const sem = sd / Math.sqrt(samples.length);
+  const df = samples.length - 1;
+  const critical = tTable[(Math.round(df) || 1).toString()] || tTable.infinity!;
+  const moe = sem * critical;
+  const rme = (moe / mean) * 100;
+  const p50 = medianSorted(samples);
+  return {
+    samples,
+    min: samples[0]!,
+    max: samples[df]!,
+    mean,
+    variance: vr,
+    sd,
+    sem,
+    df,
+    critical,
+    moe,
+    rme,
+    aad: absoluteDeviation(samples, average, mean),
+    mad: absoluteDeviation(samples, medianSorted, p50),
+    p50,
+    p75: quantileSorted(samples, 0.75),
+    p99: quantileSorted(samples, 0.99),
+    p995: quantileSorted(samples, 0.995),
+    p999: quantileSorted(samples, 0.999),
+  };
 };

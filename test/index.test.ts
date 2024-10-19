@@ -431,10 +431,14 @@ test('task with promiseLike return', async () => {
   bench.add('foo', () => ({
     then: (resolve: () => void) => setTimeout(resolve, 100),
   }));
+  bench.add('fum', () => ({
+    then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 100)),
+  }));
   bench.add('bar', () => new Promise((resolve) => setTimeout(resolve, 100)));
   await bench.run();
 
   expect(bench.getTask('foo')?.result?.latency.mean).toBeGreaterThan(100);
+  expect(bench.getTask('fum')?.result?.latency.mean).toBeGreaterThan(100);
   expect(bench.getTask('bar')?.result?.latency.mean).toBeGreaterThan(100);
 });
 

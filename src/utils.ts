@@ -28,7 +28,7 @@ type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>;
  * @returns true if the function is an async function
  */
 const isAsyncFunction = (
-  fn: Fn,
+  fn: Fn | undefined | null,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
 ): fn is AsyncFunctionType<unknown[], unknown> => fn?.constructor === (async () => {}).constructor;
 
@@ -38,7 +38,7 @@ const isAsyncFunction = (
  * @param fn - the function to check
  * @returns true if the function is an async function or returns a promise
  */
-export const isFnAsyncResource = (fn: Fn): boolean => {
+export const isFnAsyncResource = (fn: Fn | undefined | null): boolean => {
   if (fn == null) {
     return false;
   }
@@ -51,7 +51,7 @@ export const isFnAsyncResource = (fn: Fn): boolean => {
     if (promiseLike) {
       // silence promise rejection
       try {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unnecessary-condition
         (fnCall as Promise<unknown>).then(() => {})?.catch(() => {});
       } catch {
         // ignore
@@ -114,7 +114,9 @@ const quantileSorted = (samples: number[], q: number) => {
   const baseIndex = Math.floor(base);
   if (samples[baseIndex + 1] != null) {
     return (
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       samples[baseIndex]!
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       + (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
     );
   }
@@ -145,6 +147,7 @@ const absoluteDeviation = (
   const absoluteDeviations: number[] = [];
 
   for (const sample of samples) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     absoluteDeviations.push(Math.abs(sample - aggValue!));
   }
 
@@ -165,13 +168,16 @@ export const getStatisticsSorted = (samples: number[]): Statistics => {
   const sd = Math.sqrt(vr);
   const sem = sd / Math.sqrt(samples.length);
   const df = samples.length - 1;
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/no-non-null-assertion
   const critical = tTable[(Math.round(df) || 1).toString()] || tTable.infinity!;
   const moe = sem * critical;
   const rme = (moe / mean) * 100;
   const p50 = medianSorted(samples);
   return {
     samples,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     min: samples[0]!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     max: samples[df]!,
     mean,
     variance: vr,

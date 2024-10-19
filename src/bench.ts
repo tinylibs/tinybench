@@ -1,3 +1,4 @@
+/* eslint-disable operator-linebreak */
 import pLimit from 'p-limit';
 import {
   defaultMinimumIterations,
@@ -11,7 +12,6 @@ import type {
   AddEventListenerOptionsArgument,
   BenchEvents,
   BenchEventsMap,
-  EventListener,
   Fn,
   FnOptions,
   Hook,
@@ -49,7 +49,7 @@ export default class Bench extends EventTarget {
 
   signal?: AbortSignal;
 
-  throws: boolean;
+  throws = false;
 
   warmupTime = defaultMinimumWarmupTime;
 
@@ -74,7 +74,7 @@ export default class Bench extends EventTarget {
     this.time = options.time ?? this.time;
     this.iterations = options.iterations ?? this.iterations;
     this.signal = options.signal;
-    this.throws = options.throws ?? false;
+    this.throws = options.throws ?? this.throws;
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.setup = options.setup ?? (() => {});
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -91,9 +91,11 @@ export default class Bench extends EventTarget {
     }
   }
 
-  private runTask(task: Task) {
-    if (this.signal?.aborted) return task;
-    return task.run();
+  private async runTask(task: Task): Promise<Task> {
+    if (this.signal?.aborted) {
+      return task;
+    }
+    return await task.run();
   }
 
   /**
@@ -142,7 +144,7 @@ export default class Bench extends EventTarget {
   /**
    * reset each task and remove its result
    */
-  reset() {
+  reset(): void {
     this.dispatchEvent(createBenchEvent('reset'));
     for (const task of this._tasks.values()) {
       task.reset();
@@ -152,7 +154,7 @@ export default class Bench extends EventTarget {
   /**
    * add a benchmark task to the task map
    */
-  add(name: string, fn: Fn, opts: FnOptions = {}) {
+  add(name: string, fn: Fn, opts: FnOptions = {}): this {
     const task = new Task(this, name, fn, opts);
     this._tasks.set(name, task);
     this.dispatchEvent(createBenchEvent('add', task));
@@ -162,7 +164,7 @@ export default class Bench extends EventTarget {
   /**
    * remove a benchmark task from the task map
    */
-  remove(name: string) {
+  remove(name: string): this {
     const task = this.getTask(name);
     if (task) {
       this.dispatchEvent(createBenchEvent('remove', task));
@@ -171,44 +173,56 @@ export default class Bench extends EventTarget {
     return this;
   }
 
-  addEventListener<
-    K extends BenchEvents,
-    T extends EventListener = BenchEventsMap[K],
-  >(type: K, listener: T, options?: AddEventListenerOptionsArgument): void {
+  addEventListener<K extends BenchEvents>(
+    type: K,
+    listener: BenchEventsMap[K],
+    options?: AddEventListenerOptionsArgument,
+  ): void {
     super.addEventListener(type, listener, options);
   }
 
-  removeEventListener<
-    K extends BenchEvents,
-    T extends EventListener = BenchEventsMap[K],
-  >(type: K, listener: T, options?: RemoveEventListenerOptionsArgument) {
+  removeEventListener<K extends BenchEvents>(
+    type: K,
+    listener: BenchEventsMap[K],
+    options?: RemoveEventListenerOptionsArgument,
+  ): void {
     super.removeEventListener(type, listener, options);
   }
 
   /**
    * table of the tasks results
    */
-  table(convert?: (task: Task) => Record<string, string | number> | undefined) {
+  table(
+    convert?: (task: Task) => Record<string, string | number> | undefined,
+  ): (Record<string, string | number> | undefined | null)[] {
     return this.tasks.map((task) => {
       if (task.result) {
         if (task.result.error) {
           throw task.result.error;
         }
         return (
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
           convert?.(task) || {
             'Task name': task.name,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             'Throughput average (ops/s)': task.result.error
               ? 'NaN'
               : `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             'Throughput median (ops/s)': task.result.error
               ? 'NaN'
-              : `${task.result.throughput.p50?.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+              : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             'Latency average (ns)': task.result.error
               ? 'NaN'
               : `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             'Latency median (ns)': task.result.error
               ? 'NaN'
-              : `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
+              : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             Samples: task.result.error
               ? 'NaN'
               : task.result.latency.samples.length,

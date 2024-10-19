@@ -3,7 +3,6 @@ import type Bench from './bench';
 import { createBenchEvent } from './event';
 import type {
   AddEventListenerOptionsArgument,
-  EventListener,
   Fn,
   FnOptions,
   RemoveEventListenerOptionsArgument,
@@ -44,7 +43,7 @@ export default class Task extends EventTarget {
   /**
    * The result object
    */
-  result?: TaskResult;
+  result?: Readonly<TaskResult>;
 
   /**
    * Task options
@@ -134,7 +133,7 @@ export default class Task extends EventTarget {
   /**
    * run the current task and write the results in `Task.result` object property
    */
-  async run() {
+  async run(): Promise<Task> {
     if (this.result?.error) {
       return this;
     }
@@ -209,7 +208,7 @@ export default class Task extends EventTarget {
   /**
    * warmup the current task
    */
-  async warmup() {
+  async warmup(): Promise<void> {
     if (this.result?.error) {
       return;
     }
@@ -229,32 +228,36 @@ export default class Task extends EventTarget {
     }
   }
 
-  addEventListener<
-    K extends TaskEvents,
-    T extends EventListener = TaskEventsMap[K],
-  >(type: K, listener: T, options?: AddEventListenerOptionsArgument) {
+  addEventListener<K extends TaskEvents>(
+    type: K,
+    listener: TaskEventsMap[K],
+    options?: AddEventListenerOptionsArgument,
+  ): void {
     super.addEventListener(type, listener, options);
   }
 
-  removeEventListener<
-    K extends TaskEvents,
-    T extends EventListener = TaskEventsMap[K],
-  >(type: K, listener: T, options?: RemoveEventListenerOptionsArgument) {
+  removeEventListener<K extends TaskEvents>(
+    type: K,
+    listener: TaskEventsMap[K],
+    options?: RemoveEventListenerOptionsArgument,
+  ): void {
     super.removeEventListener(type, listener, options);
   }
 
   /**
    * change the result object values
    */
-  setResult(result: Partial<TaskResult>) {
-    this.result = { ...this.result, ...result } as TaskResult;
-    Object.freeze(this.result);
+  private setResult(result: Partial<TaskResult>): void {
+    this.result = Object.freeze({
+      ...this.result,
+      ...result,
+    }) as Readonly<TaskResult>;
   }
 
   /**
    * reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
    */
-  reset() {
+  reset(): void {
     this.dispatchEvent(createBenchEvent('reset', this));
     this.runs = 0;
     this.result = undefined;

@@ -3,6 +3,7 @@ import type Task from '../src/task';
 /**
  * the task function
  */
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type Fn = (...arg: unknown[]) => unknown | Promise<unknown>;
 
 export interface FnOptions {
@@ -333,7 +334,7 @@ export interface Options {
   signal?: AbortSignal;
 
   /**
-   * Throw if a task fails (events will not work if true)
+   * Throw if a task fails (events will not work if true) @default false
    */
   throws?: boolean;
 

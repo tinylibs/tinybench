@@ -43,7 +43,7 @@ export default class Task extends EventTarget {
   /**
    * The result object
    */
-  result?: TaskResult;
+  result?: Readonly<TaskResult>;
 
   /**
    * Task options
@@ -248,8 +248,10 @@ export default class Task extends EventTarget {
    * change the result object values
    */
   setResult(result: Partial<TaskResult>) {
-    this.result = { ...this.result, ...result } as TaskResult;
-    Object.freeze(this.result);
+    this.result = Object.freeze({
+      ...this.result,
+      ...result,
+    }) as Readonly<TaskResult>;
   }
 
   /**

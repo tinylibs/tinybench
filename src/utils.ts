@@ -3,9 +3,11 @@ import type { Fn, Statistics } from './types';
 
 export const nanoToMs = (nano: number) => nano / 1e6;
 
-export const hrtimeNow = () => nanoToMs(Number(process.hrtime.bigint()));
+const hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
+export const hrtimeNow = () => nanoToMs(Number(hrtimeBigint()));
 
-export const now = () => performance.now();
+const performanceNow = performance.now.bind(performance);
+export const now = performanceNow;
 
 /**
  * Checks if a value is a promise-like object.

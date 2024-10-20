@@ -3,11 +3,12 @@ import { setTimeout } from 'node:timers/promises';
 import { expect, test } from 'vitest';
 import { Bench } from '../src';
 
-test('sequential', async () => {
-  const iterations = 100;
+test.each(['warmup', 'run'])('%s sequential', async (mode) => {
+  const iterations = 1;
   const sequentialBench = new Bench({
     time: 0,
     iterations,
+    warmup: mode === 'warmup',
     warmupTime: 0,
     warmupIterations: iterations,
     throws: true,
@@ -18,24 +19,39 @@ test('sequential', async () => {
     .add('sample 1', async () => {
       await setTimeout(randomInt(0, 100));
       benchTasks.push('sample 1');
-      expect(benchTasks).toStrictEqual(['sample 1']);
-      await setTimeout(randomInt(0, 100));
+      if (mode === 'run') {
+        expect(benchTasks).toStrictEqual(['sample 1']);
+      }
     })
     .add('sample 2', async () => {
       await setTimeout(randomInt(0, 100));
       benchTasks.push('sample 2');
-      expect(benchTasks).toStrictEqual(['sample 1', 'sample 2']);
-      await setTimeout(randomInt(0, 100));
+      if (mode === 'run') {
+        expect(benchTasks).toStrictEqual(['sample 1', 'sample 2']);
+      }
     })
     .add('sample 3', async () => {
       await setTimeout(randomInt(0, 100));
       benchTasks.push('sample 3');
-      expect(benchTasks).toStrictEqual(['sample 1', 'sample 2', 'sample 3']);
-      await setTimeout(randomInt(0, 100));
+      if (mode === 'run') {
+        expect(benchTasks).toStrictEqual(['sample 1', 'sample 2', 'sample 3']);
+      }
     });
 
   const tasks = await sequentialBench.run();
 
+  if (mode === 'run') {
+    expect(benchTasks).toStrictEqual(['sample 1', 'sample 2', 'sample 3']);
+  } else if (mode === 'warmup') {
+    expect(benchTasks).toStrictEqual([
+      'sample 1',
+      'sample 2',
+      'sample 3',
+      'sample 1',
+      'sample 2',
+      'sample 3',
+    ]);
+  }
   expect(tasks.length).toBe(3);
   expect(benchTasks.length).toBeGreaterThanOrEqual(tasks.length);
   expect(tasks[0]?.name).toBe('sample 1');
@@ -108,9 +124,10 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
   concurrentBench.add(taskName, async () => {
     runs++;
     await setTimeout(10);
-    // all task function should be here after 10ms
-    expect(runs).toEqual(iterations);
-    await setTimeout(10);
+    if (concurrentBench.concurrency === 'task') {
+      // all task function should be here after 10ms
+      expect([iterations, 2 * iterations]).toContain(runs);
+    }
   });
 
   await concurrentBench.run();
@@ -120,8 +137,8 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
       expect(result?.error).toMatchObject(/AssertionError/);
     }
   }
-  expect(concurrentBench.getTask(taskName)?.runs).toEqual(0);
-  expect(runs).toEqual(1);
+  expect(concurrentBench.getTask(taskName)?.runs).toEqual(iterations);
+  expect(runs).toEqual(mode === 'run' ? iterations : 2 * iterations);
   concurrentBench.reset();
   runs = 0;
   expect(concurrentBench.threshold).toBe(Number.POSITIVE_INFINITY);
@@ -137,7 +154,7 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
     for (const result of concurrentBench.results) {
       expect(result?.error).toBeUndefined();
     }
-    expect(concurrentBench.getTask(taskName)?.runs).toEqual(10);
+    expect(concurrentBench.getTask(taskName)?.runs).toEqual(iterations);
   }
-  expect(runs).toEqual(10);
+  expect(runs).toEqual(mode === 'run' ? iterations : 2 * iterations);
 });

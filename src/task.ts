@@ -151,6 +151,8 @@ export default class Task extends EventTarget {
       if (this.bench.throws) {
         throw error;
       }
+      this.dispatchEvent(createBenchEvent('error', this));
+      this.bench.dispatchEvent(createBenchEvent('error', this));
     }
   }
 

@@ -132,10 +132,13 @@ export default class Task extends EventTarget {
 
   /**
    * warmup the current task
+   * @internal
    */
-  private async warmup() {
+  async warmup(): Promise<void> {
+    if (this.result?.error) {
+      return;
+    }
     this.dispatchEvent(createBenchEvent('warmup', this));
-    this.bench.dispatchEvent(createBenchEvent('warmup', this));
     await this.bench.setup(this, 'warmup');
     const { error } = (await this.benchmark(
       this.bench.warmupTime,
@@ -153,15 +156,13 @@ export default class Task extends EventTarget {
 
   /**
    * run the current task and write the results in `Task.result` object property
+   * @internal
    */
   async run(): Promise<Task> {
     if (this.result?.error) {
       return this;
     }
     this.dispatchEvent(createBenchEvent('start', this));
-    if (this.bench.warmup) {
-      await this.warmup();
-    }
     await this.bench.setup(this, 'run');
     const { samples: latencySamples, error } = (await this.benchmark(
       this.bench.time,

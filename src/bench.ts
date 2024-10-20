@@ -93,6 +93,25 @@ export default class Bench extends EventTarget {
     }
   }
 
+  /**
+   * warmup the benchmark tasks.
+   */
+  private async tasksWarmup(): Promise<void> {
+    this.dispatchEvent(createBenchEvent('warmup'));
+    if (this.concurrency === 'bench') {
+      const limit = pLimit(this.threshold);
+      const promises: Promise<void>[] = [];
+      for (const task of this._tasks.values()) {
+        promises.push(limit(() => task.warmup()));
+      }
+      await Promise.all(promises);
+    } else {
+      for (const task of this._tasks.values()) {
+        await task.warmup();
+      }
+    }
+  }
+
   private async runTask(task: Task): Promise<Task> {
     if (this.signal?.aborted) {
       return task;
@@ -106,6 +125,9 @@ export default class Bench extends EventTarget {
   async run(): Promise<Task[]> {
     let values: Task[] = [];
     this.dispatchEvent(createBenchEvent('start'));
+    if (this.warmup) {
+      await this.tasksWarmup();
+    }
     if (this.concurrency === 'bench') {
       const limit = pLimit(this.threshold);
       const promises: Promise<Task>[] = [];
@@ -178,37 +200,24 @@ export default class Bench extends EventTarget {
   ): (Record<string, string | number> | undefined | null)[] {
     return this.tasks.map((task) => {
       if (task.result) {
-        if (task.result.error) {
-          throw task.result.error;
-        }
-        return (
-          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-          convert?.(task) || {
+        return task.result.error
+          ? (convert?.(task) ?? {
             'Task name': task.name,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            'Throughput average (ops/s)': task.result.error
-              ? 'NaN'
-              : `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            'Throughput median (ops/s)': task.result.error
-              ? 'NaN'
-              : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            'Latency average (ns)': task.result.error
-              ? 'NaN'
-              : `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            'Latency median (ns)': task.result.error
-              ? 'NaN'
-              : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            Samples: task.result.error
-              ? 'NaN'
-              : task.result.latency.samples.length,
-          }
-        );
+            Error: task.result.error.message,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            Stack: task.result.error.stack!,
+            Samples: task.result.latency.samples.length,
+          })
+          : (convert?.(task) ?? {
+            'Task name': task.name,
+            'Throughput average (ops/s)': `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            'Throughput median (ops/s)': `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+            'Latency average (ns)': `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            'Latency median (ns)': `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
+            Samples: task.result.latency.samples.length,
+          });
       }
       return null;
     });

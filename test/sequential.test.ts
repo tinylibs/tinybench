@@ -8,10 +8,10 @@ test.each(['warmup', 'run'])('%s sequential', async (mode) => {
   const sequentialBench = new Bench({
     time: 0,
     iterations,
+    throws: true,
     warmup: mode === 'warmup',
     warmupTime: 0,
     warmupIterations: iterations,
-    throws: true,
   });
 
   const benchTasks: string[] = [];
@@ -40,9 +40,7 @@ test.each(['warmup', 'run'])('%s sequential', async (mode) => {
 
   const tasks = await sequentialBench.run();
 
-  if (mode === 'run') {
-    expect(benchTasks).toStrictEqual(['sample 1', 'sample 2', 'sample 3']);
-  } else if (mode === 'warmup') {
+  if (mode === 'warmup') {
     expect(benchTasks).toStrictEqual([
       'sample 1',
       'sample 2',
@@ -51,6 +49,8 @@ test.each(['warmup', 'run'])('%s sequential', async (mode) => {
       'sample 2',
       'sample 3',
     ]);
+  } else if (mode === 'run') {
+    expect(benchTasks).toStrictEqual(['sample 1', 'sample 2', 'sample 3']);
   }
   expect(tasks.length).toBe(3);
   expect(benchTasks.length).toBeGreaterThanOrEqual(tasks.length);
@@ -123,8 +123,8 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
 
   concurrentBench.add(taskName, async () => {
     runs++;
-    await setTimeout(10);
     if (concurrentBench.concurrency === 'task') {
+      await setTimeout(10);
       // all task function should be here after 10ms
       expect([iterations, 2 * iterations]).toContain(runs);
     }
@@ -132,10 +132,8 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
 
   await concurrentBench.run();
 
-  if (mode === 'run') {
-    for (const result of concurrentBench.results) {
-      expect(result?.error).toMatchObject(/AssertionError/);
-    }
+  for (const result of concurrentBench.results) {
+    expect(result?.error).toMatchObject(/AssertionError/);
   }
   expect(concurrentBench.getTask(taskName)?.runs).toEqual(iterations);
   expect(runs).toEqual(mode === 'run' ? iterations : 2 * iterations);
@@ -150,11 +148,9 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
 
   await concurrentBench.run();
 
-  if (mode === 'run') {
-    for (const result of concurrentBench.results) {
-      expect(result?.error).toBeUndefined();
-    }
-    expect(concurrentBench.getTask(taskName)?.runs).toEqual(iterations);
+  for (const result of concurrentBench.results) {
+    expect(result?.error).toBeUndefined();
   }
+  expect(concurrentBench.getTask(taskName)?.runs).toEqual(iterations);
   expect(runs).toEqual(mode === 'run' ? iterations : 2 * iterations);
 });

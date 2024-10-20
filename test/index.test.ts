@@ -249,9 +249,9 @@ test.each(['warmup', 'run'])('%s throws', async (mode) => {
   const iterations = 1;
   const bench = new Bench({
     iterations,
+    throws: true,
     warmup: mode === 'warmup',
     warmupIterations: iterations,
-    throws: true,
   });
   const err = new Error();
 

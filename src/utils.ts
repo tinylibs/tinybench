@@ -1,7 +1,7 @@
 import { emptyFunction, tTable } from './constants';
 import type { Fn, Statistics } from './types';
 
-export const nanoToMs = (nano: number) => nano / 1e6;
+const nanoToMs = (nano: number) => nano / 1e6;
 
 const hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
 export const hrtimeNow = () => nanoToMs(Number(hrtimeBigint()));

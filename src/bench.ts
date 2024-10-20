@@ -96,7 +96,7 @@ export default class Bench extends EventTarget {
   /**
    * warmup the benchmark tasks.
    */
-  private async tasksWarmup(): Promise<void> {
+  private async warmupTasks(): Promise<void> {
     this.dispatchEvent(createBenchEvent('warmup'));
     if (this.concurrency === 'bench') {
       const limit = pLimit(this.threshold);
@@ -123,11 +123,11 @@ export default class Bench extends EventTarget {
    * run the added tasks that were registered using the {@link add} method.
    */
   async run(): Promise<Task[]> {
+    if (this.warmup) {
+      await this.warmupTasks();
+    }
     let values: Task[] = [];
     this.dispatchEvent(createBenchEvent('start'));
-    if (this.warmup) {
-      await this.tasksWarmup();
-    }
     if (this.concurrency === 'bench') {
       const limit = pLimit(this.threshold);
       const promises: Promise<Task>[] = [];

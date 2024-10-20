@@ -196,10 +196,7 @@ test('events order', async () => {
 }, 10000);
 
 test('events order at task completion', async () => {
-  const bench = new Bench({
-    warmupTime: 0,
-    warmupIterations: 0,
-  });
+  const bench = new Bench();
 
   bench
     .add('foo', async () => {
@@ -249,10 +246,11 @@ test.each(['warmup', 'run'])('%s error event', async (mode) => {
 });
 
 test.each(['warmup', 'run'])('%s throws', async (mode) => {
+  const iterations = 1;
   const bench = new Bench({
-    iterations: 1,
+    iterations,
     warmup: mode === 'warmup',
-    warmupIterations: 1,
+    warmupIterations: iterations,
     throws: true,
   });
   const err = new Error();

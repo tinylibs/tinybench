@@ -1,4 +1,4 @@
-import { tTable } from './constants';
+import { emptyFunction, tTable } from './constants';
 import type { Fn, Statistics } from './types';
 
 export const nanoToMs = (nano: number) => nano / 1e6;
@@ -51,8 +51,8 @@ export const isFnAsyncResource = (fn: Fn | undefined | null): boolean => {
     if (promiseLike) {
       // silence promise rejection
       try {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unnecessary-condition
-        (fnCall as Promise<unknown>).then(() => {})?.catch(() => {});
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        (fnCall as Promise<unknown>).then(emptyFunction)?.catch(emptyFunction);
       } catch {
         // ignore
       }

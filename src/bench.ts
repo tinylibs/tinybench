@@ -5,6 +5,7 @@ import {
   defaultMinimumTime,
   defaultMinimumWarmupIterations,
   defaultMinimumWarmupTime,
+  emptyFunction,
 } from './constants';
 import { createBenchEvent } from './event';
 import Task from './task';
@@ -75,10 +76,8 @@ export default class Bench extends EventTarget {
     this.iterations = options.iterations ?? this.iterations;
     this.signal = options.signal;
     this.throws = options.throws ?? this.throws;
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.setup = options.setup ?? (() => {});
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.teardown = options.teardown ?? (() => {});
+    this.setup = options.setup ?? emptyFunction;
+    this.teardown = options.teardown ?? emptyFunction;
 
     if (this.signal) {
       this.signal.addEventListener(
@@ -236,7 +235,7 @@ export default class Bench extends EventTarget {
   /**
    * (getter) tasks results as an array
    */
-  get results(): (TaskResult | undefined)[] {
+  get results(): (Readonly<TaskResult> | undefined)[] {
     return [...this._tasks.values()].map((task) => task.result);
   }
 

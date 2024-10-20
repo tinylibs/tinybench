@@ -147,7 +147,7 @@ export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
     - `afterAll?: () => void | Promise<void>`: invoked once after all iterations of `fn` have finished
 - `remove(name: string)`: remove a benchmark task from the task map
 - `table()`: table of the tasks results
-- `get results(): (TaskResult | undefined)[]`: (getter) tasks results as an array
+- `get results(): (Readonly<TaskResult> | undefined)[]`: (getter) tasks results as an array
 - `get tasks(): Task[]`: (getter) tasks as an array
 - `getTask(name: string): Task | undefined`: get a task based on the name
 
@@ -163,7 +163,7 @@ function has been executed.
 - `fn: Fn`: the task function
 - `opts: FnOptions`: Task options
 - `runs: number`: the number of times the task function has been executed
-- `result?: TaskResult`: the result object
+- `result?: Readonly<TaskResult>`: the result object
 - `async run()`: run the current task and write the results in `Task.result` object property
 - `async warmup()`: warmup the current task
 - `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property

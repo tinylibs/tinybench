@@ -52,6 +52,8 @@ export default class Bench extends EventTarget {
 
   throws = false;
 
+  warmup = true;
+
   warmupTime = defaultMinimumWarmupTime;
 
   warmupIterations = defaultMinimumWarmupIterations;
@@ -70,6 +72,7 @@ export default class Bench extends EventTarget {
     super();
     this.name = options.name;
     this.now = options.now ?? this.now;
+    this.warmup = options.warmup ?? this.warmup;
     this.warmupTime = options.warmupTime ?? this.warmupTime;
     this.warmupIterations = options.warmupIterations ?? this.warmupIterations;
     this.time = options.time ?? this.time;
@@ -99,7 +102,6 @@ export default class Bench extends EventTarget {
 
   /**
    * run the added tasks that were registered using the {@link add} method.
-   * Note: This method does not do any warmup. Call {@link warmup} for that.
    */
   async run(): Promise<Task[]> {
     let values: Task[] = [];
@@ -118,26 +120,6 @@ export default class Bench extends EventTarget {
     }
     this.dispatchEvent(createBenchEvent('complete'));
     return values;
-  }
-
-  /**
-   * warmup the benchmark tasks.
-   * This is not run by default by the {@link run} method.
-   */
-  async warmup(): Promise<void> {
-    this.dispatchEvent(createBenchEvent('warmup'));
-    if (this.concurrency === 'bench') {
-      const limit = pLimit(this.threshold);
-      const promises: Promise<void>[] = [];
-      for (const task of this._tasks.values()) {
-        promises.push(limit(() => task.warmup()));
-      }
-      await Promise.all(promises);
-    } else {
-      for (const task of this._tasks.values()) {
-        await task.warmup();
-      }
-    }
   }
 
   /**

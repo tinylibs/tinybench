@@ -4,9 +4,13 @@ import { expect, test } from 'vitest';
 import { Bench } from '../src';
 
 test('sequential', async () => {
+  const iterations = 100;
   const sequentialBench = new Bench({
     time: 0,
-    iterations: 100,
+    iterations,
+    warmupTime: 0,
+    warmupIterations: iterations,
+    throws: true,
   });
 
   const benchTasks: string[] = [];
@@ -30,7 +34,6 @@ test('sequential', async () => {
       await setTimeout(randomInt(0, 100));
     });
 
-  await sequentialBench.warmup();
   const tasks = await sequentialBench.run();
 
   expect(tasks.length).toBe(3);
@@ -41,10 +44,14 @@ test('sequential', async () => {
 });
 
 test.each(['warmup', 'run'])('%s bench concurrency', async (mode) => {
+  const iterations = 100;
   const concurrentBench = new Bench({
     time: 0,
-    iterations: 100,
+    iterations,
     throws: true,
+    warmup: mode === 'warmup',
+    warmupTime: 0,
+    warmupIterations: iterations,
   });
   expect(concurrentBench.threshold).toBe(Number.POSITIVE_INFINITY);
   expect(concurrentBench.concurrency).toBeNull();
@@ -68,15 +75,9 @@ test.each(['warmup', 'run'])('%s bench concurrency', async (mode) => {
       shouldNotBeDefinedFirst2 = true;
     });
 
-  if (mode === 'warmup') {
-    // not awaited on purpose
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    concurrentBench.warmup();
-  } else if (mode === 'run') {
-    // not awaited on purpose
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    concurrentBench.run();
-  }
+  // not awaited on purpose
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  concurrentBench.run();
 
   await setTimeout(0);
   expect(shouldBeDefined1).toBeDefined();
@@ -92,8 +93,10 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
   const iterations = 10;
   const concurrentBench = new Bench({
     time: 0,
-    warmupTime: 0,
     iterations,
+    throws: true,
+    warmup: mode === 'warmup',
+    warmupTime: 0,
     warmupIterations: iterations,
   });
   expect(concurrentBench.threshold).toBe(Number.POSITIVE_INFINITY);
@@ -110,10 +113,9 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
     await setTimeout(10);
   });
 
-  if (mode === 'warmup') {
-    await concurrentBench.warmup();
-  } else if (mode === 'run') {
-    await concurrentBench.run();
+  await concurrentBench.run();
+
+  if (mode === 'run') {
     for (const result of concurrentBench.results) {
       expect(result?.error).toMatchObject(/AssertionError/);
     }
@@ -129,10 +131,9 @@ test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
   expect(concurrentBench.threshold).toBe(Number.POSITIVE_INFINITY);
   expect(concurrentBench.concurrency).toBe('task');
 
-  if (mode === 'warmup') {
-    await concurrentBench.warmup();
-  } else if (mode === 'run') {
-    await concurrentBench.run();
+  await concurrentBench.run();
+
+  if (mode === 'run') {
     for (const result of concurrentBench.results) {
       expect(result?.error).toBeUndefined();
     }

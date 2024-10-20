@@ -339,6 +339,11 @@ export interface Options {
   throws?: boolean;
 
   /**
+   * warmup the benchmark before running it @default true
+   */
+  warmup?: boolean;
+
+  /**
    * warmup time (milliseconds) @default 100
    */
   warmupTime?: number;

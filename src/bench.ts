@@ -1,4 +1,3 @@
-/* eslint-disable operator-linebreak */
 import pLimit from 'p-limit';
 import {
   defaultMinimumIterations,

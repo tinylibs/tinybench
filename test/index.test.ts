@@ -411,8 +411,10 @@ test('setup and teardown', async () => {
 
   expect(setup).toBeCalledWith(fooTask, 'warmup');
   expect(setup).toBeCalledWith(fooTask, 'run');
+  expect(setup).toHaveBeenCalledTimes(2);
   expect(teardown).toBeCalledWith(fooTask, 'warmup');
   expect(teardown).toBeCalledWith(fooTask, 'run');
+  expect(teardown).toHaveBeenCalledTimes(2);
 });
 
 test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
@@ -451,11 +453,11 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
 
   await bench.run();
 
-  expect(beforeAll.mock.calls.length).toBe(2 /* warmup + run */);
-  expect(afterAll.mock.calls.length).toBe(2 /* warmup + run */);
+  expect(beforeAll).toHaveBeenCalledTimes(2 /* warmup + run */);
+  expect(afterAll).toHaveBeenCalledTimes(2 /* warmup + run */);
   expect(beforeAll.mock.calls.length).toBe(afterAll.mock.calls.length);
-  expect(beforeEach.mock.calls.length).toBe(iterations * 2 /* warmup + run */);
-  expect(afterEach.mock.calls.length).toBe(iterations * 2 /* warmup + run */);
+  expect(beforeEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */);
+  expect(afterEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */);
   expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length);
 });
 

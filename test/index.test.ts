@@ -411,8 +411,10 @@ test('setup and teardown', async () => {
 
   expect(setup).toBeCalledWith(fooTask, 'warmup');
   expect(setup).toBeCalledWith(fooTask, 'run');
+  expect(setup).toHaveBeenCalledTimes(2);
   expect(teardown).toBeCalledWith(fooTask, 'warmup');
   expect(teardown).toBeCalledWith(fooTask, 'run');
+  expect(teardown).toHaveBeenCalledTimes(2);
 });
 
 test('task beforeAll, afterAll, beforeEach, afterEach', async () => {

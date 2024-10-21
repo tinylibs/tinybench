@@ -7,9 +7,8 @@ _I'm transitioning to a full-time open source career. Your support would be grea
 [![NPM version](https://img.shields.io/npm/v/tinybench.svg?style=flat)](https://www.npmjs.com/package/tinybench)
 
 Benchmark your code easily with Tinybench, a simple, tiny and light-weight `10KB` (`2KB` minified and gzipped) benchmarking library!
-You can run your benchmarks in multiple JavaScript runtimes, Tinybench is
-completely based on the Web APIs with proper timing using `process.hrtime` or
-`performance.now`.
+You can run your benchmarks in multiple JavaScript runtimes, Tinybench is completely based on the Web APIs with proper timing using
+`process.hrtime` or `performance.now`.
 
 - Accurate and precise timing based on the environment
 - Statistically analyzed latency and throughput values: standard deviation, margin of error, variance, percentiles, etc.
@@ -27,8 +26,7 @@ $ npm install -D tinybench
 
 ## Usage
 
-You can start benchmarking by instantiating the `Bench` class and adding
-benchmark tasks to it.
+You can start benchmarking by instantiating the `Bench` class and adding benchmark tasks to it.
 
 ```js
 import { Bench } from 'tinybench';
@@ -68,6 +66,8 @@ on their names in a `Map`.
 
 Also note that `tinybench` does not log any result by default. You can extract the relevant stats
 from `bench.tasks` or any other API after running the benchmark, and process them however you want.
+
+More usage examples can be found in the [examples](./examples/) directory.
 
 ## Docs
 

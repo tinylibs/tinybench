@@ -8,12 +8,16 @@
     "pnpm": "9.12.1"
   },
   "scripts": {
-    "all": "pnpm simple",
-    "simple": "tsx src/simple.ts",
-    "dev:simple": "tsx --watch src/simple.ts"
+    "all": "run-s example:*",
+    "example:simple": "tsx src/simple.ts",
+    "simple:dev": "tsx --watch src/simple.ts",
+    "example:simple-gc": "tsx --expose_gc src/simple-gc.ts",
+    "simple-gc:dev": "tsx --watch --expose_gc src/simple-gc.ts",
+    "example:simple-bun": "bun run src/simple-bun.ts"
   },
   "license": "ISC",
   "devDependencies": {
+    "npm-run-all2": "^6.2.4",
     "tsx": "^4.19.1"
   }
 }

@@ -169,7 +169,7 @@ function has been executed.
 - `result?: Readonly<TaskResult>`: the result object
 - `async run()`: run the current task and write the results in `Task.result` object property (internal)
 - `async warmup()`: warmup the current task (internal)
-- `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
+- `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property (internal)
 
 FnOptions:
 

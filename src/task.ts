@@ -260,6 +260,7 @@ export default class Task extends EventTarget {
 
   /**
    * reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
+   * @internal
    */
   reset(): void {
     this.dispatchEvent(createBenchEvent('reset', this));

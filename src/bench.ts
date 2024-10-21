@@ -52,6 +52,8 @@ export default class Bench extends EventTarget {
 
   throws = false;
 
+  warmup = true;
+
   warmupTime = defaultMinimumWarmupTime;
 
   warmupIterations = defaultMinimumWarmupIterations;
@@ -70,6 +72,7 @@ export default class Bench extends EventTarget {
     super();
     this.name = options.name;
     this.now = options.now ?? this.now;
+    this.warmup = options.warmup ?? this.warmup;
     this.warmupTime = options.warmupTime ?? this.warmupTime;
     this.warmupIterations = options.warmupIterations ?? this.warmupIterations;
     this.time = options.time ?? this.time;
@@ -90,6 +93,25 @@ export default class Bench extends EventTarget {
     }
   }
 
+  /**
+   * warmup the benchmark tasks.
+   */
+  private async warmupTasks(): Promise<void> {
+    this.dispatchEvent(createBenchEvent('warmup'));
+    if (this.concurrency === 'bench') {
+      const limit = pLimit(this.threshold);
+      const promises: Promise<void>[] = [];
+      for (const task of this._tasks.values()) {
+        promises.push(limit(() => task.warmup()));
+      }
+      await Promise.all(promises);
+    } else {
+      for (const task of this._tasks.values()) {
+        await task.warmup();
+      }
+    }
+  }
+
   private async runTask(task: Task): Promise<Task> {
     if (this.signal?.aborted) {
       return task;
@@ -99,9 +121,11 @@ export default class Bench extends EventTarget {
 
   /**
    * run the added tasks that were registered using the {@link add} method.
-   * Note: This method does not do any warmup. Call {@link warmup} for that.
    */
   async run(): Promise<Task[]> {
+    if (this.warmup) {
+      await this.warmupTasks();
+    }
     let values: Task[] = [];
     this.dispatchEvent(createBenchEvent('start'));
     if (this.concurrency === 'bench') {
@@ -118,26 +142,6 @@ export default class Bench extends EventTarget {
     }
     this.dispatchEvent(createBenchEvent('complete'));
     return values;
-  }
-
-  /**
-   * warmup the benchmark tasks.
-   * This is not run by default by the {@link run} method.
-   */
-  async warmup(): Promise<void> {
-    this.dispatchEvent(createBenchEvent('warmup'));
-    if (this.concurrency === 'bench') {
-      const limit = pLimit(this.threshold);
-      const promises: Promise<void>[] = [];
-      for (const task of this._tasks.values()) {
-        promises.push(limit(() => task.warmup()));
-      }
-      await Promise.all(promises);
-    } else {
-      for (const task of this._tasks.values()) {
-        await task.warmup();
-      }
-    }
   }
 
   /**
@@ -196,37 +200,24 @@ export default class Bench extends EventTarget {
   ): (Record<string, string | number> | undefined | null)[] {
     return this.tasks.map((task) => {
       if (task.result) {
-        if (task.result.error) {
-          throw task.result.error;
-        }
-        return (
-          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-          convert?.(task) || {
+        return task.result.error
+          ? (convert?.(task) ?? {
             'Task name': task.name,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            'Throughput average (ops/s)': task.result.error
-              ? 'NaN'
-              : `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            'Throughput median (ops/s)': task.result.error
-              ? 'NaN'
-              : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            'Latency average (ns)': task.result.error
-              ? 'NaN'
-              : `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            'Latency median (ns)': task.result.error
-              ? 'NaN'
-              : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            Samples: task.result.error
-              ? 'NaN'
-              : task.result.latency.samples.length,
-          }
-        );
+            Error: task.result.error.message,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            Stack: task.result.error.stack!,
+            Samples: task.result.latency.samples.length,
+          })
+          : (convert?.(task) ?? {
+            'Task name': task.name,
+            'Throughput average (ops/s)': `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            'Throughput median (ops/s)': `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+            'Latency average (ns)': `${(task.result.latency.mean * 1e6).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            'Latency median (ns)': `${(task.result.latency.p50! * 1e6).toFixed(2)}${Number.parseFloat((task.result.latency.mad! * 1e6).toFixed(2)) > 0 ? ` \xb1 ${(task.result.latency.mad! * 1e6).toFixed(2)}` : ''}`,
+            Samples: task.result.latency.samples.length,
+          });
       }
       return null;
     });

@@ -44,7 +44,6 @@ bench
     console.log('I am slower');
   });
 
-await bench.warmup(); // make results more reliable
 await bench.run();
 
 console.log(bench.name);
@@ -112,6 +111,11 @@ export interface Options {
   throws?: boolean;
 
   /**
+   * warmup benchmark @default true
+   */
+  warmup?: boolean;
+
+  /**
    * warmup time (milliseconds) @default 100
    */
   warmupTime?: number;
@@ -136,7 +140,6 @@ export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
-- `async warmup()`: warmup the benchmark tasks
 - `reset()`: reset each task and remove its result
 - `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map
   - `Fn`: `() => unknown | Promise<unknown>`
@@ -392,7 +395,6 @@ It may make your benchmarks slower, check [#42](https://github.com/tinylibs/tiny
 ```ts
 bench.threshold = 10; // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
 bench.concurrency = 'task'; // The concurrency mode to determine how tasks are run.
-await bench.warmup();
 await bench.run();
 ```
 

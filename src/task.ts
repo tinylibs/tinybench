@@ -131,7 +131,34 @@ export default class Task extends EventTarget {
   }
 
   /**
+   * warmup the current task
+   * @internal
+   */
+  async warmup(): Promise<void> {
+    if (this.result?.error) {
+      return;
+    }
+    this.dispatchEvent(createBenchEvent('warmup', this));
+    await this.bench.setup(this, 'warmup');
+    const { error } = (await this.benchmark(
+      this.bench.warmupTime,
+      this.bench.warmupIterations,
+    )) as { error?: Error };
+    await this.bench.teardown(this, 'warmup');
+
+    if (error) {
+      this.setResult({ error });
+      if (this.bench.throws) {
+        throw error;
+      }
+      this.dispatchEvent(createBenchEvent('error', this));
+      this.bench.dispatchEvent(createBenchEvent('error', this));
+    }
+  }
+
+  /**
    * run the current task and write the results in `Task.result` object property
+   * @internal
    */
   async run(): Promise<Task> {
     if (this.result?.error) {
@@ -203,29 +230,6 @@ export default class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('complete', this));
 
     return this;
-  }
-
-  /**
-   * warmup the current task
-   */
-  async warmup(): Promise<void> {
-    if (this.result?.error) {
-      return;
-    }
-    this.dispatchEvent(createBenchEvent('warmup', this));
-    await this.bench.setup(this, 'warmup');
-    const { error } = (await this.benchmark(
-      this.bench.warmupTime,
-      this.bench.warmupIterations,
-    )) as { error?: Error };
-    await this.bench.teardown(this, 'warmup');
-
-    if (error) {
-      this.setResult({ error });
-      if (this.bench.throws) {
-        throw error;
-      }
-    }
   }
 
   addEventListener<K extends TaskEvents>(

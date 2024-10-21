@@ -89,8 +89,8 @@ test('events order', async () => {
   const controller = new AbortController();
   const bench = new Bench({
     signal: controller.signal,
-    warmupIterations: 0,
     warmupTime: 0,
+    warmupIterations: 0,
   });
   bench
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -165,8 +165,6 @@ test('events order', async () => {
   bench.add('temporary', () => {});
   bench.remove('temporary');
 
-  await bench.warmup();
-
   setTimeout(() => {
     controller.abort();
     // the abort task takes 1000ms (500ms time || 10 iterations => 10 * 1000)
@@ -198,10 +196,7 @@ test('events order', async () => {
 }, 10000);
 
 test('events order at task completion', async () => {
-  const bench = new Bench({
-    warmupIterations: 0,
-    warmupTime: 0,
-  });
+  const bench = new Bench();
 
   bench
     .add('foo', async () => {
@@ -231,8 +226,8 @@ test('events order at task completion', async () => {
   expect(tasks[1]?.name).toBe('bar');
 });
 
-test('error event', async () => {
-  const bench = new Bench({ time: 50 });
+test.each(['warmup', 'run'])('%s error event', async (mode) => {
+  const bench = new Bench({ time: 100, warmup: mode === 'warmup' });
   const err = new Error();
 
   bench.add('error', () => {
@@ -250,8 +245,14 @@ test('error event', async () => {
   expect(taskErr).toBe(err);
 });
 
-test('throws', async () => {
-  const bench = new Bench({ iterations: 1, throws: true });
+test.each(['warmup', 'run'])('%s throws', async (mode) => {
+  const iterations = 1;
+  const bench = new Bench({
+    iterations,
+    throws: true,
+    warmup: mode === 'warmup',
+    warmupIterations: iterations,
+  });
   const err = new Error();
 
   bench.add('error', () => {
@@ -406,7 +407,6 @@ test('setup and teardown', async () => {
   });
   const fooTask = bench.getTask('foo');
 
-  await bench.warmup();
   await bench.run();
 
   expect(setup).toBeCalledWith(fooTask, 'warmup');
@@ -419,8 +419,8 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   const iterations = 100;
   const bench = new Bench({
     time: 0,
-    warmupTime: 0,
     iterations,
+    warmupTime: 0,
     warmupIterations: iterations,
   });
 
@@ -449,7 +449,6 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
     },
   );
 
-  await bench.warmup();
   await bench.run();
 
   expect(beforeAll.mock.calls.length).toBe(2 /* warmup + run */);

@@ -113,7 +113,7 @@ export default class Task extends EventTarget {
           await benchmarkTask();
         }
       }
-      if (promises.length > 0) {
+      if (!this.bench.signal?.aborted && promises.length > 0) {
         await Promise.all(promises);
       }
     } catch (error) {

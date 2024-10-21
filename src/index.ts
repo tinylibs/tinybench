@@ -11,6 +11,6 @@ export type {
   TaskResult,
 } from './types';
 
-export { hrtimeNow, nanoToMs, now } from './utils';
+export { hrtimeNow, nToMs, now } from './utils';
 
 export { Bench, Task };

@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
-import { Bench, nanoToMs } from '../../src';
+import { Bench, nToMs } from '../../src';
 
 const bench = new Bench({
   name: 'simple benchmark bun',
   time: 100,
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  now: () => nanoToMs(Bun.nanoseconds()),
+  now: () => nToMs(Bun.nanoseconds()),
   setup: (_task, mode) => {
     // Run the garbage collector before warmup at each cycle
     if (mode === 'warmup') {

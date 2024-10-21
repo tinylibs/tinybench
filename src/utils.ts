@@ -1,10 +1,24 @@
 import { emptyFunction, tTable } from './constants';
 import type { Fn, Statistics } from './types';
 
-export const nanoToMs = (nano: number) => nano / 1e6;
+/**
+ * Converts nanoseconds to milliseconds.
+ *
+ * @param nano - the nanoseconds to convert
+ * @returns the milliseconds
+ */
+export const nToMs = (nano: number) => nano / 1e6;
+
+/**
+ * Converts milliseconds to nanoseconds.
+ *
+ * @param ms - the milliseconds to convert
+ * @returns the nanoseconds
+ */
+export const mToNs = (ms: number) => ms * 1e6;
 
 const hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
-export const hrtimeNow = () => nanoToMs(Number(hrtimeBigint()));
+export const hrtimeNow = () => nToMs(Number(hrtimeBigint()));
 
 const performanceNow = performance.now.bind(performance);
 export const now = performanceNow;

@@ -113,7 +113,7 @@ export default class Task extends EventTarget {
           await benchmarkTask();
         }
       }
-      if (promises.length > 0) {
+      if (!this.bench.signal?.aborted && promises.length > 0) {
         await Promise.all(promises);
       }
     } catch (error) {
@@ -260,6 +260,7 @@ export default class Task extends EventTarget {
 
   /**
    * reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
+   * @internal
    */
   reset(): void {
     this.dispatchEvent(createBenchEvent('reset', this));

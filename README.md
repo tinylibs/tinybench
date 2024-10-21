@@ -167,9 +167,9 @@ function has been executed.
 - `opts: FnOptions`: Task options
 - `runs: number`: the number of times the task function has been executed
 - `result?: Readonly<TaskResult>`: the result object
-- `async run()`: run the current task and write the results in `Task.result` object property
-- `async warmup()`: warmup the current task
-- `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
+- `async run()`: run the current task and write the results in `Task.result` object property (internal)
+- `async warmup()`: warmup the current task (internal)
+- `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property (internal)
 
 FnOptions:
 

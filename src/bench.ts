@@ -111,13 +111,6 @@ export default class Bench extends EventTarget {
     }
   }
 
-  private async runTask(task: Task): Promise<Task> {
-    if (this.signal?.aborted) {
-      return task;
-    }
-    return await task.run();
-  }
-
   /**
    * run the added tasks that were registered using the {@link add} method.
    */
@@ -131,12 +124,12 @@ export default class Bench extends EventTarget {
       const limit = pLimit(this.threshold);
       const promises: Promise<Task>[] = [];
       for (const task of this._tasks.values()) {
-        promises.push(limit(() => this.runTask(task)));
+        promises.push(limit(() => task.run()));
       }
       values = await Promise.all(promises);
     } else {
       for (const task of this._tasks.values()) {
-        values.push(await this.runTask(task));
+        values.push(await task.run());
       }
     }
     this.dispatchEvent(createBenchEvent('complete'));

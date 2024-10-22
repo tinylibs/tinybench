@@ -11,9 +11,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
+    "postinstall": "pnpm exec simple-git-hooks",
     "dev": "tsup --watch",
     "build": "tsup",
-    "prepare": "git config core.hooksPath .hooks",
     "publish": "pnpm build && clean-publish",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src test examples tsup.config.ts",
@@ -40,6 +40,8 @@
   "repository": "tinylibs/tinybench",
   "license": "MIT",
   "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",
     "@types/node": "^22.7.7",
@@ -53,6 +55,7 @@
     "eslint-plugin-import": "^2.31.0",
     "nano-staged": "^0.8.0",
     "p-limit": "^6.1.0",
+    "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",
     "tsup": "^8.3.0",
     "typescript": "~5.6.3",

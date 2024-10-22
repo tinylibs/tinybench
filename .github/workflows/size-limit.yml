@@ -1,8 +1,8 @@
 name: 'size'
 on:
   pull_request:
-    branches:
-      - main
+    types: [opened, synchronize, reopened]
+
 jobs:
   size:
     runs-on: ubuntu-latest

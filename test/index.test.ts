@@ -212,7 +212,7 @@ test.each(['warmup', 'run'])('%s error event', async (mode) => {
 
   await bench.run();
 
-  expect(taskErr).toBe(err);
+  expect(taskErr).toStrictEqual(err);
 });
 
 test.each(['warmup', 'run'])('%s throws', async (mode) => {
@@ -448,13 +448,22 @@ test('task with promiseLike return', async () => {
   expect(bench.getTask('bar')?.result?.latency.mean).toBeGreaterThan(100);
 });
 
-test('throw error in return promise', async () => {
-  const bench = new Bench();
+test.each(['warmup', 'run'])('%s error handling', async (mode) => {
+  const bench = new Bench({ warmup: mode === 'warmup' });
 
-  bench.add('bar', () => Promise.reject(new Error('fake')));
+  const error = new Error('error');
+  const promiseError = new Error('promise');
+
+  bench.add('foo', () => {
+    throw error;
+  });
+  bench.add('bar', async () => Promise.reject(promiseError));
+  bench.add('baz', () => Promise.reject(promiseError));
   await bench.run();
 
-  expect(bench.getTask('bar')?.result?.error).toBeInstanceOf(Error);
+  expect(bench.getTask('foo')?.result?.error).toStrictEqual(error);
+  expect(bench.getTask('bar')?.result?.error).toStrictEqual(promiseError);
+  expect(bench.getTask('baz')?.result?.error).toStrictEqual(promiseError);
 });
 
 test('throw error in beforeAll, afterAll, beforeEach, afterEach', async () => {
@@ -479,10 +488,10 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach', async () => {
   });
   await bench.run();
 
-  expect(bench.getTask('BA test')?.result?.error).toBe(BAerror);
-  expect(bench.getTask('BE test')?.result?.error).toBe(BEerror);
-  expect(bench.getTask('AE test')?.result?.error).toBe(AEerror);
-  expect(bench.getTask('AA test')?.result?.error).toBe(AAerror);
+  expect(bench.getTask('BA test')?.result?.error).toStrictEqual(BAerror);
+  expect(bench.getTask('BE test')?.result?.error).toStrictEqual(BEerror);
+  expect(bench.getTask('AE test')?.result?.error).toStrictEqual(AEerror);
+  expect(bench.getTask('AA test')?.result?.error).toStrictEqual(AAerror);
 });
 
 test('removing non-existing task should not throw', () => {

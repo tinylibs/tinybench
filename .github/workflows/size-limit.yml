@@ -1,8 +1,12 @@
 name: 'size'
 on:
+  push:
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    types: [opened, synchronize, reopened]
+  merge_group:
+    branches: [main]
+
 jobs:
   size:
     runs-on: ubuntu-latest

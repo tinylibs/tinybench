@@ -28,12 +28,12 @@ export default class Task extends EventTarget {
   /**
    * The task function
    */
-  fn: Fn;
+  readonly fn: Fn;
 
   /**
    * The task synchronous status
    */
-  async: boolean;
+  readonly async: boolean;
 
   /*
    * The number of times the task function has been executed

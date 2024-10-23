@@ -5,8 +5,88 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  build-release:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Run unit tests
+        run: pnpm test
+        env:
+          FORCE_COLOR: 2
+
+      - name: Run examples
+        run: cd examples && pnpm all
+  publish-npm:
+    runs-on: ubuntu-latest
+    needs: build-release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Read package.json version
+        id: package-version
+        uses: jaywcjlove/github-action-package@main
+
+      - name: Publish release
+        run: pnpm publish --no-git-checks
+        if: ${{ contains(steps.package-version.outputs.version, '-') == false }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish release candidate
+        if: ${{ contains(steps.package-version.outputs.version, '-rc') == true }}
+        run: pnpm publish --no-git-checks --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish beta release
+        if: ${{ contains(steps.package-version.outputs.version, '-beta') == true }}
+        run: pnpm publish --no-git-checks --tag beta
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish alpha release
+        if: ${{ contains(steps.package-version.outputs.version, '-alpha') == true }}
+        run: pnpm publish --no-git-checks --tag alpha
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  changelog:
+    runs-on: ubuntu-latest
+    needs: publish-npm
     steps:
       - uses: actions/checkout@v4
         with:

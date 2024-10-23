@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build
@@ -54,7 +54,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: pnpm
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Read package.json version
@@ -67,15 +67,21 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish Pre-Release
-        if: ${{ contains(steps.package-version.outputs.version, '-') == true && contains(steps.package-version.outputs.version, '-beta') == false }}
+      - name: Publish release candidate
+        if: ${{ contains(steps.package-version.outputs.version, '-rc') == true }}
         run: pnpm publish --no-git-checks --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish Beta Release
+      - name: Publish beta release
         if: ${{ contains(steps.package-version.outputs.version, '-beta') == true }}
         run: pnpm publish --no-git-checks --tag beta
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish alpha release
+        if: ${{ contains(steps.package-version.outputs.version, '-alpha') == true }}
+        run: pnpm publish --no-git-checks --tag alpha
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   changelog:

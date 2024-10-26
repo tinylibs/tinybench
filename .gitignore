@@ -6,9 +6,10 @@ node_modules
 # testing
 coverage
 
-# production
+# build
 dist
 build
+package
 
 # dotenv environment variables file
 .env
@@ -25,3 +26,4 @@ yarn-error.log*
 # misc
 .DS_Store
 .idea
+.orig

@@ -10,15 +10,19 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "publishConfig": {
+    "directory": "package"
+  },
   "scripts": {
     "postinstall": "pnpm exec simple-git-hooks",
     "dev": "tsup --watch",
     "build": "tsup",
-    "publish": "pnpm build && clean-publish",
+    "prepublishOnly": "rm -rf ./package && clean-publish",
+    "postpublish": "rm -rf ./package",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src test examples tsup.config.ts",
     "lint:fix": "eslint --fix src test examples tsup.config.ts",
-    "release": "bumpp package.json --commit --push --tag && pnpm publish",
+    "release": "bumpp package.json --commit --push --tag",
     "test": "vitest --retry=5 --run"
   },
   "main": "./dist/index.cjs",
@@ -44,7 +48,7 @@
     "@commitlint/config-conventional": "^19.5.0",
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",
-    "@types/node": "^22.8.0",
+    "@types/node": "^22.8.1",
     "@typescript-eslint/eslint-plugin": "^8.11.0",
     "@typescript-eslint/parser": "^8.11.0",
     "bumpp": "^9.7.1",
@@ -57,7 +61,7 @@
     "p-limit": "^6.1.0",
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",
-    "tsup": "^8.3.4",
+    "tsup": "^8.3.5",
     "typescript": "~5.6.3",
     "vitest": "^2.1.3"
   },

@@ -25,7 +25,7 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --ignore-scripts --frozen-lockfile
 
       - name: Build
         run: pnpm build
@@ -60,10 +60,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
+        run: pnpm install --ignore-scripts --frozen-lockfile
 
       - name: Read package.json version
         id: package-version

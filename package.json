@@ -17,7 +17,7 @@
     "postinstall": "pnpm exec simple-git-hooks",
     "dev": "tsup --watch",
     "build": "tsup",
-    "prepublishOnly": "rm -rf ./package && clean-publish",
+    "prepublishOnly": "pnpm build && rm -rf ./package && clean-publish",
     "postpublish": "rm -rf ./package",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src test examples tsup.config.ts",

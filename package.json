@@ -20,8 +20,8 @@
     "prepublishOnly": "pnpm build && rm -rf ./package && clean-publish",
     "postpublish": "rm -rf ./package",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src test examples tsup.config.ts",
-    "lint:fix": "eslint --fix src test examples tsup.config.ts",
+    "lint": "eslint --cache src test examples tsup.config.ts",
+    "lint:fix": "eslint --cache --fix src test examples tsup.config.ts",
     "release": "bumpp package.json --commit --push --tag",
     "test": "vitest --retry=5 --run"
   },

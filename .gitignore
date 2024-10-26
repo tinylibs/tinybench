@@ -23,7 +23,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# cache
+.eslintcache
+
+# jetbrains
+.idea
+
 # misc
 .DS_Store
-.idea
 .orig

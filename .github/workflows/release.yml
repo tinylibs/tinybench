@@ -7,6 +7,7 @@ on:
 jobs:
   build-release:
     runs-on: ubuntu-latest
+    if: github.repository == 'tinylibs/tinybench'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,6 +54,10 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org/
           cache: pnpm
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

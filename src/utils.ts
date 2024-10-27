@@ -4,10 +4,10 @@ import type { Fn, Statistics } from './types';
 /**
  * Converts nanoseconds to milliseconds.
  *
- * @param nano - the nanoseconds to convert
+ * @param ns - the nanoseconds to convert
  * @returns the milliseconds
  */
-export const nToMs = (nano: number) => nano / 1e6;
+export const nToMs = (ns: number) => ns / 1e6;
 
 /**
  * Converts milliseconds to nanoseconds.

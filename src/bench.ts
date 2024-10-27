@@ -101,7 +101,7 @@ export default class Bench extends EventTarget {
       const limit = pLimit(this.threshold);
       const promises: Promise<void>[] = [];
       for (const task of this._tasks.values()) {
-        promises.push(limit(() => task.warmup()));
+        promises.push(limit(task.warmup.bind(task)));
       }
       await Promise.all(promises);
     } else {
@@ -124,7 +124,7 @@ export default class Bench extends EventTarget {
       const limit = pLimit(this.threshold);
       const promises: Promise<Task>[] = [];
       for (const task of this._tasks.values()) {
-        promises.push(limit(() => task.run()));
+        promises.push(limit(task.run.bind(task)));
       }
       values = await Promise.all(promises);
     } else {

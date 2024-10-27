@@ -103,7 +103,7 @@ export interface Options {
   signal?: AbortSignal;
 
   /**
-   * Throw if a task fails (events will not work if true) @default false
+   * Throws if a task fails @default false
    */
   throws?: boolean;
 
@@ -369,7 +369,7 @@ task.addEventListener('cycle', (evt) => {
 ### `BenchEvent`
 
 ```ts
-export type BenchEvent = Event & { task?: Task };
+export type BenchEvent = Event & { error?: Error; task?: Task };
 ```
 
 ### `process.hrtime`

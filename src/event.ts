@@ -14,5 +14,21 @@ function createBenchEvent(eventType: BenchEvents, target?: Task) {
   return event;
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export { createBenchEvent };
+function createErrorEvent(target: Task, error: Error) {
+  const event = new Event('error');
+  Object.defineProperty(event, 'task', {
+    value: target,
+    enumerable: true,
+    writable: false,
+    configurable: false,
+  });
+  Object.defineProperty(event, 'error', {
+    value: error,
+    enumerable: true,
+    writable: false,
+    configurable: false,
+  });
+  return event;
+}
+
+export { createBenchEvent, createErrorEvent };

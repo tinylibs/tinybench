@@ -1,7 +1,7 @@
 import type Task from './task';
 import type { BenchEvents } from './types';
 
-function createBenchEvent(eventType: BenchEvents, target?: Task) {
+const createBenchEvent = (eventType: BenchEvents, target?: Task) => {
   const event = new Event(eventType);
   if (target) {
     Object.defineProperty(event, 'task', {
@@ -12,9 +12,9 @@ function createBenchEvent(eventType: BenchEvents, target?: Task) {
     });
   }
   return event;
-}
+};
 
-function createErrorEvent(target: Task, error: Error) {
+const createErrorEvent = (target: Task, error: Error) => {
   const event = new Event('error');
   Object.defineProperty(event, 'task', {
     value: target,
@@ -29,6 +29,6 @@ function createErrorEvent(target: Task, error: Error) {
     configurable: false,
   });
   return event;
-}
+};
 
 export { createBenchEvent, createErrorEvent };

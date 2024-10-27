@@ -1,6 +1,6 @@
 import pLimit from 'p-limit';
 import type Bench from './bench';
-import { createBenchEvent } from './event';
+import { createBenchEvent, createErrorEvent } from './event';
 import type {
   AddEventListenerOptionsArgument,
   Fn,
@@ -148,11 +148,11 @@ export default class Task extends EventTarget {
 
     if (error) {
       this.setResult({ error });
+      this.dispatchEvent(createErrorEvent(this, error));
+      this.bench.dispatchEvent(createErrorEvent(this, error));
       if (this.bench.throws) {
         throw error;
       }
-      this.dispatchEvent(createBenchEvent('error', this));
-      this.bench.dispatchEvent(createBenchEvent('error', this));
     }
   }
 
@@ -217,11 +217,11 @@ export default class Task extends EventTarget {
 
     if (error) {
       this.setResult({ error });
+      this.dispatchEvent(createErrorEvent(this, error));
+      this.bench.dispatchEvent(createErrorEvent(this, error));
       if (this.bench.throws) {
         throw error;
       }
-      this.dispatchEvent(createBenchEvent('error', this));
-      this.bench.dispatchEvent(createBenchEvent('error', this));
     }
 
     this.dispatchEvent(createBenchEvent('cycle', this));

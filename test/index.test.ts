@@ -198,21 +198,23 @@ test('events order at task completion', async () => {
 
 test.each(['warmup', 'run'])('%s error event', async (mode) => {
   const bench = new Bench({ time: 100, warmup: mode === 'warmup' });
-  const err = new Error();
+  const error = new Error();
 
   bench.add('error', () => {
-    throw err;
+    throw error;
   });
 
-  let taskErr: Error | undefined;
+  let err: Error | undefined;
+  let task: Task | undefined;
   bench.addEventListener('error', (evt) => {
-    const { task } = evt;
-    taskErr = task?.result?.error;
+    const { error: e, task: t } = evt;
+    err = e;
+    task = t;
   });
 
-  await bench.run();
-
-  expect(taskErr).toStrictEqual(err);
+  await expect(bench.run()).resolves.toBeDefined();
+  expect(err).toStrictEqual(error);
+  expect(task?.result?.error).toStrictEqual(error);
 });
 
 test.each(['warmup', 'run'])('%s throws', async (mode) => {
@@ -223,12 +225,23 @@ test.each(['warmup', 'run'])('%s throws', async (mode) => {
     warmup: mode === 'warmup',
     warmupIterations: iterations,
   });
-  const err = new Error();
+  const error = new Error();
 
   bench.add('error', () => {
-    throw err;
+    throw error;
   });
-  await expect(() => bench.run()).rejects.toThrowError(err);
+
+  let err: Error | undefined;
+  let task: Task | undefined;
+  bench.addEventListener('error', (evt) => {
+    const { error: e, task: t } = evt;
+    err = e;
+    task = t;
+  });
+
+  await expect(bench.run()).rejects.toThrowError(error);
+  expect(err).toStrictEqual(error);
+  expect(task?.result?.error).toStrictEqual(error);
 });
 
 test('detect faster task', async () => {

@@ -11,11 +11,12 @@ enum JSRuntime {
   browser = 'browser',
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isBun = !!(globalThis as any).Bun || !!globalThis.process.versions.bun;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
+const isBun = !!(globalThis as any).Bun || !!globalThis.process?.versions?.bun;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isDeno = !!(globalThis as any).Deno;
-const isNode = globalThis.process.release.name === 'node';
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+const isNode = globalThis.process?.release?.name === 'node';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isBrowser = !!(globalThis as any).navigator;
 

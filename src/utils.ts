@@ -1,8 +1,31 @@
 import { emptyFunction, tTable } from './constants';
 import type { Fn, Statistics } from './types';
 
+/**
+ * The JavaScript runtime environment.
+ */
+enum JSRuntime {
+  bun = 'bun',
+  deno = 'deno',
+  node = 'node',
+  browser = 'browser',
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isBun = !!(globalThis as any).Bun || !!globalThis.process.versions.bun;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isDeno = !!(globalThis as any).Deno;
+const isNode = globalThis.process.release.name === 'node';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isBrowser = !!(globalThis as any).navigator;
+
+const runtime: JSRuntime | 'unknown' = (() => {
+  if (isBun) return JSRuntime.bun;
+  if (isDeno) return JSRuntime.deno;
+  if (isNode) return JSRuntime.node;
+  if (isBrowser) return JSRuntime.browser;
+  return 'unknown';
+})();
 
 /**
  * Converts nanoseconds to milliseconds.
@@ -21,7 +44,7 @@ export const nToMs = (ns: number) => ns / 1e6;
 export const mToNs = (ms: number) => ms * 1e6;
 
 let hrtimeBigint: () => bigint;
-if (isBrowser) {
+if (runtime === JSRuntime.browser) {
   hrtimeBigint = () => {
     throw new Error('hrtime.bigint() is not supported in this JS environment');
   };

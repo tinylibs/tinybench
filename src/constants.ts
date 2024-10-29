@@ -1029,13 +1029,13 @@ export const tTable: Readonly<Record<string, number>> = Object.freeze({
   infinity: 1.96,
 });
 
-export const defaultMinimumTime = 500;
+export const defaultMinimumTime = 1000;
 
-export const defaultMinimumIterations = 10;
+export const defaultMinimumIterations = 64;
 
-export const defaultMinimumWarmupTime = 100;
+export const defaultMinimumWarmupTime = 250;
 
-export const defaultMinimumWarmupIterations = 5;
+export const defaultMinimumWarmupIterations = 16;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const emptyFunction = Object.freeze(() => {});

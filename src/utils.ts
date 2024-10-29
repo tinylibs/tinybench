@@ -1,6 +1,9 @@
 import { emptyFunction, tTable } from './constants';
 import type { Fn, Statistics } from './types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isBrowser = !!(globalThis as any).navigator;
+
 /**
  * Converts nanoseconds to milliseconds.
  *
@@ -17,7 +20,14 @@ export const nToMs = (ns: number) => ns / 1e6;
  */
 export const mToNs = (ms: number) => ms * 1e6;
 
-const hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
+let hrtimeBigint: () => bigint;
+if (isBrowser) {
+  hrtimeBigint = () => {
+    throw new Error('hrtime.bigint() is not supported in this JS environment');
+  };
+} else {
+  hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
+}
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()));
 
 const performanceNow = performance.now.bind(performance);

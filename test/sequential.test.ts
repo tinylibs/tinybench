@@ -60,7 +60,7 @@ test.each(['warmup', 'run'])('%s sequential', async (mode) => {
 });
 
 test.each(['warmup', 'run'])('%s bench concurrency', async (mode) => {
-  const iterations = 100;
+  const iterations = 128;
   const concurrentBench = new Bench({
     time: 0,
     iterations,
@@ -106,7 +106,7 @@ test.each(['warmup', 'run'])('%s bench concurrency', async (mode) => {
 });
 
 test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
-  const iterations = 10;
+  const iterations = 16;
   const concurrentBench = new Bench({
     time: 0,
     iterations,

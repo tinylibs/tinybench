@@ -7,7 +7,7 @@ test.each([
   ['now()', now],
   ['hrtimeNow()', hrtimeNow],
 ])('%s basic', async (_, _now) => {
-  const bench = new Bench({ now: _now, time: 100 });
+  const bench = new Bench({ now: _now, time: 100, iterations: 16 });
   bench
     .add('foo', async () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -42,7 +42,7 @@ test.each([
 });
 
 test('bench and task runs, time consistency', async () => {
-  const bench = new Bench({ time: 100, iterations: 15 });
+  const bench = new Bench({ time: 100, iterations: 32 });
   bench.add('foo', async () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
   });
@@ -59,6 +59,8 @@ test('events order', async () => {
   const controller = new AbortController();
   const bench = new Bench({
     signal: controller.signal,
+    time: 100,
+    iterations: 32,
     warmupTime: 0,
     warmupIterations: 0,
   });
@@ -166,14 +168,14 @@ test('events order', async () => {
 }, 10000);
 
 test('events order at task completion', async () => {
-  const bench = new Bench();
+  const bench = new Bench({ time: 100, iterations: 16 });
 
   bench
     .add('foo', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 25));
     })
     .add('bar', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     });
 
   const events: string[] = [];
@@ -197,7 +199,11 @@ test('events order at task completion', async () => {
 });
 
 test.each(['warmup', 'run'])('%s error event', async (mode) => {
-  const bench = new Bench({ time: 100, warmup: mode === 'warmup' });
+  const bench = new Bench({
+    time: 100,
+    iterations: 32,
+    warmup: mode === 'warmup',
+  });
   const error = new Error();
 
   bench.add('error', () => {
@@ -245,7 +251,7 @@ test.each(['warmup', 'run'])('%s throws', async (mode) => {
 });
 
 test('detect faster task', async () => {
-  const bench = new Bench({ time: 200 });
+  const bench = new Bench({ time: 100, iterations: 32 });
   bench
     .add('faster', async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -297,7 +303,7 @@ test('detect faster task', async () => {
 });
 
 test('statistics', async () => {
-  const bench = new Bench({ time: 200 });
+  const bench = new Bench({ time: 100, iterations: 32 });
   bench.add('foo', async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
@@ -384,7 +390,12 @@ test('statistics', async () => {
 test('setup and teardown', async () => {
   const setup = vi.fn();
   const teardown = vi.fn();
-  const bench = new Bench({ time: 200, setup, teardown });
+  const bench = new Bench({
+    time: 100,
+    iterations: 32,
+    setup,
+    teardown,
+  });
   bench.add('foo', async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
@@ -401,7 +412,7 @@ test('setup and teardown', async () => {
 });
 
 test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
-  const iterations = 100;
+  const iterations = 128;
   const bench = new Bench({
     time: 0,
     iterations,
@@ -445,20 +456,20 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
 });
 
 test('task with promiseLike return', async () => {
-  const bench = new Bench();
+  const bench = new Bench({ time: 100, iterations: 16 });
 
   bench.add('foo', () => ({
-    then: (resolve: () => void) => setTimeout(resolve, 100),
+    then: (resolve: () => void) => setTimeout(resolve, 50),
   }));
   bench.add('fum', () => ({
-    then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 100)),
+    then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 50)),
   }));
-  bench.add('bar', () => new Promise((resolve) => setTimeout(resolve, 100)));
+  bench.add('bar', () => new Promise((resolve) => setTimeout(resolve, 50)));
   await bench.run();
 
-  expect(bench.getTask('foo')?.result?.latency.mean).toBeGreaterThan(100);
-  expect(bench.getTask('fum')?.result?.latency.mean).toBeGreaterThan(100);
-  expect(bench.getTask('bar')?.result?.latency.mean).toBeGreaterThan(100);
+  expect(bench.getTask('foo')?.result?.latency.mean).toBeGreaterThan(50);
+  expect(bench.getTask('fum')?.result?.latency.mean).toBeGreaterThan(50);
+  expect(bench.getTask('bar')?.result?.latency.mean).toBeGreaterThan(50);
 });
 
 test.each(['warmup', 'run'])('%s error handling', async (mode) => {

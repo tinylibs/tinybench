@@ -104,12 +104,13 @@ export const nToMs = (ns: number) => ns / 1e6;
 export const mToNs = (ms: number) => ms * 1e6;
 
 let hrtimeBigint: () => bigint;
-if (runtime === JSRuntime.browser) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+if (typeof (globalThis as any).process?.hrtime?.bigint === 'function') {
+  hrtimeBigint = globalThis.process.hrtime.bigint.bind(process.hrtime);
+} else {
   hrtimeBigint = () => {
     throw new Error('hrtime.bigint() is not supported in this JS environment');
   };
-} else {
-  hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
 }
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()));
 

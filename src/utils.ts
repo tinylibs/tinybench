@@ -18,9 +18,9 @@ const isDeno = !!(globalThis as any).Deno;
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const isNode = globalThis.process?.release?.name === 'node';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isBrowser = !!(globalThis as any).navigator;
+const isBrowser = !!(globalThis as any).window && !!(globalThis as any).navigator;
 
-const runtime: JSRuntime | 'unknown' = (() => {
+export const runtime: JSRuntime | 'unknown' = (() => {
   if (isBun) return JSRuntime.bun;
   if (isDeno) return JSRuntime.deno;
   if (isNode) return JSRuntime.node;
@@ -45,12 +45,13 @@ export const nToMs = (ns: number) => ns / 1e6;
 export const mToNs = (ms: number) => ms * 1e6;
 
 let hrtimeBigint: () => bigint;
-if (runtime === JSRuntime.browser) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+if (typeof (globalThis as any).process?.hrtime?.bigint === 'function') {
+  hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
+} else {
   hrtimeBigint = () => {
     throw new Error('hrtime.bigint() is not supported in this JS environment');
   };
-} else {
-  hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
 }
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()));
 

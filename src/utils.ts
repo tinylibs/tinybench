@@ -47,7 +47,7 @@ export const mToNs = (ms: number) => ms * 1e6;
 let hrtimeBigint: () => bigint;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 if (typeof (globalThis as any).process?.hrtime?.bigint === 'function') {
-  hrtimeBigint = process.hrtime.bigint.bind(process.hrtime);
+  hrtimeBigint = globalThis.process.hrtime.bigint.bind(process.hrtime);
 } else {
   hrtimeBigint = () => {
     throw new Error('hrtime.bigint() is not supported in this JS environment');

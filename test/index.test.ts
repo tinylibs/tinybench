@@ -311,6 +311,9 @@ test('statistics', async () => {
 
   const fooTask = bench.getTask('foo');
 
+  expect(fooTask?.result).toBeDefined();
+  expect(fooTask?.result?.runtime).toStrictEqual(bench.runtime);
+  expect(fooTask?.result?.runtimeVersion).toStrictEqual(bench.runtimeVersion);
   expect(fooTask?.result?.totalTime).toBeTypeOf('number');
   expect(fooTask?.result?.period).toBeTypeOf('number');
   // deprecated

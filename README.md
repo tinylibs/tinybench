@@ -200,7 +200,17 @@ The benchmark task result object:
 
 ```ts
 export interface TaskResult {
-  /*
+  /**
+   * the JavaScript runtime environment
+   */
+  runtime: JSRuntime | 'unknown';
+
+  /**
+   * the JavaScript runtime version
+   */
+  runtimeVersion: string;
+
+  /**
    * the last task error that was thrown
    */
   error?: Error;

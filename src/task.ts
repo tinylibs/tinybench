@@ -18,17 +18,20 @@ import { getStatisticsSorted, isFnAsyncResource } from './utils';
  * function has been executed.
  */
 export default class Task extends EventTarget {
-  bench: Bench;
+  /**
+   * The Bench instance reference
+   */
+  private readonly bench: Bench;
 
   /**
    * Task name
    */
-  name: string;
+  readonly name: string;
 
   /**
    * The task function
    */
-  readonly fn: Fn;
+  private readonly fn: Fn;
 
   /**
    * The task synchronous status
@@ -48,7 +51,7 @@ export default class Task extends EventTarget {
   /**
    * Task options
    */
-  opts: FnOptions;
+  private readonly opts: FnOptions;
 
   constructor(bench: Bench, name: string, fn: Fn, opts: FnOptions = {}) {
     super();
@@ -192,6 +195,8 @@ export default class Task extends EventTarget {
       }
 
       this.setResult({
+        runtime: this.bench.runtime,
+        runtimeVersion: this.bench.runtimeVersion,
         totalTime,
         period: totalTime / this.runs,
         latency: latencyStatistics,

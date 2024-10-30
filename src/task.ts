@@ -36,7 +36,7 @@ export default class Task extends EventTarget {
   /**
    * The task synchronous status
    */
-  readonly async: boolean;
+  private readonly async: boolean;
 
   /*
    * The number of times the task function has been executed
@@ -46,7 +46,7 @@ export default class Task extends EventTarget {
   /**
    * The result object
    */
-  result?: Readonly<TaskResult>;
+  result: Readonly<TaskResult> | undefined;
 
   /**
    * Task options

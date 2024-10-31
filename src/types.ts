@@ -1,4 +1,5 @@
 import type Task from '../src/task';
+import type { JSRuntime } from './utils';
 
 /**
  * the task function
@@ -124,7 +125,17 @@ export interface Statistics {
  * the benchmark task result object
  */
 export interface TaskResult {
-  /*
+  /**
+   * the JavaScript runtime environment
+   */
+  runtime: JSRuntime | 'unknown';
+
+  /**
+   * the JavaScript runtime version
+   */
+  runtimeVersion: string;
+
+  /**
    * the last task error that was thrown
    */
   error?: Error;

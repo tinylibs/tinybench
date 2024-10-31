@@ -19,7 +19,9 @@ import type {
   RemoveEventListenerOptionsArgument,
   TaskResult,
 } from './types';
-import { mToNs, now } from './utils';
+import {
+  type JSRuntime, mToNs, now, runtime, runtimeVersion,
+} from './utils';
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
@@ -31,7 +33,20 @@ export default class Bench extends EventTarget {
    */
   private readonly _tasks = new Map<string, Task>();
 
-  name?: string;
+  /**
+   * The benchmark name.
+   */
+  readonly name?: string;
+
+  /**
+   * The JavaScript runtime environment.
+   */
+  readonly runtime: JSRuntime | 'unknown';
+
+  /**
+   * The JavaScript runtime version.
+   */
+  readonly runtimeVersion: string;
 
   /**
    * Executes tasks concurrently based on the specified concurrency mode.
@@ -47,7 +62,7 @@ export default class Bench extends EventTarget {
    */
   threshold = Number.POSITIVE_INFINITY;
 
-  signal?: AbortSignal;
+  readonly signal?: AbortSignal;
 
   throws = false;
 
@@ -61,15 +76,17 @@ export default class Bench extends EventTarget {
 
   iterations = defaultMinimumIterations;
 
-  now = now;
+  readonly now = now;
 
-  setup: Hook;
+  readonly setup: Hook;
 
-  teardown: Hook;
+  readonly teardown: Hook;
 
   constructor(options: Options = {}) {
     super();
     this.name = options.name;
+    this.runtime = runtime;
+    this.runtimeVersion = runtimeVersion;
     this.now = options.now ?? this.now;
     this.warmup = options.warmup ?? this.warmup;
     this.warmupTime = options.warmupTime ?? this.warmupTime;

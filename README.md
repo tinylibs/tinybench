@@ -333,7 +333,7 @@ export interface TaskResult {
 }
 ```
 
-[Statistics](https://github.com/tinylibs/tinybench/blob/main/src/types.ts#L30) type definition.
+[Statistics](https://github.com/tinylibs/tinybench/blob/main/src/types.ts#L31) type definition.
 
 ### `Events`
 

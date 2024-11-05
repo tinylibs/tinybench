@@ -325,12 +325,12 @@ export interface Options {
   name?: string;
 
   /**
-   * time needed for running a benchmark task (milliseconds) @default 500
+   * time needed for running a benchmark task (milliseconds) @default 1000
    */
   time?: number;
 
   /**
-   * number of times that a task should run if even the time option is finished @default 10
+   * number of times that a task should run if even the time option is finished @default 64
    */
   iterations?: number;
 
@@ -355,12 +355,12 @@ export interface Options {
   warmup?: boolean;
 
   /**
-   * warmup time (milliseconds) @default 100
+   * warmup time (milliseconds) @default 250
    */
   warmupTime?: number;
 
   /**
-   * warmup iterations @default 5
+   * warmup iterations @default 16
    */
   warmupIterations?: number;
 

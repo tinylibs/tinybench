@@ -6,25 +6,23 @@ import type { Fn, Statistics } from './types';
  * @see https://runtime-keys.proposal.wintercg.org/
  */
 export enum JSRuntime {
-  v8 = 'v8',
   bun = 'bun',
   deno = 'deno',
   node = 'node',
+  hermes = 'hermes',
   netlify = 'netlify',
   'edge-light' = 'edge-light',
   lagon = 'lagon',
   fastly = 'fastly',
   'quickjs-ng' = 'quickjs-ng',
-  spidermonkey = 'spidermonkey',
-  hermes = 'hermes',
-  jsc = 'jsc',
   workerd = 'workerd',
   moddable = 'moddable',
+  v8 = 'v8',
+  spidermonkey = 'spidermonkey',
+  jsc = 'jsc',
   browser = 'browser',
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isV8 = !!(globalThis as any).d8;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
 const isBun = !!(globalThis as any).Bun || !!globalThis.process?.versions?.bun;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -48,14 +46,16 @@ const isEdgeLight = typeof (globalThis as any).EdgeRuntime === 'string';
 const isLagon = !!(globalThis as any).__lagon__;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isFastly = !!(globalThis as any).fastly;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
-const isSpiderMonkey = !!(globalThis as any).inIon && !!(globalThis as any).performance?.mozMemory;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isModdable = !!(globalThis as any).$262
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   && !!(globalThis as any).lockdown
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   && !!(globalThis as any).AsyncDisposableStack;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isV8 = !!(globalThis as any).d8;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
+const isSpiderMonkey = !!(globalThis as any).inIon && !!(globalThis as any).performance?.mozMemory;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isJsc = !!(globalThis as any).$
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access

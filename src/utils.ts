@@ -62,8 +62,7 @@ const isSpiderMonkey = !!(globalThis as any).inIon && !!(globalThis as any).perf
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isJsc = !!(globalThis as any).$
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  && 'IsHTMLDDA' in (globalThis as any).$
-  && new Error().stack?.startsWith('runtime@');
+  && 'IsHTMLDDA' in (globalThis as any).$;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isBrowser = !!(globalThis as any).window && !!(globalThis as any).navigator;
 

@@ -107,7 +107,8 @@ export default class Task extends EventTarget {
       const promises: Promise<void>[] = []; // only for task level concurrency
       while (
         (totalTime < time
-          || samples.length + limit.activeCount + limit.pendingCount < iterations)
+          || samples.length + limit.activeCount + limit.pendingCount
+            < iterations)
         && !this.bench.signal?.aborted
       ) {
         if (this.bench.concurrency === 'task') {

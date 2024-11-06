@@ -391,8 +391,13 @@ test('statistics', async () => {
 });
 
 test('setup and teardown', async () => {
-  const setup = vi.fn();
-  const teardown = vi.fn();
+  const calls: string[] = [];
+  const setup = vi.fn(() => {
+    calls.push('setup');
+  });
+  const teardown = vi.fn(() => {
+    calls.push('teardown');
+  });
   const bench = new Bench({
     time: 100,
     iterations: 32,
@@ -412,6 +417,7 @@ test('setup and teardown', async () => {
   expect(teardown).toBeCalledWith(fooTask, 'warmup');
   expect(teardown).toBeCalledWith(fooTask, 'run');
   expect(teardown).toHaveBeenCalledTimes(2);
+  expect(calls).toStrictEqual(['setup', 'teardown', 'setup', 'teardown']);
 });
 
 test('task beforeAll, afterAll, beforeEach, afterEach', async () => {

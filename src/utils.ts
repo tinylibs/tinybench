@@ -6,23 +6,26 @@ import type { Fn, Statistics } from './types';
 
 /**
  * The JavaScript runtime environment.
+ * @see https://runtime-keys.proposal.wintercg.org/
  */
 export enum JSRuntime {
-  v8 = 'v8',
   bun = 'bun',
   deno = 'deno',
   node = 'node',
-  'quickjs-ng' = 'quickjs-ng',
-  spidermonkey = 'spidermonkey',
   hermes = 'hermes',
-  jsc = 'jsc',
+  netlify = 'netlify',
+  'edge-light' = 'edge-light',
+  lagon = 'lagon',
+  fastly = 'fastly',
+  'quickjs-ng' = 'quickjs-ng',
   workerd = 'workerd',
-  'XS Moddable' = 'XS Moddable',
+  moddable = 'moddable',
+  v8 = 'v8',
+  spidermonkey = 'spidermonkey',
+  jsc = 'jsc',
   browser = 'browser',
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isV8 = !!(globalThis as any).d8;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
 const isBun = !!(globalThis as any).Bun || !!globalThis.process?.versions?.bun;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -38,14 +41,24 @@ const isQuickJsNg = !!(globalThis as any).navigator?.userAgent
   ?.toLowerCase?.()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   ?.includes?.('quickjs-ng');
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
-const isSpiderMonkey = !!(globalThis as any).inIon && !!(globalThis as any).performance?.mozMemory;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isXsModdable = !!(globalThis as any).$262
+const isNetlify = typeof (globalThis as any).Netlify === 'object';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isEdgeLight = typeof (globalThis as any).EdgeRuntime === 'string';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isLagon = !!(globalThis as any).__lagon__;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isFastly = !!(globalThis as any).fastly;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isModdable = !!(globalThis as any).$262
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   && !!(globalThis as any).lockdown
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   && !!(globalThis as any).AsyncDisposableStack;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+const isV8 = !!(globalThis as any).d8;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
+const isSpiderMonkey = !!(globalThis as any).inIon && !!(globalThis as any).performance?.mozMemory;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isJsc = !!(globalThis as any).$
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -55,25 +68,25 @@ const isJsc = !!(globalThis as any).$
 const isBrowser = !!(globalThis as any).window && !!(globalThis as any).navigator;
 
 export const runtime: JSRuntime | 'unknown' = (() => {
-  if (isV8) return JSRuntime.v8;
-  if (isSpiderMonkey) return JSRuntime.spidermonkey;
-  if (isQuickJsNg) return JSRuntime['quickjs-ng'];
-  if (isXsModdable) return JSRuntime['XS Moddable'];
-  if (isJsc) return JSRuntime.jsc;
   if (isBun) return JSRuntime.bun;
   if (isDeno) return JSRuntime.deno;
   if (isNode) return JSRuntime.node;
   if (isHermes) return JSRuntime.hermes;
+  if (isNetlify) return JSRuntime.netlify;
+  if (isEdgeLight) return JSRuntime['edge-light'];
+  if (isLagon) return JSRuntime.lagon;
+  if (isFastly) return JSRuntime.fastly;
   if (isWorkerd) return JSRuntime.workerd;
+  if (isQuickJsNg) return JSRuntime['quickjs-ng'];
+  if (isModdable) return JSRuntime.moddable;
+  if (isV8) return JSRuntime.v8;
+  if (isSpiderMonkey) return JSRuntime.spidermonkey;
+  if (isJsc) return JSRuntime.jsc;
   if (isBrowser) return JSRuntime.browser;
   return 'unknown';
 })();
 
 export const runtimeVersion: string = (() => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,
-  if (runtime === JSRuntime.v8) return (globalThis as any).version?.() as string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,
-  if (runtime === JSRuntime['quickjs-ng']) return (globalThis as any).navigator?.userAgent?.split?.('/')[1] as string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   if (runtime === JSRuntime.bun) return (globalThis as any).Bun?.version as string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -87,6 +100,10 @@ export const runtimeVersion: string = (() => {
       'OSS Release Version'
     ] as string;
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,
+  if (runtime === JSRuntime.v8) return (globalThis as any).version?.() as string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,
+  if (runtime === JSRuntime['quickjs-ng']) return (globalThis as any).navigator?.userAgent?.split?.('/')[1] as string;
   return 'unknown';
 })();
 

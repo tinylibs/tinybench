@@ -26,23 +26,23 @@ $ npm install -D tinybench
 You can start benchmarking by instantiating the `Bench` class and adding benchmark tasks to it.
 
 ```js
-import { Bench } from 'tinybench';
+import { Bench } from 'tinybench'
 
-const bench = new Bench({ name: 'simple benchmark', time: 100 });
+const bench = new Bench({ name: 'simple benchmark', time: 100 })
 
 bench
   .add('faster task', () => {
-    console.log('I am faster');
+    console.log('I am faster')
   })
   .add('slower task', async () => {
-    await new Promise((r) => setTimeout(r, 1)); // we wait 1ms :)
-    console.log('I am slower');
-  });
+    await new Promise(resolve => setTimeout(resolve, 1)) // we wait 1ms :)
+    console.log('I am slower')
+  })
 
-await bench.run();
+await bench.run()
 
-console.log(bench.name);
-console.table(bench.table());
+console.log(bench.name)
+console.table(bench.table())
 
 // Output:
 // simple benchmark
@@ -80,60 +80,60 @@ export interface Options {
   /**
    * benchmark name
    */
-  name?: string;
+  name?: string
 
   /**
    * time needed for running a benchmark task (milliseconds) @default 1000
    */
-  time?: number;
+  time?: number
 
   /**
    * number of times that a task should run if even the time option is finished @default 64
    */
-  iterations?: number;
+  iterations?: number
 
   /**
    * function to get the current timestamp in milliseconds
    */
-  now?: () => number;
+  now?: () => number
 
   /**
    * An AbortSignal for aborting the benchmark
    */
-  signal?: AbortSignal;
+  signal?: AbortSignal
 
   /**
    * Throws if a task fails @default false
    */
-  throws?: boolean;
+  throws?: boolean
 
   /**
    * warmup benchmark @default true
    */
-  warmup?: boolean;
+  warmup?: boolean
 
   /**
    * warmup time (milliseconds) @default 250
    */
-  warmupTime?: number;
+  warmupTime?: number
 
   /**
    * warmup iterations @default 16
    */
-  warmupIterations?: number;
+  warmupIterations?: number
 
   /**
    * setup function to run before each benchmark task (cycle)
    */
-  setup?: Hook;
+  setup?: Hook
 
   /**
    * teardown function to run after each benchmark task (cycle)
    */
-  teardown?: Hook;
+  teardown?: Hook
 }
 
-export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
+export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>
 ```
 
 - `async run()`: run the added tasks that were registered using the `add` method
@@ -175,22 +175,22 @@ export interface FnOptions {
   /**
    * An optional function that is run before iterations of this task begin
    */
-  beforeAll?: (this: Task) => void | Promise<void>;
+  beforeAll?: (this: Task) => void | Promise<void>
 
   /**
    * An optional function that is run before each iteration of this task
    */
-  beforeEach?: (this: Task) => void | Promise<void>;
+  beforeEach?: (this: Task) => void | Promise<void>
 
   /**
    * An optional function that is run after each iteration of this task
    */
-  afterEach?: (this: Task) => void | Promise<void>;
+  afterEach?: (this: Task) => void | Promise<void>
 
   /**
    * An optional function that is run after all iterations of this task end
    */
-  afterAll?: (this: Task) => void | Promise<void>;
+  afterAll?: (this: Task) => void | Promise<void>
 }
 ```
 
@@ -203,133 +203,133 @@ export interface TaskResult {
   /**
    * the JavaScript runtime environment
    */
-  runtime: JSRuntime | 'unknown';
+  runtime: JSRuntime | 'unknown'
 
   /**
    * the JavaScript runtime version
    */
-  runtimeVersion: string;
+  runtimeVersion: string
 
   /**
    * the last task error that was thrown
    */
-  error?: Error;
+  error?: Error
 
   /**
    * the time to run the task benchmark cycle (ms)
    */
-  totalTime: number;
+  totalTime: number
 
   /**
    * how long each operation takes (ms)
    */
-  period: number;
+  period: number
 
   /**
    * the task latency statistics
    */
-  latency: Statistics;
+  latency: Statistics
 
   /**
    * the task throughput statistics
    */
-  throughput: Statistics;
+  throughput: Statistics
 
   /**
    * the number of operations per second
    * @deprecated use `.throughput.mean` instead
    */
-  hz: number;
+  hz: number
 
   /**
    * latency samples (ms)
    * @deprecated use `.latency.samples` instead
    */
-  samples: number[];
+  samples: number[]
 
   /**
    * the minimum latency samples value
    * @deprecated use `.latency.min` instead
    */
-  min: number;
+  min: number
 
   /**
    * the maximum latency samples value
    * @deprecated use `.latency.max` instead
    */
-  max: number;
+  max: number
 
   /**
    * the latency samples mean/average (estimate of the population mean/average)
    * @deprecated use `.latency.mean` instead
    */
-  mean: number;
+  mean: number
 
   /**
    * the latency samples variance (estimate of the population variance)
    * @deprecated use `.latency.variance` instead
    */
-  variance: number;
+  variance: number
 
   /**
    * the latency samples standard deviation (estimate of the population standard deviation)
    * @deprecated use `.latency.sd` instead
    */
-  sd: number;
+  sd: number
 
   /**
    * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
    * @deprecated use `.latency.sem` instead
    */
-  sem: number;
+  sem: number
 
   /**
    * the latency samples degrees of freedom
    * @deprecated use `.latency.df` instead
    */
-  df: number;
+  df: number
 
   /**
    * the latency samples critical value
    * @deprecated use `.latency.critical` instead
    */
-  critical: number;
+  critical: number
 
   /**
    * the latency samples margin of error
    * @deprecated use `.latency.moe` instead
    */
-  moe: number;
+  moe: number
 
   /**
    * the latency samples relative margin of error
    * @deprecated use `.latency.rme` instead
    */
-  rme: number;
+  rme: number
 
   /**
    * the latency samples p75 percentile
    * @deprecated use `.latency.p75` instead
    */
-  p75: number;
+  p75: number
 
   /**
    * the latency samples p99 percentile
    * @deprecated use `.latency.p99` instead
    */
-  p99: number;
+  p99: number
 
   /**
    * the latency samples p995 percentile
    * @deprecated use `.latency.p995` instead
    */
-  p995: number;
+  p995: number
 
   /**
    * the latency samples p999 percentile
    * @deprecated use `.latency.p999` instead
    */
-  p999: number;
+  p999: number
 }
 ```
 
@@ -354,12 +354,12 @@ export type BenchEvents =
   | 'warmup' // when the benchmarks start getting warmed up (before start)
   | 'cycle' // when running each benchmark task gets done (cycle)
   | 'add' // when a Task gets added to the Bench
-  | 'remove'; // when a Task gets removed of the Bench
+  | 'remove' // when a Task gets removed of the Bench
 
 /**
  * task events
  */
-export type TaskEvents = 'abort' | 'complete' | 'error' | 'reset' | 'start' | 'warmup' | 'cycle';
+export type TaskEvents = 'abort' | 'complete' | 'error' | 'reset' | 'start' | 'warmup' | 'cycle'
 ```
 
 For instance:
@@ -379,7 +379,7 @@ task.addEventListener('cycle', (evt) => {
 ### `BenchEvent`
 
 ```ts
-export type BenchEvent = Event & { error?: Error; task?: Task };
+export type BenchEvent = Event & { error?: Error; task?: Task }
 ```
 
 ### `process.hrtime`
@@ -388,7 +388,7 @@ if you want more accurate results for nodejs with `process.hrtime`, then import
 the `hrtimeNow` function from the library and pass it to the `Bench` options.
 
 ```ts
-import { hrtimeNow } from 'tinybench';
+import { hrtimeNow } from 'tinybench'
 ```
 
 It may make your benchmarks slower, check [#42](https://github.com/tinylibs/tinybench/issues/42).
@@ -400,9 +400,9 @@ It may make your benchmarks slower, check [#42](https://github.com/tinylibs/tiny
 - When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
 
 ```ts
-bench.threshold = 10; // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
-bench.concurrency = 'task'; // The concurrency mode to determine how tasks are run.
-await bench.run();
+bench.threshold = 10 // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
+bench.concurrency = 'task' // The concurrency mode to determine how tasks are run.
+await bench.run()
 ```
 
 ## Prior art

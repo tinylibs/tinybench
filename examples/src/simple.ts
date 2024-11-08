@@ -1,21 +1,20 @@
-/* eslint-disable no-console */
-import { Bench } from '../../src';
+import { Bench } from '../../src'
 
-const bench = new Bench({ name: 'simple benchmark', time: 100 });
+const bench = new Bench({ name: 'simple benchmark', time: 100 })
 
 bench
   .add('faster task', () => {
-    console.log('I am faster');
+    console.log('I am faster')
   })
   .add('slower task', async () => {
-    await new Promise((r) => setTimeout(r, 1)); // we wait 1ms :)
-    console.log('I am slower');
-  });
+    await new Promise(resolve => setTimeout(resolve, 1)) // we wait 1ms :)
+    console.log('I am slower')
+  })
 
-await bench.run();
+await bench.run()
 
-console.log(bench.name);
-console.table(bench.table());
+console.log(bench.name)
+console.table(bench.table())
 
 // Output:
 // simple benchmark

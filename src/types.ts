@@ -1,124 +1,124 @@
-import type Task from '../src/task';
-import type { JSRuntime } from './utils';
+import type Task from '../src/task'
+import type { JSRuntime } from './utils'
 
 /**
  * the task function
  */
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type Fn = () => unknown | Promise<unknown>;
+export type Fn = () => Promise<unknown> | unknown
 
 export interface FnOptions {
   /**
-   * An optional function that is run before iterations of this task begin
+   * An optional function that is run after all iterations of this task end
    */
-  beforeAll?: (this: Task) => void | Promise<void>;
-
-  /**
-   * An optional function that is run before each iteration of this task
-   */
-  beforeEach?: (this: Task) => void | Promise<void>;
+  afterAll?: (this: Task) => Promise<void> | void
 
   /**
    * An optional function that is run after each iteration of this task
    */
-  afterEach?: (this: Task) => void | Promise<void>;
+  afterEach?: (this: Task) => Promise<void> | void
 
   /**
-   * An optional function that is run after all iterations of this task end
+   * An optional function that is run before iterations of this task begin
    */
-  afterAll?: (this: Task) => void | Promise<void>;
+  beforeAll?: (this: Task) => Promise<void> | void
+
+  /**
+   * An optional function that is run before each iteration of this task
+   */
+  beforeEach?: (this: Task) => Promise<void> | void
 }
 
 export interface Statistics {
   /**
-   * samples
+   * mean/average absolute deviation
    */
-  samples: number[];
-
-  /**
-   * the minimum value
-   */
-  min: number;
-
-  /**
-   * the maximum value
-   */
-  max: number;
-
-  /**
-   * mean/average (estimate of the population mean/average)
-   */
-  mean: number;
-
-  /**
-   * variance (estimate of the population variance)
-   */
-  variance: number;
-
-  /**
-   * standard deviation (estimate of the population standard deviation)
-   */
-  sd: number;
-
-  /**
-   * standard error of the mean/average (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
-   */
-  sem: number;
-
-  /**
-   * degrees of freedom
-   */
-  df: number;
+  aad: number | undefined
 
   /**
    * critical value
    */
-  critical: number;
+  critical: number
 
   /**
-   * margin of error
+   * degrees of freedom
    */
-  moe: number;
-
-  /**
-   * relative margin of error
-   */
-  rme: number;
-
-  /**
-   * mean/average absolute deviation
-   */
-  aad: number | undefined;
+  df: number
 
   /**
    * median absolute deviation
    */
-  mad: number | undefined;
+  mad: number | undefined
+
+  /**
+   * the maximum value
+   */
+  max: number
+
+  /**
+   * mean/average (estimate of the population mean/average)
+   */
+  mean: number
+
+  /**
+   * the minimum value
+   */
+  min: number
+
+  /**
+   * margin of error
+   */
+  moe: number
 
   /**
    * p50/median percentile
    */
-  p50: number | undefined;
+  p50: number | undefined
 
   /**
    * p75 percentile
    */
-  p75: number | undefined;
+  p75: number | undefined
 
   /**
    * p99 percentile
    */
-  p99: number | undefined;
+  p99: number | undefined
 
   /**
    * p995 percentile
    */
-  p995: number | undefined;
+  p995: number | undefined
 
   /**
    * p999 percentile
    */
-  p999: number | undefined;
+  p999: number | undefined
+
+  /**
+   * relative margin of error
+   */
+  rme: number
+
+  /**
+   * samples
+   */
+  samples: number[]
+
+  /**
+   * standard deviation (estimate of the population standard deviation)
+   */
+  sd: number
+
+  /**
+   * standard error of the mean/average (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   */
+  sem: number
+
+  /**
+   * variance (estimate of the population variance)
+   */
+  variance: number
 }
 
 /**
@@ -126,135 +126,135 @@ export interface Statistics {
  */
 export interface TaskResult {
   /**
-   * the JavaScript runtime environment
+   * the latency samples critical value
+   * @deprecated use `.latency.critical` instead
    */
-  runtime: JSRuntime | 'unknown';
-
-  /**
-   * the JavaScript runtime version
-   */
-  runtimeVersion: string;
-
-  /**
-   * the last task error that was thrown
-   */
-  error?: Error;
-
-  /**
-   * the time to run the task benchmark cycle (ms)
-   */
-  totalTime: number;
-
-  /**
-   * how long each operation takes (ms)
-   */
-  period: number;
-
-  /**
-   * the task latency statistics
-   */
-  latency: Statistics;
-
-  /**
-   * the task throughput statistics
-   */
-  throughput: Statistics;
-
-  /**
-   * the number of operations per second
-   * @deprecated use `.throughput.mean` instead
-   */
-  hz: number;
-
-  /**
-   * latency samples (ms)
-   * @deprecated use `.latency.samples` instead
-   */
-  samples: number[];
-
-  /**
-   * the minimum latency samples value
-   * @deprecated use `.latency.min` instead
-   */
-  min: number;
-
-  /**
-   * the maximum latency samples value
-   * @deprecated use `.latency.max` instead
-   */
-  max: number;
-
-  /**
-   * the latency samples mean/average (estimate of the population mean/average)
-   * @deprecated use `.latency.mean` instead
-   */
-  mean: number;
-
-  /**
-   * the latency samples variance (estimate of the population variance)
-   * @deprecated use `.latency.variance` instead
-   */
-  variance: number;
-
-  /**
-   * the latency samples standard deviation (estimate of the population standard deviation)
-   * @deprecated use `.latency.sd` instead
-   */
-  sd: number;
-
-  /**
-   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
-   * @deprecated use `.latency.sem` instead
-   */
-  sem: number;
+  critical: number
 
   /**
    * the latency samples degrees of freedom
    * @deprecated use `.latency.df` instead
    */
-  df: number;
+  df: number
 
   /**
-   * the latency samples critical value
-   * @deprecated use `.latency.critical` instead
+   * the last task error that was thrown
    */
-  critical: number;
+  error?: Error
+
+  /**
+   * the number of operations per second
+   * @deprecated use `.throughput.mean` instead
+   */
+  hz: number
+
+  /**
+   * the task latency statistics
+   */
+  latency: Statistics
+
+  /**
+   * the maximum latency samples value
+   * @deprecated use `.latency.max` instead
+   */
+  max: number
+
+  /**
+   * the latency samples mean/average (estimate of the population mean/average)
+   * @deprecated use `.latency.mean` instead
+   */
+  mean: number
+
+  /**
+   * the minimum latency samples value
+   * @deprecated use `.latency.min` instead
+   */
+  min: number
 
   /**
    * the latency samples margin of error
    * @deprecated use `.latency.moe` instead
    */
-  moe: number;
-
-  /**
-   * the latency samples relative margin of error
-   * @deprecated use `.latency.rme` instead
-   */
-  rme: number;
+  moe: number
 
   /**
    * the latency samples p75 percentile
    * @deprecated use `.latency.p75` instead
    */
-  p75: number;
+  p75: number
 
   /**
    * the latency samples p99 percentile
    * @deprecated use `.latency.p99` instead
    */
-  p99: number;
+  p99: number
 
   /**
    * the latency samples p995 percentile
    * @deprecated use `.latency.p995` instead
    */
-  p995: number;
+  p995: number
 
   /**
    * the latency samples p999 percentile
    * @deprecated use `.latency.p999` instead
    */
-  p999: number;
+  p999: number
+
+  /**
+   * how long each operation takes (ms)
+   */
+  period: number
+
+  /**
+   * the latency samples relative margin of error
+   * @deprecated use `.latency.rme` instead
+   */
+  rme: number
+
+  /**
+   * the JavaScript runtime environment
+   */
+  runtime: 'unknown' | JSRuntime
+
+  /**
+   * the JavaScript runtime version
+   */
+  runtimeVersion: string
+
+  /**
+   * latency samples (ms)
+   * @deprecated use `.latency.samples` instead
+   */
+  samples: number[]
+
+  /**
+   * the latency samples standard deviation (estimate of the population standard deviation)
+   * @deprecated use `.latency.sd` instead
+   */
+  sd: number
+
+  /**
+   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * @deprecated use `.latency.sem` instead
+   */
+  sem: number
+
+  /**
+   * the task throughput statistics
+   */
+  throughput: Statistics
+
+  /**
+   * the time to run the task benchmark cycle (ms)
+   */
+  totalTime: number
+
+  /**
+   * the latency samples variance (estimate of the population variance)
+   * @deprecated use `.latency.variance` instead
+   */
+  variance: number
 }
 
 /**
@@ -269,31 +269,31 @@ export interface TaskResult {
  */
 export type BenchEvents =
   | 'abort' // when a signal aborts
+  | 'add' // when a Task gets added to the Bench
   | 'complete' // when running a benchmark finishes
+  | 'cycle' // when running each benchmark task gets done (cycle)
   | 'error' // when the benchmark task throws
+  | 'remove' // when a Task gets removed of the Bench
   | 'reset' // when the reset function gets called
   | 'start' // when running the benchmarks gets started
   | 'warmup' // when the benchmarks start getting warmed up (before start)
-  | 'cycle' // when running each benchmark task gets done (cycle)
-  | 'add' // when a Task gets added to the Bench
-  | 'remove'; // when a Task gets removed of the Bench
 
-export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
+export type Hook = (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
 
-export type BenchEvent = Event & { error?: Error; task?: Task };
+export type BenchEvent = { error?: Error; task?: Task } & Event
 
-export type EventListener = (evt: BenchEvent) => void;
+export type EventListener = (evt: BenchEvent) => void
 
 export interface BenchEventsMap {
-  abort: EventListener;
-  start: EventListener;
-  complete: EventListener;
-  warmup: EventListener;
-  reset: EventListener;
-  add: EventListener;
-  remove: EventListener;
-  cycle: EventListener;
-  error: EventListener;
+  abort: EventListener
+  add: EventListener
+  complete: EventListener
+  cycle: EventListener
+  error: EventListener
+  remove: EventListener
+  reset: EventListener
+  start: EventListener
+  warmup: EventListener
 }
 
 /**
@@ -302,83 +302,83 @@ export interface BenchEventsMap {
 export type TaskEvents =
   | 'abort'
   | 'complete'
+  | 'cycle'
   | 'error'
   | 'reset'
   | 'start'
   | 'warmup'
-  | 'cycle';
 
 export interface TaskEventsMap {
-  abort: EventListener;
-  start: EventListener;
-  error: EventListener;
-  cycle: EventListener;
-  complete: EventListener;
-  warmup: EventListener;
-  reset: EventListener;
+  abort: EventListener
+  complete: EventListener
+  cycle: EventListener
+  error: EventListener
+  reset: EventListener
+  start: EventListener
+  warmup: EventListener
 }
 
 export interface Options {
   /**
-   * benchmark name
-   */
-  name?: string;
-
-  /**
-   * time needed for running a benchmark task (milliseconds) @default 1000
-   */
-  time?: number;
-
-  /**
    * number of times that a task should run if even the time option is finished @default 64
    */
-  iterations?: number;
+  iterations?: number
+
+  /**
+   * benchmark name
+   */
+  name?: string
 
   /**
    * function to get the current timestamp in milliseconds
    */
-  now?: () => number;
-
-  /**
-   * An AbortSignal for aborting the benchmark
-   */
-  signal?: AbortSignal;
-
-  /**
-   * Throws if a task fails @default false
-   */
-  throws?: boolean;
-
-  /**
-   * warmup benchmark @default true
-   */
-  warmup?: boolean;
-
-  /**
-   * warmup time (milliseconds) @default 250
-   */
-  warmupTime?: number;
-
-  /**
-   * warmup iterations @default 16
-   */
-  warmupIterations?: number;
+  now?: () => number
 
   /**
    * setup function to run before each benchmark task (cycle)
    */
-  setup?: Hook;
+  setup?: Hook
+
+  /**
+   * An AbortSignal for aborting the benchmark
+   */
+  signal?: AbortSignal
 
   /**
    * teardown function to run after each benchmark task (cycle)
    */
-  teardown?: Hook;
+  teardown?: Hook
+
+  /**
+   * Throws if a task fails @default false
+   */
+  throws?: boolean
+
+  /**
+   * time needed for running a benchmark task (milliseconds) @default 1000
+   */
+  time?: number
+
+  /**
+   * warmup benchmark @default true
+   */
+  warmup?: boolean
+
+  /**
+   * warmup iterations @default 16
+   */
+  warmupIterations?: number
+
+  /**
+   * warmup time (milliseconds) @default 250
+   */
+  warmupTime?: number
 }
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.removeEventListener
->[2];
+>[2]
 export type AddEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.addEventListener
->[2];
+>[2]

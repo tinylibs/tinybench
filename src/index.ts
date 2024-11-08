@@ -1,5 +1,5 @@
-import Bench from './bench';
-import Task from './task';
+import Bench from './bench'
+import Task from './task'
 
 export type {
   BenchEvent,
@@ -9,8 +9,8 @@ export type {
   Options,
   TaskEvents,
   TaskResult,
-} from './types';
+} from './types'
 
-export { hrtimeNow, nToMs, now } from './utils';
+export { hrtimeNow, now, nToMs } from './utils'
 
-export { Bench, Task };
+export { Bench, Task }

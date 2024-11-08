@@ -1,13 +1,13 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  outDir: 'dist',
-  format: ['esm', 'cjs'],
-  minify: false,
-  minifySyntax: true,
-  minifyWhitespace: false,
-  minifyIdentifiers: true,
   clean: true,
   dts: true,
-});
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
+  minify: false,
+  minifyIdentifiers: true,
+  minifySyntax: true,
+  minifyWhitespace: false,
+  outDir: 'dist',
+})

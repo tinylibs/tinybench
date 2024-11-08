@@ -1,44 +1,54 @@
-import type Task from '../src/task';
-import type { JSRuntime } from './utils';
+import type Task from '../src/task'
+import type { JSRuntime } from './utils'
 
 /**
  * the task function
  */
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type Fn = () => unknown | Promise<unknown>;
+export type Fn = () => Promise<unknown> | unknown
 
 export interface FnOptions {
   /**
-   * An optional function that is run before iterations of this task begin
+   * An optional function that is run after all iterations of this task end
    */
-  beforeAll?: (this: Task) => void | Promise<void>;
-
-  /**
-   * An optional function that is run before each iteration of this task
-   */
-  beforeEach?: (this: Task) => void | Promise<void>;
+  afterAll?: (this: Task) => Promise<void> | void;
 
   /**
    * An optional function that is run after each iteration of this task
    */
-  afterEach?: (this: Task) => void | Promise<void>;
+  afterEach?: (this: Task) => Promise<void> | void;
 
   /**
-   * An optional function that is run after all iterations of this task end
+   * An optional function that is run before iterations of this task begin
    */
-  afterAll?: (this: Task) => void | Promise<void>;
+  beforeAll?: (this: Task) => Promise<void> | void;
+
+  /**
+   * An optional function that is run before each iteration of this task
+   */
+  beforeEach?: (this: Task) => Promise<void> | void;
 }
 
 export interface Statistics {
   /**
-   * samples
+   * mean/average absolute deviation
    */
-  samples: number[];
+  aad: number | undefined;
 
   /**
-   * the minimum value
+   * critical value
    */
-  min: number;
+  critical: number;
+
+  /**
+   * degrees of freedom
+   */
+  df: number;
+
+  /**
+   * median absolute deviation
+   */
+  mad: number | undefined;
 
   /**
    * the maximum value
@@ -51,49 +61,14 @@ export interface Statistics {
   mean: number;
 
   /**
-   * variance (estimate of the population variance)
+   * the minimum value
    */
-  variance: number;
-
-  /**
-   * standard deviation (estimate of the population standard deviation)
-   */
-  sd: number;
-
-  /**
-   * standard error of the mean/average (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
-   */
-  sem: number;
-
-  /**
-   * degrees of freedom
-   */
-  df: number;
-
-  /**
-   * critical value
-   */
-  critical: number;
+  min: number;
 
   /**
    * margin of error
    */
   moe: number;
-
-  /**
-   * relative margin of error
-   */
-  rme: number;
-
-  /**
-   * mean/average absolute deviation
-   */
-  aad: number | undefined;
-
-  /**
-   * median absolute deviation
-   */
-  mad: number | undefined;
 
   /**
    * p50/median percentile
@@ -119,6 +94,31 @@ export interface Statistics {
    * p999 percentile
    */
   p999: number | undefined;
+
+  /**
+   * relative margin of error
+   */
+  rme: number;
+
+  /**
+   * samples
+   */
+  samples: number[];
+
+  /**
+   * standard deviation (estimate of the population standard deviation)
+   */
+  sd: number;
+
+  /**
+   * standard error of the mean/average (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   */
+  sem: number;
+
+  /**
+   * variance (estimate of the population variance)
+   */
+  variance: number;
 }
 
 /**
@@ -126,39 +126,21 @@ export interface Statistics {
  */
 export interface TaskResult {
   /**
-   * the JavaScript runtime environment
+   * the latency samples critical value
+   * @deprecated use `.latency.critical` instead
    */
-  runtime: JSRuntime | 'unknown';
+  critical: number;
 
   /**
-   * the JavaScript runtime version
+   * the latency samples degrees of freedom
+   * @deprecated use `.latency.df` instead
    */
-  runtimeVersion: string;
+  df: number;
 
   /**
    * the last task error that was thrown
    */
   error?: Error;
-
-  /**
-   * the time to run the task benchmark cycle (ms)
-   */
-  totalTime: number;
-
-  /**
-   * how long each operation takes (ms)
-   */
-  period: number;
-
-  /**
-   * the task latency statistics
-   */
-  latency: Statistics;
-
-  /**
-   * the task throughput statistics
-   */
-  throughput: Statistics;
 
   /**
    * the number of operations per second
@@ -167,16 +149,9 @@ export interface TaskResult {
   hz: number;
 
   /**
-   * latency samples (ms)
-   * @deprecated use `.latency.samples` instead
+   * the task latency statistics
    */
-  samples: number[];
-
-  /**
-   * the minimum latency samples value
-   * @deprecated use `.latency.min` instead
-   */
-  min: number;
+  latency: Statistics;
 
   /**
    * the maximum latency samples value
@@ -191,46 +166,16 @@ export interface TaskResult {
   mean: number;
 
   /**
-   * the latency samples variance (estimate of the population variance)
-   * @deprecated use `.latency.variance` instead
+   * the minimum latency samples value
+   * @deprecated use `.latency.min` instead
    */
-  variance: number;
-
-  /**
-   * the latency samples standard deviation (estimate of the population standard deviation)
-   * @deprecated use `.latency.sd` instead
-   */
-  sd: number;
-
-  /**
-   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
-   * @deprecated use `.latency.sem` instead
-   */
-  sem: number;
-
-  /**
-   * the latency samples degrees of freedom
-   * @deprecated use `.latency.df` instead
-   */
-  df: number;
-
-  /**
-   * the latency samples critical value
-   * @deprecated use `.latency.critical` instead
-   */
-  critical: number;
+  min: number;
 
   /**
    * the latency samples margin of error
    * @deprecated use `.latency.moe` instead
    */
   moe: number;
-
-  /**
-   * the latency samples relative margin of error
-   * @deprecated use `.latency.rme` instead
-   */
-  rme: number;
 
   /**
    * the latency samples p75 percentile
@@ -255,6 +200,61 @@ export interface TaskResult {
    * @deprecated use `.latency.p999` instead
    */
   p999: number;
+
+  /**
+   * how long each operation takes (ms)
+   */
+  period: number;
+
+  /**
+   * the latency samples relative margin of error
+   * @deprecated use `.latency.rme` instead
+   */
+  rme: number;
+
+  /**
+   * the JavaScript runtime environment
+   */
+  runtime: 'unknown' | JSRuntime;
+
+  /**
+   * the JavaScript runtime version
+   */
+  runtimeVersion: string;
+
+  /**
+   * latency samples (ms)
+   * @deprecated use `.latency.samples` instead
+   */
+  samples: number[];
+
+  /**
+   * the latency samples standard deviation (estimate of the population standard deviation)
+   * @deprecated use `.latency.sd` instead
+   */
+  sd: number;
+
+  /**
+   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * @deprecated use `.latency.sem` instead
+   */
+  sem: number;
+
+  /**
+   * the task throughput statistics
+   */
+  throughput: Statistics;
+
+  /**
+   * the time to run the task benchmark cycle (ms)
+   */
+  totalTime: number;
+
+  /**
+   * the latency samples variance (estimate of the population variance)
+   * @deprecated use `.latency.variance` instead
+   */
+  variance: number;
 }
 
 /**
@@ -269,31 +269,31 @@ export interface TaskResult {
  */
 export type BenchEvents =
   | 'abort' // when a signal aborts
+  | 'add' // when a Task gets added to the Bench
   | 'complete' // when running a benchmark finishes
+  | 'cycle' // when running each benchmark task gets done (cycle)
   | 'error' // when the benchmark task throws
+  | 'remove' // when a Task gets removed of the Bench
   | 'reset' // when the reset function gets called
   | 'start' // when running the benchmarks gets started
   | 'warmup' // when the benchmarks start getting warmed up (before start)
-  | 'cycle' // when running each benchmark task gets done (cycle)
-  | 'add' // when a Task gets added to the Bench
-  | 'remove'; // when a Task gets removed of the Bench
 
-export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>;
+export type Hook = (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
 
-export type BenchEvent = Event & { error?: Error; task?: Task };
+export type BenchEvent = { error?: Error; task?: Task } & Event
 
-export type EventListener = (evt: BenchEvent) => void;
+export type EventListener = (evt: BenchEvent) => void
 
 export interface BenchEventsMap {
   abort: EventListener;
-  start: EventListener;
-  complete: EventListener;
-  warmup: EventListener;
-  reset: EventListener;
   add: EventListener;
-  remove: EventListener;
+  complete: EventListener;
   cycle: EventListener;
   error: EventListener;
+  remove: EventListener;
+  reset: EventListener;
+  start: EventListener;
+  warmup: EventListener;
 }
 
 /**
@@ -302,37 +302,32 @@ export interface BenchEventsMap {
 export type TaskEvents =
   | 'abort'
   | 'complete'
+  | 'cycle'
   | 'error'
   | 'reset'
   | 'start'
   | 'warmup'
-  | 'cycle';
 
 export interface TaskEventsMap {
   abort: EventListener;
-  start: EventListener;
-  error: EventListener;
-  cycle: EventListener;
   complete: EventListener;
-  warmup: EventListener;
+  cycle: EventListener;
+  error: EventListener;
   reset: EventListener;
+  start: EventListener;
+  warmup: EventListener;
 }
 
 export interface Options {
   /**
-   * benchmark name
-   */
-  name?: string;
-
-  /**
-   * time needed for running a benchmark task (milliseconds) @default 1000
-   */
-  time?: number;
-
-  /**
    * number of times that a task should run if even the time option is finished @default 64
    */
   iterations?: number;
+
+  /**
+   * benchmark name
+   */
+  name?: string;
 
   /**
    * function to get the current timestamp in milliseconds
@@ -340,9 +335,19 @@ export interface Options {
   now?: () => number;
 
   /**
+   * setup function to run before each benchmark task (cycle)
+   */
+  setup?: Hook;
+
+  /**
    * An AbortSignal for aborting the benchmark
    */
   signal?: AbortSignal;
+
+  /**
+   * teardown function to run after each benchmark task (cycle)
+   */
+  teardown?: Hook;
 
   /**
    * Throws if a task fails @default false
@@ -350,14 +355,14 @@ export interface Options {
   throws?: boolean;
 
   /**
+   * time needed for running a benchmark task (milliseconds) @default 1000
+   */
+  time?: number;
+
+  /**
    * warmup benchmark @default true
    */
   warmup?: boolean;
-
-  /**
-   * warmup time (milliseconds) @default 250
-   */
-  warmupTime?: number;
 
   /**
    * warmup iterations @default 16
@@ -365,20 +370,15 @@ export interface Options {
   warmupIterations?: number;
 
   /**
-   * setup function to run before each benchmark task (cycle)
+   * warmup time (milliseconds) @default 250
    */
-  setup?: Hook;
-
-  /**
-   * teardown function to run after each benchmark task (cycle)
-   */
-  teardown?: Hook;
+  warmupTime?: number;
 }
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.removeEventListener
->[2];
+>[2]
 export type AddEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.addEventListener
->[2];
+>[2]

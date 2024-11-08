@@ -50,7 +50,7 @@ export default class Task extends EventTarget {
    */
   result: Readonly<TaskResult> | undefined
 
-  /*
+  /**
    * The number of times the task function has been executed
    */
   runs = 0

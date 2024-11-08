@@ -219,7 +219,7 @@ export default class Bench extends EventTarget {
 
   /**
    * table of the tasks results
-   * @param convert - an optional function to convert the task result to a table record
+   * @param convert - an optional callback to convert the task result to a table record
    * @returns the tasks results as an array of table records
    */
   table (

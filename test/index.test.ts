@@ -1,8 +1,6 @@
 import { expect, test, vi } from 'vitest'
 
-import {
-  Bench, hrtimeNow, now, type Task,
-} from '../src'
+import { Bench, hrtimeNow, now, type Task } from '../src'
 
 test.each([
   ['now()', now],
@@ -11,10 +9,10 @@ test.each([
   const bench = new Bench({ iterations: 16, now: _now, time: 100 })
   bench
     .add('foo', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, 50))
     })
     .add('bar', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, 100))
     })
 
   await bench.run()
@@ -45,7 +43,7 @@ test.each([
 test('bench and task runs, time consistency', async () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench.add('foo', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 50))
+    await new Promise(resolve => setTimeout(resolve, 50))
   })
 
   await bench.run()
@@ -74,7 +72,7 @@ test('events order', async () => {
       throw new Error('fake')
     })
     .add('abort', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1000))
     })
 
   const events: string[] = []
@@ -113,7 +111,7 @@ test('events order', async () => {
     events.push('reset')
   })
 
-  bench.addEventListener('cycle', (evt) => {
+  bench.addEventListener('cycle', evt => {
     expect(evt.task?.name.trim()).not.toBe('')
     events.push('cycle')
   })
@@ -173,10 +171,10 @@ test('events order at task completion', async () => {
 
   bench
     .add('foo', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 25))
+      await new Promise(resolve => setTimeout(resolve, 25))
     })
     .add('bar', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, 50))
     })
 
   const events: string[] = []
@@ -199,7 +197,7 @@ test('events order at task completion', async () => {
   expect(tasks[1]?.name).toBe('bar')
 })
 
-test.each(['warmup', 'run'])('%s error event', async (mode) => {
+test.each(['warmup', 'run'])('%s error event', async mode => {
   const bench = new Bench({
     iterations: 32,
     time: 100,
@@ -213,7 +211,7 @@ test.each(['warmup', 'run'])('%s error event', async (mode) => {
 
   let err: Error | undefined
   let task: Task | undefined
-  bench.addEventListener('error', (evt) => {
+  bench.addEventListener('error', evt => {
     const { error: e, task: t } = evt
     err = e
     task = t
@@ -224,7 +222,7 @@ test.each(['warmup', 'run'])('%s error event', async (mode) => {
   expect(task?.result?.error).toStrictEqual(error)
 })
 
-test.each(['warmup', 'run'])('%s throws', async (mode) => {
+test.each(['warmup', 'run'])('%s throws', async mode => {
   const iterations = 1
   const bench = new Bench({
     iterations,
@@ -240,7 +238,7 @@ test.each(['warmup', 'run'])('%s throws', async (mode) => {
 
   let err: Error | undefined
   let task: Task | undefined
-  bench.addEventListener('error', (evt) => {
+  bench.addEventListener('error', evt => {
     const { error: e, task: t } = evt
     err = e
     task = t
@@ -255,10 +253,10 @@ test('detect faster task', async () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench
     .add('faster', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0))
+      await new Promise(resolve => setTimeout(resolve, 0))
     })
     .add('slower', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, 50))
     })
 
   await bench.run()
@@ -306,7 +304,7 @@ test('detect faster task', async () => {
 test('statistics', async () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench.add('foo', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
   })
   await bench.run()
 
@@ -406,7 +404,7 @@ test('setup and teardown', async () => {
     time: 100,
   })
   bench.add('foo', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
   })
   const fooTask = bench.getTask('foo')
 
@@ -445,7 +443,7 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   bench.add(
     'foo',
     async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0))
+      await new Promise(resolve => setTimeout(resolve, 0))
     },
     {
       afterAll,
@@ -474,7 +472,7 @@ test('task with promiseLike return', async () => {
   bench.add('fum', () => ({
     then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 50)),
   }))
-  bench.add('bar', () => new Promise((resolve) => setTimeout(resolve, 50)))
+  bench.add('bar', () => new Promise(resolve => setTimeout(resolve, 50)))
   await bench.run()
 
   expect(bench.getTask('foo')?.result?.latency.mean).toBeGreaterThan(50)
@@ -482,7 +480,7 @@ test('task with promiseLike return', async () => {
   expect(bench.getTask('bar')?.result?.latency.mean).toBeGreaterThan(50)
 })
 
-test.each(['warmup', 'run'])('%s error handling', async (mode) => {
+test.each(['warmup', 'run'])('%s error handling', async mode => {
   const bench = new Bench({ warmup: mode === 'warmup' })
 
   const error = new Error('error')

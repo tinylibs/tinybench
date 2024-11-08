@@ -16,7 +16,7 @@ bench
     console.log('I am faster')
   })
   .add('slower task', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 1)) // we wait 1ms :)
+    await new Promise(resolve => setTimeout(resolve, 1)) // we wait 1ms :)
     console.log('I am slower')
   })
 

@@ -21,9 +21,7 @@ import {
 } from './constants'
 import { createBenchEvent } from './event'
 import Task from './task'
-import {
-  type JSRuntime, mToNs, now, runtime, runtimeVersion,
-} from './utils'
+import { type JSRuntime, mToNs, now, runtime, runtimeVersion } from './utils'
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
@@ -31,7 +29,7 @@ import {
  */
 export default class Bench extends EventTarget {
   /**
-   * @private the task map
+   * the task map
    */
   private readonly _tasks = new Map<string, Task>()
 
@@ -132,6 +130,10 @@ export default class Bench extends EventTarget {
 
   /**
    * add a benchmark task to the task map
+   * @param name - the task name
+   * @param fn - the task function
+   * @param opts - the task options
+   * @returns the Bench instance
    */
   add (name: string, fn: Fn, opts: FnOptions = {}): this {
     const task = new Task(this, name, fn, opts)
@@ -150,6 +152,8 @@ export default class Bench extends EventTarget {
 
   /**
    * get a task based on the task name
+   * @param name - the task name
+   * @returns the task
    */
   getTask (name: string): Task | undefined {
     return this._tasks.get(name)
@@ -157,6 +161,8 @@ export default class Bench extends EventTarget {
 
   /**
    * remove a benchmark task from the task map
+   * @param name - the task name
+   * @returns the Bench instance
    */
   remove (name: string): this {
     const task = this.getTask(name)
@@ -186,7 +192,8 @@ export default class Bench extends EventTarget {
   }
 
   /**
-   * run the added tasks that were registered using the {@link add} method.
+   * run the added tasks that were registered using the {@link add} method
+   * @returns the tasks array
    */
   async run (): Promise<Task[]> {
     if (this.warmup) {
@@ -212,20 +219,22 @@ export default class Bench extends EventTarget {
 
   /**
    * table of the tasks results
+   * @param convert - an optional function to convert the task result to a table record
+   * @returns the tasks results as an array of table records
    */
   table (
     convert?: (task: Task) => Record<string, number | string> | undefined
   ): (null | Record<string, number | string> | undefined)[] {
-    return this.tasks.map((task) => {
+    return this.tasks.map(task => {
       if (task.result) {
         return task.result.error
-          ? (convert?.(task) ?? {
+          ? {
               Error: task.result.error.message,
               Samples: task.result.latency.samples.length,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               Stack: task.result.error.stack!,
               'Task name': task.name,
-            })
+            }
           : (convert?.(task) ?? {
               'Latency average (ns)': `${mToNs(task.result.latency.mean).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -243,13 +252,15 @@ export default class Bench extends EventTarget {
 
   /**
    * (getter) tasks results as an array
+   * @returns the tasks results as an array
    */
   get results (): (Readonly<TaskResult> | undefined)[] {
-    return [...this._tasks.values()].map((task) => task.result)
+    return [...this._tasks.values()].map(task => task.result)
   }
 
   /**
    * (getter) tasks as an array
+   * @returns the tasks as an array
    */
   get tasks (): Task[] {
     return [...this._tasks.values()]

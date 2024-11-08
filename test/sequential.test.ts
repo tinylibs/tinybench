@@ -4,7 +4,7 @@ import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
 
-test.each(['warmup', 'run'])('%s sequential', async (mode) => {
+test.each(['warmup', 'run'])('%s sequential', async mode => {
   const iterations = 1
   const sequentialBench = new Bench({
     iterations,
@@ -60,7 +60,7 @@ test.each(['warmup', 'run'])('%s sequential', async (mode) => {
   expect(tasks[2]?.name).toBe('sample 3')
 })
 
-test.each(['warmup', 'run'])('%s bench concurrency', async (mode) => {
+test.each(['warmup', 'run'])('%s bench concurrency', async mode => {
   const iterations = 128
   const concurrentBench = new Bench({
     iterations,
@@ -106,7 +106,7 @@ test.each(['warmup', 'run'])('%s bench concurrency', async (mode) => {
   expect(shouldNotBeDefinedFirst2).toBeDefined()
 })
 
-test.each(['warmup', 'run'])('%s task concurrency', async (mode) => {
+test.each(['warmup', 'run'])('%s task concurrency', async mode => {
   const iterations = 16
   const concurrentBench = new Bench({
     iterations,

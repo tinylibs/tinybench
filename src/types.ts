@@ -11,114 +11,114 @@ export interface FnOptions {
   /**
    * An optional function that is run after all iterations of this task end
    */
-  afterAll?: (this: Task) => Promise<void> | void;
+  afterAll?: (this: Task) => Promise<void> | void
 
   /**
    * An optional function that is run after each iteration of this task
    */
-  afterEach?: (this: Task) => Promise<void> | void;
+  afterEach?: (this: Task) => Promise<void> | void
 
   /**
    * An optional function that is run before iterations of this task begin
    */
-  beforeAll?: (this: Task) => Promise<void> | void;
+  beforeAll?: (this: Task) => Promise<void> | void
 
   /**
    * An optional function that is run before each iteration of this task
    */
-  beforeEach?: (this: Task) => Promise<void> | void;
+  beforeEach?: (this: Task) => Promise<void> | void
 }
 
 export interface Statistics {
   /**
    * mean/average absolute deviation
    */
-  aad: number | undefined;
+  aad: number | undefined
 
   /**
    * critical value
    */
-  critical: number;
+  critical: number
 
   /**
    * degrees of freedom
    */
-  df: number;
+  df: number
 
   /**
    * median absolute deviation
    */
-  mad: number | undefined;
+  mad: number | undefined
 
   /**
    * the maximum value
    */
-  max: number;
+  max: number
 
   /**
    * mean/average (estimate of the population mean/average)
    */
-  mean: number;
+  mean: number
 
   /**
    * the minimum value
    */
-  min: number;
+  min: number
 
   /**
    * margin of error
    */
-  moe: number;
+  moe: number
 
   /**
    * p50/median percentile
    */
-  p50: number | undefined;
+  p50: number | undefined
 
   /**
    * p75 percentile
    */
-  p75: number | undefined;
+  p75: number | undefined
 
   /**
    * p99 percentile
    */
-  p99: number | undefined;
+  p99: number | undefined
 
   /**
    * p995 percentile
    */
-  p995: number | undefined;
+  p995: number | undefined
 
   /**
    * p999 percentile
    */
-  p999: number | undefined;
+  p999: number | undefined
 
   /**
    * relative margin of error
    */
-  rme: number;
+  rme: number
 
   /**
    * samples
    */
-  samples: number[];
+  samples: number[]
 
   /**
    * standard deviation (estimate of the population standard deviation)
    */
-  sd: number;
+  sd: number
 
   /**
    * standard error of the mean/average (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
    */
-  sem: number;
+  sem: number
 
   /**
    * variance (estimate of the population variance)
    */
-  variance: number;
+  variance: number
 }
 
 /**
@@ -129,132 +129,132 @@ export interface TaskResult {
    * the latency samples critical value
    * @deprecated use `.latency.critical` instead
    */
-  critical: number;
+  critical: number
 
   /**
    * the latency samples degrees of freedom
    * @deprecated use `.latency.df` instead
    */
-  df: number;
+  df: number
 
   /**
    * the last task error that was thrown
    */
-  error?: Error;
+  error?: Error
 
   /**
    * the number of operations per second
    * @deprecated use `.throughput.mean` instead
    */
-  hz: number;
+  hz: number
 
   /**
    * the task latency statistics
    */
-  latency: Statistics;
+  latency: Statistics
 
   /**
    * the maximum latency samples value
    * @deprecated use `.latency.max` instead
    */
-  max: number;
+  max: number
 
   /**
    * the latency samples mean/average (estimate of the population mean/average)
    * @deprecated use `.latency.mean` instead
    */
-  mean: number;
+  mean: number
 
   /**
    * the minimum latency samples value
    * @deprecated use `.latency.min` instead
    */
-  min: number;
+  min: number
 
   /**
    * the latency samples margin of error
    * @deprecated use `.latency.moe` instead
    */
-  moe: number;
+  moe: number
 
   /**
    * the latency samples p75 percentile
    * @deprecated use `.latency.p75` instead
    */
-  p75: number;
+  p75: number
 
   /**
    * the latency samples p99 percentile
    * @deprecated use `.latency.p99` instead
    */
-  p99: number;
+  p99: number
 
   /**
    * the latency samples p995 percentile
    * @deprecated use `.latency.p995` instead
    */
-  p995: number;
+  p995: number
 
   /**
    * the latency samples p999 percentile
    * @deprecated use `.latency.p999` instead
    */
-  p999: number;
+  p999: number
 
   /**
    * how long each operation takes (ms)
    */
-  period: number;
+  period: number
 
   /**
    * the latency samples relative margin of error
    * @deprecated use `.latency.rme` instead
    */
-  rme: number;
+  rme: number
 
   /**
    * the JavaScript runtime environment
    */
-  runtime: 'unknown' | JSRuntime;
+  runtime: 'unknown' | JSRuntime
 
   /**
    * the JavaScript runtime version
    */
-  runtimeVersion: string;
+  runtimeVersion: string
 
   /**
    * latency samples (ms)
    * @deprecated use `.latency.samples` instead
    */
-  samples: number[];
+  samples: number[]
 
   /**
    * the latency samples standard deviation (estimate of the population standard deviation)
    * @deprecated use `.latency.sd` instead
    */
-  sd: number;
+  sd: number
 
   /**
    * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
    * @deprecated use `.latency.sem` instead
    */
-  sem: number;
+  sem: number
 
   /**
    * the task throughput statistics
    */
-  throughput: Statistics;
+  throughput: Statistics
 
   /**
    * the time to run the task benchmark cycle (ms)
    */
-  totalTime: number;
+  totalTime: number
 
   /**
    * the latency samples variance (estimate of the population variance)
    * @deprecated use `.latency.variance` instead
    */
-  variance: number;
+  variance: number
 }
 
 /**
@@ -285,15 +285,15 @@ export type BenchEvent = { error?: Error; task?: Task } & Event
 export type EventListener = (evt: BenchEvent) => void
 
 export interface BenchEventsMap {
-  abort: EventListener;
-  add: EventListener;
-  complete: EventListener;
-  cycle: EventListener;
-  error: EventListener;
-  remove: EventListener;
-  reset: EventListener;
-  start: EventListener;
-  warmup: EventListener;
+  abort: EventListener
+  add: EventListener
+  complete: EventListener
+  cycle: EventListener
+  error: EventListener
+  remove: EventListener
+  reset: EventListener
+  start: EventListener
+  warmup: EventListener
 }
 
 /**
@@ -309,70 +309,70 @@ export type TaskEvents =
   | 'warmup'
 
 export interface TaskEventsMap {
-  abort: EventListener;
-  complete: EventListener;
-  cycle: EventListener;
-  error: EventListener;
-  reset: EventListener;
-  start: EventListener;
-  warmup: EventListener;
+  abort: EventListener
+  complete: EventListener
+  cycle: EventListener
+  error: EventListener
+  reset: EventListener
+  start: EventListener
+  warmup: EventListener
 }
 
 export interface Options {
   /**
    * number of times that a task should run if even the time option is finished @default 64
    */
-  iterations?: number;
+  iterations?: number
 
   /**
    * benchmark name
    */
-  name?: string;
+  name?: string
 
   /**
    * function to get the current timestamp in milliseconds
    */
-  now?: () => number;
+  now?: () => number
 
   /**
    * setup function to run before each benchmark task (cycle)
    */
-  setup?: Hook;
+  setup?: Hook
 
   /**
    * An AbortSignal for aborting the benchmark
    */
-  signal?: AbortSignal;
+  signal?: AbortSignal
 
   /**
    * teardown function to run after each benchmark task (cycle)
    */
-  teardown?: Hook;
+  teardown?: Hook
 
   /**
    * Throws if a task fails @default false
    */
-  throws?: boolean;
+  throws?: boolean
 
   /**
    * time needed for running a benchmark task (milliseconds) @default 1000
    */
-  time?: number;
+  time?: number
 
   /**
    * warmup benchmark @default true
    */
-  warmup?: boolean;
+  warmup?: boolean
 
   /**
    * warmup iterations @default 16
    */
-  warmupIterations?: number;
+  warmupIterations?: number
 
   /**
    * warmup time (milliseconds) @default 250
    */
-  warmupTime?: number;
+  warmupTime?: number
 }
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone

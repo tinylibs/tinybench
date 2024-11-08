@@ -35,8 +35,9 @@ const isDeno = !!(globalThis as any).Deno
 const isNode = globalThis.process?.release?.name === 'node'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isHermes = !!(globalThis as any).HermesInternal
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isWorkerd = (globalThis as any).navigator?.userAgent === 'Cloudflare-Workers'
+const isWorkerd =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  (globalThis as any).navigator?.userAgent === 'Cloudflare-Workers'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 const isQuickJsNg = !!(globalThis as any).navigator?.userAgent
   ?.toLowerCase?.()
@@ -50,22 +51,26 @@ const isEdgeLight = typeof (globalThis as any).EdgeRuntime === 'string'
 const isLagon = !!(globalThis as any).__lagon__
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isFastly = !!(globalThis as any).fastly
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isModdable = !!(globalThis as any).$262 &&
+const isModdable =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  !!(globalThis as any).$262 &&
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   !!(globalThis as any).lockdown &&
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   !!(globalThis as any).AsyncDisposableStack
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 const isV8 = !!(globalThis as any).d8
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isSpiderMonkey = !!(globalThis as any).inIon && !!(globalThis as any).performance?.mozMemory
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isJsc = !!(globalThis as any).$ &&
+const isSpiderMonkey =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  !!(globalThis as any).inIon && !!(globalThis as any).performance?.mozMemory
+const isJsc =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  !!(globalThis as any).$ &&
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   'IsHTMLDDA' in (globalThis as any).$
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isBrowser = !!(globalThis as any).window && !!(globalThis as any).navigator
+const isBrowser =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  !!(globalThis as any).window && !!(globalThis as any).navigator
 
 export const runtime: 'unknown' | JSRuntime = (() => {
   if (isBun) return JSRuntime.bun
@@ -87,10 +92,14 @@ export const runtime: 'unknown' | JSRuntime = (() => {
 })()
 
 export const runtimeVersion: string = (() => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  if (runtime === JSRuntime.bun) return (globalThis as any).Bun?.version as string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  if (runtime === JSRuntime.deno) return (globalThis as any).Deno?.version?.deno as string
+  if (runtime === JSRuntime.bun) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    return (globalThis as any).Bun?.version as string
+  }
+  if (runtime === JSRuntime.deno) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    return (globalThis as any).Deno?.version?.deno as string
+  }
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (runtime === JSRuntime.node) return globalThis.process?.versions?.node
   if (runtime === JSRuntime.hermes) {
@@ -100,16 +109,17 @@ export const runtimeVersion: string = (() => {
       'OSS Release Version'
     ] as string
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   if (runtime === JSRuntime.v8) return (globalThis as any).version?.() as string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,
-  if (runtime === JSRuntime['quickjs-ng']) return (globalThis as any).navigator?.userAgent?.split?.('/')[1] as string
+  if (runtime === JSRuntime['quickjs-ng']) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    return (globalThis as any).navigator?.userAgent?.split?.('/')[1] as string
+  }
   return 'unknown'
 })()
 
 /**
  * Converts nanoseconds to milliseconds.
- *
  * @param ns - the nanoseconds to convert
  * @returns the milliseconds
  */
@@ -117,7 +127,6 @@ export const nToMs = (ns: number) => ns / 1e6
 
 /**
  * Converts milliseconds to nanoseconds.
- *
  * @param ms - the milliseconds to convert
  * @returns the nanoseconds
  */
@@ -139,13 +148,13 @@ export const now = performanceNow
 
 /**
  * Checks if a value is a promise-like object.
- *
  * @param maybePromiseLike - the value to check
  * @returns true if the value is a promise-like object
  */
 const isPromiseLike = <T>(
   maybePromiseLike: unknown
-): maybePromiseLike is PromiseLike<T> => maybePromiseLike !== null &&
+): maybePromiseLike is PromiseLike<T> =>
+    maybePromiseLike !== null &&
   typeof maybePromiseLike === 'object' &&
   typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
@@ -153,18 +162,17 @@ type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
 /**
  * An async function check helper only considering runtime support async syntax
- *
  * @param fn - the function to check
  * @returns true if the function is an async function
  */
 const isAsyncFunction = (
   fn: Fn | null | undefined
+): fn is AsyncFunctionType<unknown[], unknown> =>
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-): fn is AsyncFunctionType<unknown[], unknown> => fn?.constructor === (async () => {}).constructor
+  fn?.constructor === (async () => {}).constructor
 
 /**
  * An async function check helper considering runtime support async syntax and promise return
- *
  * @param fn - the function to check
  * @returns true if the function is an async function or returns a promise
  */
@@ -195,7 +203,6 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 
 /**
  * Computes the average of a sample.
- *
  * @param samples the sample
  * @returns the average of the sample
  * @throws if the sample is empty
@@ -209,7 +216,6 @@ const average = (samples: number[]) => {
 
 /**
  * Computes the variance of a sample with Bessel's correction.
- *
  * @param samples the sample
  * @param avg the average of the sample
  * @returns the variance of the sample
@@ -221,7 +227,6 @@ const variance = (samples: number[], avg = average(samples)) => {
 
 /**
  * Computes the q-quantile of a sorted sample.
- *
  * @param samples the sorted sample
  * @param q the quantile to compute
  * @returns the q-quantile of the sample
@@ -255,7 +260,6 @@ const quantileSorted = (samples: number[], q: number) => {
 
 /**
  * Computes the median of a sorted sample.
- *
  * @param samples the sorted sample
  * @returns the median of the sample
  */
@@ -263,7 +267,6 @@ const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5)
 
 /**
  * Computes the absolute deviation of a sample given an aggregation.
- *
  * @param samples the sample
  * @param aggFn the aggregation function to use
  * @param aggValue the aggregated value to use
@@ -287,7 +290,6 @@ const absoluteDeviation = (
 /**
  * Computes the statistics of a sample.
  * The sample must be sorted.
- *
  * @param samples the sorted sample
  * @returns the statistics of the sample
  * @throws if the sample is empty

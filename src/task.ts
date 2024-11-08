@@ -140,6 +140,7 @@ export default class Task extends EventTarget {
 
   /**
    * change the result object values
+   * @param result - the task result object to merge with the current result object
    */
   private setResult (result: Partial<TaskResult>): void {
     this.result = Object.freeze({
@@ -176,6 +177,7 @@ export default class Task extends EventTarget {
 
   /**
    * run the current task and write the results in `Task.result` object property
+   * @returns the current task
    * @internal
    */
   async run (): Promise<Task> {
@@ -201,7 +203,9 @@ export default class Task extends EventTarget {
 
       // Throughput statistics
       const throughputSamples = latencySamples
-        .map((sample) => (sample !== 0 ? 1000 / sample : 1000 / latencyStatistics.mean)) // Use latency average as imputed sample
+        .map(sample =>
+          sample !== 0 ? 1000 / sample : 1000 / latencyStatistics.mean
+        ) // Use latency average as imputed sample
         .sort((a, b) => a - b)
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 

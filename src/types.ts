@@ -1,4 +1,4 @@
-import type Task from '../src/task'
+import type { Task } from '../src/task'
 import type { JSRuntime } from './utils'
 
 /**

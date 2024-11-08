@@ -1,4 +1,4 @@
-import type Task from './task'
+import type { Task } from './task'
 import type { BenchEvents } from './types'
 
 const createBenchEvent = (eventType: BenchEvents, target?: Task) => {

@@ -20,14 +20,14 @@ import {
   emptyFunction,
 } from './constants'
 import { createBenchEvent } from './event'
-import Task from './task'
+import { Task } from './task'
 import { type JSRuntime, mToNs, now, runtime, runtimeVersion } from './utils'
 
 /**
  * The Benchmark instance for keeping track of the benchmark tasks and controlling
  * them.
  */
-export default class Bench extends EventTarget {
+export class Bench extends EventTarget {
   /**
    * the task map
    */

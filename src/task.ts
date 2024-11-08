@@ -1,6 +1,6 @@
 import pLimit from 'p-limit'
 
-import type Bench from './bench'
+import type { Bench } from './bench'
 import type {
   AddEventListenerOptionsArgument,
   Fn,
@@ -19,7 +19,7 @@ import { getStatisticsSorted, isFnAsyncResource } from './utils'
  * results, name, Bench instance, the task function and the number times the task
  * function has been executed.
  */
-export default class Task extends EventTarget {
+export class Task extends EventTarget {
   /**
    * The task synchronous status
    */

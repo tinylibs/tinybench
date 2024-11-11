@@ -141,6 +141,10 @@ if (typeof (globalThis as any).process?.hrtime?.bigint === 'function') {
     throw new Error('hrtime.bigint() is not supported in this JS environment')
   }
 }
+/**
+ * Returns the current high resolution timestamp in milliseconds using `process.hrtime.bigint()`.
+ * @returns the current high resolution timestamp in milliseconds
+ */
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
 
 const performanceNow = performance.now.bind(performance)

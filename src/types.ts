@@ -62,7 +62,7 @@ export interface Statistics {
   max: number
 
   /**
-   * mean/average (estimate of the population mean/average)
+   * mean/average
    */
   mean: number
 
@@ -112,17 +112,17 @@ export interface Statistics {
   samples: number[]
 
   /**
-   * standard deviation (estimate of the population standard deviation)
+   * standard deviation
    */
   sd: number
 
   /**
-   * standard error of the mean/average (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * standard error of the mean/average (a.k.a. the standard deviation of the distribution of the sample mean/average)
    */
   sem: number
 
   /**
-   * variance (estimate of the population variance)
+   * variance
    */
   variance: number
 }
@@ -166,7 +166,7 @@ export interface TaskResult {
   max: number
 
   /**
-   * the latency samples mean/average (estimate of the population mean/average)
+   * the latency samples mean/average
    * @deprecated use `.latency.mean` instead
    */
   mean: number
@@ -235,13 +235,13 @@ export interface TaskResult {
   samples: number[]
 
   /**
-   * the latency samples standard deviation (estimate of the population standard deviation)
+   * the latency samples standard deviation
    * @deprecated use `.latency.sd` instead
    */
   sd: number
 
   /**
-   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * the latency standard error of the mean (a.k.a. the standard deviation of the distribution of the sample mean/average)
    * @deprecated use `.latency.sem` instead
    */
   sem: number
@@ -257,7 +257,7 @@ export interface TaskResult {
   totalTime: number
 
   /**
-   * the latency samples variance (estimate of the population variance)
+   * the latency samples variance
    * @deprecated use `.latency.variance` instead
    */
   variance: number

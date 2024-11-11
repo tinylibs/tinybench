@@ -4,6 +4,9 @@ import perfectionist from 'eslint-plugin-perfectionist'
 import neostandard, { plugins } from 'neostandard'
 
 export default [
+  {
+    ignores: ['docs/**', 'package/**'],
+  },
   js.configs.recommended,
   jsdoc.configs['flat/recommended-typescript'],
   ...plugins['typescript-eslint'].config(

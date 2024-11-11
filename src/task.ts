@@ -16,8 +16,8 @@ import { getStatisticsSorted, isFnAsyncResource } from './utils'
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
- * results, name, Bench instance, the task function and the number times the task
- * function has been executed.
+ * results, name, Bench instance, the task function, the number times the task
+ * function has been executed, ...
  */
 export class Task extends EventTarget {
   /**
@@ -139,10 +139,10 @@ export class Task extends EventTarget {
   }
 
   /**
-   * change the result object values
-   * @param result - the task result object to merge with the current result object
+   * merge into the result object values
+   * @param result - the task result object to merge with the current result object values
    */
-  private setResult (result: Partial<TaskResult>): void {
+  private mergeTaskResult (result: Partial<TaskResult>): void {
     this.result = Object.freeze({
       ...this.result,
       ...result,
@@ -213,7 +213,7 @@ export class Task extends EventTarget {
         return this
       }
 
-      this.setResult({
+      this.mergeTaskResult({
         critical: latencyStatistics.critical,
         df: latencyStatistics.df,
         hz: throughputStatistics.mean,
@@ -240,7 +240,7 @@ export class Task extends EventTarget {
     }
 
     if (error) {
-      this.setResult({ error })
+      this.mergeTaskResult({ error })
       this.dispatchEvent(createErrorEvent(this, error))
       this.bench.dispatchEvent(createErrorEvent(this, error))
       if (this.bench.throws) {
@@ -273,7 +273,7 @@ export class Task extends EventTarget {
     await this.bench.teardown(this, 'warmup')
 
     if (error) {
-      this.setResult({ error })
+      this.mergeTaskResult({ error })
       this.dispatchEvent(createErrorEvent(this, error))
       this.bench.dispatchEvent(createErrorEvent(this, error))
       if (this.bench.throws) {

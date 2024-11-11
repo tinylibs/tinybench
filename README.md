@@ -68,321 +68,37 @@ More usage examples can be found in the [examples](./examples/) directory.
 
 ## Docs
 
-### `Bench`
+### [`Bench`](./docs/classes/Bench.html)
 
-The Benchmark instance for keeping track of the benchmark tasks and controlling
-them.
+### [`Task`](./docs/classes/Task.html)
 
-Options:
-
-```ts
-export interface Options {
-  /**
-   * benchmark name
-   */
-  name?: string
-
-  /**
-   * time needed for running a benchmark task (milliseconds) @default 1000
-   */
-  time?: number
-
-  /**
-   * number of times that a task should run if even the time option is finished @default 64
-   */
-  iterations?: number
-
-  /**
-   * function to get the current timestamp in milliseconds
-   */
-  now?: () => number
-
-  /**
-   * An AbortSignal for aborting the benchmark
-   */
-  signal?: AbortSignal
-
-  /**
-   * Throws if a task fails @default false
-   */
-  throws?: boolean
-
-  /**
-   * warmup benchmark @default true
-   */
-  warmup?: boolean
-
-  /**
-   * warmup time (milliseconds) @default 250
-   */
-  warmupTime?: number
-
-  /**
-   * warmup iterations @default 16
-   */
-  warmupIterations?: number
-
-  /**
-   * setup function to run before each benchmark task (cycle)
-   */
-  setup?: Hook
-
-  /**
-   * teardown function to run after each benchmark task (cycle)
-   */
-  teardown?: Hook
-}
-
-export type Hook = (task: Task, mode: 'warmup' | 'run') => void | Promise<void>
-```
-
-- `async run()`: run the added tasks that were registered using the `add` method
-- `reset()`: reset each task and remove its result
-- `add(name: string, fn: Fn, opts?: FnOpts)`: add a benchmark task to the task map
-  - `Fn`: `() => unknown | Promise<unknown>`
-  - `FnOpts`: `{}`: a set of optional functions run during the benchmark lifecycle that can be used to set up or tear down test data or fixtures without affecting the timing of each task
-    - `beforeAll?: () => void | Promise<void>`: invoked once before iterations of `fn` begin
-    - `beforeEach?: () => void | Promise<void>`: invoked before each time `fn` is executed
-    - `afterEach?: () => void | Promise<void>`: invoked after each time `fn` is executed
-    - `afterAll?: () => void | Promise<void>`: invoked once after all iterations of `fn` have finished
-- `remove(name: string)`: remove a benchmark task from the task map
-- `table()`: table of the tasks results
-- `get results(): (Readonly<TaskResult> | undefined)[]`: (getter) tasks results as an array
-- `get tasks(): Task[]`: (getter) tasks as an array
-- `getTask(name: string): Task | undefined`: get a task based on the name
-
-### `Task`
-
-A class that represents each benchmark task in Tinybench. It keeps track of the
-results, name, Bench instance, the task function and the number of times the task
-function has been executed.
-
-- `constructor(bench: Bench, name: string, fn: Fn, opts: FnOptions = {})`
-- `bench: Bench`
-- `name: string`: task name
-- `fn: Fn`: the task function
-- `opts: FnOptions`: Task options
-- `runs: number`: the number of times the task function has been executed
-- `result?: Readonly<TaskResult>`: the result object
-- `async run()`: run the current task and write the results in `Task.result` object property (internal)
-- `async warmup()`: warmup the current task (internal)
-- `reset()`: reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property (internal)
-
-FnOptions:
-
-```ts
-export interface FnOptions {
-  /**
-   * An optional function that is run before iterations of this task begin
-   */
-  beforeAll?: (this: Task) => void | Promise<void>
-
-  /**
-   * An optional function that is run before each iteration of this task
-   */
-  beforeEach?: (this: Task) => void | Promise<void>
-
-  /**
-   * An optional function that is run after each iteration of this task
-   */
-  afterEach?: (this: Task) => void | Promise<void>
-
-  /**
-   * An optional function that is run after all iterations of this task end
-   */
-  afterAll?: (this: Task) => void | Promise<void>
-}
-```
-
-### `TaskResult`
-
-The benchmark task result object:
-
-```ts
-export interface TaskResult {
-  /**
-   * the JavaScript runtime environment
-   */
-  runtime: JSRuntime | 'unknown'
-
-  /**
-   * the JavaScript runtime version
-   */
-  runtimeVersion: string
-
-  /**
-   * the last task error that was thrown
-   */
-  error?: Error
-
-  /**
-   * the time to run the task benchmark cycle (ms)
-   */
-  totalTime: number
-
-  /**
-   * how long each operation takes (ms)
-   */
-  period: number
-
-  /**
-   * the task latency statistics
-   */
-  latency: Statistics
-
-  /**
-   * the task throughput statistics
-   */
-  throughput: Statistics
-
-  /**
-   * the number of operations per second
-   * @deprecated use `.throughput.mean` instead
-   */
-  hz: number
-
-  /**
-   * latency samples (ms)
-   * @deprecated use `.latency.samples` instead
-   */
-  samples: number[]
-
-  /**
-   * the minimum latency samples value
-   * @deprecated use `.latency.min` instead
-   */
-  min: number
-
-  /**
-   * the maximum latency samples value
-   * @deprecated use `.latency.max` instead
-   */
-  max: number
-
-  /**
-   * the latency samples mean/average (estimate of the population mean/average)
-   * @deprecated use `.latency.mean` instead
-   */
-  mean: number
-
-  /**
-   * the latency samples variance (estimate of the population variance)
-   * @deprecated use `.latency.variance` instead
-   */
-  variance: number
-
-  /**
-   * the latency samples standard deviation (estimate of the population standard deviation)
-   * @deprecated use `.latency.sd` instead
-   */
-  sd: number
-
-  /**
-   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
-   * @deprecated use `.latency.sem` instead
-   */
-  sem: number
-
-  /**
-   * the latency samples degrees of freedom
-   * @deprecated use `.latency.df` instead
-   */
-  df: number
-
-  /**
-   * the latency samples critical value
-   * @deprecated use `.latency.critical` instead
-   */
-  critical: number
-
-  /**
-   * the latency samples margin of error
-   * @deprecated use `.latency.moe` instead
-   */
-  moe: number
-
-  /**
-   * the latency samples relative margin of error
-   * @deprecated use `.latency.rme` instead
-   */
-  rme: number
-
-  /**
-   * the latency samples p75 percentile
-   * @deprecated use `.latency.p75` instead
-   */
-  p75: number
-
-  /**
-   * the latency samples p99 percentile
-   * @deprecated use `.latency.p99` instead
-   */
-  p99: number
-
-  /**
-   * the latency samples p995 percentile
-   * @deprecated use `.latency.p995` instead
-   */
-  p995: number
-
-  /**
-   * the latency samples p999 percentile
-   * @deprecated use `.latency.p999` instead
-   */
-  p999: number
-}
-```
-
-[Statistics](https://github.com/tinylibs/tinybench/blob/main/src/types.ts#L31) type definition.
+### [`TaskResult`](./docs/interfaces/TaskResult.html)
 
 ### `Events`
 
-Both the `Task` and `Bench` objects extend the `EventTarget` object, so you can attach listeners to different types of events
-in each class instance using the universal `addEventListener` and
-`removeEventListener`.
+Both the `Task` and `Bench` classes extend the `EventTarget` object. So you can attach listeners to different types of events in each class instance using the universal `addEventListener` and `removeEventListener` methods.
 
-```ts
-/**
- * Bench events
- */
-export type BenchEvents =
-  | 'abort' // when a signal aborts
-  | 'complete' // when running a benchmark finishes
-  | 'error' // when the benchmark task throws
-  | 'reset' // when the reset function gets called
-  | 'start' // when running the benchmarks gets started
-  | 'warmup' // when the benchmarks start getting warmed up (before start)
-  | 'cycle' // when running each benchmark task gets done (cycle)
-  | 'add' // when a Task gets added to the Bench
-  | 'remove' // when a Task gets removed of the Bench
-
-/**
- * task events
- */
-export type TaskEvents = 'abort' | 'complete' | 'error' | 'reset' | 'start' | 'warmup' | 'cycle'
-```
-
-For instance:
+#### [`BenchEvents`](./docs/types/BenchEvents.html)
 
 ```js
 // runs on each benchmark task's cycle
 bench.addEventListener('cycle', (evt) => {
   const task = evt.task!;
 });
+```
 
+#### [`TaskEvents`](./docs/types/TaskEvents.html)
+
+```js
 // runs only on this benchmark task's cycle
 task.addEventListener('cycle', (evt) => {
   const task = evt.task!;
 });
 ```
 
-### `BenchEvent`
+### [`BenchEvent`](./docs/types/BenchEvent.html)
 
-```ts
-export type BenchEvent = Event & { error?: Error; task?: Task }
-```
-
-### `process.hrtime`
+## `process.hrtime`
 
 if you want more accurate results for nodejs with `process.hrtime`, then import
 the `hrtimeNow` function from the library and pass it to the `Bench` options.

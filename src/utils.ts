@@ -203,7 +203,7 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 
 /**
  * Computes the average of a sample.
- * @param samples the sample
+ * @param samples - the sample
  * @returns the average of the sample
  * @throws if the sample is empty
  */
@@ -216,8 +216,8 @@ const average = (samples: number[]) => {
 
 /**
  * Computes the variance of a sample with Bessel's correction.
- * @param samples the sample
- * @param avg the average of the sample
+ * @param samples - the sample
+ * @param avg - the average of the sample
  * @returns the variance of the sample
  */
 const variance = (samples: number[], avg = average(samples)) => {
@@ -227,8 +227,8 @@ const variance = (samples: number[], avg = average(samples)) => {
 
 /**
  * Computes the q-quantile of a sorted sample.
- * @param samples the sorted sample
- * @param q the quantile to compute
+ * @param samples - the sorted sample
+ * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  * @throws if the sample is empty
  */
@@ -260,16 +260,16 @@ const quantileSorted = (samples: number[], q: number) => {
 
 /**
  * Computes the median of a sorted sample.
- * @param samples the sorted sample
+ * @param samples - the sorted sample
  * @returns the median of the sample
  */
 const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5)
 
 /**
  * Computes the absolute deviation of a sample given an aggregation.
- * @param samples the sample
- * @param aggFn the aggregation function to use
- * @param aggValue the aggregated value to use
+ * @param samples - the sample
+ * @param aggFn - the aggregation function to use
+ * @param aggValue - the aggregated value to use
  * @returns the absolute deviation of the sample given the aggregation
  */
 const absoluteDeviation = (
@@ -290,7 +290,7 @@ const absoluteDeviation = (
 /**
  * Computes the statistics of a sample.
  * The sample must be sorted.
- * @param samples the sorted sample
+ * @param samples - the sorted sample
  * @returns the statistics of the sample
  * @throws if the sample is empty
  */

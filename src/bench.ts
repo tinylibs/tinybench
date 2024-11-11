@@ -24,8 +24,7 @@ import { Task } from './task'
 import { type JSRuntime, mToNs, now, runtime, runtimeVersion } from './utils'
 
 /**
- * The Benchmark instance for keeping track of the benchmark tasks and controlling
- * them.
+ * The Bench class keeps track of the benchmark tasks and controls them.
  */
 export class Bench extends EventTarget {
   /**

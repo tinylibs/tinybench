@@ -68,17 +68,17 @@ More usage examples can be found in the [examples](./examples/) directory.
 
 ## Docs
 
-### [`Bench`](./docs/classes/Bench.html)
+### [`Bench`](https://tinylibs.github.io/tinybench/classes/Bench.html)
 
-### [`Task`](./docs/classes/Task.html)
+### [`Task`](https://tinylibs.github.io/tinybench/classes/Task.html)
 
-### [`TaskResult`](./docs/interfaces/TaskResult.html)
+### [`TaskResult`](https://tinylibs.github.io/tinybench/interfaces/TaskResult.html)
 
 ### `Events`
 
 Both the `Task` and `Bench` classes extend the `EventTarget` object. So you can attach listeners to different types of events in each class instance using the universal `addEventListener` and `removeEventListener` methods.
 
-#### [`BenchEvents`](./docs/types/BenchEvents.html)
+#### [`BenchEvents`](https://tinylibs.github.io/tinybench/types/BenchEvents.html)
 
 ```js
 // runs on each benchmark task's cycle
@@ -87,7 +87,7 @@ bench.addEventListener('cycle', (evt) => {
 });
 ```
 
-#### [`TaskEvents`](./docs/types/TaskEvents.html)
+#### [`TaskEvents`](https://tinylibs.github.io/tinybench/types/TaskEvents.html)
 
 ```js
 // runs only on this benchmark task's cycle
@@ -96,7 +96,7 @@ task.addEventListener('cycle', (evt) => {
 });
 ```
 
-### [`BenchEvent`](./docs/types/BenchEvent.html)
+### [`BenchEvent`](https://tinylibs.github.io/tinybench/types/BenchEvent.html)
 
 ## `process.hrtime`
 
@@ -107,7 +107,7 @@ the `hrtimeNow` function from the library and pass it to the `Bench` options.
 import { hrtimeNow } from 'tinybench'
 ```
 
-It may make your benchmarks slower, check [#42](https://github.com/tinylibs/tinybench/issues/42).
+It may make your benchmarks slower.
 
 ## Concurrency
 

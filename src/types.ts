@@ -7,6 +7,9 @@ import type { JSRuntime } from './utils'
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type Fn = () => Promise<unknown> | unknown
 
+/**
+ * the task function options
+ */
 export interface FnOptions {
   /**
    * An optional function that is run after all iterations of this task end
@@ -29,6 +32,9 @@ export interface FnOptions {
   beforeEach?: (this: Task) => Promise<void> | void
 }
 
+/**
+ * the statistics object
+ */
 export interface Statistics {
   /**
    * mean/average absolute deviation
@@ -56,7 +62,7 @@ export interface Statistics {
   max: number
 
   /**
-   * mean/average (estimate of the population mean/average)
+   * mean/average
    */
   mean: number
 
@@ -106,23 +112,23 @@ export interface Statistics {
   samples: number[]
 
   /**
-   * standard deviation (estimate of the population standard deviation)
+   * standard deviation
    */
   sd: number
 
   /**
-   * standard error of the mean/average (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * standard error of the mean/average (a.k.a. the standard deviation of the distribution of the sample mean/average)
    */
   sem: number
 
   /**
-   * variance (estimate of the population variance)
+   * variance
    */
   variance: number
 }
 
 /**
- * the benchmark task result object
+ * the task result object
  */
 export interface TaskResult {
   /**
@@ -160,7 +166,7 @@ export interface TaskResult {
   max: number
 
   /**
-   * the latency samples mean/average (estimate of the population mean/average)
+   * the latency samples mean/average
    * @deprecated use `.latency.mean` instead
    */
   mean: number
@@ -229,13 +235,13 @@ export interface TaskResult {
   samples: number[]
 
   /**
-   * the latency samples standard deviation (estimate of the population standard deviation)
+   * the latency samples standard deviation
    * @deprecated use `.latency.sd` instead
    */
   sd: number
 
   /**
-   * the latency standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean/average)
+   * the latency standard error of the mean (a.k.a. the standard deviation of the distribution of the sample mean/average)
    * @deprecated use `.latency.sem` instead
    */
   sem: number
@@ -251,17 +257,16 @@ export interface TaskResult {
   totalTime: number
 
   /**
-   * the latency samples variance (estimate of the population variance)
+   * the latency samples variance
    * @deprecated use `.latency.variance` instead
    */
   variance: number
 }
 
 /**
- * Both the `Task` and `Bench` objects extend the `EventTarget` object,
- * so you can attach a listeners to different types of events
- * to each class instance using the universal `addEventListener` and
- * `removeEventListener`
+ * Both the `Task` and `Bench` objects extend the `EventTarget` object.
+ * So you can attach a listeners to different types of events to each class instance
+ * using the universal `addEventListener` and `removeEventListener` methods.
  */
 
 /**
@@ -269,19 +274,25 @@ export interface TaskResult {
  */
 export type BenchEvents =
   | 'abort' // when a signal aborts
-  | 'add' // when a Task gets added to the Bench
+  | 'add' // when a task gets added to the Bench instance
   | 'complete' // when running a benchmark finishes
-  | 'cycle' // when running each benchmark task gets done (cycle)
+  | 'cycle' // when running each benchmark task gets done
   | 'error' // when the benchmark task throws
-  | 'remove' // when a Task gets removed of the Bench
-  | 'reset' // when the reset function gets called
+  | 'remove' // when a task gets removed of the Bench instance
+  | 'reset' // when the reset method gets called
   | 'start' // when running the benchmarks gets started
-  | 'warmup' // when the benchmarks start getting warmed up (before start)
+  | 'warmup' // when the benchmarks start getting warmed up
 
 export type Hook = (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
 
+/**
+ * bench event
+ */
 export type BenchEvent = { error?: Error; task?: Task } & Event
 
+/**
+ * event listener
+ */
 export type EventListener = (evt: BenchEvent) => void
 
 export interface BenchEventsMap {
@@ -318,6 +329,9 @@ export interface TaskEventsMap {
   warmup: EventListener
 }
 
+/**
+ * bench options
+ */
 export interface Options {
   /**
    * number of times that a task should run if even the time option is finished @default 64

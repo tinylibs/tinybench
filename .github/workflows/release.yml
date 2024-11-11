@@ -4,6 +4,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: read
+
 jobs:
   build-release:
     runs-on: ubuntu-latest
@@ -104,3 +107,41 @@ jobs:
       - run: npx changelogithub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  publish-documentation:
+    runs-on: ubuntu-latest
+    needs: changelog
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Generate documentation
+        run: |
+          pnpm install --ignore-scripts --frozen-lockfile
+          pnpm typedoc
+
+      - name: Commit and push changes
+        if: github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
+        env:
+          COMMIT_MESSAGE: 'docs: publish documentation'
+          COMMIT_AUTHOR: Documentation Bot
+          COMMIT_EMAIL: documentation-bot@users.noreply.github.com
+        run: |
+          git config --local user.name "${{ env.COMMIT_AUTHOR }}"
+          git config --local user.email "${{ env.COMMIT_EMAIL }}"
+          git pull
+          git add ./docs
+          git commit -a -m "${{ env.COMMIT_MESSAGE }}"
+          git push

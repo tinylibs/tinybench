@@ -250,7 +250,7 @@ export class Bench extends EventTarget {
   }
 
   /**
-   * (getter) tasks results as an array
+   * tasks results as an array
    * @returns the tasks results as an array
    */
   get results (): (Readonly<TaskResult> | undefined)[] {
@@ -258,7 +258,7 @@ export class Bench extends EventTarget {
   }
 
   /**
-   * (getter) tasks as an array
+   * tasks as an array
    * @returns the tasks as an array
    */
   get tasks (): Task[] {

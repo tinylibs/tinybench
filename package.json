@@ -20,6 +20,7 @@
     "prepublishOnly": "pnpm build && rm -rf ./package && clean-publish",
     "postpublish": "rm -rf ./package",
     "typecheck": "tsc --noEmit",
+    "typedoc": "typedoc",
     "lint": "eslint --cache src test examples eslint.config.js tsup.config.ts",
     "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsup.config.ts",
     "release": "bumpp package.json --commit --push --tag",
@@ -62,6 +63,7 @@
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",
     "tsup": "^8.3.5",
+    "typedoc": "^0.26.11",
     "typescript": "~5.6.3",
     "vitest": "^2.1.4"
   },

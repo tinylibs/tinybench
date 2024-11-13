@@ -1,6 +1,6 @@
 {
   "name": "tinybench",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "type": "module",
   "packageManager": "pnpm@9.12.3",
   "volta": {

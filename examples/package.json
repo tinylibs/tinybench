@@ -5,7 +5,7 @@
   "packageManager": "pnpm@9.12.3",
   "volta": {
     "node": "20.18.0",
-    "pnpm": "9.12.3"
+    "pnpm": "9.13.0"
   },
   "scripts": {
     "all": "run-s example:*",

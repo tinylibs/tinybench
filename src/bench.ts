@@ -228,21 +228,25 @@ export class Bench extends EventTarget {
       if (task.result) {
         return task.result.error
           ? {
+              'Task name': task.name,
+              // eslint-disable-next-line perfectionist/sort-objects
               Error: task.result.error.message,
-              Samples: task.result.latency.samples.length,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               Stack: task.result.error.stack!,
-              'Task name': task.name,
+              // eslint-disable-next-line perfectionist/sort-objects
+              Samples: task.result.latency.samples.length,
             }
           : (convert?.(task) ?? {
+              'Task name': task.name,
+              // eslint-disable-next-line perfectionist/sort-objects
               'Latency average (ns)': `${mToNs(task.result.latency.mean).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               'Latency median (ns)': `${mToNs(task.result.latency.p50!).toFixed(2)}${Number.parseFloat(mToNs(task.result.latency.mad!).toFixed(2)) > 0 ? ` \xb1 ${mToNs(task.result.latency.mad!).toFixed(2)}` : ''}`,
-              Samples: task.result.latency.samples.length,
-              'Task name': task.name,
               'Throughput average (ops/s)': `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               'Throughput median (ops/s)': `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+              // eslint-disable-next-line perfectionist/sort-objects
+              Samples: task.result.latency.samples.length,
             })
       }
       return null

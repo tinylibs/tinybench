@@ -109,8 +109,10 @@ export const runtimeVersion: string = (() => {
       'OSS Release Version'
     ] as string
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  if (runtime === JSRuntime.v8) return (globalThis as any).version?.() as string
+  if (runtime === JSRuntime.v8) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    return (globalThis as any).version?.() as string
+  }
   if (runtime === JSRuntime['quickjs-ng']) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     return (globalThis as any).navigator?.userAgent?.split?.('/')[1] as string

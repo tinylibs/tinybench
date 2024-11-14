@@ -222,8 +222,8 @@ export class Bench extends EventTarget {
    * @returns the tasks results as an array of table records
    */
   table (
-    convert?: (task: Task) => Record<string, number | string> | undefined
-  ): (null | Record<string, number | string> | undefined)[] {
+    convert?: (task: Task) => Record<string, number | string | undefined>
+  ): (null | Record<string, number | string | undefined>)[] {
     return this.tasks.map(task => {
       if (task.result) {
         return task.result.error

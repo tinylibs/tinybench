@@ -40,7 +40,33 @@ test.each([
   ).toBeCloseTo(1000, 1)
 })
 
-test('bench and task runs, time consistency', async () => {
+test('bench table', async () => {
+  const bench = new Bench({ iterations: 32, time: 100 })
+  bench.add('foo', async () => {
+    await new Promise(resolve => setTimeout(resolve, 1))
+  })
+
+  await bench.run()
+
+  expect(bench.table()).toStrictEqual([
+    {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      'Task name': expect.any(String),
+      // eslint-disable-next-line perfectionist/sort-objects, @typescript-eslint/no-unsafe-assignment
+      'Latency average (ns)': expect.any(String),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      'Latency median (ns)': expect.any(String),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      'Throughput average (ops/s)': expect.any(String),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      'Throughput median (ops/s)': expect.any(String),
+      // eslint-disable-next-line perfectionist/sort-objects, @typescript-eslint/no-unsafe-assignment
+      Samples: expect.any(Number),
+    },
+  ])
+})
+
+test('bench task runs and time consistency', async () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench.add('foo', async () => {
     await new Promise(resolve => setTimeout(resolve, 50))

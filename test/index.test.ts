@@ -64,6 +64,24 @@ test('bench table', async () => {
       Samples: expect.any(Number),
     },
   ])
+
+  bench.remove('foo')
+  bench.add('bar', () => {
+    throw new Error('fake')
+  })
+
+  await bench.run()
+
+  expect(bench.table()).toStrictEqual([
+    {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      'Task name': expect.any(String),
+      // eslint-disable-next-line perfectionist/sort-objects, @typescript-eslint/no-unsafe-assignment
+      Error: expect.any(String),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      Stack: expect.any(String),
+    },
+  ])
 })
 
 test('bench task runs and time consistency', async () => {

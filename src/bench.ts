@@ -233,8 +233,6 @@ export class Bench extends EventTarget {
               Error: task.result.error.message,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               Stack: task.result.error.stack!,
-              // eslint-disable-next-line perfectionist/sort-objects
-              Samples: task.result.latency.samples.length,
             }
           : (convert?.(task) ?? {
               'Task name': task.name,

@@ -152,7 +152,7 @@ export class Bench extends EventTarget {
   /**
    * get a task based on the task name
    * @param name - the task name
-   * @returns the task
+   * @returns the Task instance
    */
   getTask (name: string): Task | undefined {
     return this._tasks.get(name)
@@ -181,7 +181,7 @@ export class Bench extends EventTarget {
   }
 
   /**
-   * reset each task and remove its result
+   * reset tasks and remove their result
    */
   reset (): void {
     this.dispatchEvent(createBenchEvent('reset'))

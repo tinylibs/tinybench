@@ -65,8 +65,7 @@ test('bench table', async () => {
     },
   ])
 
-  bench.remove('foo')
-  bench.add('bar', () => {
+  bench.remove('foo').add('bar', () => {
     throw new Error('fake')
   })
 
@@ -177,8 +176,7 @@ test('events order', async () => {
   })
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  bench.add('temporary', () => {})
-  bench.remove('temporary')
+  bench.add('temporary', () => {}).remove('temporary')
 
   setTimeout(() => {
     controller.abort()
@@ -510,13 +508,14 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
 test('task with promiseLike return', async () => {
   const bench = new Bench({ iterations: 16, time: 100 })
 
-  bench.add('foo', () => ({
-    then: (resolve: () => void) => setTimeout(resolve, 50),
-  }))
-  bench.add('fum', () => ({
-    then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 50)),
-  }))
-  bench.add('bar', () => new Promise(resolve => setTimeout(resolve, 50)))
+  bench
+    .add('foo', () => ({
+      then: (resolve: () => void) => setTimeout(resolve, 50),
+    }))
+    .add('fum', () => ({
+      then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 50)),
+    }))
+    .add('bar', () => new Promise(resolve => setTimeout(resolve, 50)))
   await bench.run()
 
   expect(bench.getTask('foo')?.result?.latency.mean).toBeGreaterThan(50)
@@ -530,11 +529,12 @@ test.each(['warmup', 'run'])('%s error handling', async mode => {
   const error = new Error('error')
   const promiseError = new Error('promise')
 
-  bench.add('foo', () => {
-    throw error
-  })
-  bench.add('bar', async () => Promise.reject(promiseError))
-  bench.add('baz', () => Promise.reject(promiseError))
+  bench
+    .add('foo', () => {
+      throw error
+    })
+    .add('bar', async () => Promise.reject(promiseError))
+    .add('baz', () => Promise.reject(promiseError))
   await bench.run()
 
   expect(bench.getTask('foo')?.result?.error).toStrictEqual(error)
@@ -550,18 +550,19 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach', async () => {
   const AEerror = new Error('AfterEach')
   const AAerror = new Error('AfterAll')
 
-  bench.add('BA test', () => 1, {
-    beforeAll: () => Promise.reject(BAerror),
-  })
-  bench.add('BE test', () => 1, {
-    beforeEach: () => Promise.reject(BEerror),
-  })
-  bench.add('AE test', () => 1, {
-    afterEach: () => Promise.reject(AEerror),
-  })
-  bench.add('AA test', () => 1, {
-    afterAll: () => Promise.reject(AAerror),
-  })
+  bench
+    .add('BA test', () => 1, {
+      beforeAll: () => Promise.reject(BAerror),
+    })
+    .add('BE test', () => 1, {
+      beforeEach: () => Promise.reject(BEerror),
+    })
+    .add('AE test', () => 1, {
+      afterEach: () => Promise.reject(AEerror),
+    })
+    .add('AA test', () => 1, {
+      afterAll: () => Promise.reject(AAerror),
+    })
   await bench.run()
 
   expect(bench.getTask('BA test')?.result?.error).toStrictEqual(BAerror)

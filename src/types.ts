@@ -332,7 +332,7 @@ export interface TaskEventsMap {
 /**
  * bench options
  */
-export interface Options {
+export interface BenchOptions {
   /**
    * number of times that a task should run if even the time option is finished @default 64
    */

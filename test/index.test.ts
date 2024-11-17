@@ -93,8 +93,10 @@ test('bench task runs and time consistency', async () => {
 
   const fooTask = bench.getTask('foo')
 
-  expect(fooTask?.runs).toBeGreaterThanOrEqual(bench.iterations)
-  expect(fooTask?.result?.totalTime).toBeGreaterThanOrEqual(bench.time)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  expect(fooTask?.runs).toBeGreaterThanOrEqual(bench.opts.iterations!)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  expect(fooTask?.result?.totalTime).toBeGreaterThanOrEqual(bench.opts.time!)
 })
 
 test('events order', async () => {

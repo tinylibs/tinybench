@@ -16,8 +16,7 @@ import { getStatisticsSorted, isFnAsyncResource } from './utils'
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
- * results, name, Bench instance, the task function, the number times the task
- * function has been executed, ...
+ * results, name, the task function, the number times the task function has been executed, ...
  */
 export class Task extends EventTarget {
   /**
@@ -36,12 +35,12 @@ export class Task extends EventTarget {
   private readonly fn: Fn
 
   /**
-   * Task options
+   * The task function options
    */
-  private readonly opts: FnOptions
+  private readonly fnOpts: FnOptions
 
   /**
-   * Task name
+   * The task name
    */
   readonly name: string
 
@@ -55,13 +54,13 @@ export class Task extends EventTarget {
    */
   runs = 0
 
-  constructor (bench: Bench, name: string, fn: Fn, opts: FnOptions = {}) {
+  constructor (bench: Bench, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
     this.bench = bench
     this.name = name
     this.fn = fn
+    this.fnOpts = fnOpts
     this.async = isFnAsyncResource(fn)
-    this.opts = opts
     // TODO: support signal in Tasks
   }
 
@@ -69,9 +68,9 @@ export class Task extends EventTarget {
     time: number,
     iterations: number
   ): Promise<{ error?: unknown; samples?: number[] }> {
-    if (this.opts.beforeAll != null) {
+    if (this.fnOpts.beforeAll != null) {
       try {
-        await this.opts.beforeAll.call(this)
+        await this.fnOpts.beforeAll.call(this)
       } catch (error) {
         return { error }
       }
@@ -81,28 +80,32 @@ export class Task extends EventTarget {
     let totalTime = 0 // ms
     const samples: number[] = []
     const benchmarkTask = async () => {
-      if (this.opts.beforeEach != null) {
-        await this.opts.beforeEach.call(this)
+      if (this.fnOpts.beforeEach != null) {
+        await this.fnOpts.beforeEach.call(this)
       }
 
       let taskTime = 0 // ms;
       if (this.async) {
-        const taskStart = this.bench.now()
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const taskStart = this.bench.opts.now!()
         // eslint-disable-next-line no-useless-call
         await this.fn.call(this)
-        taskTime = this.bench.now() - taskStart
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        taskTime = this.bench.opts.now!() - taskStart
       } else {
-        const taskStart = this.bench.now()
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const taskStart = this.bench.opts.now!()
         // eslint-disable-next-line no-useless-call
         this.fn.call(this)
-        taskTime = this.bench.now() - taskStart
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        taskTime = this.bench.opts.now!() - taskStart
       }
 
       samples.push(taskTime)
       totalTime += taskTime
 
-      if (this.opts.afterEach != null) {
-        await this.opts.afterEach.call(this)
+      if (this.fnOpts.afterEach != null) {
+        await this.fnOpts.afterEach.call(this)
       }
     }
 
@@ -113,7 +116,7 @@ export class Task extends EventTarget {
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
           samples.length + limit.activeCount + limit.pendingCount < iterations) &&
-        !this.bench.signal?.aborted
+        !this.bench.opts.signal?.aborted
       ) {
         if (this.bench.concurrency === 'task') {
           promises.push(limit(benchmarkTask))
@@ -121,16 +124,16 @@ export class Task extends EventTarget {
           await benchmarkTask()
         }
       }
-      if (!this.bench.signal?.aborted && promises.length > 0) {
+      if (!this.bench.opts.signal?.aborted && promises.length > 0) {
         await Promise.all(promises)
       }
     } catch (error) {
       return { error }
     }
 
-    if (this.opts.afterAll != null) {
+    if (this.fnOpts.afterAll != null) {
       try {
-        await this.opts.afterAll.call(this)
+        await this.fnOpts.afterAll.call(this)
       } catch (error) {
         return { error }
       }
@@ -185,12 +188,14 @@ export class Task extends EventTarget {
       return this
     }
     this.dispatchEvent(createBenchEvent('start', this))
-    await this.bench.setup(this, 'run')
+    await this.bench.opts.setup?.(this, 'run')
     const { error, samples: latencySamples } = (await this.benchmark(
-      this.bench.time,
-      this.bench.iterations
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.bench.opts.time!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.bench.opts.iterations!
     )) as { error?: Error; samples?: number[] }
-    await this.bench.teardown(this, 'run')
+    await this.bench.opts.teardown?.(this, 'run')
 
     if (latencySamples) {
       this.runs = latencySamples.length
@@ -209,7 +214,7 @@ export class Task extends EventTarget {
         .sort((a, b) => a - b)
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
-      if (this.bench.signal?.aborted) {
+      if (this.bench.opts.signal?.aborted) {
         return this
       }
 
@@ -243,7 +248,7 @@ export class Task extends EventTarget {
       this.mergeTaskResult({ error })
       this.dispatchEvent(createErrorEvent(this, error))
       this.bench.dispatchEvent(createErrorEvent(this, error))
-      if (this.bench.throws) {
+      if (this.bench.opts.throws) {
         throw error
       }
     }
@@ -265,18 +270,20 @@ export class Task extends EventTarget {
       return
     }
     this.dispatchEvent(createBenchEvent('warmup', this))
-    await this.bench.setup(this, 'warmup')
+    await this.bench.opts.setup?.(this, 'warmup')
     const { error } = (await this.benchmark(
-      this.bench.warmupTime,
-      this.bench.warmupIterations
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.bench.opts.warmupTime!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.bench.opts.warmupIterations!
     )) as { error?: Error }
-    await this.bench.teardown(this, 'warmup')
+    await this.bench.opts.teardown?.(this, 'warmup')
 
     if (error) {
       this.mergeTaskResult({ error })
       this.dispatchEvent(createErrorEvent(this, error))
       this.bench.dispatchEvent(createErrorEvent(this, error))
-      if (this.bench.throws) {
+      if (this.bench.opts.throws) {
         throw error
       }
     }

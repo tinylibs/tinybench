@@ -4,10 +4,9 @@ import type {
   AddEventListenerOptionsArgument,
   BenchEvents,
   BenchEventsMap,
+  BenchOptions,
   Fn,
   FnOptions,
-  Hook,
-  Options,
   RemoveEventListenerOptionsArgument,
   TaskResult,
 } from './types'
@@ -41,14 +40,15 @@ export class Bench extends EventTarget {
    */
   concurrency: 'bench' | 'task' | null = null
 
-  iterations = defaultMinimumIterations
-
   /**
    * The benchmark name.
    */
   readonly name?: string
 
-  readonly now = now
+  /**
+   * The options.
+   */
+  readonly opts: BenchOptions
 
   /**
    * The JavaScript runtime environment.
@@ -60,45 +60,35 @@ export class Bench extends EventTarget {
    */
   readonly runtimeVersion: string
 
-  readonly setup: Hook
-
-  readonly signal?: AbortSignal
-
-  readonly teardown: Hook
-
   /**
    * The maximum number of concurrent tasks to run @default Number.POSITIVE_INFINITY
    */
   threshold = Number.POSITIVE_INFINITY
 
-  throws = false
-
-  time = defaultMinimumTime
-
-  warmup = true
-
-  warmupIterations = defaultMinimumWarmupIterations
-
-  warmupTime = defaultMinimumWarmupTime
-
-  constructor (options: Options = {}) {
+  constructor (options: BenchOptions = {}) {
     super()
     this.name = options.name
+    delete options.name
     this.runtime = runtime
     this.runtimeVersion = runtimeVersion
-    this.now = options.now ?? this.now
-    this.warmup = options.warmup ?? this.warmup
-    this.warmupTime = options.warmupTime ?? this.warmupTime
-    this.warmupIterations = options.warmupIterations ?? this.warmupIterations
-    this.time = options.time ?? this.time
-    this.iterations = options.iterations ?? this.iterations
-    this.signal = options.signal
-    this.throws = options.throws ?? this.throws
-    this.setup = options.setup ?? emptyFunction
-    this.teardown = options.teardown ?? emptyFunction
+    this.opts = {
+      ...{
+        iterations: defaultMinimumIterations,
+        now,
+        setup: emptyFunction,
+        signal: undefined,
+        teardown: emptyFunction,
+        throws: false,
+        time: defaultMinimumTime,
+        warmup: true,
+        warmupIterations: defaultMinimumWarmupIterations,
+        warmupTime: defaultMinimumWarmupTime,
+      },
+      ...options,
+    }
 
-    if (this.signal) {
-      this.signal.addEventListener(
+    if (this.opts.signal) {
+      this.opts.signal.addEventListener(
         'abort',
         () => {
           this.dispatchEvent(createBenchEvent('abort'))
@@ -131,11 +121,11 @@ export class Bench extends EventTarget {
    * add a benchmark task to the task map
    * @param name - the task name
    * @param fn - the task function
-   * @param opts - the task options
+   * @param fnOpts - the task function options
    * @returns the Bench instance
    */
-  add (name: string, fn: Fn, opts: FnOptions = {}): this {
-    const task = new Task(this, name, fn, opts)
+  add (name: string, fn: Fn, fnOpts: FnOptions = {}): this {
+    const task = new Task(this, name, fn, fnOpts)
     this._tasks.set(name, task)
     this.dispatchEvent(createBenchEvent('add', task))
     return this
@@ -195,7 +185,7 @@ export class Bench extends EventTarget {
    * @returns the tasks array
    */
   async run (): Promise<Task[]> {
-    if (this.warmup) {
+    if (this.opts.warmup) {
       await this.warmupTasks()
     }
     let values: Task[] = []

@@ -76,7 +76,6 @@ export class Bench extends EventTarget {
         iterations: defaultMinimumIterations,
         now,
         setup: emptyFunction,
-        signal: undefined,
         teardown: emptyFunction,
         throws: false,
         time: defaultMinimumTime,

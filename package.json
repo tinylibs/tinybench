@@ -47,6 +47,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@cspell/eslint-plugin": "^8.16.0",
     "@eslint/js": "^9.14.0",
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",

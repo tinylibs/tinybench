@@ -1,4 +1,5 @@
 // Portions copyright evanwashere. 2024. All Rights Reserved.
+// eslint-disable-next-line @cspell/spellchecker
 // Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
 
 import type { Fn, Statistics } from './types'
@@ -66,7 +67,7 @@ const isSpiderMonkey =
 const isJsc =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   !!(globalThis as any).$ &&
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @cspell/spellchecker
   'IsHTMLDDA' in (globalThis as any).$
 const isBrowser =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access

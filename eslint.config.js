@@ -54,6 +54,7 @@ export default [
   ),
   perfectionist.configs['recommended-natural'],
   ...neostandard({
+    noJsx: true,
     ts: true,
   }),
 ]

@@ -48,7 +48,7 @@ export class Bench extends EventTarget {
   /**
    * The options.
    */
-  readonly opts: BenchOptions
+  readonly opts: Readonly<BenchOptions>
 
   /**
    * The JavaScript runtime environment.

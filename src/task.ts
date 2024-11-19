@@ -37,7 +37,7 @@ export class Task extends EventTarget {
   /**
    * The task function options
    */
-  private readonly fnOpts: FnOptions
+  private readonly fnOpts: Readonly<FnOptions>
 
   /**
    * The task name

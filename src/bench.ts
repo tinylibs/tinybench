@@ -212,8 +212,8 @@ export class Bench extends EventTarget {
   ): (null | Record<string, number | string | undefined>)[] {
     return this.tasks.map(task => {
       if (task.result) {
+        /* eslint-disable perfectionist/sort-objects */
         return task.result.error
-          /* eslint-disable perfectionist/sort-objects */
           ? {
               'Task name': task.name,
               Error: task.result.error.message,
@@ -229,7 +229,7 @@ export class Bench extends EventTarget {
               'Throughput median (ops/s)': `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
               Samples: task.result.latency.samples.length,
             })
-            /* eslint-enable perfectionist/sort-objects */
+        /* eslint-enable perfectionist/sort-objects */
       }
       return null
     })

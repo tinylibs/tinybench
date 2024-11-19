@@ -49,10 +49,11 @@ test('bench table', async () => {
   await bench.run()
 
   expect(bench.table()).toStrictEqual([
+    /* eslint-disable perfectionist/sort-objects */
     {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Task name': expect.any(String),
-      // eslint-disable-next-line perfectionist/sort-objects, @typescript-eslint/no-unsafe-assignment
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Latency average (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Latency median (ns)': expect.any(String),
@@ -60,9 +61,10 @@ test('bench table', async () => {
       'Throughput average (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Throughput median (ops/s)': expect.any(String),
-      // eslint-disable-next-line perfectionist/sort-objects, @typescript-eslint/no-unsafe-assignment
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Samples: expect.any(Number),
     },
+    /* eslint-enable perfectionist/sort-objects */
   ])
 
   bench.remove('foo').add('bar', () => {
@@ -72,14 +74,16 @@ test('bench table', async () => {
   await bench.run()
 
   expect(bench.table()).toStrictEqual([
+    /* eslint-disable perfectionist/sort-objects */
     {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Task name': expect.any(String),
-      // eslint-disable-next-line perfectionist/sort-objects, @typescript-eslint/no-unsafe-assignment
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Error: expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Stack: expect.any(String),
     },
+    /* eslint-enable perfectionist/sort-objects */
   ])
 })
 

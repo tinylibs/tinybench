@@ -1,6 +1,112 @@
 import type { Task } from '../src/task'
 import type { JSRuntime } from './utils'
 
+export type AddEventListenerOptionsArgument = Parameters<
+  typeof EventTarget.prototype.addEventListener
+>[2]
+
+/**
+ * bench event
+ */
+export type BenchEvent = Event & { error?: Error; task?: Task }
+
+/**
+ * Bench events
+ */
+export type BenchEvents =
+  | 'abort' // when a signal aborts
+  | 'add' // when a task gets added to the Bench instance
+  | 'complete' // when running a benchmark finishes
+  | 'cycle' // when running each benchmark task gets done
+  | 'error' // when the benchmark task throws
+  | 'remove' // when a task gets removed of the Bench instance
+  | 'reset' // when the reset method gets called
+  | 'start' // when running the benchmarks gets started
+  | 'warmup' // when the benchmarks start getting warmed up
+
+export interface BenchEventsMap {
+  abort: EventListener
+  add: EventListener
+  complete: EventListener
+  cycle: EventListener
+  error: EventListener
+  remove: EventListener
+  reset: EventListener
+  start: EventListener
+  warmup: EventListener
+}
+
+/**
+ * Both the `Task` and `Bench` objects extend the `EventTarget` object.
+ * So you can attach a listeners to different types of events to each class instance
+ * using the universal `addEventListener` and `removeEventListener` methods.
+ */
+
+/**
+ * bench options
+ */
+export interface BenchOptions {
+  /**
+   * number of times that a task should run if even the time option is finished @default 64
+   */
+  iterations?: number
+
+  /**
+   * benchmark name
+   */
+  name?: string
+
+  /**
+   * function to get the current timestamp in milliseconds
+   */
+  now?: () => number
+
+  /**
+   * setup function to run before each benchmark task (cycle)
+   */
+  setup?: Hook
+
+  /**
+   * An AbortSignal for aborting the benchmark
+   */
+  signal?: AbortSignal
+
+  /**
+   * teardown function to run after each benchmark task (cycle)
+   */
+  teardown?: Hook
+
+  /**
+   * Throws if a task fails @default false
+   */
+  throws?: boolean
+
+  /**
+   * time needed for running a benchmark task (milliseconds) @default 1000
+   */
+  time?: number
+
+  /**
+   * warmup benchmark @default true
+   */
+  warmup?: boolean
+
+  /**
+   * warmup iterations @default 16
+   */
+  warmupIterations?: number
+
+  /**
+   * warmup time (milliseconds) @default 250
+   */
+  warmupTime?: number
+}
+
+/**
+ * event listener
+ */
+export type EventListener = (evt: BenchEvent) => void
+
 /**
  * the task function
  */
@@ -31,6 +137,13 @@ export interface FnOptions {
    */
   beforeEach?: (this: Task) => Promise<void> | void
 }
+
+export type Hook = (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+
+// @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
+export type RemoveEventListenerOptionsArgument = Parameters<
+  typeof EventTarget.prototype.removeEventListener
+>[2]
 
 /**
  * the statistics object
@@ -127,6 +240,27 @@ export interface Statistics {
   variance: number
 }
 
+/**
+ * task events
+ */
+export type TaskEvents =
+  | 'abort'
+  | 'complete'
+  | 'cycle'
+  | 'error'
+  | 'reset'
+  | 'start'
+  | 'warmup'
+
+export interface TaskEventsMap {
+  abort: EventListener
+  complete: EventListener
+  cycle: EventListener
+  error: EventListener
+  reset: EventListener
+  start: EventListener
+  warmup: EventListener
+}
 /**
  * the task result object
  */
@@ -262,137 +396,3 @@ export interface TaskResult {
    */
   variance: number
 }
-
-/**
- * Both the `Task` and `Bench` objects extend the `EventTarget` object.
- * So you can attach a listeners to different types of events to each class instance
- * using the universal `addEventListener` and `removeEventListener` methods.
- */
-
-/**
- * Bench events
- */
-export type BenchEvents =
-  | 'abort' // when a signal aborts
-  | 'add' // when a task gets added to the Bench instance
-  | 'complete' // when running a benchmark finishes
-  | 'cycle' // when running each benchmark task gets done
-  | 'error' // when the benchmark task throws
-  | 'remove' // when a task gets removed of the Bench instance
-  | 'reset' // when the reset method gets called
-  | 'start' // when running the benchmarks gets started
-  | 'warmup' // when the benchmarks start getting warmed up
-
-export type Hook = (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
-
-/**
- * bench event
- */
-export type BenchEvent = { error?: Error; task?: Task } & Event
-
-/**
- * event listener
- */
-export type EventListener = (evt: BenchEvent) => void
-
-export interface BenchEventsMap {
-  abort: EventListener
-  add: EventListener
-  complete: EventListener
-  cycle: EventListener
-  error: EventListener
-  remove: EventListener
-  reset: EventListener
-  start: EventListener
-  warmup: EventListener
-}
-
-/**
- * task events
- */
-export type TaskEvents =
-  | 'abort'
-  | 'complete'
-  | 'cycle'
-  | 'error'
-  | 'reset'
-  | 'start'
-  | 'warmup'
-
-export interface TaskEventsMap {
-  abort: EventListener
-  complete: EventListener
-  cycle: EventListener
-  error: EventListener
-  reset: EventListener
-  start: EventListener
-  warmup: EventListener
-}
-
-/**
- * bench options
- */
-export interface BenchOptions {
-  /**
-   * number of times that a task should run if even the time option is finished @default 64
-   */
-  iterations?: number
-
-  /**
-   * benchmark name
-   */
-  name?: string
-
-  /**
-   * function to get the current timestamp in milliseconds
-   */
-  now?: () => number
-
-  /**
-   * setup function to run before each benchmark task (cycle)
-   */
-  setup?: Hook
-
-  /**
-   * An AbortSignal for aborting the benchmark
-   */
-  signal?: AbortSignal
-
-  /**
-   * teardown function to run after each benchmark task (cycle)
-   */
-  teardown?: Hook
-
-  /**
-   * Throws if a task fails @default false
-   */
-  throws?: boolean
-
-  /**
-   * time needed for running a benchmark task (milliseconds) @default 1000
-   */
-  time?: number
-
-  /**
-   * warmup benchmark @default true
-   */
-  warmup?: boolean
-
-  /**
-   * warmup iterations @default 16
-   */
-  warmupIterations?: number
-
-  /**
-   * warmup time (milliseconds) @default 250
-   */
-  warmupTime?: number
-}
-
-// @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
-export type RemoveEventListenerOptionsArgument = Parameters<
-  typeof EventTarget.prototype.removeEventListener
->[2]
-export type AddEventListenerOptionsArgument = Parameters<
-  typeof EventTarget.prototype.addEventListener
->[2]

@@ -20,6 +20,21 @@ import { getStatisticsSorted, isFnAsyncResource } from './utils'
  */
 export class Task extends EventTarget {
   /**
+   * The task name
+   */
+  readonly name: string
+
+  /**
+   * The result object
+   */
+  result: Readonly<TaskResult> | undefined
+
+  /**
+   * The number of times the task function has been executed
+   */
+  runs = 0
+
+  /**
    * The task synchronous status
    */
   private readonly async: boolean
@@ -39,21 +54,6 @@ export class Task extends EventTarget {
    */
   private readonly fnOpts: Readonly<FnOptions>
 
-  /**
-   * The task name
-   */
-  readonly name: string
-
-  /**
-   * The result object
-   */
-  result: Readonly<TaskResult> | undefined
-
-  /**
-   * The number of times the task function has been executed
-   */
-  runs = 0
-
   constructor (bench: Bench, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
     this.bench = bench
@@ -62,94 +62,6 @@ export class Task extends EventTarget {
     this.fnOpts = fnOpts
     this.async = isFnAsyncResource(fn)
     // TODO: support signal in Tasks
-  }
-
-  private async benchmark (
-    time: number,
-    iterations: number
-  ): Promise<{ error?: unknown; samples?: number[] }> {
-    if (this.fnOpts.beforeAll != null) {
-      try {
-        await this.fnOpts.beforeAll.call(this)
-      } catch (error) {
-        return { error }
-      }
-    }
-
-    // TODO: factor out
-    let totalTime = 0 // ms
-    const samples: number[] = []
-    const benchmarkTask = async () => {
-      if (this.fnOpts.beforeEach != null) {
-        await this.fnOpts.beforeEach.call(this)
-      }
-
-      let taskTime = 0 // ms;
-      if (this.async) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const taskStart = this.bench.opts.now!()
-        // eslint-disable-next-line no-useless-call
-        await this.fn.call(this)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        taskTime = this.bench.opts.now!() - taskStart
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const taskStart = this.bench.opts.now!()
-        // eslint-disable-next-line no-useless-call
-        this.fn.call(this)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        taskTime = this.bench.opts.now!() - taskStart
-      }
-
-      samples.push(taskTime)
-      totalTime += taskTime
-
-      if (this.fnOpts.afterEach != null) {
-        await this.fnOpts.afterEach.call(this)
-      }
-    }
-
-    try {
-      const limit = pLimit(this.bench.threshold) // only for task level concurrency
-      const promises: Promise<void>[] = [] // only for task level concurrency
-      while (
-        // eslint-disable-next-line no-unmodified-loop-condition
-        (totalTime < time ||
-          samples.length + limit.activeCount + limit.pendingCount < iterations) &&
-        !this.bench.opts.signal?.aborted
-      ) {
-        if (this.bench.concurrency === 'task') {
-          promises.push(limit(benchmarkTask))
-        } else {
-          await benchmarkTask()
-        }
-      }
-      if (!this.bench.opts.signal?.aborted && promises.length > 0) {
-        await Promise.all(promises)
-      }
-    } catch (error) {
-      return { error }
-    }
-
-    if (this.fnOpts.afterAll != null) {
-      try {
-        await this.fnOpts.afterAll.call(this)
-      } catch (error) {
-        return { error }
-      }
-    }
-    return { samples }
-  }
-
-  /**
-   * merge into the result object values
-   * @param result - the task result object to merge with the current result object values
-   */
-  private mergeTaskResult (result: Partial<TaskResult>): void {
-    this.result = Object.freeze({
-      ...this.result,
-      ...result,
-    }) as Readonly<TaskResult>
   }
 
   addEventListener<K extends TaskEvents>(
@@ -287,5 +199,93 @@ export class Task extends EventTarget {
         throw error
       }
     }
+  }
+
+  private async benchmark (
+    time: number,
+    iterations: number
+  ): Promise<{ error?: unknown; samples?: number[] }> {
+    if (this.fnOpts.beforeAll != null) {
+      try {
+        await this.fnOpts.beforeAll.call(this)
+      } catch (error) {
+        return { error }
+      }
+    }
+
+    // TODO: factor out
+    let totalTime = 0 // ms
+    const samples: number[] = []
+    const benchmarkTask = async () => {
+      if (this.fnOpts.beforeEach != null) {
+        await this.fnOpts.beforeEach.call(this)
+      }
+
+      let taskTime = 0 // ms;
+      if (this.async) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const taskStart = this.bench.opts.now!()
+        // eslint-disable-next-line no-useless-call
+        await this.fn.call(this)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        taskTime = this.bench.opts.now!() - taskStart
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const taskStart = this.bench.opts.now!()
+        // eslint-disable-next-line no-useless-call
+        this.fn.call(this)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        taskTime = this.bench.opts.now!() - taskStart
+      }
+
+      samples.push(taskTime)
+      totalTime += taskTime
+
+      if (this.fnOpts.afterEach != null) {
+        await this.fnOpts.afterEach.call(this)
+      }
+    }
+
+    try {
+      const limit = pLimit(this.bench.threshold) // only for task level concurrency
+      const promises: Promise<void>[] = [] // only for task level concurrency
+      while (
+        // eslint-disable-next-line no-unmodified-loop-condition
+        (totalTime < time ||
+          samples.length + limit.activeCount + limit.pendingCount < iterations) &&
+        !this.bench.opts.signal?.aborted
+      ) {
+        if (this.bench.concurrency === 'task') {
+          promises.push(limit(benchmarkTask))
+        } else {
+          await benchmarkTask()
+        }
+      }
+      if (!this.bench.opts.signal?.aborted && promises.length > 0) {
+        await Promise.all(promises)
+      }
+    } catch (error) {
+      return { error }
+    }
+
+    if (this.fnOpts.afterAll != null) {
+      try {
+        await this.fnOpts.afterAll.call(this)
+      } catch (error) {
+        return { error }
+      }
+    }
+    return { samples }
+  }
+
+  /**
+   * merge into the result object values
+   * @param result - the task result object to merge with the current result object values
+   */
+  private mergeTaskResult (result: Partial<TaskResult>): void {
+    this.result = Object.freeze({
+      ...this.result,
+      ...result,
+    }) as Readonly<TaskResult>
   }
 }

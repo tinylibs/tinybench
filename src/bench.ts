@@ -27,11 +27,6 @@ import { type JSRuntime, mToNs, now, runtime, runtimeVersion } from './utils'
  */
 export class Bench extends EventTarget {
   /**
-   * the task map
-   */
-  private readonly _tasks = new Map<string, Task>()
-
-  /**
    * Executes tasks concurrently based on the specified concurrency mode.
    *
    * - When `mode` is set to `null` (default), concurrency is disabled.
@@ -65,6 +60,27 @@ export class Bench extends EventTarget {
    */
   threshold = Number.POSITIVE_INFINITY
 
+  /**
+   * tasks results as an array
+   * @returns the tasks results as an array
+   */
+  get results (): (Readonly<TaskResult> | undefined)[] {
+    return [...this._tasks.values()].map(task => task.result)
+  }
+
+  /**
+   * tasks as an array
+   * @returns the tasks as an array
+   */
+  get tasks (): Task[] {
+    return [...this._tasks.values()]
+  }
+
+  /**
+   * the task map
+   */
+  private readonly _tasks = new Map<string, Task>()
+
   constructor (options: BenchOptions = {}) {
     super()
     this.name = options.name
@@ -94,25 +110,6 @@ export class Bench extends EventTarget {
         },
         { once: true }
       )
-    }
-  }
-
-  /**
-   * warmup the benchmark tasks.
-   */
-  private async warmupTasks (): Promise<void> {
-    this.dispatchEvent(createBenchEvent('warmup'))
-    if (this.concurrency === 'bench') {
-      const limit = pLimit(this.threshold)
-      const promises: Promise<void>[] = []
-      for (const task of this._tasks.values()) {
-        promises.push(limit(task.warmup.bind(task)))
-      }
-      await Promise.all(promises)
-    } else {
-      for (const task of this._tasks.values()) {
-        await task.warmup()
-      }
     }
   }
 
@@ -216,42 +213,44 @@ export class Bench extends EventTarget {
     return this.tasks.map(task => {
       if (task.result) {
         return task.result.error
+          /* eslint-disable perfectionist/sort-objects */
           ? {
               'Task name': task.name,
-              // eslint-disable-next-line perfectionist/sort-objects
               Error: task.result.error.message,
               Stack: task.result.error.stack,
             }
           : (convert?.(task) ?? {
               'Task name': task.name,
-              // eslint-disable-next-line perfectionist/sort-objects
               'Latency average (ns)': `${mToNs(task.result.latency.mean).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               'Latency median (ns)': `${mToNs(task.result.latency.p50!).toFixed(2)}${Number.parseFloat(mToNs(task.result.latency.mad!).toFixed(2)) > 0 ? ` \xb1 ${mToNs(task.result.latency.mad!).toFixed(2)}` : ''}`,
               'Throughput average (ops/s)': `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               'Throughput median (ops/s)': `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
-              // eslint-disable-next-line perfectionist/sort-objects
               Samples: task.result.latency.samples.length,
             })
+            /* eslint-enable perfectionist/sort-objects */
       }
       return null
     })
   }
 
   /**
-   * tasks results as an array
-   * @returns the tasks results as an array
+   * warmup the benchmark tasks.
    */
-  get results (): (Readonly<TaskResult> | undefined)[] {
-    return [...this._tasks.values()].map(task => task.result)
-  }
-
-  /**
-   * tasks as an array
-   * @returns the tasks as an array
-   */
-  get tasks (): Task[] {
-    return [...this._tasks.values()]
+  private async warmupTasks (): Promise<void> {
+    this.dispatchEvent(createBenchEvent('warmup'))
+    if (this.concurrency === 'bench') {
+      const limit = pLimit(this.threshold)
+      const promises: Promise<void>[] = []
+      for (const task of this._tasks.values()) {
+        promises.push(limit(task.warmup.bind(task)))
+      }
+      await Promise.all(promises)
+    } else {
+      for (const task of this._tasks.values()) {
+        await task.warmup()
+      }
+    }
   }
 }

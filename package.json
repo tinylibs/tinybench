@@ -59,7 +59,7 @@
     "eslint-plugin-jsdoc": "^50.5.0",
     "eslint-plugin-perfectionist": "^4.0.3",
     "nano-staged": "^0.8.0",
-    "neostandard": "^0.11.8",
+    "neostandard": "^0.11.9",
     "p-limit": "^6.1.0",
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",

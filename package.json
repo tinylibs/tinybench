@@ -47,7 +47,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.6.0",
-    "@cspell/eslint-plugin": "^8.16.0",
+    "@cspell/eslint-plugin": "^8.16.1",
     "@eslint/js": "^9.15.0",
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",
@@ -64,7 +64,7 @@
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",
     "tsup": "^8.3.5",
-    "typedoc": "^0.26.11",
+    "typedoc": "^0.27.0",
     "typescript": "~5.7.2",
     "vitest": "^2.1.6"
   },

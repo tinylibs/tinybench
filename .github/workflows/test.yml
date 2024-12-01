@@ -1,4 +1,4 @@
-name: Test
+name: QA
 on:
   push:
     branches: [main]
@@ -8,16 +8,20 @@ on:
     branches: [main]
 
 jobs:
-  short:
-    runs-on: ubuntu-latest
+  qa:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
         node-version:
           - 18
           - 20
           - 22
           - latest
-    name: Node.js ${{ matrix.node-version }} Quick
+    name: Node.js ${{ matrix.node-version }} QA on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 

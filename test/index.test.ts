@@ -298,7 +298,7 @@ test.each(['warmup', 'run'])('%s throws', async mode => {
   expect(task?.result?.error).toStrictEqual(error)
 })
 
-test('detect faster task', async () => {
+test('detect faster task', { skip: platform() !== 'linux' }, async () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench
     .add('faster', async () => {

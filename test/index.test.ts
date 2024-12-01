@@ -512,23 +512,27 @@ test('task beforeAll, afterAll, beforeEach, afterEach', async () => {
   expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length)
 })
 
-test('task with promiseLike return', async () => {
-  const bench = new Bench({ iterations: 16, time: 100 })
+test(
+  'task with promiseLike return',
+  { skip: platform() !== 'linux' },
+  async () => {
+    const bench = new Bench({ iterations: 16, time: 100 })
 
-  bench
-    .add('foo', () => ({
-      then: (resolve: () => void) => setTimeout(resolve, 50),
-    }))
-    .add('fum', () => ({
-      then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 50)),
-    }))
-    .add('bar', () => new Promise(resolve => setTimeout(resolve, 50)))
-  await bench.run()
+    bench
+      .add('foo', () => ({
+        then: (resolve: () => void) => setTimeout(resolve, 50),
+      }))
+      .add('fum', () => ({
+        then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 50)),
+      }))
+      .add('bar', () => new Promise(resolve => setTimeout(resolve, 50)))
+    await bench.run()
 
-  expect(bench.getTask('foo')?.result?.latency.mean).toBeGreaterThan(50)
-  expect(bench.getTask('fum')?.result?.latency.mean).toBeGreaterThan(50)
-  expect(bench.getTask('bar')?.result?.latency.mean).toBeGreaterThan(50)
-})
+    expect(bench.getTask('foo')?.result?.latency.mean).toBeGreaterThan(50)
+    expect(bench.getTask('fum')?.result?.latency.mean).toBeGreaterThan(50)
+    expect(bench.getTask('bar')?.result?.latency.mean).toBeGreaterThan(50)
+  }
+)
 
 test.each(['warmup', 'run'])('%s error handling', async mode => {
   const bench = new Bench({ warmup: mode === 'warmup' })

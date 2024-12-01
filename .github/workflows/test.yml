@@ -16,6 +16,7 @@ jobs:
           - 18
           - 20
           - 22
+          - latest
     name: Node.js ${{ matrix.node-version }} Quick
     steps:
       - uses: actions/checkout@v4
@@ -41,11 +42,11 @@ jobs:
         run: pnpm build
 
       - name: Type check
-        if: matrix.node-version == 20
+        if: matrix.node-version == 22
         run: pnpm typecheck
 
       - name: Lint
-        if: matrix.node-version == 20
+        if: matrix.node-version == 22
         run: pnpm lint
 
       - name: Run unit tests

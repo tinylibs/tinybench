@@ -41,6 +41,18 @@ test.each([
   ).toBeCloseTo(1000, 1)
 })
 
+test('cannot add duplicate task', () => {
+  const bench = new Bench()
+  bench.add('foo', () => {
+    /* noop */
+  })
+  expect(() =>
+    bench.add('foo', () => {
+      /* noop */
+    })
+  ).toThrowError('Task "foo" already exists')
+})
+
 test('bench table', async () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench.add('foo', async () => {

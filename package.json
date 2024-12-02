@@ -48,14 +48,14 @@
     "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.6.0",
     "@cspell/eslint-plugin": "^8.16.1",
-    "@eslint/js": "^9.15.0",
+    "@eslint/js": "^9.16.0",
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",
     "@types/node": "^22.10.1",
     "bumpp": "^9.8.1",
     "changelogithub": "^0.13.11",
     "clean-publish": "^5.1.0",
-    "eslint": "^9.15.0",
+    "eslint": "^9.16.0",
     "eslint-plugin-jsdoc": "^50.6.0",
     "eslint-plugin-perfectionist": "^4.1.2",
     "nano-staged": "^0.8.0",
@@ -64,9 +64,9 @@
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",
     "tsup": "^8.3.5",
-    "typedoc": "^0.27.1",
+    "typedoc": "^0.27.2",
     "typescript": "~5.7.2",
-    "vitest": "^2.1.6"
+    "vitest": "^2.1.7"
   },
   "keywords": [
     "benchmark",

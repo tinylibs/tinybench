@@ -119,11 +119,16 @@ export class Bench extends EventTarget {
    * @param fn - the task function
    * @param fnOpts - the task function options
    * @returns the Bench instance
+   * @throws if the task already exists
    */
   add (name: string, fn: Fn, fnOpts: FnOptions = {}): this {
-    const task = new Task(this, name, fn, fnOpts)
-    this._tasks.set(name, task)
-    this.dispatchEvent(createBenchEvent('add', task))
+    if (!this._tasks.has(name)) {
+      const task = new Task(this, name, fn, fnOpts)
+      this._tasks.set(name, task)
+      this.dispatchEvent(createBenchEvent('add', task))
+    } else {
+      throw new Error(`Task "${name}" already exists`)
+    }
     return this
   }
 

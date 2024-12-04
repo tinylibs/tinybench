@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@9.14.4",
   "volta": {
-    "node": "22.11.0",
+    "node": "22.12.0",
     "pnpm": "9.14.4"
   },
   "engines": {

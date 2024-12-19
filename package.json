@@ -60,7 +60,7 @@
     "eslint-plugin-perfectionist": "^4.3.0",
     "nano-staged": "^0.8.0",
     "neostandard": "^0.12.0",
-    "p-limit": "^6.1.0",
+    "p-limit": "^6.2.0",
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",
     "tsup": "^8.3.5",

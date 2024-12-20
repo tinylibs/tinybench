@@ -57,7 +57,7 @@
     "clean-publish": "^5.1.0",
     "eslint": "^9.17.0",
     "eslint-plugin-jsdoc": "^50.6.1",
-    "eslint-plugin-perfectionist": "^4.3.0",
+    "eslint-plugin-perfectionist": "^4.4.0",
     "nano-staged": "^0.8.0",
     "neostandard": "^0.12.0",
     "p-limit": "^6.2.0",

@@ -2,10 +2,10 @@
   "name": "tinybench",
   "version": "3.0.7",
   "type": "module",
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@9.15.1",
   "volta": {
     "node": "22.12.0",
-    "pnpm": "9.15.0"
+    "pnpm": "9.15.1"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -57,10 +57,10 @@
     "clean-publish": "^5.1.0",
     "eslint": "^9.17.0",
     "eslint-plugin-jsdoc": "^50.6.1",
-    "eslint-plugin-perfectionist": "^4.3.0",
+    "eslint-plugin-perfectionist": "^4.4.0",
     "nano-staged": "^0.8.0",
     "neostandard": "^0.12.0",
-    "p-limit": "^6.1.0",
+    "p-limit": "^6.2.0",
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",
     "tsup": "^8.3.5",

@@ -20,7 +20,7 @@ import {
 } from './constants'
 import { createBenchEvent } from './event'
 import { Task } from './task'
-import { type JSRuntime, mToNs, now, runtime, runtimeVersion } from './utils'
+import { invariant, type JSRuntime, mToNs, now, runtime, runtimeVersion } from './utils'
 
 /**
  * The Bench class keeps track of the benchmark tasks and controls them.
@@ -207,6 +207,20 @@ export class Bench extends EventTarget {
     return values
   }
 
+  runSync (): Task[] {
+    invariant(this.concurrency === null, 'Cannot use `concurrency` option when using `runSync`')
+    if (this.opts.warmup) {
+      this.warmupTasksSync()
+    }
+    const values: Task[] = []
+    this.dispatchEvent(createBenchEvent('start'))
+    for (const task of this._tasks.values()) {
+      values.push(task.runSync())
+    }
+    this.dispatchEvent(createBenchEvent('complete'))
+    return values
+  }
+
   /**
    * table of the tasks results
    * @param convert - an optional callback to convert the task result to a table record
@@ -256,6 +270,16 @@ export class Bench extends EventTarget {
       for (const task of this._tasks.values()) {
         await task.warmup()
       }
+    }
+  }
+
+  /**
+   * warmup the benchmark tasks (sync version)
+   */
+  private warmupTasksSync (): void {
+    this.dispatchEvent(createBenchEvent('warmup'))
+    for (const task of this._tasks.values()) {
+      task.warmupSync()
     }
   }
 }

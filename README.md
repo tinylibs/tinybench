@@ -1,7 +1,8 @@
 # Tinybench 🔎
 
 [![CI](https://github.com/tinylibs/tinybench/actions/workflows/qa.yml/badge.svg?branch=main)](https://github.com/tinylibs/tinybench/actions/workflows/qa.yml)
-[![NPM version](https://img.shields.io/npm/v/tinybench.svg?style=flat)](https://www.npmjs.com/package/tinybench)
+[![NPM version](https://badgen.net/npm/v/tinybench?icon=npm)](https://www.npmjs.com/package/tinybench)
+[![Discord](https://badgen.net/discord/online-members/c3UUYNcHrU?icon=discord&label=discord&color=green)](https://discord.gg/c3UUYNcHrU)
 [![neostandard Javascript Code Style](<https://badgen.net/static/code style/neostandard/green>)](https://github.com/neostandard/neostandard)
 
 Benchmark your code easily with Tinybench, a simple, tiny and light-weight `10KB` (`2KB` minified and gzipped) benchmarking library!

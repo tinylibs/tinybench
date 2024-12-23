@@ -158,7 +158,7 @@ export const now = performanceNow
  * @param maybePromiseLike - the value to check
  * @returns true if the value is a promise-like object
  */
-const isPromiseLike = <T>(
+export const isPromiseLike = <T>(
   maybePromiseLike: unknown
 ): maybePromiseLike is PromiseLike<T> =>
     maybePromiseLike !== null &&
@@ -333,5 +333,11 @@ export const getStatisticsSorted = (samples: number[]): Statistics => {
     sd,
     sem,
     variance: vr,
+  }
+}
+
+export const invariant = (condition: boolean, message: string): void => {
+  if (!condition) {
+    throw new Error(message)
   }
 }

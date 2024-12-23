@@ -20,7 +20,14 @@ import {
 } from './constants'
 import { createBenchEvent } from './event'
 import { Task } from './task'
-import { invariant, type JSRuntime, mToNs, now, runtime, runtimeVersion } from './utils'
+import {
+  invariant,
+  type JSRuntime,
+  mToNs,
+  now,
+  runtime,
+  runtimeVersion,
+} from './utils'
 
 /**
  * The Bench class keeps track of the benchmark tasks and controls them.
@@ -208,7 +215,10 @@ export class Bench extends EventTarget {
   }
 
   runSync (): Task[] {
-    invariant(this.concurrency === null, 'Cannot use `concurrency` option when using `runSync`')
+    invariant(
+      this.concurrency === null,
+      'Cannot use `concurrency` option when using `runSync`'
+    )
     if (this.opts.warmup) {
       this.warmupTasksSync()
     }

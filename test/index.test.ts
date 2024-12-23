@@ -307,9 +307,11 @@ test('events order (async)', async () => {
     events.push('complete')
   })
 
-  bench.add('temporary', () => {
-    // noop
-  }).remove('temporary')
+  bench
+    .add('temporary', () => {
+      // noop
+    })
+    .remove('temporary')
 
   setTimeout(() => {
     controller.abort()
@@ -412,9 +414,11 @@ test('events order (sync)', () => {
     events.push('complete')
   })
 
-  bench.add('temporary', () => {
-    // noop
-  }).remove('temporary')
+  bench
+    .add('temporary', () => {
+      // noop
+    })
+    .remove('temporary')
 
   bench.runSync()
   bench.reset()
@@ -605,57 +609,61 @@ test.each(['warmup', 'run'])('%s throws (sync)', mode => {
   expect(task?.result?.error).toStrictEqual(error)
 })
 
-test('detect faster task (async)', { skip: platform() !== 'linux' }, async () => {
-  const bench = new Bench({ iterations: 32, time: 100 })
-  bench
-    .add('faster', async () => {
-      await new Promise(resolve => setTimeout(resolve, 0))
-    })
-    .add('slower', async () => {
-      await new Promise(resolve => setTimeout(resolve, 50))
-    })
+test(
+  'detect faster task (async)',
+  { skip: platform() !== 'linux' },
+  async () => {
+    const bench = new Bench({ iterations: 32, time: 100 })
+    bench
+      .add('faster', async () => {
+        await new Promise(resolve => setTimeout(resolve, 0))
+      })
+      .add('slower', async () => {
+        await new Promise(resolve => setTimeout(resolve, 50))
+      })
 
-  await bench.run()
+    await bench.run()
 
-  const fasterTask = bench.getTask('faster')
-  const slowerTask = bench.getTask('slower')
+    const fasterTask = bench.getTask('faster')
+    const slowerTask = bench.getTask('slower')
 
-  expect(fasterTask?.result?.latency.mean).toBeLessThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.latency.mean
-  )
-  expect(fasterTask?.result?.latency.min).toBeLessThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.latency.min
-  )
-  expect(fasterTask?.result?.latency.max).toBeLessThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.latency.max
-  )
-  // latency moe should be lesser since it's faster
-  expect(fasterTask?.result?.latency.moe).toBeLessThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.latency.moe
-  )
+    expect(fasterTask?.result?.latency.mean).toBeLessThan(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      slowerTask!.result!.latency.mean
+    )
+    expect(fasterTask?.result?.latency.min).toBeLessThan(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      slowerTask!.result!.latency.min
+    )
+    expect(fasterTask?.result?.latency.max).toBeLessThan(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      slowerTask!.result!.latency.max
+    )
+    // latency moe should be lesser since it's faster
+    expect(fasterTask?.result?.latency.moe).toBeLessThan(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      slowerTask!.result!.latency.moe
+    )
 
-  expect(fasterTask?.result?.throughput.mean).toBeGreaterThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.throughput.mean
-  )
-  expect(fasterTask?.result?.throughput.min).toBeGreaterThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.throughput.min
-  )
-  expect(fasterTask?.result?.throughput.max).toBeGreaterThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.throughput.max
-  )
-  // throughput moe should be greater since it's faster
-  expect(fasterTask?.result?.throughput.moe).toBeGreaterThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.throughput.moe
-  )
-})
+    expect(fasterTask?.result?.throughput.mean).toBeGreaterThan(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      slowerTask!.result!.throughput.mean
+    )
+    expect(fasterTask?.result?.throughput.min).toBeGreaterThan(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      slowerTask!.result!.throughput.min
+    )
+    expect(fasterTask?.result?.throughput.max).toBeGreaterThan(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      slowerTask!.result!.throughput.max
+    )
+    // throughput moe should be greater since it's faster
+    expect(fasterTask?.result?.throughput.moe).toBeGreaterThan(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      slowerTask!.result!.throughput.moe
+    )
+  }
+)
 
 test('detect faster task (sync)', { skip: platform() !== 'linux' }, () => {
   const bench = new Bench({ iterations: 32, time: 100 })
@@ -1055,71 +1063,95 @@ test(
   }
 )
 
-test(
-  'task with promiseLike return (sync)',
-  () => {
-    const bench = new Bench({ iterations: 16, time: 100 })
+test('task with promiseLike return (sync)', () => {
+  const bench = new Bench({ iterations: 16, time: 100 })
 
-    bench
-      .add('foo', async () => {
+  bench
+    .add('foo', async () => {
+      // noop
+    })
+    .add('fum', () => ({
+      then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 50)),
+    }))
+    .add('bar', () => new Promise(resolve => setTimeout(resolve, 50)))
+
+  bench.runSync()
+
+  expect(bench.getTask('foo')?.result?.error?.message).toStrictEqual(
+    'task function must be sync when using `runSync()`'
+  )
+  expect(bench.getTask('fum')?.result?.error?.message).toStrictEqual(
+    'task function must be sync when using `runSync()`'
+  )
+  expect(bench.getTask('bar')?.result?.error?.message).toStrictEqual(
+    'task function must be sync when using `runSync()`'
+  )
+})
+
+test('async hooks in sync tests', () => {
+  const bench = new Bench({ iterations: 16, time: 100 })
+
+  bench
+    .add(
+      'async-beforeAll',
+      () => {
         // noop
-      })
-      .add('fum', () => ({
-        then: (resolve: () => void) => Promise.resolve(setTimeout(resolve, 50)),
-      }))
-      .add('bar', () => new Promise(resolve => setTimeout(resolve, 50)))
-
-    bench.runSync()
-
-    expect(bench.getTask('foo')?.result?.error?.message).toStrictEqual('task function must be sync when using `runSync()`')
-    expect(bench.getTask('fum')?.result?.error?.message).toStrictEqual('task function must be sync when using `runSync()`')
-    expect(bench.getTask('bar')?.result?.error?.message).toStrictEqual('task function must be sync when using `runSync()`')
-  }
-)
-
-test(
-  'async hooks in sync tests',
-  () => {
-    const bench = new Bench({ iterations: 16, time: 100 })
-
-    bench
-      .add('async-beforeAll', () => {
-        // noop
-      }, {
+      },
+      {
         beforeAll: async () => {
           // noop
         },
-      })
-      .add('async-beforeEach', () => {
+      }
+    )
+    .add(
+      'async-beforeEach',
+      () => {
         // noop
-      }, {
+      },
+      {
         beforeEach: async () => {
           // noop
         },
-      })
-      .add('async-afterAll', () => {
+      }
+    )
+    .add(
+      'async-afterAll',
+      () => {
         // noop
-      }, {
+      },
+      {
         afterAll: async () => {
           // noop
         },
-      })
-      .add('async-afterEach', () => {
+      }
+    )
+    .add(
+      'async-afterEach',
+      () => {
         // noop
-      }, {
+      },
+      {
         afterEach: async () => {
           // noop
         },
-      })
+      }
+    )
 
-    bench.runSync()
+  bench.runSync()
 
-    expect(bench.getTask('async-beforeAll')?.result?.error?.message).toStrictEqual('`beforeAll` function must be sync when using `runSync()`')
-    expect(bench.getTask('async-beforeEach')?.result?.error?.message).toStrictEqual('`beforeEach` function must be sync when using `runSync()`')
-    expect(bench.getTask('async-afterAll')?.result?.error?.message).toStrictEqual('`afterAll` function must be sync when using `runSync()`')
-    expect(bench.getTask('async-afterEach')?.result?.error?.message).toStrictEqual('`afterEach` function must be sync when using `runSync()`')
-  }
-)
+  expect(
+    bench.getTask('async-beforeAll')?.result?.error?.message
+  ).toStrictEqual('`beforeAll` function must be sync when using `runSync()`')
+  expect(
+    bench.getTask('async-beforeEach')?.result?.error?.message
+  ).toStrictEqual('`beforeEach` function must be sync when using `runSync()`')
+  expect(bench.getTask('async-afterAll')?.result?.error?.message).toStrictEqual(
+    '`afterAll` function must be sync when using `runSync()`'
+  )
+  expect(
+    bench.getTask('async-afterEach')?.result?.error?.message
+  ).toStrictEqual('`afterEach` function must be sync when using `runSync()`')
+})
 
 test.each(['warmup', 'run'])('%s error handling (async)', async mode => {
   const bench = new Bench({ warmup: mode === 'warmup' })
@@ -1204,22 +1236,22 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
     .add('BA test', () => 1, {
       beforeAll: () => {
         throw BAerror
-      }
+      },
     })
     .add('BE test', () => 1, {
       beforeEach: () => {
         throw BEerror
-      }
+      },
     })
     .add('AE test', () => 1, {
       afterEach: () => {
         throw AEerror
-      }
+      },
     })
     .add('AA test', () => 1, {
       afterAll: () => {
         throw AAerror
-      }
+      },
     })
   bench.runSync()
 

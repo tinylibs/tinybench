@@ -12,7 +12,12 @@ import type {
 } from './types'
 
 import { createBenchEvent, createErrorEvent } from './event'
-import { getStatisticsSorted, invariant, isFnAsyncResource, isPromiseLike } from './utils'
+import {
+  getStatisticsSorted,
+  invariant,
+  isFnAsyncResource,
+  isPromiseLike,
+} from './utils'
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -124,21 +129,30 @@ export class Task extends EventTarget {
       return this
     }
 
-    invariant(this.bench.concurrency === null, 'Cannot use `concurrency` option when using `runSync`')
+    invariant(
+      this.bench.concurrency === null,
+      'Cannot use `concurrency` option when using `runSync`'
+    )
     this.dispatchEvent(createBenchEvent('start', this))
 
     const setupResult = this.bench.opts.setup?.(this, 'run')
-    invariant(!isPromiseLike(setupResult), '`setup` function must be sync when using `runSync()`')
+    invariant(
+      !isPromiseLike(setupResult),
+      '`setup` function must be sync when using `runSync()`'
+    )
 
-    const { error, samples: latencySamples } = (this.benchmarkSync(
+    const { error, samples: latencySamples } = this.benchmarkSync(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.bench.opts.time!,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.bench.opts.iterations!
-    )) as { error?: Error; samples?: number[] }
+    ) as { error?: Error; samples?: number[] }
 
     const teardownResult = this.bench.opts.teardown?.(this, 'run')
-    invariant(!isPromiseLike(teardownResult), '`teardown` function must be sync when using `runSync()`')
+    invariant(
+      !isPromiseLike(teardownResult),
+      '`teardown` function must be sync when using `runSync()`'
+    )
 
     this.processRunResult({ error, latencySamples })
 
@@ -178,17 +192,23 @@ export class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('warmup', this))
 
     const setupResult = this.bench.opts.setup?.(this, 'warmup')
-    invariant(!isPromiseLike(setupResult), '`setup` function must be sync when using `runSync()`')
+    invariant(
+      !isPromiseLike(setupResult),
+      '`setup` function must be sync when using `runSync()`'
+    )
 
-    const { error } = (this.benchmarkSync(
+    const { error } = this.benchmarkSync(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.bench.opts.warmupTime!,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.bench.opts.warmupIterations!
-    )) as { error?: Error }
+    ) as { error?: Error }
 
     const teardownResult = this.bench.opts.teardown?.(this, 'warmup')
-    invariant(!isPromiseLike(teardownResult), '`teardown` function must be sync when using `runSync()`')
+    invariant(
+      !isPromiseLike(teardownResult),
+      '`teardown` function must be sync when using `runSync()`'
+    )
 
     this.postWarmup(error)
   }
@@ -277,7 +297,10 @@ export class Task extends EventTarget {
     if (this.fnOpts.beforeAll != null) {
       try {
         const beforeAllResult = this.fnOpts.beforeAll.call(this)
-        invariant(!isPromiseLike(beforeAllResult), '`beforeAll` function must be sync when using `runSync()`')
+        invariant(
+          !isPromiseLike(beforeAllResult),
+          '`beforeAll` function must be sync when using `runSync()`'
+        )
       } catch (error) {
         return { error }
       }
@@ -289,7 +312,10 @@ export class Task extends EventTarget {
     const benchmarkTask = () => {
       if (this.fnOpts.beforeEach != null) {
         const beforeEachResult = this.fnOpts.beforeEach.call(this)
-        invariant(!isPromiseLike(beforeEachResult), '`beforeEach` function must be sync when using `runSync()`')
+        invariant(
+          !isPromiseLike(beforeEachResult),
+          '`beforeEach` function must be sync when using `runSync()`'
+        )
       }
 
       let taskTime = 0 // ms;
@@ -301,21 +327,29 @@ export class Task extends EventTarget {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskTime = this.bench.opts.now!() - taskStart
 
-      invariant(!isPromiseLike(result), 'task function must be sync when using `runSync()`')
+      invariant(
+        !isPromiseLike(result),
+        'task function must be sync when using `runSync()`'
+      )
 
       samples.push(taskTime)
       totalTime += taskTime
 
       if (this.fnOpts.afterEach != null) {
         const afterEachResult = this.fnOpts.afterEach.call(this)
-        invariant(!isPromiseLike(afterEachResult), '`afterEach` function must be sync when using `runSync()`')
+        invariant(
+          !isPromiseLike(afterEachResult),
+          '`afterEach` function must be sync when using `runSync()`'
+        )
       }
     }
 
     try {
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
-        (totalTime < time || samples.length < iterations)) {
+        totalTime < time ||
+        samples.length < iterations
+      ) {
         benchmarkTask()
       }
     } catch (error) {
@@ -325,7 +359,10 @@ export class Task extends EventTarget {
     if (this.fnOpts.afterAll != null) {
       try {
         const afterAllResult = this.fnOpts.afterAll.call(this)
-        invariant(!isPromiseLike(afterAllResult), '`afterAll` function must be sync when using `runSync()`')
+        invariant(
+          !isPromiseLike(afterAllResult),
+          '`afterAll` function must be sync when using `runSync()`'
+        )
       } catch (error) {
         return { error }
       }
@@ -355,7 +392,13 @@ export class Task extends EventTarget {
     }
   }
 
-  private processRunResult ({ error, latencySamples }: { error?: Error, latencySamples?: number[] }): void {
+  private processRunResult ({
+    error,
+    latencySamples,
+  }: {
+    error?: Error
+    latencySamples?: number[]
+  }): void {
     if (latencySamples) {
       this.runs = latencySamples.length
       const totalTime = latencySamples.reduce((a, b) => a + b, 0)

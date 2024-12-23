@@ -214,6 +214,10 @@ export class Bench extends EventTarget {
     return values
   }
 
+  /**
+   * run the added tasks that were registered using the {@link add} method (sync version)
+   * @returns the tasks array
+   */
   runSync (): Task[] {
     invariant(
       this.concurrency === null,

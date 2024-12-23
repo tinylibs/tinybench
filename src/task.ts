@@ -120,7 +120,7 @@ export class Task extends EventTarget {
   }
 
   /**
-   * run the current task and write the results in `Task.result` object property
+   * run the current task and write the results in `Task.result` object property (sync version)
    * @returns the current task
    * @internal
    */

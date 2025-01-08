@@ -30,8 +30,8 @@ importers:
         specifier: ^22.10.5
         version: 22.10.5
       bumpp:
-        specifier: ^9.9.2
-        version: 9.9.2
+        specifier: ^9.9.3
+        version: 9.9.3
       changelogithub:
         specifier: ^0.13.11
         version: 0.13.11
@@ -1337,8 +1337,8 @@ packages:
   buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
 
-  bumpp@9.9.2:
-    resolution: {integrity: sha512-ggRxRV1rWHEyWXnf55UqYzGvttS/Vpkl1zxcNdE5xoYMTHlSgRA0Td4nKn3ckCcMuC+MTgaGQrbKBeyr0V9+Hg==}
+  bumpp@9.9.3:
+    resolution: {integrity: sha512-fEX4zIuFuDLCFaQtBFaiNtlUgYbDjd9fUbJqlDfER7Wz+KUOkEXeDs5qScsHX+jKYvTgD5xdOA4ZYYMAo5rC9A==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -4660,7 +4660,7 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
-  bumpp@9.9.2:
+  bumpp@9.9.3:
     dependencies:
       c12: 2.0.1
       cac: 6.7.14

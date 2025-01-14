@@ -47,11 +47,11 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
-    "@cspell/eslint-plugin": "^8.17.1",
+    "@cspell/eslint-plugin": "^8.17.2",
     "@eslint/js": "^9.18.0",
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",
-    "@types/node": "^22.10.5",
+    "@types/node": "^22.10.6",
     "bumpp": "^9.10.0",
     "changelogithub": "^0.13.11",
     "clean-publish": "^5.1.0",

@@ -53,7 +53,7 @@
     "@size-limit/time": "^11.1.6",
     "@types/node": "^22.10.6",
     "bumpp": "^9.10.1",
-    "changelogithub": "^0.13.11",
+    "changelogithub": "^13.12.1",
     "clean-publish": "^5.1.0",
     "eslint": "^9.18.0",
     "eslint-plugin-jsdoc": "^50.6.1",

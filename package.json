@@ -57,7 +57,7 @@
     "clean-publish": "^5.1.0",
     "eslint": "^9.18.0",
     "eslint-plugin-jsdoc": "^50.6.2",
-    "eslint-plugin-perfectionist": "^4.6.0",
+    "eslint-plugin-perfectionist": "^4.7.0",
     "nano-staged": "^0.8.0",
     "neostandard": "^0.12.0",
     "p-limit": "^6.2.0",
@@ -66,7 +66,7 @@
     "tsup": "^8.3.5",
     "typedoc": "^0.27.6",
     "typescript": "~5.7.3",
-    "vitest": "^3.0.2"
+    "vitest": "^3.0.3"
   },
   "keywords": [
     "benchmark",

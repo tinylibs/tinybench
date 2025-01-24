@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@9.15.4",
   "volta": {
-    "node": "22.13.0",
+    "node": "22.13.1",
     "pnpm": "9.15.4"
   },
   "engines": {
@@ -51,7 +51,7 @@
     "@eslint/js": "^9.18.0",
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.10.10",
     "bumpp": "^9.10.2",
     "changelogithub": "^13.12.1",
     "clean-publish": "^5.1.0",
@@ -66,7 +66,7 @@
     "tsup": "^8.3.5",
     "typedoc": "^0.27.6",
     "typescript": "~5.7.3",
-    "vitest": "^3.0.3"
+    "vitest": "^3.0.4"
   },
   "keywords": [
     "benchmark",

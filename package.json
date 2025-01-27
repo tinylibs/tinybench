@@ -52,7 +52,7 @@
     "@size-limit/preset-small-lib": "^11.1.6",
     "@size-limit/time": "^11.1.6",
     "@types/node": "^22.10.10",
-    "bumpp": "^9.10.2",
+    "bumpp": "^10.0.1",
     "changelogithub": "^13.12.1",
     "clean-publish": "^5.1.0",
     "eslint": "^9.19.0",

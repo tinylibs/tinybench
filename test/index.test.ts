@@ -117,11 +117,11 @@ test('bench table (async)', async () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Latency average (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency median (ns)': expect.any(String),
+      'Latency median (ns)': expect.any(Number),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Throughput average (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput median (ops/s)': expect.any(String),
+      'Throughput median (ops/s)': expect.any(Number),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Samples: expect.any(Number),
     },
@@ -164,11 +164,11 @@ test('bench table (sync)', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Latency average (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency median (ns)': expect.any(String),
+      'Latency median (ns)': expect.any(Number),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Throughput average (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput median (ops/s)': expect.any(String),
+      'Throughput median (ops/s)': expect.any(Number),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Samples: expect.any(Number),
     },

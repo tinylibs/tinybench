@@ -21,6 +21,7 @@ import {
 import { createBenchEvent } from './event'
 import { Task } from './task'
 import {
+  formatNumber,
   invariant,
   type JSRuntime,
   mToNs,
@@ -254,12 +255,12 @@ export class Bench extends EventTarget {
             }
           : (convert?.(task) ?? {
               'Task name': task.name,
-              'Latency average (ns)': `${mToNs(task.result.latency.mean).toFixed(2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+              'Latency average (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              'Latency median (ns)': `${mToNs(task.result.latency.p50!).toFixed(2)}${Number.parseFloat(mToNs(task.result.latency.mad!).toFixed(2)) > 0 ? ` \xb1 ${mToNs(task.result.latency.mad!).toFixed(2)}` : ''}`,
+              'Latency median (ns)': +formatNumber(mToNs(task.result.latency.p50!), 5, 2),
               'Throughput average (ops/s)': `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              'Throughput median (ops/s)': `${task.result.throughput.p50!.toFixed(0)}${Number.parseInt(task.result.throughput.mad!.toFixed(0), 10) > 0 ? ` \xb1 ${task.result.throughput.mad!.toFixed(0)}` : ''}`,
+              'Throughput median (ops/s)': Math.round(task.result.throughput.p50!),
               Samples: task.result.latency.samples.length,
             })
         /* eslint-enable perfectionist/sort-objects */

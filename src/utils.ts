@@ -296,6 +296,15 @@ const quantileSorted = (samples: number[], q: number) => {
 const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5)
 
 /**
+ * Computes the median of a sample.
+ * @param samples - the sample
+ * @returns the median of the sample
+ */
+const median = (samples: number[]) => {
+  return medianSorted(samples.sort((a, b) => a - b))
+}
+
+/**
  * Computes the absolute deviation of a sample given an aggregation.
  * @param samples - the sample
  * @param aggFn - the aggregation function to use
@@ -339,7 +348,7 @@ export const getStatisticsSorted = (samples: number[]): Statistics => {
     aad: absoluteDeviation(samples, average, mean),
     critical,
     df,
-    mad: absoluteDeviation(samples, medianSorted, p50),
+    mad: absoluteDeviation(samples, median, p50),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     max: samples[df]!,
     mean,

@@ -1,6 +1,8 @@
 import { expect, test } from 'vitest'
 
+import { getStatisticsSorted } from '../src/utils'
 import { formatNumber } from '../src/utils'
+
 
 test('formatting integers', () => {
   expect(formatNumber(123456, 5, 2)).toBe('123456')
@@ -19,5 +21,11 @@ test('formatting floats', () => {
   expect(formatNumber(1234.56789, 5, 2)).toBe('1234.6')
   expect(formatNumber(123.456789, 5, 2)).toBe('123.46')
   expect(formatNumber(12.3456789, 5, 2)).toBe('12.35')
-  expect(formatNumber(-12.3456789, 5, 2)).toBe('-12.35')
+  expect(formatNumber(-12.3456789, 5, 2)).toBe('-12.35')    
+})  
+
+test('median absolute deviation', () => {
+  // https://www.wolframalpha.com/input?i=MedianDeviation[1,2,3]
+  const stats = getStatisticsSorted([1, 2, 3])
+  expect(stats.mad).toBe(1)
 })

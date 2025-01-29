@@ -168,7 +168,7 @@ test('bench table (sync)', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Throughput average (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput median (ops/s)': expect.any(Number),
+      'Throughput median (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Samples: expect.any(Number),
     },

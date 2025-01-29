@@ -291,7 +291,7 @@ const absoluteDeviation = (
     absoluteDeviations.push(Math.abs(sample - aggValue!))
   }
 
-  return aggFn(absoluteDeviations)
+  return aggFn(absoluteDeviations.sort((a, b) => a - b))
 }
 
 /**

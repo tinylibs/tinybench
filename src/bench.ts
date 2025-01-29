@@ -260,7 +260,7 @@ export class Bench extends EventTarget {
               'Latency median (ns)': `${formatNumber(mToNs(task.result.latency.p50!), 5, 2)} \xb1 ${mToNs(task.result.latency.mad!).toFixed(2)}`,
               'Throughput average (ops/s)': `${task.result.throughput.mean.toFixed(0)} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              'Throughput median (ops/s)': Math.round(task.result.throughput.p50!),
+              'Throughput median (ops/s)': `{Math.round(task.result.throughput.p50!)} \xb1 ${Math.round(task.result.throughput.mad)}`,
               Samples: task.result.latency.samples.length,
             })
         /* eslint-enable perfectionist/sort-objects */

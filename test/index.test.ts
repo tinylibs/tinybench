@@ -117,7 +117,7 @@ test('bench table (async)', async () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Latency average (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency median (ns)': expect.any(Number),
+      'Latency median (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Throughput average (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

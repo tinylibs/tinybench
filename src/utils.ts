@@ -141,7 +141,11 @@ export const mToNs = (ms: number) => ms * 1e6
  * @param maxFractionDigits hard limit for the number of digits after the decimal dot
  * @returns formatted number
  */
-export const formatNumber = (x: number, targetDigits: number, maxFractionDigits: number): string => {
+export const formatNumber = (
+  x: number,
+  targetDigits: number,
+  maxFractionDigits: number
+): string => {
   // Round large numbers to integers, but not to multiples of 10.
   // The actual number of significant digits may be more than `targetDigits`.
   if (Math.abs(x) >= 10 ** targetDigits) {

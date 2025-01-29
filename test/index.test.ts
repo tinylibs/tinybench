@@ -115,13 +115,13 @@ test('bench table (async)', async () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Task name': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency average (ns)': expect.any(String),
+      'Latency avg (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency median (ns)': expect.any(String),
+      'Latency med (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput average (ops/s)': expect.any(String),
+      'Throughput avg (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput median (ops/s)': expect.any(String),
+      'Throughput med (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Samples: expect.any(Number),
     },
@@ -162,13 +162,13 @@ test('bench table (sync)', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       'Task name': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency average (ns)': expect.any(String),
+      'Latency avg (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency median (ns)': expect.any(String),
+      'Latency med (ns)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput average (ops/s)': expect.any(String),
+      'Throughput avg (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput median (ops/s)': expect.any(String),
+      'Throughput med (ops/s)': expect.any(String),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Samples: expect.any(Number),
     },

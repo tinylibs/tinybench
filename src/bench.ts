@@ -257,7 +257,7 @@ export class Bench extends EventTarget {
               'Task name': task.name,
               'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50!), 5, 2)} \xb1 ${mToNs(task.result.latency.mad!).toFixed(2)}`,
+              'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50!), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad!), 5, 2)}`,
               'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50!).toString()} \xb1 ${Math.round(task.result.throughput.mad!).toString()}`,

@@ -135,6 +135,29 @@ export const nToMs = (ns: number) => ns / 1e6
  */
 export const mToNs = (ms: number) => ms * 1e6
 
+/**
+ * @param x number to format
+ * @param targetDigits number of digits in the output to aim for
+ * @param maxFractionDigits hard limit for the number of digits after the decimal dot
+ * @returns formatted number
+ */
+export const formatNumber = (x: number, targetDigits: number, maxFractionDigits: number): string => {
+  // Round large numbers to integers, but not to multiples of 10.
+  // The actual number of significant digits may be more than `targetDigits`.
+  if (Math.abs(x) >= 10 ** targetDigits) {
+    return x.toFixed()
+  }
+
+  // Round small numbers to have `maxFractionDigits` digits after the decimal dot.
+  // The actual number of significant digits may be less than `targetDigits`.
+  if (Math.abs(x) < 10 ** (targetDigits - maxFractionDigits)) {
+    return x.toFixed(maxFractionDigits)
+  }
+
+  // Round medium magnitude numbers to have exactly `targetDigits` significant digits.
+  return x.toPrecision(targetDigits)
+}
+
 let hrtimeBigint: () => bigint
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 if (typeof (globalThis as any).process?.hrtime?.bigint === 'function') {

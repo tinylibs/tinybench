@@ -2,10 +2,10 @@
   "name": "tinybench",
   "version": "3.1.1",
   "type": "module",
-  "packageManager": "pnpm@9.15.5",
+  "packageManager": "pnpm@10.3.0",
   "volta": {
-    "node": "22.13.1",
-    "pnpm": "9.15.5"
+    "node": "22.14.0",
+    "pnpm": "10.3.0"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -39,7 +39,9 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist/**"],
+  "files": [
+    "dist/**"
+  ],
   "repository": "tinylibs/tinybench",
   "license": "MIT",
   "devDependencies": {
@@ -53,7 +55,7 @@
     "bumpp": "^10.0.3",
     "changelogithub": "^13.12.1",
     "clean-publish": "^5.1.0",
-    "eslint": "^9.20.0",
+    "eslint": "^9.20.1",
     "eslint-plugin-jsdoc": "^50.6.3",
     "eslint-plugin-perfectionist": "^4.8.0",
     "nano-staged": "^0.8.0",
@@ -66,5 +68,9 @@
     "typescript": "~5.7.3",
     "vitest": "^3.0.5"
   },
-  "keywords": ["benchmark", "tinylibs", "tiny"]
+  "keywords": [
+    "benchmark",
+    "tinylibs",
+    "tiny"
+  ]
 }

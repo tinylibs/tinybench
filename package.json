@@ -47,15 +47,15 @@
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
-    "@cspell/eslint-plugin": "^8.17.4",
-    "@eslint/js": "^9.20.0",
+    "@cspell/eslint-plugin": "^8.17.5",
+    "@eslint/js": "^9.21.0",
     "@size-limit/preset-small-lib": "^11.2.0",
     "@size-limit/time": "^11.2.0",
-    "@types/node": "^22.13.4",
+    "@types/node": "^22.13.5",
     "bumpp": "^10.0.3",
     "changelogithub": "^13.12.1",
     "clean-publish": "^5.1.0",
-    "eslint": "^9.20.1",
+    "eslint": "^9.21.0",
     "eslint-plugin-jsdoc": "^50.6.3",
     "eslint-plugin-perfectionist": "^4.9.0",
     "nano-staged": "^0.8.0",
@@ -63,10 +63,10 @@
     "p-limit": "^6.2.0",
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.2.0",
-    "tsup": "^8.3.6",
-    "typedoc": "^0.27.7",
+    "tsup": "^8.4.0",
+    "typedoc": "^0.27.9",
     "typescript": "~5.7.3",
-    "vitest": "^3.0.6"
+    "vitest": "^3.0.7"
   },
   "keywords": [
     "benchmark",

@@ -2,11 +2,9 @@
   "compilerOptions": {
     "target": "ES2018",
     "strict": true,
-    "esModuleInterop": true,
     "moduleResolution": "Bundler",
     "noEmit": true,
     "noUncheckedIndexedAccess": true,
-    "baseUrl": ".",
     "skipLibCheck": true,
     "lib": []
   },

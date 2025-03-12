@@ -2,9 +2,10 @@ import cspellConfigs from '@cspell/eslint-plugin/configs'
 import js from '@eslint/js'
 import jsdoc from 'eslint-plugin-jsdoc'
 import perfectionist from 'eslint-plugin-perfectionist'
+import { defineConfig } from 'eslint/config'
 import neostandard, { plugins } from 'neostandard'
 
-export default [
+export default defineConfig([
   {
     ignores: ['docs/**', 'package/**'],
   },
@@ -57,4 +58,4 @@ export default [
     noJsx: true,
     ts: true,
   }),
-]
+])

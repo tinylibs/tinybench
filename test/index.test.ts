@@ -1036,11 +1036,13 @@ test('task beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
   bench.runSync()
 
   expect(beforeAll).toHaveBeenCalledTimes(2 /* warmup + run */)
+  expect(beforeAll.mock.calls).toEqual([['warmup'], ['run']])
   expect(afterAll).toHaveBeenCalledTimes(2 /* warmup + run */)
-  expect(beforeAll.mock.calls.length).toBe(afterAll.mock.calls.length)
+  expect(afterAll.mock.calls).toEqual([['warmup'], ['run']])
   expect(beforeEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
+  expect(beforeEach.mock.calls).toEqual(Array(iterations).fill(['warmup']).concat(Array(iterations).fill(['run'])))
   expect(afterEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(beforeEach.mock.calls.length).toBe(afterEach.mock.calls.length)
+  expect(afterEach.mock.calls).toEqual(Array(iterations).fill(['warmup']).concat(Array(iterations).fill(['run'])))
 })
 
 test(

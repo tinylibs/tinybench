@@ -120,22 +120,22 @@ export interface FnOptions {
   /**
    * An optional function that is run after all iterations of this task end
    */
-  afterAll?: (this: Task) => Promise<void> | void
+  afterAll?: (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
 
   /**
    * An optional function that is run after each iteration of this task
    */
-  afterEach?: (this: Task) => Promise<void> | void
+  afterEach?: (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
 
   /**
    * An optional function that is run before iterations of this task begin
    */
-  beforeAll?: (this: Task) => Promise<void> | void
+  beforeAll?: (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
 
   /**
    * An optional function that is run before each iteration of this task
    */
-  beforeEach?: (this: Task) => Promise<void> | void
+  beforeEach?: (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
 }
 
 /**

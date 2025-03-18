@@ -114,32 +114,41 @@ export type EventListener = (evt: BenchEvent) => void
 export type Fn = () => Promise<unknown> | unknown
 
 /**
+ * The task hook function signature
+ * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
+ * @param task the task instance
+ * @param mode the mode where the hook is being called
+ */
+export type FnHook = (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
+
+/**
  * the task function options
  */
 export interface FnOptions {
   /**
    * An optional function that is run after all iterations of this task end
    */
-  afterAll?: (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  afterAll?: FnHook
 
   /**
    * An optional function that is run after each iteration of this task
    */
-  afterEach?: (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  afterEach?: FnHook
 
   /**
    * An optional function that is run before iterations of this task begin
    */
-  beforeAll?: (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  beforeAll?: FnHook
 
   /**
    * An optional function that is run before each iteration of this task
    */
-  beforeEach?: (this: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  beforeEach?: FnHook
 }
 
 /**
  * Hook function signature
+ * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
  * @param task the task instance
  * @param mode the mode where the hook is being called
  */

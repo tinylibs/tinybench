@@ -118,7 +118,10 @@ export type Fn = () => Promise<unknown> | unknown
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
  * @param mode the mode where the hook is being called
  */
-export type FnHook = (this: Task, mode?: 'run' | 'warmup') => Promise<void> | void
+export type FnHook = (
+  this: Task,
+  mode?: 'run' | 'warmup'
+) => Promise<void> | void
 
 /**
  * the task function options
@@ -146,12 +149,15 @@ export interface FnOptions {
 }
 
 /**
- * Hook function signature
+ * The hook function signature
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
  * @param task the task instance
  * @param mode the mode where the hook is being called
  */
-export type Hook = (task?: Task, mode?: 'run' | 'warmup') => Promise<void> | void
+export type Hook = (
+  task?: Task,
+  mode?: 'run' | 'warmup'
+) => Promise<void> | void
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<

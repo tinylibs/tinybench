@@ -994,9 +994,17 @@ test('task beforeAll, afterAll, beforeEach, afterEach (async)', async () => {
   expect(afterAll).toHaveBeenCalledTimes(2 /* warmup + run */)
   expect(afterAll.mock.calls).toEqual([['warmup'], ['run']])
   expect(beforeEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(beforeEach.mock.calls).toEqual(Array(iterations).fill(['warmup']).concat(Array(iterations).fill(['run'])))
+  expect(beforeEach.mock.calls).toEqual(
+    Array(iterations)
+      .fill(['warmup'])
+      .concat(Array(iterations).fill(['run']))
+  )
   expect(afterEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(afterEach.mock.calls).toEqual(Array(iterations).fill(['warmup']).concat(Array(iterations).fill(['run'])))
+  expect(afterEach.mock.calls).toEqual(
+    Array(iterations)
+      .fill(['warmup'])
+      .concat(Array(iterations).fill(['run']))
+  )
 })
 
 test('task beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
@@ -1040,9 +1048,17 @@ test('task beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
   expect(afterAll).toHaveBeenCalledTimes(2 /* warmup + run */)
   expect(afterAll.mock.calls).toEqual([['warmup'], ['run']])
   expect(beforeEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(beforeEach.mock.calls).toEqual(Array(iterations).fill(['warmup']).concat(Array(iterations).fill(['run'])))
+  expect(beforeEach.mock.calls).toEqual(
+    Array(iterations)
+      .fill(['warmup'])
+      .concat(Array(iterations).fill(['run']))
+  )
   expect(afterEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(afterEach.mock.calls).toEqual(Array(iterations).fill(['warmup']).concat(Array(iterations).fill(['run'])))
+  expect(afterEach.mock.calls).toEqual(
+    Array(iterations)
+      .fill(['warmup'])
+      .concat(Array(iterations).fill(['run']))
+  )
 })
 
 test(

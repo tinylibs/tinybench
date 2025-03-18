@@ -35,9 +35,7 @@
       "default": "./dist/index.js"
     }
   },
-  "files": [
-    "dist/**"
-  ],
+  "files": ["dist/**"],
   "repository": "tinylibs/tinybench",
   "license": "MIT",
   "devDependencies": {
@@ -64,9 +62,5 @@
     "typescript": "~5.8.2",
     "vitest": "^3.0.9"
   },
-  "keywords": [
-    "benchmark",
-    "tinylibs",
-    "tiny"
-  ]
+  "keywords": ["benchmark", "tinylibs", "tiny"]
 }

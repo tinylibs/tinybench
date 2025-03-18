@@ -143,7 +143,7 @@ export interface FnOptions {
  * @param task the task instance
  * @param mode the mode where the hook is being called
  */
-export type Hook = (task: Task, mode?: 'run' | 'warmup') => Promise<void> | void
+export type Hook = (task?: Task, mode?: 'run' | 'warmup') => Promise<void> | void
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<

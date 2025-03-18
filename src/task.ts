@@ -107,6 +107,7 @@ export class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('start', this))
     await this.bench.opts.setup?.(this, 'run')
     const { error, samples: latencySamples } = (await this.benchmark(
+      'run',
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.bench.opts.time!,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -142,6 +143,7 @@ export class Task extends EventTarget {
     )
 
     const { error, samples: latencySamples } = this.benchmarkSync(
+      'run',
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.bench.opts.time!,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -170,6 +172,7 @@ export class Task extends EventTarget {
     this.dispatchEvent(createBenchEvent('warmup', this))
     await this.bench.opts.setup?.(this, 'warmup')
     const { error } = (await this.benchmark(
+      'warmup',
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.bench.opts.warmupTime!,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -198,6 +201,7 @@ export class Task extends EventTarget {
     )
 
     const { error } = this.benchmarkSync(
+      'warmup',
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.bench.opts.warmupTime!,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -214,12 +218,13 @@ export class Task extends EventTarget {
   }
 
   private async benchmark (
+    mode: 'run' | 'warmup',
     time: number,
     iterations: number
   ): Promise<{ error?: unknown; samples?: number[] }> {
     if (this.fnOpts.beforeAll != null) {
       try {
-        await this.fnOpts.beforeAll.call(this)
+        await this.fnOpts.beforeAll.call(this, mode)
       } catch (error) {
         return { error }
       }
@@ -230,7 +235,7 @@ export class Task extends EventTarget {
     const samples: number[] = []
     const benchmarkTask = async () => {
       if (this.fnOpts.beforeEach != null) {
-        await this.fnOpts.beforeEach.call(this)
+        await this.fnOpts.beforeEach.call(this, mode)
       }
 
       let taskTime = 0 // ms;
@@ -254,7 +259,7 @@ export class Task extends EventTarget {
       totalTime += taskTime
 
       if (this.fnOpts.afterEach != null) {
-        await this.fnOpts.afterEach.call(this)
+        await this.fnOpts.afterEach.call(this, mode)
       }
     }
 
@@ -282,7 +287,7 @@ export class Task extends EventTarget {
 
     if (this.fnOpts.afterAll != null) {
       try {
-        await this.fnOpts.afterAll.call(this)
+        await this.fnOpts.afterAll.call(this, mode)
       } catch (error) {
         return { error }
       }
@@ -291,12 +296,13 @@ export class Task extends EventTarget {
   }
 
   private benchmarkSync (
+    mode: 'run' | 'warmup',
     time: number,
     iterations: number
   ): { error?: unknown; samples?: number[] } {
     if (this.fnOpts.beforeAll != null) {
       try {
-        const beforeAllResult = this.fnOpts.beforeAll.call(this)
+        const beforeAllResult = this.fnOpts.beforeAll.call(this, mode)
         invariant(
           !isPromiseLike(beforeAllResult),
           '`beforeAll` function must be sync when using `runSync()`'
@@ -311,7 +317,7 @@ export class Task extends EventTarget {
     const samples: number[] = []
     const benchmarkTask = () => {
       if (this.fnOpts.beforeEach != null) {
-        const beforeEachResult = this.fnOpts.beforeEach.call(this)
+        const beforeEachResult = this.fnOpts.beforeEach.call(this, mode)
         invariant(
           !isPromiseLike(beforeEachResult),
           '`beforeEach` function must be sync when using `runSync()`'
@@ -336,7 +342,7 @@ export class Task extends EventTarget {
       totalTime += taskTime
 
       if (this.fnOpts.afterEach != null) {
-        const afterEachResult = this.fnOpts.afterEach.call(this)
+        const afterEachResult = this.fnOpts.afterEach.call(this, mode)
         invariant(
           !isPromiseLike(afterEachResult),
           '`afterEach` function must be sync when using `runSync()`'
@@ -358,7 +364,7 @@ export class Task extends EventTarget {
 
     if (this.fnOpts.afterAll != null) {
       try {
-        const afterAllResult = this.fnOpts.afterAll.call(this)
+        const afterAllResult = this.fnOpts.afterAll.call(this, mode)
         invariant(
           !isPromiseLike(afterAllResult),
           '`afterAll` function must be sync when using `runSync()`'

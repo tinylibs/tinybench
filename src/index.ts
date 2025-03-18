@@ -7,6 +7,7 @@ export type {
   BenchOptions,
   EventListener,
   Fn,
+  FnHook,
   FnOptions,
   Hook,
   Statistics,

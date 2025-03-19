@@ -114,7 +114,7 @@ export type EventListener = (evt: BenchEvent) => void
 export type Fn = () => Promise<unknown> | unknown
 
 /**
- * The task hook function signature
+ * The task hook function signature.
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
  * @param mode the mode where the hook is being called
  */
@@ -149,7 +149,7 @@ export interface FnOptions {
 }
 
 /**
- * The hook function signature
+ * The hook function signature.
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
  * @param task the task instance
  * @param mode the mode where the hook is being called

@@ -61,7 +61,7 @@
     "size-limit": "^11.2.0",
     "tsup": "^8.4.0",
     "typedoc": "^0.28.1",
-    "typescript": "~5.8.2",
+    "typescript": "~5.8.3",
     "vitest": "^3.1.1"
   },
   "keywords": [

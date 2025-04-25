@@ -2,10 +2,10 @@
   "name": "tinybench",
   "version": "4.0.1",
   "type": "module",
-  "packageManager": "pnpm@10.8.1",
+  "packageManager": "pnpm@10.9.0",
   "volta": {
-    "node": "22.14.0",
-    "pnpm": "10.8.1"
+    "node": "22.15.0",
+    "pnpm": "10.9.0"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -47,12 +47,12 @@
     "@eslint/js": "^9.25.1",
     "@size-limit/preset-small-lib": "^11.2.0",
     "@size-limit/time": "^11.2.0",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.2",
     "bumpp": "^10.1.0",
     "changelogithub": "^13.13.0",
     "clean-publish": "^5.1.0",
     "eslint": "^9.25.1",
-    "eslint-plugin-jsdoc": "^50.6.10",
+    "eslint-plugin-jsdoc": "^50.6.11",
     "eslint-plugin-perfectionist": "^4.12.3",
     "nano-staged": "^0.8.0",
     "neostandard": "^0.12.1",

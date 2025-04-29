@@ -2,10 +2,10 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@10.9.0",
+  "packageManager": "pnpm@10.10.0",
   "volta": {
     "node": "22.15.0",
-    "pnpm": "10.9.0"
+    "pnpm": "10.10.0"
   },
   "scripts": {
     "all": "run-s example:*",
@@ -18,6 +18,6 @@
   "license": "ISC",
   "devDependencies": {
     "npm-run-all2": "^7.0.2",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.4"
   }
 }

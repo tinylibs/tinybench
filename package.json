@@ -2,10 +2,10 @@
   "name": "tinybench",
   "version": "4.0.1",
   "type": "module",
-  "packageManager": "pnpm@10.9.0",
+  "packageManager": "pnpm@10.10.0",
   "volta": {
     "node": "22.15.0",
-    "pnpm": "10.9.0"
+    "pnpm": "10.10.0"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -43,11 +43,11 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
-    "@cspell/eslint-plugin": "^8.19.2",
+    "@cspell/eslint-plugin": "^8.19.3",
     "@eslint/js": "^9.25.1",
     "@size-limit/preset-small-lib": "^11.2.0",
     "@size-limit/time": "^11.2.0",
-    "@types/node": "^22.15.2",
+    "@types/node": "^22.15.3",
     "bumpp": "^10.1.0",
     "changelogithub": "^13.13.0",
     "clean-publish": "^5.1.0",

@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "lib": []
   },
-  "include": ["src", "test", "tsup.config.ts"],
+  "include": ["src", "test", "tsdown.config.ts"],
   "exclude": ["node_modules", "dist"],
   "removeComments": true,
   "newLine": "lf"

@@ -15,14 +15,14 @@
   },
   "scripts": {
     "prepare": "pnpm exec simple-git-hooks",
-    "dev": "tsup --watch",
-    "build": "tsup",
+    "dev": "tsdown --watch",
+    "build": "tsdown",
     "prepublishOnly": "pnpm build && rm -rf ./package && clean-publish",
     "postpublish": "rm -rf ./package",
     "typecheck": "tsc --noEmit",
     "typedoc": "typedoc",
-    "lint": "eslint --cache src test examples eslint.config.js tsup.config.ts",
-    "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsup.config.ts",
+    "lint": "eslint --cache src test examples eslint.config.js tsdown.config.ts",
+    "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsdown.config.ts",
     "release": "bumpp package.json --commit --push --tag",
     "test": "vitest --retry=5 --run"
   },
@@ -59,7 +59,7 @@
     "p-limit": "^6.2.0",
     "simple-git-hooks": "^2.13.0",
     "size-limit": "^11.2.0",
-    "tsup": "^8.4.0",
+    "tsdown": "^0.11.0",
     "typedoc": "^0.28.3",
     "typescript": "~5.8.3",
     "vitest": "^3.1.2"

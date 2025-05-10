@@ -43,12 +43,12 @@
   "license": "MIT",
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.1",
     "@cspell/eslint-plugin": "^9.0.1",
     "@eslint/js": "^9.26.0",
     "@size-limit/preset-small-lib": "^11.2.0",
     "@size-limit/time": "^11.2.0",
-    "@types/node": "^22.15.14",
+    "@types/node": "^22.15.17",
     "bumpp": "^10.1.0",
     "changelogithub": "^13.13.0",
     "clean-publish": "^5.2.0",
@@ -60,7 +60,7 @@
     "p-limit": "^6.2.0",
     "simple-git-hooks": "^2.13.0",
     "size-limit": "^11.2.0",
-    "tsdown": "^0.11.1",
+    "tsdown": "^0.11.2",
     "typedoc": "^0.28.4",
     "typescript": "~5.8.3",
     "vitest": "^3.1.3"

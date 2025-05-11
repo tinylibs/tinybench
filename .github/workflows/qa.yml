@@ -17,9 +17,9 @@ jobs:
           - macos-latest
           - windows-latest
         node-version:
-          - 18
           - 20
           - 22
+          - 24
           - latest
     name: Node.js ${{ matrix.node-version }} QA on ${{ matrix.os }}
     steps:

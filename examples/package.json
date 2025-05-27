@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@10.11.0",
   "volta": {
-    "node": "22.15.0",
+    "node": "22.16.0",
     "pnpm": "10.11.0"
   },
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "npm-run-all2": "^8.0.1",
+    "npm-run-all2": "^8.0.4",
     "tsx": "^4.19.4"
   }
 }

@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.11.0",
   "volta": {
-    "node": "22.15.0",
+    "node": "22.16.0",
     "pnpm": "10.11.0"
   },
   "engines": {
@@ -44,26 +44,26 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "@cspell/eslint-plugin": "^9.0.1",
-    "@eslint/js": "^9.26.0",
+    "@cspell/eslint-plugin": "^9.0.2",
+    "@eslint/js": "^9.27.0",
     "@size-limit/preset-small-lib": "^11.2.0",
     "@size-limit/time": "^11.2.0",
-    "@types/node": "^22.15.18",
-    "bumpp": "^10.1.0",
+    "@types/node": "^22.15.21",
+    "bumpp": "^10.1.1",
     "changelogithub": "^13.14.0",
     "clean-publish": "^5.2.0",
-    "eslint": "^9.26.0",
-    "eslint-plugin-jsdoc": "^50.6.15",
+    "eslint": "^9.27.0",
+    "eslint-plugin-jsdoc": "^50.6.17",
     "eslint-plugin-perfectionist": "^4.13.0",
     "nano-staged": "^0.8.0",
     "neostandard": "^0.12.1",
     "p-limit": "^6.2.0",
     "simple-git-hooks": "^2.13.0",
     "size-limit": "^11.2.0",
-    "tsdown": "^0.11.9",
-    "typedoc": "^0.28.4",
+    "tsdown": "^0.11.13",
+    "typedoc": "^0.28.5",
     "typescript": "~5.8.3",
-    "vitest": "^3.1.3"
+    "vitest": "^3.1.4"
   },
   "keywords": [
     "benchmark",

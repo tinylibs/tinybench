@@ -48,7 +48,7 @@
     "@eslint/js": "^9.27.0",
     "@size-limit/preset-small-lib": "^11.2.0",
     "@size-limit/time": "^11.2.0",
-    "@types/node": "^22.15.21",
+    "@types/node": "^22.15.23",
     "bumpp": "^10.1.1",
     "changelogithub": "^13.14.0",
     "clean-publish": "^5.2.0",

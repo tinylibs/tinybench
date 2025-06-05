@@ -60,10 +60,10 @@
     "p-limit": "^6.2.0",
     "simple-git-hooks": "^2.13.0",
     "size-limit": "^11.2.0",
-    "tsdown": "^0.12.6",
+    "tsdown": "^0.12.7",
     "typedoc": "^0.28.5",
     "typescript": "~5.8.3",
-    "vitest": "^3.2.1"
+    "vitest": "^3.2.2"
   },
   "keywords": [
     "benchmark",

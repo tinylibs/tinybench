@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.13.1",
   "volta": {
-    "node": "22.17.0",
+    "node": "22.17.1",
     "pnpm": "10.13.1"
   },
   "engines": {
@@ -44,16 +44,16 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "@cspell/eslint-plugin": "^9.1.5",
+    "@cspell/eslint-plugin": "^9.2.0",
     "@eslint/js": "^9.31.0",
     "@size-limit/preset-small-lib": "^11.2.0",
     "@size-limit/time": "^11.2.0",
-    "@types/node": "^24.0.14",
+    "@types/node": "^24.0.15",
     "bumpp": "^10.2.0",
     "changelogithub": "^13.16.0",
     "clean-publish": "^5.2.2",
     "eslint": "^9.31.0",
-    "eslint-plugin-jsdoc": "^51.4.0",
+    "eslint-plugin-jsdoc": "^51.4.1",
     "eslint-plugin-perfectionist": "^4.15.0",
     "nano-staged": "^0.8.0",
     "neostandard": "^0.12.2",

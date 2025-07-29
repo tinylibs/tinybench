@@ -49,7 +49,7 @@
     "@size-limit/preset-small-lib": "^11.2.0",
     "@size-limit/time": "^11.2.0",
     "@types/node": "^24.1.0",
-    "bumpp": "^10.2.0",
+    "bumpp": "^10.2.1",
     "changelogithub": "^13.16.0",
     "clean-publish": "^5.2.2",
     "eslint": "^9.32.0",
@@ -61,7 +61,7 @@
     "simple-git-hooks": "^2.13.0",
     "size-limit": "^11.2.0",
     "tsdown": "^0.13.0",
-    "typedoc": "^0.28.7",
+    "typedoc": "^0.28.8",
     "typescript": "~5.8.3",
     "vitest": "^3.2.4"
   },

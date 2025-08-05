@@ -3,10 +3,10 @@
   "version": "4.0.1",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.14.0",
   "volta": {
-    "node": "22.17.1",
-    "pnpm": "10.13.1"
+    "node": "22.18.0",
+    "pnpm": "10.14.0"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -60,7 +60,7 @@
     "p-limit": "^6.2.0",
     "simple-git-hooks": "^2.13.1",
     "size-limit": "^11.2.0",
-    "tsdown": "^0.13.2",
+    "tsdown": "^0.13.3",
     "typedoc": "^0.28.9",
     "typescript": "~5.9.2",
     "vitest": "^3.2.4"

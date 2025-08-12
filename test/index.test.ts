@@ -205,10 +205,9 @@ test('bench task runs and time consistency (async)', async () => {
 
   const fooTask = bench.getTask('foo')
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  expect(fooTask?.runs).toBeGreaterThanOrEqual(bench.opts.iterations!)
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  expect(fooTask?.result?.totalTime).toBeGreaterThanOrEqual(bench.opts.time!)
+  expect(fooTask?.runs).toBeGreaterThanOrEqual(bench.opts.iterations)
+
+  expect(fooTask?.result?.totalTime).toBeGreaterThanOrEqual(bench.opts.time)
 })
 
 test('bench task runs and time consistency (sync)', () => {
@@ -221,10 +220,9 @@ test('bench task runs and time consistency (sync)', () => {
 
   const fooTask = bench.getTask('foo')
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  expect(fooTask?.runs).toBeGreaterThanOrEqual(bench.opts.iterations!)
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  expect(fooTask?.result?.totalTime).toBeGreaterThanOrEqual(bench.opts.time!)
+  expect(fooTask?.runs).toBeGreaterThanOrEqual(bench.opts.iterations)
+
+  expect(fooTask?.result?.totalTime).toBeGreaterThanOrEqual(bench.opts.time)
 })
 
 test('events order (async)', async () => {
@@ -1308,4 +1306,44 @@ test('using concurrency should throw (sync)', () => {
   expect(() => {
     bench.runSync()
   }).toThrowError('Cannot use `concurrency` option when using `runSync`')
+})
+
+test('uses overridden task durations (async)', async () => {
+  const bench = new Bench({
+    iterations: 16,
+    now: () => 100,
+    throws: true,
+  })
+
+  bench.add('foo', () => {
+    return {
+      overriddenDuration: bench.opts.now() + 50,
+    }
+  })
+
+  await bench.run()
+
+  expect(bench.getTask('foo')?.result?.latency.mean).toBe(150)
+  expect(bench.getTask('foo')?.result?.latency.min).toBe(150)
+  expect(bench.getTask('foo')?.result?.latency.max).toBe(150)
+})
+
+test('uses overridden task durations (sync)', () => {
+  const bench = new Bench({
+    iterations: 16,
+    now: () => 100,
+    throws: true,
+  })
+
+  bench.add('foo', () => {
+    return {
+      overriddenDuration: bench.opts.now() + 50,
+    }
+  })
+
+  bench.runSync()
+
+  expect(bench.getTask('foo')?.result?.latency.mean).toBe(150)
+  expect(bench.getTask('foo')?.result?.latency.min).toBe(150)
+  expect(bench.getTask('foo')?.result?.latency.max).toBe(150)
 })

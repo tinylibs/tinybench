@@ -108,10 +108,15 @@ export interface BenchOptions {
 export type EventListener = (evt: BenchEvent) => void
 
 /**
- * the task function
+ * The task function.
+ *
+ * If you need to provide a custom duration for the task (e.g.: because
+ * you want to measure a specific part of its execution), you can return an
+ * object with a `overriddenDuration` field. You should still use
+ * `bench.opts.now()` to measure that duration.
  */
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type Fn = () => Promise<unknown> | unknown
+export type Fn = () => FnReturnedObject | Promise<FnReturnedObject | unknown> | unknown
 
 /**
  * The task hook function signature.
@@ -149,6 +154,21 @@ export interface FnOptions {
 }
 
 /**
+ * A possible object returned by task functions to override default behaviors,
+ * like the duration of the function itself.
+ */
+export interface FnReturnedObject {
+  /**
+   * An overridden duration for the task function, to be used instead of the
+   * duration measured by tinybench when running the benchmark.
+   *
+   * This can be useful to measure parts of the execution of a function that are
+   * hard to execute independently.
+   */
+  overriddenDuration?: number;
+}
+
+/**
  * The hook function signature.
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
  * @param task the task instance
@@ -163,6 +183,18 @@ export type Hook = (
 export type RemoveEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.removeEventListener
 >[2]
+
+export interface ResolvedBenchOptions extends BenchOptions {
+  iterations: NonNullable<BenchOptions['iterations']>,
+  now: NonNullable<BenchOptions['now']>,
+  setup: NonNullable<BenchOptions['setup']>,
+  teardown: NonNullable<BenchOptions['teardown']>,
+  throws: NonNullable<BenchOptions['throws']>,
+  time: NonNullable<BenchOptions['time']>,
+  warmup: NonNullable<BenchOptions['warmup']>,
+  warmupIterations: NonNullable<BenchOptions['warmupIterations']>,
+  warmupTime: NonNullable<BenchOptions['warmupTime']>,
+}
 
 /**
  * the statistics object

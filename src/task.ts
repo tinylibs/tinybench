@@ -105,15 +105,15 @@ export class Task extends EventTarget {
       return this
     }
     this.dispatchEvent(createBenchEvent('start', this))
-    await this.bench.opts.setup?.(this, 'run')
+    await this.bench.opts.setup(this, 'run')
     const { error, samples: latencySamples } = (await this.benchmark(
       'run',
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.bench.opts.time!,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.bench.opts.iterations!
+
+      this.bench.opts.time,
+
+      this.bench.opts.iterations
     )) as { error?: Error; samples?: number[] }
-    await this.bench.opts.teardown?.(this, 'run')
+    await this.bench.opts.teardown(this, 'run')
 
     this.processRunResult({ error, latencySamples })
 
@@ -136,7 +136,7 @@ export class Task extends EventTarget {
     )
     this.dispatchEvent(createBenchEvent('start', this))
 
-    const setupResult = this.bench.opts.setup?.(this, 'run')
+    const setupResult = this.bench.opts.setup(this, 'run')
     invariant(
       !isPromiseLike(setupResult),
       '`setup` function must be sync when using `runSync()`'
@@ -144,13 +144,13 @@ export class Task extends EventTarget {
 
     const { error, samples: latencySamples } = this.benchmarkSync(
       'run',
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.bench.opts.time!,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.bench.opts.iterations!
+
+      this.bench.opts.time,
+
+      this.bench.opts.iterations
     ) as { error?: Error; samples?: number[] }
 
-    const teardownResult = this.bench.opts.teardown?.(this, 'run')
+    const teardownResult = this.bench.opts.teardown(this, 'run')
     invariant(
       !isPromiseLike(teardownResult),
       '`teardown` function must be sync when using `runSync()`'
@@ -170,15 +170,15 @@ export class Task extends EventTarget {
       return
     }
     this.dispatchEvent(createBenchEvent('warmup', this))
-    await this.bench.opts.setup?.(this, 'warmup')
+    await this.bench.opts.setup(this, 'warmup')
     const { error } = (await this.benchmark(
       'warmup',
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.bench.opts.warmupTime!,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.bench.opts.warmupIterations!
+
+      this.bench.opts.warmupTime,
+
+      this.bench.opts.warmupIterations
     )) as { error?: Error }
-    await this.bench.opts.teardown?.(this, 'warmup')
+    await this.bench.opts.teardown(this, 'warmup')
 
     this.postWarmup(error)
   }
@@ -194,7 +194,7 @@ export class Task extends EventTarget {
 
     this.dispatchEvent(createBenchEvent('warmup', this))
 
-    const setupResult = this.bench.opts.setup?.(this, 'warmup')
+    const setupResult = this.bench.opts.setup(this, 'warmup')
     invariant(
       !isPromiseLike(setupResult),
       '`setup` function must be sync when using `runSync()`'
@@ -202,13 +202,13 @@ export class Task extends EventTarget {
 
     const { error } = this.benchmarkSync(
       'warmup',
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.bench.opts.warmupTime!,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.bench.opts.warmupIterations!
+
+      this.bench.opts.warmupTime,
+
+      this.bench.opts.warmupIterations
     ) as { error?: Error }
 
-    const teardownResult = this.bench.opts.teardown?.(this, 'warmup')
+    const teardownResult = this.bench.opts.teardown(this, 'warmup')
     invariant(
       !isPromiseLike(teardownResult),
       '`teardown` function must be sync when using `runSync()`'
@@ -240,19 +240,25 @@ export class Task extends EventTarget {
 
       let taskTime = 0 // ms;
       if (this.async) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const taskStart = this.bench.opts.now!()
+        const taskStart = this.bench.opts.now()
         // eslint-disable-next-line no-useless-call
-        await this.fn.call(this)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        taskTime = this.bench.opts.now!() - taskStart
+        const fnResult = await this.fn.call(this)
+        taskTime = this.bench.opts.now() - taskStart
+
+        const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
+        if (overriddenDuration != null) {
+          taskTime = overriddenDuration
+        }
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const taskStart = this.bench.opts.now!()
+        const taskStart = this.bench.opts.now()
         // eslint-disable-next-line no-useless-call
-        this.fn.call(this)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        taskTime = this.bench.opts.now!() - taskStart
+        const fnResult = this.fn.call(this)
+        taskTime = this.bench.opts.now() - taskStart
+
+        const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
+        if (overriddenDuration != null) {
+          taskTime = overriddenDuration
+        }
       }
 
       samples.push(taskTime)
@@ -326,17 +332,20 @@ export class Task extends EventTarget {
 
       let taskTime = 0 // ms;
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const taskStart = this.bench.opts.now!()
+      const taskStart = this.bench.opts.now()
       // eslint-disable-next-line no-useless-call
-      const result = this.fn.call(this)
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      taskTime = this.bench.opts.now!() - taskStart
+      const fnResult = this.fn.call(this)
+      taskTime = this.bench.opts.now() - taskStart
 
       invariant(
-        !isPromiseLike(result),
+        !isPromiseLike(fnResult),
         'task function must be sync when using `runSync()`'
       )
+
+      const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
+      if (overriddenDuration != null) {
+        taskTime = overriddenDuration
+      }
 
       samples.push(taskTime)
       totalTime += taskTime
@@ -465,5 +474,16 @@ export class Task extends EventTarget {
     this.bench.dispatchEvent(createBenchEvent('cycle', this))
     // cycle and complete are equal in Task
     this.dispatchEvent(createBenchEvent('complete', this))
+  }
+}
+
+/**
+ *
+ * @param fnResult - the result of the task function.
+ * @returns the overridden duration if defined by the function.
+ */
+function getOverriddenDurationFromFnResult (fnResult: ReturnType<Fn>): number | undefined {
+  if (fnResult != null && typeof fnResult === 'object' && 'overriddenDuration' in fnResult && typeof fnResult.overriddenDuration === 'number') {
+    return fnResult.overriddenDuration
   }
 }

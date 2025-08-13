@@ -146,6 +146,8 @@ export const formatNumber = (
   targetDigits: number,
   maxFractionDigits: number
 ): string => {
+  if (!Number.isFinite(x)) return String(x)
+
   // Round large numbers to integers, but not to multiples of 10.
   // The actual number of significant digits may be more than `targetDigits`.
   if (Math.abs(x) >= 10 ** targetDigits) {
@@ -189,7 +191,8 @@ export const isPromiseLike = <T>(
   maybePromiseLike: unknown
 ): maybePromiseLike is PromiseLike<T> =>
     maybePromiseLike !== null &&
-  typeof maybePromiseLike === 'object' &&
+  (typeof maybePromiseLike === 'object' ||
+    typeof maybePromiseLike === 'function') &&
   typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
@@ -216,6 +219,9 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
   }
   if (isAsyncFunction(fn)) {
     return true
+  }
+  if (fn.length > 0) {
+    return false
   }
   try {
     const fnCall = fn()
@@ -346,7 +352,8 @@ export const getStatisticsSorted = (samples: number[]): Statistics => {
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/no-non-null-assertion
   const critical = tTable[(Math.round(df) || 1).toString()] || tTable.infinity!
   const moe = sem * critical
-  const rme = (moe / mean) * 100
+  const absMean = Math.abs(mean)
+  const rme = absMean === 0 ? Number.POSITIVE_INFINITY : (moe / absMean) * 100
   const p50 = medianSorted(samples)
   return {
     aad: absoluteDeviation(samples, average, mean),

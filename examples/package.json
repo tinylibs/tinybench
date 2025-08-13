@@ -18,6 +18,6 @@
   "license": "ISC",
   "devDependencies": {
     "npm-run-all2": "^8.0.4",
-    "tsx": "^4.20.3"
+    "tsx": "^4.20.4"
   }
 }

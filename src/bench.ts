@@ -8,6 +8,7 @@ import type {
   Fn,
   FnOptions,
   RemoveEventListenerOptionsArgument,
+  ResolvedBenchOptions,
   TaskResult,
 } from './types'
 
@@ -51,7 +52,7 @@ export class Bench extends EventTarget {
   /**
    * The options.
    */
-  readonly opts: Readonly<BenchOptions>
+  readonly opts: Readonly<ResolvedBenchOptions>
 
   /**
    * The JavaScript runtime environment.

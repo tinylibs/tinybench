@@ -6,7 +6,7 @@ export type AddEventListenerOptionsArgument = Parameters<
 >[2]
 
 /**
- * bench event
+ * Bench event
  */
 export type BenchEvent = Event & { error?: Error; task?: Task }
 
@@ -43,7 +43,7 @@ export interface BenchEventsMap {
  */
 
 /**
- * bench options
+ * Bench options
  */
 export interface BenchOptions {
   /**
@@ -103,7 +103,7 @@ export interface BenchOptions {
 }
 
 /**
- * event listener
+ * Event listener
  */
 export type EventListener = (evt: BenchEvent) => void
 
@@ -115,8 +115,13 @@ export type EventListener = (evt: BenchEvent) => void
  * object with a `overriddenDuration` field. You should still use
  * `bench.opts.now()` to measure that duration.
  */
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type Fn = () => FnReturnedObject | Promise<FnReturnedObject | unknown> | unknown
+
+export type Fn = () =>
+  | FnReturnedObject
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  | Promise<FnReturnedObject | unknown>
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  | unknown
 
 /**
  * The task hook function signature.
@@ -129,7 +134,7 @@ export type FnHook = (
 ) => Promise<void> | void
 
 /**
- * the task function options
+ * The task function options
  */
 export interface FnOptions {
   /**
@@ -165,7 +170,7 @@ export interface FnReturnedObject {
    * This can be useful to measure parts of the execution of a function that are
    * hard to execute independently.
    */
-  overriddenDuration?: number;
+  overriddenDuration?: number
 }
 
 /**
@@ -185,19 +190,19 @@ export type RemoveEventListenerOptionsArgument = Parameters<
 >[2]
 
 export interface ResolvedBenchOptions extends BenchOptions {
-  iterations: NonNullable<BenchOptions['iterations']>,
-  now: NonNullable<BenchOptions['now']>,
-  setup: NonNullable<BenchOptions['setup']>,
-  teardown: NonNullable<BenchOptions['teardown']>,
-  throws: NonNullable<BenchOptions['throws']>,
-  time: NonNullable<BenchOptions['time']>,
-  warmup: NonNullable<BenchOptions['warmup']>,
-  warmupIterations: NonNullable<BenchOptions['warmupIterations']>,
-  warmupTime: NonNullable<BenchOptions['warmupTime']>,
+  iterations: NonNullable<BenchOptions['iterations']>
+  now: NonNullable<BenchOptions['now']>
+  setup: NonNullable<BenchOptions['setup']>
+  teardown: NonNullable<BenchOptions['teardown']>
+  throws: NonNullable<BenchOptions['throws']>
+  time: NonNullable<BenchOptions['time']>
+  warmup: NonNullable<BenchOptions['warmup']>
+  warmupIterations: NonNullable<BenchOptions['warmupIterations']>
+  warmupTime: NonNullable<BenchOptions['warmupTime']>
 }
 
 /**
- * the statistics object
+ * The statistics object
  */
 export interface Statistics {
   /**
@@ -292,7 +297,7 @@ export interface Statistics {
 }
 
 /**
- * task events
+ * Task events
  */
 export type TaskEvents =
   | 'abort'
@@ -313,7 +318,7 @@ export interface TaskEventsMap {
   warmup: EventListener
 }
 /**
- * the task result object
+ * The task result object
  */
 export interface TaskResult {
   /**

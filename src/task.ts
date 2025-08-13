@@ -108,9 +108,7 @@ export class Task extends EventTarget {
     await this.bench.opts.setup(this, 'run')
     const { error, samples: latencySamples } = (await this.benchmark(
       'run',
-
       this.bench.opts.time,
-
       this.bench.opts.iterations
     )) as { error?: Error; samples?: number[] }
     await this.bench.opts.teardown(this, 'run')
@@ -144,9 +142,7 @@ export class Task extends EventTarget {
 
     const { error, samples: latencySamples } = this.benchmarkSync(
       'run',
-
       this.bench.opts.time,
-
       this.bench.opts.iterations
     ) as { error?: Error; samples?: number[] }
 
@@ -173,9 +169,7 @@ export class Task extends EventTarget {
     await this.bench.opts.setup(this, 'warmup')
     const { error } = (await this.benchmark(
       'warmup',
-
       this.bench.opts.warmupTime,
-
       this.bench.opts.warmupIterations
     )) as { error?: Error }
     await this.bench.opts.teardown(this, 'warmup')
@@ -202,9 +196,7 @@ export class Task extends EventTarget {
 
     const { error } = this.benchmarkSync(
       'warmup',
-
       this.bench.opts.warmupTime,
-
       this.bench.opts.warmupIterations
     ) as { error?: Error }
 
@@ -482,8 +474,15 @@ export class Task extends EventTarget {
  * @param fnResult - the result of the task function.
  * @returns the overridden duration if defined by the function.
  */
-function getOverriddenDurationFromFnResult (fnResult: ReturnType<Fn>): number | undefined {
-  if (fnResult != null && typeof fnResult === 'object' && 'overriddenDuration' in fnResult && typeof fnResult.overriddenDuration === 'number') {
+function getOverriddenDurationFromFnResult (
+  fnResult: ReturnType<Fn>
+): number | undefined {
+  if (
+    fnResult != null &&
+    typeof fnResult === 'object' &&
+    'overriddenDuration' in fnResult &&
+    typeof fnResult.overriddenDuration === 'number'
+  ) {
     return fnResult.overriddenDuration
   }
 }

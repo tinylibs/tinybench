@@ -220,9 +220,6 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
   if (isAsyncFunction(fn)) {
     return true
   }
-  if (fn.length > 0) {
-    return false
-  }
   try {
     const fnCall = fn()
     const promiseLike = isPromiseLike(fnCall)

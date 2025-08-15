@@ -332,6 +332,7 @@ test('events order (async)', async () => {
     'cycle',
     'error-complete',
     'abort',
+    'cycle',
     'complete',
     'reset',
   ])

@@ -40,7 +40,7 @@ export class Task extends EventTarget {
   runs = 0
 
   /**
-   * The task synchronous status
+   * The task asynchronous status
    */
   private readonly async: boolean
 
@@ -222,62 +222,58 @@ export class Task extends EventTarget {
       }
     }
 
-    // TODO: factor out
     let totalTime = 0 // ms
     const samples: number[] = []
     const benchmarkTask = async () => {
-      if (this.fnOpts.beforeEach != null) {
-        await this.fnOpts.beforeEach.call(this, mode)
+      if (this.bench.opts.signal?.aborted) {
+        return
       }
-
-      let taskTime = 0 // ms;
-      if (this.async) {
-        const taskStart = this.bench.opts.now()
-        // eslint-disable-next-line no-useless-call
-        const fnResult = await this.fn.call(this)
-        taskTime = this.bench.opts.now() - taskStart
-
-        const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
-        if (overriddenDuration != null) {
-          taskTime = overriddenDuration
+      try {
+        if (this.fnOpts.beforeEach != null) {
+          await this.fnOpts.beforeEach.call(this, mode)
         }
-      } else {
-        const taskStart = this.bench.opts.now()
-        // eslint-disable-next-line no-useless-call
-        const fnResult = this.fn.call(this)
-        taskTime = this.bench.opts.now() - taskStart
 
-        const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
-        if (overriddenDuration != null) {
-          taskTime = overriddenDuration
+        let taskTime: number
+        if (this.async) {
+          ({ taskTime } = await this.measureOnce())
+        } else {
+          ({ taskTime } = this.measureOnceSync())
         }
-      }
 
-      samples.push(taskTime)
-      totalTime += taskTime
-
-      if (this.fnOpts.afterEach != null) {
-        await this.fnOpts.afterEach.call(this, mode)
+        samples.push(taskTime)
+        totalTime += taskTime
+      } finally {
+        if (this.fnOpts.afterEach != null) {
+          await this.fnOpts.afterEach.call(this, mode)
+        }
       }
     }
 
     try {
-      const limit = pLimit(this.bench.threshold) // only for task level concurrency
+      let limit: ReturnType<typeof pLimit> | undefined // only for task level concurrency
+      if (this.bench.concurrency === 'task') {
+        limit = pLimit(this.bench.threshold)
+      }
       const promises: Promise<void>[] = [] // only for task level concurrency
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
-          samples.length + limit.activeCount + limit.pendingCount < iterations) &&
+          samples.length + (limit?.activeCount ?? 0) + (limit?.pendingCount ?? 0) < iterations) &&
         !this.bench.opts.signal?.aborted
       ) {
         if (this.bench.concurrency === 'task') {
-          promises.push(limit(benchmarkTask))
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          promises.push((limit!)(benchmarkTask))
         } else {
           await benchmarkTask()
         }
       }
       if (!this.bench.opts.signal?.aborted && promises.length > 0) {
         await Promise.all(promises)
+      } else if (promises.length > 0) {
+        // Abort path
+        // eslint-disable-next-line no-void
+        void Promise.allSettled(promises)
       }
     } catch (error) {
       return { error }
@@ -310,52 +306,42 @@ export class Task extends EventTarget {
       }
     }
 
-    // TODO: factor out
-    let totalTime = 0 // ms
+    let totalTime = 0
     const samples: number[] = []
     const benchmarkTask = () => {
-      if (this.fnOpts.beforeEach != null) {
-        const beforeEachResult = this.fnOpts.beforeEach.call(this, mode)
-        invariant(
-          !isPromiseLike(beforeEachResult),
-          '`beforeEach` function must be sync when using `runSync()`'
-        )
+      if (this.bench.opts.signal?.aborted) {
+        return
       }
+      try {
+        if (this.fnOpts.beforeEach != null) {
+          const beforeEachResult = this.fnOpts.beforeEach.call(this, mode)
+          invariant(
+            !isPromiseLike(beforeEachResult),
+            '`beforeEach` function must be sync when using `runSync()`'
+          )
+        }
 
-      let taskTime = 0 // ms;
+        const { taskTime } = this.measureOnceSync()
 
-      const taskStart = this.bench.opts.now()
-      // eslint-disable-next-line no-useless-call
-      const fnResult = this.fn.call(this)
-      taskTime = this.bench.opts.now() - taskStart
-
-      invariant(
-        !isPromiseLike(fnResult),
-        'task function must be sync when using `runSync()`'
-      )
-
-      const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
-      if (overriddenDuration != null) {
-        taskTime = overriddenDuration
-      }
-
-      samples.push(taskTime)
-      totalTime += taskTime
-
-      if (this.fnOpts.afterEach != null) {
-        const afterEachResult = this.fnOpts.afterEach.call(this, mode)
-        invariant(
-          !isPromiseLike(afterEachResult),
-          '`afterEach` function must be sync when using `runSync()`'
-        )
+        samples.push(taskTime)
+        totalTime += taskTime
+      } finally {
+        if (this.fnOpts.afterEach != null) {
+          const afterEachResult = this.fnOpts.afterEach.call(this, mode)
+          invariant(
+            !isPromiseLike(afterEachResult),
+            '`afterEach` function must be sync when using `runSync()`'
+          )
+        }
       }
     }
 
     try {
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
-        totalTime < time ||
-        samples.length < iterations
+        (totalTime < time ||
+        samples.length < iterations) &&
+        !this.bench.opts.signal?.aborted
       ) {
         benchmarkTask()
       }
@@ -375,6 +361,34 @@ export class Task extends EventTarget {
       }
     }
     return { samples }
+  }
+
+  private async measureOnce (): Promise<{ fnResult: ReturnType<Fn>; taskTime: number }> {
+    const taskStart = this.bench.opts.now()
+    // eslint-disable-next-line no-useless-call
+    const fnResult = await this.fn.call(this)
+    let taskTime = this.bench.opts.now() - taskStart
+    const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
+    if (overriddenDuration != null) {
+      taskTime = overriddenDuration
+    }
+    return { fnResult, taskTime }
+  }
+
+  private measureOnceSync (): { fnResult: ReturnType<Fn>; taskTime: number } {
+    const taskStart = this.bench.opts.now()
+    // eslint-disable-next-line no-useless-call
+    const fnResult = this.fn.call(this)
+    let taskTime = this.bench.opts.now() - taskStart
+    invariant(
+      !isPromiseLike(fnResult),
+      'task function must be sync when using `runSync()`'
+    )
+    const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
+    if (overriddenDuration != null) {
+      taskTime = overriddenDuration
+    }
+    return { fnResult, taskTime }
   }
 
   /**
@@ -406,7 +420,7 @@ export class Task extends EventTarget {
     error?: Error
     latencySamples?: number[]
   }): void {
-    if (latencySamples) {
+    if (latencySamples && latencySamples.length > 0) {
       this.runs = latencySamples.length
       const totalTime = latencySamples.reduce((a, b) => a + b, 0)
 
@@ -418,16 +432,17 @@ export class Task extends EventTarget {
       // Throughput statistics
       const throughputSamples = latencySamples
         .map(sample =>
-          sample !== 0 ? 1000 / sample : 1000 / latencyStatistics.mean
+          sample !== 0
+            ? 1000 / sample
+            : latencyStatistics.mean !== 0
+              ? 1000 / latencyStatistics.mean
+              : 0
         ) // Use latency average as imputed sample
         .sort((a, b) => a - b)
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
-      if (this.bench.opts.signal?.aborted) {
-        return
-      }
-
       this.mergeTaskResult({
+        aborted: this.bench.opts.signal?.aborted ?? false,
         critical: latencyStatistics.critical,
         df: latencyStatistics.df,
         hz: throughputStatistics.mean,
@@ -481,7 +496,9 @@ function getOverriddenDurationFromFnResult (
     fnResult != null &&
     typeof fnResult === 'object' &&
     'overriddenDuration' in fnResult &&
-    typeof fnResult.overriddenDuration === 'number'
+    typeof fnResult.overriddenDuration === 'number' &&
+    Number.isFinite(fnResult.overriddenDuration) &&
+    fnResult.overriddenDuration >= 0
   ) {
     return fnResult.overriddenDuration
   }

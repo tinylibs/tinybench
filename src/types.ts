@@ -322,6 +322,11 @@ export interface TaskEventsMap {
  */
 export interface TaskResult {
   /**
+   * whether the task was aborted
+   */
+  aborted: boolean
+
+  /**
    * the latency samples critical value
    * @deprecated use `.latency.critical` instead
    */

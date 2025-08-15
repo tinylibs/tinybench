@@ -40,7 +40,7 @@ export class Bench extends EventTarget {
    *
    * - When `mode` is set to `null` (default), concurrency is disabled.
    * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
-   * - When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
+   * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
    */
   concurrency: 'bench' | 'task' | null = null
 
@@ -92,8 +92,8 @@ export class Bench extends EventTarget {
 
   constructor (options: BenchOptions = {}) {
     super()
-    this.name = options.name
-    delete options.name
+    const { name, ...restOptions } = options
+    this.name = name
     this.runtime = runtime
     this.runtimeVersion = runtimeVersion
     this.opts = {
@@ -108,7 +108,7 @@ export class Bench extends EventTarget {
         warmupIterations: defaultMinimumWarmupIterations,
         warmupTime: defaultMinimumWarmupTime,
       },
-      ...options,
+      ...restOptions,
     }
 
     if (this.opts.signal) {
@@ -201,12 +201,7 @@ export class Bench extends EventTarget {
     let values: Task[] = []
     this.dispatchEvent(createBenchEvent('start'))
     if (this.concurrency === 'bench') {
-      const limit = pLimit(this.threshold)
-      const promises: Promise<Task>[] = []
-      for (const task of this._tasks.values()) {
-        promises.push(limit(task.run.bind(task)))
-      }
-      values = await Promise.all(promises)
+      values = await this.mapTasksConcurrently(task => task.run())
     } else {
       for (const task of this._tasks.values()) {
         values.push(await task.run())
@@ -272,17 +267,38 @@ export class Bench extends EventTarget {
   }
 
   /**
+   * Applies a worker function to all registered tasks using the concurrency limit.
+   *
+   * Scheduling is handled via p-limit with the current threshold. The returned array preserves
+   * the iteration order of the tasks. If any scheduled worker function rejects, the returned promise
+   * rejects with the first error after the scheduled worker functions settle, as per Promise.all semantics.
+   *
+   * Notes:
+   * - Concurrency is controlled by Bench.threshold (Number.POSITIVE_INFINITY means unlimited).
+   * - No measurements are performed here; measurements happen inside Task.
+   * - Used internally by run() and warmupTasks() when concurrency === 'bench'.
+   * @template R The resolved type produced by the worker function for each task.
+   * @param workerFn A function invoked for each Task; it must return a Promise<R>.
+   * @returns Promise that resolves to an array of results in the same order as task iteration.
+   */
+  private async mapTasksConcurrently<R>(
+    workerFn: (task: Task) => Promise<R>
+  ): Promise<R[]> {
+    const limit = pLimit(Math.max(1, Math.floor(this.threshold)))
+    const promises: Promise<R>[] = []
+    for (const task of this._tasks.values()) {
+      promises.push(limit(() => workerFn(task)))
+    }
+    return Promise.all(promises)
+  }
+
+  /**
    * warmup the benchmark tasks.
    */
   private async warmupTasks (): Promise<void> {
     this.dispatchEvent(createBenchEvent('warmup'))
     if (this.concurrency === 'bench') {
-      const limit = pLimit(this.threshold)
-      const promises: Promise<void>[] = []
-      for (const task of this._tasks.values()) {
-        promises.push(limit(task.warmup.bind(task)))
-      }
-      await Promise.all(promises)
+      await this.mapTasksConcurrently(task => task.warmup())
     } else {
       for (const task of this._tasks.values()) {
         await task.warmup()

@@ -252,7 +252,7 @@ export class Task extends EventTarget {
     try {
       let limit: ReturnType<typeof pLimit> | undefined // only for task level concurrency
       if (this.bench.concurrency === 'task') {
-        limit = pLimit(this.bench.threshold)
+        limit = pLimit(Math.max(1, Math.floor(this.bench.threshold)))
       }
       const promises: Promise<void>[] = [] // only for task level concurrency
       while (

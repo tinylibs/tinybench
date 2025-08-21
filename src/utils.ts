@@ -258,8 +258,11 @@ const average = (samples: number[]) => {
  * @returns the variance of the sample
  */
 const variance = (samples: number[], avg = average(samples)) => {
+  if (samples.length <= 1) {
+    return 0
+  }
   const sumSq = samples.reduce((sum, n) => sum + (n - avg) ** 2, 0)
-  return samples.length <= 1 ? 0 : sumSq / (samples.length - 1)
+  return sumSq / (samples.length - 1)
 }
 
 /**
@@ -308,7 +311,7 @@ const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5)
  * @returns the median of the sample
  */
 const median = (samples: number[]) => {
-  return medianSorted(samples.sort((a, b) => a - b))
+  return medianSorted([...samples].sort((a, b) => a - b))
 }
 
 /**

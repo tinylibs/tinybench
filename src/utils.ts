@@ -136,32 +136,42 @@ export const nToMs = (ns: number) => ns / 1e6
 export const mToNs = (ms: number) => ms * 1e6
 
 /**
- * @param x number to format
- * @param targetDigits number of digits in the output to aim for
+ * @param value number to format
+ * @param significantDigits number of significant digits in the output to aim for
  * @param maxFractionDigits hard limit for the number of digits after the decimal dot
  * @returns formatted number
  */
 export const formatNumber = (
-  x: number,
-  targetDigits: number,
+  value: number,
+  significantDigits: number,
   maxFractionDigits: number
 ): string => {
-  if (!Number.isFinite(x)) return String(x)
+  if (typeof value !== 'number') return String(value)
+
+  if (value === Number.POSITIVE_INFINITY) return '+∞'
+  if (value === Number.NEGATIVE_INFINITY) return '-∞'
+  if (Number.isNaN(value)) return 'NaN'
+
+  const absValue = Math.abs(value)
 
   // Round large numbers to integers, but not to multiples of 10.
-  // The actual number of significant digits may be more than `targetDigits`.
-  if (Math.abs(x) >= 10 ** targetDigits) {
-    return x.toFixed()
+  // The actual number of significant digits may be more than `significantDigits`.
+  if (absValue >= 10 ** significantDigits) {
+    return value.toFixed()
   }
 
   // Round small numbers to have `maxFractionDigits` digits after the decimal dot.
-  // The actual number of significant digits may be less than `targetDigits`.
-  if (Math.abs(x) < 10 ** (targetDigits - maxFractionDigits)) {
-    return x.toFixed(maxFractionDigits)
+  // The actual number of significant digits may be less than `significantDigits`.
+  if (absValue < 10 ** (significantDigits - maxFractionDigits)) {
+    return value.toFixed(maxFractionDigits)
   }
 
-  // Round medium magnitude numbers to have exactly `targetDigits` significant digits.
-  return x.toPrecision(targetDigits)
+  // Avoid scientific notation
+  const integerDigits = absValue >= 1 ? Math.floor(Math.log10(absValue)) + 1 : 0
+  let decimals = Math.max(0, significantDigits - integerDigits)
+  decimals = Math.min(decimals, maxFractionDigits)
+
+  return value.toFixed(decimals)
 }
 
 let hrtimeBigint: () => bigint

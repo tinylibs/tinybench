@@ -14,6 +14,9 @@ test('formatting integers', () => {
 })
 
 test('formatting floats', () => {
+  expect(formatNumber(Number.NEGATIVE_INFINITY, 5, 2)).toBe('-∞')
+  expect(formatNumber(Number.POSITIVE_INFINITY, 5, 2)).toBe('+∞')
+  expect(formatNumber(Number.NaN, 5, 2)).toBe('NaN')
   expect(formatNumber(123456.789, 5, 2)).toBe('123457')
   expect(formatNumber(12345.6789, 5, 2)).toBe('12346')
   expect(formatNumber(1234.56789, 5, 2)).toBe('1234.6')

@@ -59,6 +59,11 @@ export class Task extends EventTarget {
    */
   private readonly fnOpts: Readonly<FnOptions>
 
+  /**
+   * The task-level abort signal
+   */
+  private readonly signal: AbortSignal | undefined
+
   constructor (bench: Bench, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
     this.bench = bench
@@ -66,7 +71,18 @@ export class Task extends EventTarget {
     this.fn = fn
     this.fnOpts = fnOpts
     this.async = isFnAsyncResource(fn)
-    // TODO: support signal in Tasks
+    this.signal = fnOpts.signal
+
+    if (this.signal) {
+      this.signal.addEventListener(
+        'abort',
+        () => {
+          this.dispatchEvent(createBenchEvent('abort', this))
+          this.bench.dispatchEvent(createBenchEvent('abort', this))
+        },
+        { once: true }
+      )
+    }
   }
 
   addEventListener<K extends TaskEvents>(
@@ -225,7 +241,7 @@ export class Task extends EventTarget {
     let totalTime = 0 // ms
     const samples: number[] = []
     const benchmarkTask = async () => {
-      if (this.bench.opts.signal?.aborted) {
+      if (this.isAborted()) {
         return
       }
       try {
@@ -259,7 +275,7 @@ export class Task extends EventTarget {
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
           samples.length + (limit?.activeCount ?? 0) + (limit?.pendingCount ?? 0) < iterations) &&
-        !this.bench.opts.signal?.aborted
+        !this.isAborted()
       ) {
         if (this.bench.concurrency === 'task') {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -268,7 +284,7 @@ export class Task extends EventTarget {
           await benchmarkTask()
         }
       }
-      if (!this.bench.opts.signal?.aborted && promises.length > 0) {
+      if (!this.isAborted() && promises.length > 0) {
         await Promise.all(promises)
       } else if (promises.length > 0) {
         // Abort path
@@ -309,7 +325,7 @@ export class Task extends EventTarget {
     let totalTime = 0
     const samples: number[] = []
     const benchmarkTask = () => {
-      if (this.bench.opts.signal?.aborted) {
+      if (this.isAborted()) {
         return
       }
       try {
@@ -341,7 +357,7 @@ export class Task extends EventTarget {
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
         samples.length < iterations) &&
-        !this.bench.opts.signal?.aborted
+        !this.isAborted()
       ) {
         benchmarkTask()
       }
@@ -361,6 +377,14 @@ export class Task extends EventTarget {
       }
     }
     return { samples }
+  }
+
+  /**
+   * Check if either our signal or the bench-level signal is aborted
+   * @returns `true` if either signal is aborted
+   */
+  private isAborted (): boolean {
+    return this.signal?.aborted === true || this.bench.opts.signal?.aborted === true
   }
 
   private async measureOnce (): Promise<{ fnResult: ReturnType<Fn>; taskTime: number }> {
@@ -420,6 +444,9 @@ export class Task extends EventTarget {
     error?: Error
     latencySamples?: number[]
   }): void {
+    // Always set aborted status, even if no samples were collected
+    const isAborted = this.isAborted()
+
     if (latencySamples && latencySamples.length > 0) {
       this.runs = latencySamples.length
       const totalTime = latencySamples.reduce((a, b) => a + b, 0)
@@ -442,7 +469,7 @@ export class Task extends EventTarget {
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
       this.mergeTaskResult({
-        aborted: this.bench.opts.signal?.aborted ?? false,
+        aborted: isAborted,
         critical: latencyStatistics.critical,
         df: latencyStatistics.df,
         hz: throughputStatistics.mean,
@@ -466,6 +493,9 @@ export class Task extends EventTarget {
         totalTime,
         variance: latencyStatistics.variance,
       })
+    } else if (isAborted) {
+      // If aborted with no samples, still set the aborted flag
+      this.mergeTaskResult({ aborted: true })
     }
 
     if (error) {

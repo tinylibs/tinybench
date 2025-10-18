@@ -156,6 +156,13 @@ export interface FnOptions {
    * An optional function that is run before each iteration of this task
    */
   beforeEach?: FnHook
+
+  /**
+   * An AbortSignal for aborting this specific task
+   *
+   * If not provided, falls back to {@link BenchOptions.signal}
+   */
+  signal?: AbortSignal
 }
 
 /**

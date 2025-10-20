@@ -123,6 +123,107 @@ bench.concurrency = 'task' // The concurrency mode to determine how tasks are ru
 await bench.run()
 ```
 
+## Aborting Benchmarks
+
+Tinybench supports aborting benchmarks using `AbortSignal` at both the bench and task levels:
+
+### Bench-level Abort
+
+Abort all tasks in a benchmark by passing a signal to the `Bench` constructor:
+
+```ts
+const controller = new AbortController()
+
+const bench = new Bench({ signal: controller.signal })
+
+bench
+  .add('task1', () => {
+    // This will be aborted
+  })
+  .add('task2', () => {
+    // This will also be aborted
+  })
+
+// Abort all tasks
+controller.abort()
+
+await bench.run()
+// Both tasks will be aborted
+```
+
+### Task-level Abort
+
+Abort individual tasks without affecting other tasks by passing a signal to the task options:
+
+```ts
+const controller = new AbortController()
+
+const bench = new Bench()
+
+bench
+  .add('abortable task', () => {
+    // This task can be aborted independently
+  }, { signal: controller.signal })
+  .add('normal task', () => {
+    // This task will continue normally
+  })
+
+// Abort only the first task
+controller.abort()
+
+await bench.run()
+// Only 'abortable task' will be aborted, 'normal task' continues
+```
+
+### Abort During Execution
+
+You can abort benchmarks while they're running:
+
+```ts
+const controller = new AbortController()
+
+const bench = new Bench({ time: 10000 }) // Long-running benchmark
+
+bench.add('long task', async () => {
+  await new Promise(resolve => setTimeout(resolve, 100))
+}, { signal: controller.signal })
+
+// Abort after 1 second
+setTimeout(() => controller.abort(), 1000)
+
+await bench.run()
+// Task will stop after ~1 second instead of running for 10 seconds
+```
+
+### Abort Events
+
+Both `Bench` and `Task` emit `abort` events when aborted:
+
+```ts
+const controller = new AbortController()
+const bench = new Bench()
+
+bench.add('task', () => {
+  // Task function
+}, { signal: controller.signal })
+
+const task = bench.getTask('task')
+
+// Listen for abort events
+task.addEventListener('abort', () => {
+  console.log('Task aborted!')
+})
+
+bench.addEventListener('abort', () => {
+  console.log('Bench received abort event!')
+})
+
+controller.abort()
+await bench.run()
+```
+
+**Note:** When a task is aborted, `task.result.aborted` will be `true`, and the task will have completed any iterations that were running when the abort signal was received.
+
 ## Prior art
 
 - [Benchmark.js](https://github.com/bestiejs/benchmark.js)

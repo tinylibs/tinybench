@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@10.18.3",
   "volta": {
-    "node": "22.20.0",
+    "node": "22.21.0",
     "pnpm": "10.18.3"
   },
   "scripts": {

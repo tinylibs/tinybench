@@ -252,7 +252,7 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
  * Computes the average of a sample.
  * @param samples - the sample
  * @returns the average of the sample
- * @throws if the sample is empty
+ * @throws {Error} if the sample is empty
  */
 const average = (samples: number[]) => {
   if (samples.length === 0) {
@@ -280,7 +280,7 @@ const variance = (samples: number[], avg = average(samples)) => {
  * @param samples - the sorted sample
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
- * @throws if the sample is empty
+ * @throws {Error} if the sample is empty
  */
 const quantileSorted = (samples: number[], q: number) => {
   if (samples.length === 0) {
@@ -351,7 +351,7 @@ const absoluteDeviation = (
  * The sample must be sorted.
  * @param samples - the sorted sample
  * @returns the statistics of the sample
- * @throws if the sample is empty
+ * @throws {Error} if the sample is empty
  */
 export const getStatisticsSorted = (samples: number[]): Statistics => {
   const mean = average(samples)

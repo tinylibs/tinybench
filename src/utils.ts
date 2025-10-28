@@ -10,116 +10,95 @@ import { emptyFunction, tTable } from './constants'
  * The JavaScript runtime environment.
  * @see https://runtime-keys.proposal.wintercg.org/
  */
-export enum JSRuntime {
-  browser = 'browser',
-  bun = 'bun',
-  deno = 'deno',
-  'edge-light' = 'edge-light',
-  fastly = 'fastly',
-  hermes = 'hermes',
-  jsc = 'jsc',
-  lagon = 'lagon',
-  moddable = 'moddable',
-  netlify = 'netlify',
-  node = 'node',
-  'quickjs-ng' = 'quickjs-ng',
-  spidermonkey = 'spidermonkey',
-  v8 = 'v8',
-  workerd = 'workerd',
+export type JSRuntime = 'browser' | 'bun' | 'deno' | 'edge-light' | 'fastly' |
+  'hermes' | 'jsc' | 'lagon' | 'moddable' | 'netlify' | 'node' | 'quickjs-ng' |
+  'spidermonkey' | 'unknown' | 'v8' | 'workerd'
+
+/**
+ * @param g GlobalThis object
+ * @returns Detected runtime and its version
+ */
+export function detectRuntime (g = globalThis as Record<string, unknown>): {
+  runtime: JSRuntime
+  version: string
+} {
+  let runtime: JSRuntime = 'unknown'
+  let version = 'unknown'
+
+  if (!!g.Bun || !!(g.process && (g.process as { versions?: Record<string, string> }).versions?.bun)) {
+    runtime = 'bun'
+    version = (g.Bun as { version: string }).version || 'unknown'
+  } else if (g.Deno) {
+    runtime = 'deno'
+    version = (g.Deno as { version?: { deno: string } }).version?.deno ?? 'unknown'
+  } else if (g.process && (g.process as { release?: { name: string } }).release?.name === 'node') {
+    runtime = 'node'
+    version = (g.process as { versions: { node: string } }).versions.node || 'unknown'
+  } else if (g.HermesInternal) {
+    runtime = 'hermes'
+    version = (g.HermesInternal as { getRuntimeProperties?: () => Record<string, string> }).getRuntimeProperties?.()[
+      'OSS Release Version'
+    ] ?? 'unknown'
+  } else if (hasNavigatorWithUserAgent(g) && g.navigator.userAgent === 'Cloudflare-Workers') {
+    runtime = 'workerd'
+  } else if (hasNavigatorWithUserAgent(g) && g.navigator.userAgent.toLowerCase().includes('quickjs-ng')) {
+    runtime = 'quickjs-ng'
+  } else if (typeof g.Netlify === 'object') {
+    runtime = 'netlify'
+  } else if (typeof g.EdgeRuntime === 'string') {
+    runtime = 'edge-light'
+  } else if (g.__lagon__) {
+    runtime = 'lagon'
+  } else if (g.fastly) {
+    runtime = 'fastly'
+  } else if (
+    !!g.$262 &&
+    !!g.lockdown &&
+    !!g.AsyncDisposableStack
+  ) {
+    runtime = 'moddable'
+  } else if (g.d8) {
+    runtime = 'v8'
+    version = typeof g.version === 'function' ? (g.version as () => string)() : 'unknown'
+  } else if (
+    !!g.inIon &&
+    !!(g.performance && (g.performance as { mozMemory?: unknown }).mozMemory)
+  ) {
+    runtime = 'spidermonkey'
+  } else if (
+    typeof g.$ === 'object' && g.$ !== null &&
+    'IsHTMLDDA' in g.$ // eslint-disable-line @cspell/spellchecker
+  ) {
+    runtime = 'jsc'
+  } else if (
+    !!g.window &&
+    !!g.navigator
+  ) {
+    runtime = 'browser'
+  }
+
+  return {
+    runtime,
+    version,
+  }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
-const isBun = !!(globalThis as any).Bun || !!globalThis.process?.versions?.bun
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isDeno = !!(globalThis as any).Deno
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const isNode = globalThis.process?.release?.name === 'node'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isHermes = !!(globalThis as any).HermesInternal
-const isWorkerd =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  (globalThis as any).navigator?.userAgent === 'Cloudflare-Workers'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-const isQuickJsNg = !!(globalThis as any).navigator?.userAgent
-  ?.toLowerCase?.()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  ?.includes?.('quickjs-ng')
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isNetlify = typeof (globalThis as any).Netlify === 'object'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isEdgeLight = typeof (globalThis as any).EdgeRuntime === 'string'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isLagon = !!(globalThis as any).__lagon__
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isFastly = !!(globalThis as any).fastly
-const isModdable =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  !!(globalThis as any).$262 &&
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  !!(globalThis as any).lockdown &&
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  !!(globalThis as any).AsyncDisposableStack
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-const isV8 = !!(globalThis as any).d8
-const isSpiderMonkey =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  !!(globalThis as any).inIon && !!(globalThis as any).performance?.mozMemory
-const isJsc =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  !!(globalThis as any).$ &&
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @cspell/spellchecker
-  'IsHTMLDDA' in (globalThis as any).$
-const isBrowser =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  !!(globalThis as any).window && !!(globalThis as any).navigator
+/**
+ * @param g GlobalThis object
+ * @returns Whether the global object has a navigator with userAgent
+ */
+function hasNavigatorWithUserAgent (g = globalThis as Record<string, unknown>): g is { navigator: Navigator } {
+  return (
+    typeof g.navigator === 'object' &&
+    g.navigator !== null &&
+    typeof (g.navigator as Navigator).userAgent === 'string'
+  )
+}
 
-export const runtime: 'unknown' | JSRuntime = (() => {
-  if (isBun) return JSRuntime.bun
-  if (isDeno) return JSRuntime.deno
-  if (isNode) return JSRuntime.node
-  if (isHermes) return JSRuntime.hermes
-  if (isNetlify) return JSRuntime.netlify
-  if (isEdgeLight) return JSRuntime['edge-light']
-  if (isLagon) return JSRuntime.lagon
-  if (isFastly) return JSRuntime.fastly
-  if (isWorkerd) return JSRuntime.workerd
-  if (isQuickJsNg) return JSRuntime['quickjs-ng']
-  if (isModdable) return JSRuntime.moddable
-  if (isV8) return JSRuntime.v8
-  if (isSpiderMonkey) return JSRuntime.spidermonkey
-  if (isJsc) return JSRuntime.jsc
-  if (isBrowser) return JSRuntime.browser
-  return 'unknown'
-})()
-
-export const runtimeVersion: string = (() => {
-  if (runtime === JSRuntime.bun) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    return (globalThis as any).Bun?.version as string
-  }
-  if (runtime === JSRuntime.deno) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    return (globalThis as any).Deno?.version?.deno as string
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (runtime === JSRuntime.node) return globalThis.process?.versions?.node
-  if (runtime === JSRuntime.hermes) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    return (globalThis as any).HermesInternal?.getRuntimeProperties?.()?.[
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      'OSS Release Version'
-    ] as string
-  }
-  if (runtime === JSRuntime.v8) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    return (globalThis as any).version?.() as string
-  }
-  if (runtime === JSRuntime['quickjs-ng']) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    return (globalThis as any).navigator?.userAgent?.split?.('/')[1] as string
-  }
-  return 'unknown'
-})()
+export const {
+  runtime,
+  version: runtimeVersion,
+} = detectRuntime()
 
 /**
  * Converts nanoseconds to milliseconds.

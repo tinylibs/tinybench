@@ -429,7 +429,7 @@ export interface TaskResult {
   /**
    * the JavaScript runtime environment
    */
-  runtime: 'unknown' | JSRuntime
+  runtime: JSRuntime
 
   /**
    * the JavaScript runtime version

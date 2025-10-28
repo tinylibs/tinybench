@@ -6,7 +6,8 @@
     "noEmit": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
-    "lib": []
+    "lib": [],
+    "erasableSyntaxOnly": true
   },
   "include": ["src", "test", "tsdown.config.ts"],
   "exclude": ["node_modules", "dist"],

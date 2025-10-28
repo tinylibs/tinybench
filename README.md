@@ -118,7 +118,7 @@ checking if provided function is an `AsyncFunction` or if it returns a
 `Promise`, by calling the provided function once.
 
 You can also explicitly set the `async` option to `true` or `false` when adding
-a task, thus avoiding the detection. This can be for example useful for
+a task, thus avoiding the detection. This can be useful, for example, for
 functions that return a `Promise` but are actually synchronous.
 
 ```ts

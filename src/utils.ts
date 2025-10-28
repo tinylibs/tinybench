@@ -359,12 +359,12 @@ export const getStatisticsSorted = (samples: number[]): Statistics => {
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)
   const df = samples.length - 1
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/no-non-null-assertion
-  const critical = tTable[(Math.round(df) || 1).toString()] || tTable.infinity!
+  const critical = tTable[df || 1] ?? tTable[0]
   const moe = sem * critical
   const absMean = Math.abs(mean)
   const rme = absMean === 0 ? Number.POSITIVE_INFINITY : (moe / absMean) * 100
   const p50 = medianSorted(samples)
+
   return {
     aad: absoluteDeviation(samples, average, mean),
     critical,

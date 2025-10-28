@@ -13,7 +13,7 @@ function sleep (ms: number): void {
   }
 }
 
-test('detect faster task (sync)', { timeout: 10000, skip: platform() !== 'linux' }, () => {
+test('detect faster task (sync)', { skip: platform() !== 'linux', timeout: 10000 }, () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench
     .add('faster', () => {

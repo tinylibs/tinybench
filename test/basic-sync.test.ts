@@ -16,7 +16,7 @@ function sleep (ms: number): void {
 test.each([
   ['now()', now],
   ['hrtimeNow()', hrtimeNow],
-])('%s basic (sync)', { timeout: 10000, skip: platform() !== 'linux' }, (_, _now) => {
+])('%s basic (sync)', { skip: platform() !== 'linux', timeout: 10000 }, (_, _now) => {
   const bench = new Bench({ iterations: 16, now: _now, time: 100 })
   bench
     .add('foo', () => {

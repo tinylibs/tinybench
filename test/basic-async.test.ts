@@ -6,7 +6,7 @@ import { Bench, hrtimeNow, now } from '../src'
 test.each([
   ['now()', now],
   ['hrtimeNow()', hrtimeNow],
-])('%s basic (async)', {  timeout: 10000, skip: platform() !== 'linux' }, async (_, _now) => {
+])('%s basic (async)', { skip: platform() !== 'linux', timeout: 10000 }, async (_, _now) => {
   const bench = new Bench({ iterations: 16, now: _now, time: 100 })
   bench
     .add('foo', async () => {

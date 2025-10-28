@@ -10,23 +10,9 @@ import { emptyFunction, tTable } from './constants'
  * The JavaScript runtime environment.
  * @see https://runtime-keys.proposal.wintercg.org/
  */
-export type JSRuntime =
-  'browser' |
-  'bun' |
-  'deno' |
-  'edge-light' |
-  'fastly' |
-  'hermes' |
-  'jsc' |
-  'lagon' |
-  'moddable' |
-  'netlify' |
-  'node' |
-  'quickjs-ng' |
-  'spidermonkey' |
-  'unknown' |
-  'v8' |
-  'workerd'
+export type JSRuntime = 'browser' | 'bun' | 'deno' | 'edge-light' | 'fastly' |
+  'hermes' | 'jsc' | 'lagon' | 'moddable' | 'netlify' | 'node' | 'quickjs-ng' |
+  'spidermonkey' | 'unknown' | 'v8' | 'workerd'
 
 /**
  * @param g GlobalThis object
@@ -36,135 +22,64 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
   runtime: JSRuntime
   version: string
 } {
+  let runtime: JSRuntime = 'unknown'
+  let version = 'unknown'
+
   if (!!g.Bun || !!(g.process && (g.process as { versions?: Record<string, string> }).versions?.bun)) {
-    return {
-      runtime: 'bun',
-      version: (g.Bun as { version: string }).version || 'unknown',
-    }
-  }
-
-  if (g.Deno) {
-    return {
-      runtime: 'deno',
-      version: (g.Deno as { version?: { deno: string } }).version?.deno ?? 'unknown',
-    }
-  }
-
-  if (g.process) {
-    if ((g.process as { release?: { name: string } }).release?.name === 'node') {
-      return {
-        runtime: 'node',
-        version: (g.process as { versions: { node: string } }).versions.node || 'unknown',
-      }
-    }
-  }
-
-  if (g.HermesInternal) {
-    return {
-      runtime: 'hermes',
-      version: (g.HermesInternal as { getRuntimeProperties?: () => Record<string, string> }).getRuntimeProperties?.()[
-
-        'OSS Release Version'
-      ] ?? 'unknown',
-    }
-  }
-
-  if (hasNavigatorWithUserAgent(g)) {
-    const userAgent = g.navigator.userAgent
-    if (userAgent === 'Cloudflare-Workers') {
-      return {
-        runtime: 'workerd',
-        version: 'unknown',
-      }
-    }
-
-    if (userAgent.toLowerCase().includes('quickjs-ng')) {
-      return {
-        runtime: 'quickjs-ng',
-        version: 'unknown',
-      }
-    }
-  }
-
-  if (typeof g.Netlify === 'object') {
-    return {
-      runtime: 'netlify',
-      version: 'unknown',
-    }
-  }
-
-  if (typeof g.EdgeRuntime === 'string') {
-    return {
-      runtime: 'edge-light',
-      version: 'unknown',
-    }
-  }
-
-  if (g.__lagon__) {
-    return {
-      runtime: 'lagon',
-      version: 'unknown',
-    }
-  }
-
-  if (g.fastly) {
-    return {
-      runtime: 'fastly',
-      version: 'unknown',
-    }
-  }
-
-  if (
+    runtime = 'bun'
+    version = (g.Bun as { version: string }).version || 'unknown'
+  } else if (g.Deno) {
+    runtime = 'deno'
+    version = (g.Deno as { version?: { deno: string } }).version?.deno ?? 'unknown'
+  } else if (g.process && (g.process as { release?: { name: string } }).release?.name === 'node') {
+    runtime = 'node'
+    version = (g.process as { versions: { node: string } }).versions.node || 'unknown'
+  } else if (g.HermesInternal) {
+    runtime = 'hermes'
+    version = (g.HermesInternal as { getRuntimeProperties?: () => Record<string, string> }).getRuntimeProperties?.()[
+      'OSS Release Version'
+    ] ?? 'unknown'
+  } else if (hasNavigatorWithUserAgent(g) && g.navigator.userAgent === 'Cloudflare-Workers') {
+    runtime = 'workerd'
+  } else if (hasNavigatorWithUserAgent(g) && g.navigator.userAgent.toLowerCase().includes('quickjs-ng')) {
+    runtime = 'quickjs-ng'
+  } else if (typeof g.Netlify === 'object') {
+    runtime = 'netlify'
+  } else if (typeof g.EdgeRuntime === 'string') {
+    runtime = 'edge-light'
+  } else if (g.__lagon__) {
+    runtime = 'lagon'
+  } else if (g.fastly) {
+    runtime = 'fastly'
+  } else if (
     !!g.$262 &&
     !!g.lockdown &&
     !!g.AsyncDisposableStack
   ) {
-    return {
-      runtime: 'moddable',
-      version: 'unknown',
-    }
-  }
-
-  if (g.d8) {
-    return {
-      runtime: 'v8',
-      version: typeof g.version === 'function' ? (g.version as () => string)() : 'unknown',
-    }
-  }
-
-  if (
+    runtime = 'moddable'
+  } else if (g.d8) {
+    runtime = 'v8'
+    version = typeof g.version === 'function' ? (g.version as () => string)() : 'unknown'
+  } else if (
     !!g.inIon &&
     !!(g.performance && (g.performance as { mozMemory?: unknown }).mozMemory)
   ) {
-    return {
-      runtime: 'spidermonkey',
-      version: 'unknown',
-    }
-  }
-
-  if (
+    runtime = 'spidermonkey'
+  } else if (
     typeof g.$ === 'object' && g.$ !== null &&
     'IsHTMLDDA' in g.$ // eslint-disable-line @cspell/spellchecker
   ) {
-    return {
-      runtime: 'jsc',
-      version: 'unknown',
-    }
-  }
-
-  if (
+    runtime = 'jsc'
+  } else if (
     !!g.window &&
     !!g.navigator
   ) {
-    return {
-      runtime: 'browser',
-      version: 'unknown',
-    }
+    runtime = 'browser'
   }
 
   return {
-    runtime: 'unknown',
-    version: 'unknown',
+    runtime,
+    version,
   }
 }
 

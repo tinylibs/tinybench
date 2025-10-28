@@ -57,7 +57,7 @@ export class Bench extends EventTarget {
   /**
    * The JavaScript runtime environment.
    */
-  readonly runtime: 'unknown' | JSRuntime
+  readonly runtime: JSRuntime
 
   /**
    * The JavaScript runtime version.

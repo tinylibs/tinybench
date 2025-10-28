@@ -10,23 +10,23 @@ import { emptyFunction, tTable } from './constants'
  * The JavaScript runtime environment.
  * @see https://runtime-keys.proposal.wintercg.org/
  */
-export enum JSRuntime {
-  browser = 'browser',
-  bun = 'bun',
-  deno = 'deno',
-  'edge-light' = 'edge-light',
-  fastly = 'fastly',
-  hermes = 'hermes',
-  jsc = 'jsc',
-  lagon = 'lagon',
-  moddable = 'moddable',
-  netlify = 'netlify',
-  node = 'node',
-  'quickjs-ng' = 'quickjs-ng',
-  spidermonkey = 'spidermonkey',
-  v8 = 'v8',
-  workerd = 'workerd',
-}
+export type JSRuntime =
+  'browser' |
+  'bun' |
+  'deno' |
+  'edge-light' |
+  'fastly' |
+  'hermes' |
+  'jsc' |
+  'lagon' |
+  'moddable' |
+  'netlify' |
+  'node' |
+  'quickjs-ng' |
+  'spidermonkey' |
+  'unknown' |
+  'v8' |
+  'workerd'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition
 const isBun = !!(globalThis as any).Bun || !!globalThis.process?.versions?.bun
@@ -73,48 +73,48 @@ const isBrowser =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   !!(globalThis as any).window && !!(globalThis as any).navigator
 
-export const runtime: 'unknown' | JSRuntime = (() => {
-  if (isBun) return JSRuntime.bun
-  if (isDeno) return JSRuntime.deno
-  if (isNode) return JSRuntime.node
-  if (isHermes) return JSRuntime.hermes
-  if (isNetlify) return JSRuntime.netlify
-  if (isEdgeLight) return JSRuntime['edge-light']
-  if (isLagon) return JSRuntime.lagon
-  if (isFastly) return JSRuntime.fastly
-  if (isWorkerd) return JSRuntime.workerd
-  if (isQuickJsNg) return JSRuntime['quickjs-ng']
-  if (isModdable) return JSRuntime.moddable
-  if (isV8) return JSRuntime.v8
-  if (isSpiderMonkey) return JSRuntime.spidermonkey
-  if (isJsc) return JSRuntime.jsc
-  if (isBrowser) return JSRuntime.browser
+export const runtime: JSRuntime = (() => {
+  if (isBun) return 'bun'
+  if (isDeno) return 'deno'
+  if (isNode) return 'node'
+  if (isHermes) return 'hermes'
+  if (isNetlify) return 'netlify'
+  if (isEdgeLight) return 'edge-light'
+  if (isLagon) return 'lagon'
+  if (isFastly) return 'fastly'
+  if (isWorkerd) return 'workerd'
+  if (isQuickJsNg) return 'quickjs-ng'
+  if (isModdable) return 'moddable'
+  if (isV8) return 'v8'
+  if (isSpiderMonkey) return 'spidermonkey'
+  if (isJsc) return 'jsc'
+  if (isBrowser) return 'browser'
   return 'unknown'
 })()
 
 export const runtimeVersion: string = (() => {
-  if (runtime === JSRuntime.bun) {
+  if (runtime === 'bun') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     return (globalThis as any).Bun?.version as string
   }
-  if (runtime === JSRuntime.deno) {
+  if (runtime === 'deno') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     return (globalThis as any).Deno?.version?.deno as string
   }
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (runtime === JSRuntime.node) return globalThis.process?.versions?.node
-  if (runtime === JSRuntime.hermes) {
+  if (runtime === 'node') return globalThis.process?.versions?.node
+  if (runtime === 'hermes') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     return (globalThis as any).HermesInternal?.getRuntimeProperties?.()?.[
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       'OSS Release Version'
     ] as string
   }
-  if (runtime === JSRuntime.v8) {
+  if (runtime === 'v8') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     return (globalThis as any).version?.() as string
   }
-  if (runtime === JSRuntime['quickjs-ng']) {
+  if (runtime === 'quickjs-ng') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     return (globalThis as any).navigator?.userAgent?.split?.('/')[1] as string
   }

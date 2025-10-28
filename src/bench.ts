@@ -65,7 +65,8 @@ export class Bench extends EventTarget {
   readonly runtimeVersion: string
 
   /**
-   * The maximum number of concurrent tasks to run @default Number.POSITIVE_INFINITY
+   * The maximum number of concurrent tasks to run
+   * @default Number.POSITIVE_INFINITY
    */
   threshold = Number.POSITIVE_INFINITY
 
@@ -128,7 +129,7 @@ export class Bench extends EventTarget {
    * @param fn - the task function
    * @param fnOpts - the task function options
    * @returns the Bench instance
-   * @throws if the task already exists
+   * @throws {Error} if the task already exists
    */
   add (name: string, fn: Fn, fnOpts: FnOptions = {}): this {
     if (!this._tasks.has(name)) {

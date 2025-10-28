@@ -47,7 +47,8 @@ export interface BenchEventsMap {
  */
 export interface BenchOptions {
   /**
-   * number of times that a task should run if even the time option is finished @default 64
+   * number of times that a task should run if even the time option is finished
+   * @default 64
    */
   iterations?: number
 
@@ -77,27 +78,32 @@ export interface BenchOptions {
   teardown?: Hook
 
   /**
-   * Throws if a task fails @default false
+   * Throws if a task fails
+   * @default false
    */
   throws?: boolean
 
   /**
-   * time needed for running a benchmark task (milliseconds) @default 1000
+   * time needed for running a benchmark task (milliseconds)
+   * @default 1000
    */
   time?: number
 
   /**
-   * warmup benchmark @default true
+   * warmup benchmark
+   * @default true
    */
   warmup?: boolean
 
   /**
-   * warmup iterations @default 16
+   * warmup iterations
+   * @default 16
    */
   warmupIterations?: number
 
   /**
-   * warmup time (milliseconds) @default 250
+   * warmup time (milliseconds)
+   * @default 250
    */
   warmupTime?: number
 }

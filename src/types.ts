@@ -148,6 +148,12 @@ export interface FnOptions {
   afterEach?: FnHook
 
   /**
+   * Whether the provided task function is asynchronous, otherwise it is
+   * determined automatically.
+   */
+  async?: boolean
+
+  /**
    * An optional function that is run before iterations of this task begin
    */
   beforeAll?: FnHook

@@ -70,7 +70,7 @@ export class Task extends EventTarget {
     this.name = name
     this.fn = fn
     this.fnOpts = fnOpts
-    this.async = isFnAsyncResource(fn)
+    this.async = fnOpts.async ?? isFnAsyncResource(fn)
     this.signal = fnOpts.signal
 
     if (this.signal) {

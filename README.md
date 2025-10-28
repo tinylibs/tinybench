@@ -111,6 +111,40 @@ import { hrtimeNow } from 'tinybench'
 
 It may make your benchmarks slower.
 
+## Async Detection
+
+Tinybench automatically detects if a task function is asynchronous by
+checking if provided function is an `AsyncFunction` or if it returns a
+`Promise`, by calling the provided function once.
+
+You can also explicitly set the `async` option to `true` or `false` when adding
+a task, thus avoiding the detection. This can be for example useful for
+functions that return a `Promise` but are actually synchronous.
+
+```ts
+const bench = new Bench()
+
+bench.add('asyncTask', async () => {
+}, { async: true })
+
+bench.add('syncTask', () => {
+}, { async: false })
+
+bench.add('syncTaskReturningPromiseAsAsync', () => {
+  return Promise.resolve()
+}, { async: true })
+
+bench.add('syncTaskReturningPromiseAsSync', () => {
+  // for example running sync logic, which blocks the event loop anyway
+  // like fs.writeFileSync
+
+  // returns promise maybe for API compatibility
+  return Promise.resolve()
+}, { async: false })
+
+await bench.run()
+```
+
 ## Concurrency
 
 - When `mode` is set to `null` (default), concurrency is disabled.

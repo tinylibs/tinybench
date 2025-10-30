@@ -229,7 +229,7 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 
 /**
  * Computes the average of a sample.
- * @param samples - the sample, must have at least one element
+ * @param samples - the sample
  * @returns the average of the sample
  */
 const average = (samples: Samples) => {
@@ -261,7 +261,7 @@ export const isSamples = (value: number[] | undefined): value is Samples => {
 
 /**
  * Computes the variance of a sample with Bessel's correction.
- * @param samples - the sample, must have at least one element
+ * @param samples - the sample
  * @param avg - the average of the sample
  * @returns the variance of the sample
  */
@@ -280,7 +280,7 @@ type ValidQuantiles = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
 
 /**
  * Computes the q-quantile of a sorted sample.
- * @param samples - the sorted sample, must have at least one element
+ * @param samples - the sorted sample
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  */
@@ -301,7 +301,7 @@ const quantileSorted = (samples: Samples, q: ValidQuantiles): number => {
 
 /**
  * Computes the median of a sorted sample.
- * @param samples - the sorted sample, must have at least one element
+ * @param samples - the sorted sample
  * @returns the median of the sample
  */
 const medianSorted = (samples: Samples) => quantileSorted(samples, 0.5)
@@ -316,7 +316,7 @@ export const sortFn = (a: number, b: number) => a - b
 
 /**
  * Computes the median of a sample.
- * @param samples - the sample, must have at least one element
+ * @param samples - the sample
  * @returns the median of the sample
  */
 const median = (samples: Samples) => {
@@ -325,7 +325,7 @@ const median = (samples: Samples) => {
 
 /**
  * Computes the absolute deviation of a sample given an aggregation.
- * @param samples - the sample, must have at least one element
+ * @param samples - the sample
  * @param aggFn - the aggregation function to use
  * @param aggValue - the aggregated value to use
  * @returns the absolute deviation of the sample given the aggregation
@@ -348,7 +348,7 @@ const absoluteDeviation = (
 /**
  * Computes the statistics of a sample.
  * The sample must be sorted.
- * @param samples - the sorted sample, must have at least one element
+ * @param samples - the sorted sample
  * @returns the statistics of the sample
  * @throws {TypeError} if the sample is empty
  */

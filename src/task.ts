@@ -131,7 +131,7 @@ export class Task extends EventTarget {
    * @internal
    */
   async run (): Promise<Task> {
-    if (this.result.state === 'errored' || this.result.state === 'aborted') {
+    if (this.result.state !== 'not-started') {
       return this
     }
     this.dispatchEvent(createBenchEvent('start', this))
@@ -154,7 +154,7 @@ export class Task extends EventTarget {
    * @internal
    */
   runSync (): this {
-    if (this.result.state === 'errored' || this.result.state === 'aborted') {
+    if (this.result.state !== 'not-started') {
       return this
     }
 
@@ -192,7 +192,7 @@ export class Task extends EventTarget {
    * @internal
    */
   async warmup (): Promise<void> {
-    if (this.result.state === 'errored' || this.result.state === 'aborted') {
+    if (this.result.state !== 'not-started') {
       return
     }
     this.dispatchEvent(createBenchEvent('warmup', this))
@@ -212,7 +212,7 @@ export class Task extends EventTarget {
    * @internal
    */
   warmupSync (): void {
-    if (this.result.state === 'errored' || this.result.state === 'aborted') {
+    if (this.result.state !== 'not-started') {
       return
     }
 

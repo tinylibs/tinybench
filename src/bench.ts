@@ -75,7 +75,7 @@ export class Bench extends EventTarget {
    * @returns the tasks results as an array
    */
   get results (): (Readonly<TaskResult> | undefined)[] {
-    return [...this._tasks.values()].map(task => task.result)
+    return this.tasks.map(task => task.result)
   }
 
   /**

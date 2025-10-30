@@ -14,9 +14,12 @@ import type {
 import { createBenchEvent, createErrorEvent } from './event'
 import {
   getStatisticsSorted,
+  sortFn,
   invariant,
   isFnAsyncResource,
   isPromiseLike,
+  isSamples,
+  Samples,
 } from './utils'
 
 /**
@@ -447,13 +450,13 @@ export class Task extends EventTarget {
     // Always set aborted status, even if no samples were collected
     const isAborted = this.isAborted()
 
-    if (latencySamples && latencySamples.length > 0) {
+    if (isSamples(latencySamples)) {
       this.runs = latencySamples.length
       const totalTime = latencySamples.reduce((a, b) => a + b, 0)
 
       // Latency statistics
       const latencyStatistics = getStatisticsSorted(
-        latencySamples.sort((a, b) => a - b)
+        latencySamples.sort(sortFn) as Samples
       )
 
       // Throughput statistics
@@ -465,7 +468,7 @@ export class Task extends EventTarget {
               ? 1000 / latencyStatistics.mean
               : 0
         ) // Use latency average as imputed sample
-        .sort((a, b) => a - b)
+        .sort(sortFn) as Samples
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
       this.mergeTaskResult({

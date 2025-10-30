@@ -229,51 +229,62 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 
 /**
  * Computes the average of a sample.
- * @param samples - the sample
+ * @param samples - the sample, must have at least one element
  * @returns the average of the sample
- * @throws {Error} if the sample is empty
  */
-const average = (samples: number[]) => {
-  if (samples.length === 0) {
-    throw new Error('samples must not be empty')
+const average = (samples: Samples) => {
+  let result = 0
+
+  for (const sample of samples) {
+    result += sample
   }
-  return samples.reduce((a, b) => a + b, 0) / samples.length || 0
+
+  return (result / samples.length) || 0
+}
+
+/**
+ * A type representing a samples-array with at least one number.
+ */
+export type Samples = [number, ...number[]]
+
+/**
+ * Checks if a value is a Samples type.
+ * @param value - value to check
+ * @returns if the value is a Samples type, meaning a non-empty array of numbers
+ */
+export const isSamples = (value: number[] | undefined): value is Samples => {
+  return (
+    Array.isArray(value) && 
+    value.length !== 0
+  )
 }
 
 /**
  * Computes the variance of a sample with Bessel's correction.
- * @param samples - the sample
+ * @param samples - the sample, must have at least one element
  * @param avg - the average of the sample
  * @returns the variance of the sample
  */
-const variance = (samples: number[], avg = average(samples)) => {
-  if (samples.length <= 1) {
+const variance = (samples: Samples, avg = average(samples)) => {
+  if (samples.length === 1) {
     return 0
   }
-  const sumSq = samples.reduce((sum, n) => sum + (n - avg) ** 2, 0)
+  let sumSq = 0
+  for (const sample of samples) {
+    sumSq += (sample - avg) ** 2
+  }
   return sumSq / (samples.length - 1)
 }
 
+type ValidQuantiles = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
+
 /**
  * Computes the q-quantile of a sorted sample.
- * @param samples - the sorted sample
+ * @param samples - the sorted sample, must have at least one element
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
- * @throws {Error} if the sample is empty
  */
-const quantileSorted = (samples: number[], q: number) => {
-  if (samples.length === 0) {
-    throw new Error('samples must not be empty')
-  }
-  if (q < 0 || q > 1) {
-    throw new Error('q must be between 0 and 1')
-  }
-  if (q === 0) {
-    return samples[0]
-  }
-  if (q === 1) {
-    return samples[samples.length - 1]
-  }
+const quantileSorted = (samples: Samples, q: ValidQuantiles): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
   if (samples[baseIndex + 1] != null) {
@@ -284,38 +295,47 @@ const quantileSorted = (samples: number[], q: number) => {
       (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
     )
   }
-  return samples[baseIndex]
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return samples[baseIndex]!
 }
 
 /**
  * Computes the median of a sorted sample.
- * @param samples - the sorted sample
+ * @param samples - the sorted sample, must have at least one element
  * @returns the median of the sample
  */
-const medianSorted = (samples: number[]) => quantileSorted(samples, 0.5)
+const medianSorted = (samples: Samples) => quantileSorted(samples, 0.5)
+
+/**
+ * A sort function to be passed to Array.prototype.sort for numbers.
+ * @param a
+ * @param b
+ * @returns a number indicating the sort order 
+ */
+export const sortFn = (a: number, b: number) => a - b
 
 /**
  * Computes the median of a sample.
- * @param samples - the sample
+ * @param samples - the sample, must have at least one element
  * @returns the median of the sample
  */
-const median = (samples: number[]) => {
-  return medianSorted([...samples].sort((a, b) => a - b))
+const median = (samples: Samples) => {
+  return medianSorted(([...samples] as Samples).sort(sortFn))
 }
 
 /**
  * Computes the absolute deviation of a sample given an aggregation.
- * @param samples - the sample
+ * @param samples - the sample, must have at least one element
  * @param aggFn - the aggregation function to use
  * @param aggValue - the aggregated value to use
  * @returns the absolute deviation of the sample given the aggregation
  */
 const absoluteDeviation = (
-  samples: number[],
-  aggFn: (arr: number[]) => number | undefined,
+  samples: Samples,
+  aggFn: (arr: Samples) => number,
   aggValue = aggFn(samples)
 ) => {
-  const absoluteDeviations: number[] = []
+  const absoluteDeviations: Samples = [] as unknown as Samples
 
   for (const sample of samples) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -328,11 +348,15 @@ const absoluteDeviation = (
 /**
  * Computes the statistics of a sample.
  * The sample must be sorted.
- * @param samples - the sorted sample
+ * @param samples - the sorted sample, must have at least one element
  * @returns the statistics of the sample
- * @throws {Error} if the sample is empty
+ * @throws {TypeError} if the sample is empty
  */
-export const getStatisticsSorted = (samples: number[]): Statistics => {
+export const getStatisticsSorted = (samples: Samples): Statistics => {
+  if (samples.length === 0) {
+    throw new TypeError('samples must not be empty')
+  }
+
   const mean = average(samples)
   const vr = variance(samples, mean)
   const sd = Math.sqrt(vr)

@@ -254,7 +254,7 @@ export type Samples = [number, ...number[]]
  */
 export const isSamples = (value: number[] | undefined): value is Samples => {
   return (
-    Array.isArray(value) && 
+    Array.isArray(value) &&
     value.length !== 0
   )
 }
@@ -276,7 +276,7 @@ const variance = (samples: Samples, avg = average(samples)) => {
   return sumSq / (samples.length - 1)
 }
 
-type ValidQuantiles = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
+type ValidQ = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
 
 /**
  * Computes the q-quantile of a sorted sample.
@@ -284,7 +284,7 @@ type ValidQuantiles = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  */
-const quantileSorted = (samples: Samples, q: ValidQuantiles): number => {
+const quantileSorted = (samples: Samples, q: ValidQ): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
   if (samples[baseIndex + 1] != null) {
@@ -308,9 +308,9 @@ const medianSorted = (samples: Samples) => quantileSorted(samples, 0.5)
 
 /**
  * A sort function to be passed to Array.prototype.sort for numbers.
- * @param a
- * @param b
- * @returns a number indicating the sort order 
+ * @param a - first number
+ * @param b - second number
+ * @returns a number indicating the sort order
  */
 export const sortFn = (a: number, b: number) => a - b
 
@@ -338,8 +338,7 @@ const absoluteDeviation = (
   const absoluteDeviations: Samples = [] as unknown as Samples
 
   for (const sample of samples) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    absoluteDeviations.push(Math.abs(sample - aggValue!))
+    absoluteDeviations.push(Math.abs(sample - aggValue))
   }
 
   return aggFn(absoluteDeviations)
@@ -376,8 +375,7 @@ export const getStatisticsSorted = (samples: Samples): Statistics => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     max: samples[df]!,
     mean,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    min: samples[0]!,
+    min: samples[0],
     moe,
     p50,
     p75: quantileSorted(samples, 0.75),

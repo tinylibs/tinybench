@@ -14,12 +14,12 @@ import type {
 import { createBenchEvent, createErrorEvent } from './event'
 import {
   getStatisticsSorted,
-  sortFn,
   invariant,
   isFnAsyncResource,
   isPromiseLike,
   isSamples,
   Samples,
+  sortFn,
 } from './utils'
 
 /**
@@ -456,7 +456,7 @@ export class Task extends EventTarget {
 
       // Latency statistics
       const latencyStatistics = getStatisticsSorted(
-        latencySamples.sort(sortFn) as Samples
+        latencySamples.sort(sortFn)
       )
 
       // Throughput statistics

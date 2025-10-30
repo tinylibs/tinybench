@@ -1,7 +1,7 @@
 import { platform } from 'node:os'
 import { expect, test } from 'vitest'
 
-import { Bench, hrtimeNow, now } from '../src'
+import { Bench, hrtimeNow, now, Task } from '../src'
 
 test.each([
   ['now()', now],
@@ -18,25 +18,31 @@ test.each([
 
   await bench.run()
 
-  const { tasks } = bench
+  expect(bench.tasks.length).toEqual(2)
 
-  expect(tasks.length).toEqual(2)
+  const tasks = bench.tasks as [Task, Task]
 
-  expect(tasks[0]?.name).toEqual('foo')
-  expect(tasks[0]?.result?.totalTime).toBeGreaterThan(50)
-  expect(tasks[0]?.result?.latency.mean).toBeGreaterThan(50)
+  expect(tasks[0].name).toEqual('foo')
+
+  expect(tasks[0].result.state).toBe('completed')
+  if (tasks[0].result.state !== 'completed') return
+
+  expect(tasks[0].result.totalTime).toBeGreaterThan(50)
+  expect(tasks[0].result.latency.mean).toBeGreaterThan(50)
   // throughput mean is ops/s, period is ms unit value
   expect(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    tasks[0]!.result!.throughput.mean * tasks[0]!.result!.period
+    tasks[0].result.throughput.mean * tasks[0].result.period
   ).toBeCloseTo(1000, 1)
 
-  expect(tasks[1]?.name).toEqual('bar')
-  expect(tasks[1]?.result?.totalTime).toBeGreaterThan(100)
-  expect(tasks[1]?.result?.latency.mean).toBeGreaterThan(100)
+  expect(tasks[1].name).toEqual('bar')
+
+  expect(tasks[1].result.state).toBe('completed')
+  if (tasks[1].result.state !== 'completed') return
+
+  expect(tasks[1].result.totalTime).toBeGreaterThan(100)
+  expect(tasks[1].result.latency.mean).toBeGreaterThan(100)
   // throughput mean is ops/s, period is ms unit value
   expect(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    tasks[1]!.result!.throughput.mean * tasks[1]!.result!.period
+    tasks[1].result.throughput.mean * tasks[1].result.period
   ).toBeCloseTo(1000, 1)
 })

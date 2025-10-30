@@ -108,10 +108,19 @@ export interface BenchOptions {
   warmupTime?: number
 }
 
+export type ConvertForConsoleTableFn = (task: Task) => Record<string, number | string>
+
 /**
  * Event listener
  */
 export type EventListener = (evt: BenchEvent) => void
+
+export type Fn = () =>
+  | FnReturnedObject
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  | Promise<FnReturnedObject | unknown>
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  | unknown
 
 /**
  * The task function.
@@ -121,13 +130,6 @@ export type EventListener = (evt: BenchEvent) => void
  * object with a `overriddenDuration` field. You should still use
  * `bench.opts.now()` to measure that duration.
  */
-
-export type Fn = () =>
-  | FnReturnedObject
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  | Promise<FnReturnedObject | unknown>
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  | unknown
 
 /**
  * The task hook function signature.
@@ -227,7 +229,7 @@ export interface Statistics {
   /**
    * mean/average absolute deviation
    */
-  aad: number | undefined
+  aad: number
 
   /**
    * critical value
@@ -242,7 +244,7 @@ export interface Statistics {
   /**
    * median absolute deviation
    */
-  mad: number | undefined
+  mad: number
 
   /**
    * the maximum value
@@ -267,27 +269,27 @@ export interface Statistics {
   /**
    * p50/median percentile
    */
-  p50: number | undefined
+  p50: number
 
   /**
    * p75 percentile
    */
-  p75: number | undefined
+  p75: number
 
   /**
    * p99 percentile
    */
-  p99: number | undefined
+  p99: number
 
   /**
    * p995 percentile
    */
-  p995: number | undefined
+  p995: number
 
   /**
    * p999 percentile
    */
-  p999: number | undefined
+  p999: number
 
   /**
    * relative margin of error
@@ -336,15 +338,97 @@ export interface TaskEventsMap {
   start: EventListener
   warmup: EventListener
 }
+
 /**
  * The task result object
  */
-export interface TaskResult {
+export type TaskResult = TaskResultAborted | TaskResultAbortedWithStatistics | TaskResultCompleted | TaskResultErrored | TaskResultNotStarted
+
+export interface TaskResultAborted {
   /**
    * whether the task was aborted
    */
-  aborted: boolean
+  aborted: true
 
+  state: 'aborted'
+}
+
+export interface TaskResultAbortedWithStatistics extends
+  TaskResultWithStatistics {
+  /**
+   * whether the task was aborted
+   */
+  aborted: true
+
+  state: 'aborted-with-statistics'
+}
+
+export interface TaskResultCompleted extends
+  TaskResultWithStatistics {
+  /**
+   * whether the task was aborted
+   */
+  aborted: false
+
+  /**
+   * how long each operation takes (ms)
+   */
+  period: number
+
+  state: 'completed'
+}
+
+export interface TaskResultErrored {
+  /**
+   * the error that caused the task to fail
+   */
+  error: Error
+
+  state: 'errored'
+}
+
+export interface TaskResultNotStarted {
+  state: 'not-started'
+}
+
+export interface TaskResultRuntimeInfo {
+  /**
+   * the JavaScript runtime environment
+   */
+  runtime: JSRuntime
+
+  /**
+   * the JavaScript runtime version
+   */
+  runtimeVersion: string
+}
+
+export interface TaskResultWithStatistics extends
+  DeprecatedStatistics {
+
+  /**
+   * the task latency statistics
+   */
+  latency: Statistics
+
+  /**
+   * how long each operation takes (ms)
+   */
+  period: number
+
+  /**
+   * the task throughput statistics
+   */
+  throughput: Statistics
+
+  /**
+   * the time to run the task benchmark cycle (ms)
+   */
+  totalTime: number
+
+}
+
+interface DeprecatedStatistics {
   /**
    * the latency samples critical value
    * @deprecated use `.latency.critical` instead
@@ -358,20 +442,10 @@ export interface TaskResult {
   df: number
 
   /**
-   * the last task error that was thrown
-   */
-  error?: Error
-
-  /**
    * the number of operations per second
    * @deprecated use `.throughput.mean` instead
    */
   hz: number
-
-  /**
-   * the task latency statistics
-   */
-  latency: Statistics
 
   /**
    * the maximum latency samples value
@@ -422,25 +496,10 @@ export interface TaskResult {
   p999: number
 
   /**
-   * how long each operation takes (ms)
-   */
-  period: number
-
-  /**
    * the latency samples relative margin of error
    * @deprecated use `.latency.rme` instead
    */
   rme: number
-
-  /**
-   * the JavaScript runtime environment
-   */
-  runtime: JSRuntime
-
-  /**
-   * the JavaScript runtime version
-   */
-  runtimeVersion: string
 
   /**
    * latency samples (ms)
@@ -459,16 +518,6 @@ export interface TaskResult {
    * @deprecated use `.latency.sem` instead
    */
   sem: number
-
-  /**
-   * the task throughput statistics
-   */
-  throughput: Statistics
-
-  /**
-   * the time to run the task benchmark cycle (ms)
-   */
-  totalTime: number
 
   /**
    * the latency samples variance

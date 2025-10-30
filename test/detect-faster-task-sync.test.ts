@@ -28,39 +28,43 @@ test('detect faster task (sync)', { skip: platform() !== 'linux', timeout: 10000
   const fasterTask = bench.getTask('faster')
   const slowerTask = bench.getTask('slower')
 
-  expect(fasterTask?.result?.latency.mean).toBeLessThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.latency.mean
+  expect(fasterTask).toBeDefined()
+  if (!fasterTask) return
+
+  expect(slowerTask).toBeDefined()
+  if (!slowerTask) return
+
+  expect(fasterTask.result.state).toBe('completed')
+  if (fasterTask.result.state !== 'completed') return
+
+  expect(slowerTask.result.state).toBe('completed')
+  if (slowerTask.result.state !== 'completed') return
+
+  expect(fasterTask.result.latency.mean).toBeLessThan(
+    slowerTask.result.latency.mean
   )
-  expect(fasterTask?.result?.latency.min).toBeLessThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.latency.min
+  expect(fasterTask.result.latency.min).toBeLessThan(
+    slowerTask.result.latency.min
   )
-  expect(fasterTask?.result?.latency.max).toBeLessThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.latency.max
+  expect(fasterTask.result.latency.max).toBeLessThan(
+    slowerTask.result.latency.max
   )
   // latency moe should be lesser since it's faster
-  expect(fasterTask?.result?.latency.moe).toBeLessThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.latency.moe
+  expect(fasterTask.result.latency.moe).toBeLessThan(
+    slowerTask.result.latency.moe
   )
 
-  expect(fasterTask?.result?.throughput.mean).toBeGreaterThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.throughput.mean
+  expect(fasterTask.result.throughput.mean).toBeGreaterThan(
+    slowerTask.result.throughput.mean
   )
-  expect(fasterTask?.result?.throughput.min).toBeGreaterThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.throughput.min
+  expect(fasterTask.result.throughput.min).toBeGreaterThan(
+    slowerTask.result.throughput.min
   )
-  expect(fasterTask?.result?.throughput.max).toBeGreaterThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.throughput.max
+  expect(fasterTask.result.throughput.max).toBeGreaterThan(
+    slowerTask.result.throughput.max
   )
   // throughput moe should be greater since it's faster
-  expect(fasterTask?.result?.throughput.moe).toBeGreaterThan(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    slowerTask!.result!.throughput.moe
+  expect(fasterTask.result.throughput.moe).toBeGreaterThan(
+    slowerTask.result.throughput.moe
   )
 })

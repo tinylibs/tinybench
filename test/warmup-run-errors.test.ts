@@ -24,7 +24,13 @@ test.each(['warmup', 'run'])('%s error event (async)', async mode => {
 
   await expect(bench.run()).resolves.toBeDefined()
   expect(err).toStrictEqual(error)
-  expect(task?.result?.error).toStrictEqual(error)
+
+  expect(task).toBeDefined()
+  if (!task) return
+
+  expect(task.result.state).toBe('errored')
+  if (task.result.state !== 'errored') return
+  expect(task.result.error).toStrictEqual(error)
 })
 
 test.each(['warmup', 'run'])('%s error event (sync)', mode => {
@@ -49,7 +55,13 @@ test.each(['warmup', 'run'])('%s error event (sync)', mode => {
 
   expect(bench.runSync()).toBeDefined()
   expect(err).toStrictEqual(error)
-  expect(task?.result?.error).toStrictEqual(error)
+  expect(task).toBeDefined()
+  if (!task) return
+
+  expect(task.result.state).toBe('errored')
+  if (task.result.state !== 'errored') return
+
+  expect(task.result.error).toStrictEqual(error)
 })
 
 test.each(['warmup', 'run'])('%s throws (async)', async mode => {
@@ -76,7 +88,14 @@ test.each(['warmup', 'run'])('%s throws (async)', async mode => {
 
   await expect(bench.run()).rejects.toThrowError(error)
   expect(err).toStrictEqual(error)
-  expect(task?.result?.error).toStrictEqual(error)
+
+  expect(task).toBeDefined()
+  if (!task) return
+
+  expect(task.result.state).toBe('errored')
+  if (task.result.state !== 'errored') return
+
+  expect(task.result.error).toStrictEqual(error)
 })
 
 test.each(['warmup', 'run'])('%s throws (sync)', mode => {
@@ -105,5 +124,12 @@ test.each(['warmup', 'run'])('%s throws (sync)', mode => {
     bench.runSync()
   }).toThrowError(error)
   expect(err).toStrictEqual(error)
-  expect(task?.result?.error).toStrictEqual(error)
+
+  expect(task).toBeDefined()
+  if (!task) return
+
+  expect(task.result.state).toBe('errored')
+  if (task.result.state !== 'errored') return
+
+  expect(task.result.error).toStrictEqual(error)
 })

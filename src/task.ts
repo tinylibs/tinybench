@@ -9,6 +9,7 @@ import type {
   TaskEvents,
   TaskEventsMap,
   TaskResult,
+  TaskResultRuntimeInfo,
 } from './types'
 
 import { createBenchEvent, createErrorEvent } from './event'
@@ -19,7 +20,7 @@ import {
   isPromiseLike,
   isSamples,
   Samples,
-  sortFn,
+  sortSamples,
 } from './utils'
 
 /**
@@ -35,7 +36,7 @@ export class Task extends EventTarget {
   /**
    * The result object
    */
-  result: Readonly<TaskResult> | undefined
+  result: Readonly<TaskResult & TaskResultRuntimeInfo>
 
   /**
    * The number of times the task function has been executed
@@ -86,6 +87,12 @@ export class Task extends EventTarget {
         { once: true }
       )
     }
+
+    this.result = Object.freeze({
+      runtime: this.bench.runtime,
+      runtimeVersion: this.bench.runtimeVersion,
+      state: 'not-started',
+    }) as Readonly<TaskResult & TaskResultRuntimeInfo>
   }
 
   addEventListener<K extends TaskEvents>(
@@ -111,7 +118,11 @@ export class Task extends EventTarget {
   reset (): void {
     this.dispatchEvent(createBenchEvent('reset', this))
     this.runs = 0
-    this.result = undefined
+    this.result = Object.freeze({
+      runtime: this.bench.runtime,
+      runtimeVersion: this.bench.runtimeVersion,
+      state: 'not-started',
+    }) as Readonly<TaskResult & TaskResultRuntimeInfo>
   }
 
   /**
@@ -120,7 +131,7 @@ export class Task extends EventTarget {
    * @internal
    */
   async run (): Promise<Task> {
-    if (this.result?.error) {
+    if (this.result.state === 'errored' || this.result.state === 'aborted') {
       return this
     }
     this.dispatchEvent(createBenchEvent('start', this))
@@ -143,7 +154,7 @@ export class Task extends EventTarget {
    * @internal
    */
   runSync (): this {
-    if (this.result?.error) {
+    if (this.result.state === 'errored' || this.result.state === 'aborted') {
       return this
     }
 
@@ -181,7 +192,7 @@ export class Task extends EventTarget {
    * @internal
    */
   async warmup (): Promise<void> {
-    if (this.result?.error) {
+    if (this.result.state === 'errored' || this.result.state === 'aborted') {
       return
     }
     this.dispatchEvent(createBenchEvent('warmup', this))
@@ -201,7 +212,7 @@ export class Task extends EventTarget {
    * @internal
    */
   warmupSync (): void {
-    if (this.result?.error) {
+    if (this.result.state === 'errored' || this.result.state === 'aborted') {
       return
     }
 
@@ -269,11 +280,13 @@ export class Task extends EventTarget {
     }
 
     try {
+      const promises: Promise<void>[] = [] // only for task level concurrency
       let limit: ReturnType<typeof pLimit> | undefined // only for task level concurrency
+
       if (this.bench.concurrency === 'task') {
         limit = pLimit(Math.max(1, Math.floor(this.bench.threshold)))
       }
-      const promises: Promise<void>[] = [] // only for task level concurrency
+
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
@@ -359,7 +372,7 @@ export class Task extends EventTarget {
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
-        samples.length < iterations) &&
+          samples.length < iterations) &&
         !this.isAborted()
       ) {
         benchmarkTask()
@@ -412,7 +425,7 @@ export class Task extends EventTarget {
       'task function must be sync when using `runSync()`'
     )
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
-    if (overriddenDuration != null) {
+    if (overriddenDuration !== undefined) {
       taskTime = overriddenDuration
     }
     return { fnResult, taskTime }
@@ -422,16 +435,19 @@ export class Task extends EventTarget {
    * merge into the result object values
    * @param result - the task result object to merge with the current result object values
    */
-  private mergeTaskResult (result: Partial<TaskResult>): void {
+  private mergeTaskResult (result: TaskResult): void {
     this.result = Object.freeze({
       ...this.result,
       ...result,
-    }) as Readonly<TaskResult>
+    })
   }
 
   private postWarmup (error: Error | undefined): void {
     if (error) {
-      this.mergeTaskResult({ error })
+      this.mergeTaskResult({
+        error,
+        state: 'errored',
+      })
       this.dispatchEvent(createErrorEvent(this, error))
       this.bench.dispatchEvent(createErrorEvent(this, error))
       if (this.bench.opts.throws) {
@@ -452,57 +468,68 @@ export class Task extends EventTarget {
 
     if (isSamples(latencySamples)) {
       this.runs = latencySamples.length
-      const totalTime = latencySamples.reduce((a, b) => a + b, 0)
 
-      // Latency statistics
-      const latencyStatistics = getStatisticsSorted(
-        latencySamples.sort(sortFn)
-      )
+      sortSamples(latencySamples)
 
-      // Throughput statistics
-      const throughputSamples = latencySamples
-        .map(sample =>
-          sample !== 0
-            ? 1000 / sample
-            : latencyStatistics.mean !== 0
-              ? 1000 / latencyStatistics.mean
-              : 0
-        ) // Use latency average as imputed sample
-        .sort(sortFn) as Samples
+      const latencyStatistics = getStatisticsSorted(latencySamples)
+      const latencyStatisticsMean = latencyStatistics.mean
+
+      const throughputSamples = new Array(latencySamples.length) as unknown as Samples
+
+      let totalTime = 0
+
+      for (let i = 0; i < latencySamples.length; i++) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const sample = latencySamples[i]!
+        if (sample !== 0) {
+          totalTime += sample
+          throughputSamples[i] = 1000 / sample
+        } else {
+          throughputSamples[i] = latencyStatisticsMean === 0 ? 0 : 1000 / latencyStatisticsMean
+        }
+      }
+
+      sortSamples(throughputSamples)
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
-      this.mergeTaskResult({
-        aborted: isAborted,
-        critical: latencyStatistics.critical,
-        df: latencyStatistics.df,
-        hz: throughputStatistics.mean,
-        latency: latencyStatistics,
-        max: latencyStatistics.max,
-        mean: latencyStatistics.mean,
-        min: latencyStatistics.min,
-        moe: latencyStatistics.moe,
-        p75: latencyStatistics.p75,
-        p99: latencyStatistics.p99,
-        p995: latencyStatistics.p995,
-        p999: latencyStatistics.p999,
-        period: totalTime / this.runs,
-        rme: latencyStatistics.rme,
-        runtime: this.bench.runtime,
-        runtimeVersion: this.bench.runtimeVersion,
-        samples: latencyStatistics.samples,
-        sd: latencyStatistics.sd,
-        sem: latencyStatistics.sem,
-        throughput: throughputStatistics,
-        totalTime,
-        variance: latencyStatistics.variance,
-      })
+      if (isAborted) {
+        this.mergeTaskResult({
+          aborted: true,
+          period: totalTime / this.runs,
+          state: 'aborted-with-statistics',
+          totalTime,
+          // deprecated statistics included for backward compatibility
+          ...latencyStatistics,
+          hz: latencyStatistics.mean,
+          latency: latencyStatistics,
+          throughput: throughputStatistics,
+        })
+      } else {
+        this.mergeTaskResult({
+          aborted: false,
+          period: totalTime / this.runs,
+          state: 'completed',
+          totalTime,
+          // deprecated statistics included for backward compatibility
+          ...latencyStatistics,
+          hz: latencyStatistics.mean,
+          latency: latencyStatistics,
+          throughput: throughputStatistics,
+        })
+      }
     } else if (isAborted) {
       // If aborted with no samples, still set the aborted flag
-      this.mergeTaskResult({ aborted: true })
+      this.mergeTaskResult({
+        aborted: true,
+        state: 'aborted',
+      })
     }
 
     if (error) {
-      this.mergeTaskResult({ error })
+      this.mergeTaskResult({
+        error,
+        state: 'errored',
+      })
       this.dispatchEvent(createErrorEvent(this, error))
       this.bench.dispatchEvent(createErrorEvent(this, error))
       if (this.bench.opts.throws) {

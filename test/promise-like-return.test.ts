@@ -17,13 +17,35 @@ test('task with promiseLike return (sync)', () => {
 
   bench.runSync()
 
-  expect(bench.getTask('foo')?.result?.error?.message).toStrictEqual(
+  const fooTask = bench.getTask('foo')
+  const fumTask = bench.getTask('fum')
+  const barTask = bench.getTask('bar')
+
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fumTask).toBeDefined()
+  if (!fumTask) return
+
+  expect(barTask).toBeDefined()
+  if (!barTask) return
+
+  expect(fooTask.result.state).toBe('errored')
+  if (fooTask.result.state !== 'errored') return
+
+  expect(fumTask.result.state).toBe('errored')
+  if (fumTask.result.state !== 'errored') return
+
+  expect(barTask.result.state).toBe('errored')
+  if (barTask.result.state !== 'errored') return
+
+  expect(fooTask.result.error.message).toStrictEqual(
     'task function must be sync when using `runSync()`'
   )
-  expect(bench.getTask('fum')?.result?.error?.message).toStrictEqual(
+  expect(fumTask.result.error.message).toStrictEqual(
     'task function must be sync when using `runSync()`'
   )
-  expect(bench.getTask('bar')?.result?.error?.message).toStrictEqual(
+  expect(barTask.result.error.message).toStrictEqual(
     'task function must be sync when using `runSync()`'
   )
 })
@@ -44,8 +66,30 @@ test(
       .add('bar', () => new Promise(resolve => setTimeout(resolve, 50)))
     await bench.run()
 
-    expect(bench.getTask('foo')?.result?.latency.mean).toBeGreaterThan(50)
-    expect(bench.getTask('fum')?.result?.latency.mean).toBeGreaterThan(50)
-    expect(bench.getTask('bar')?.result?.latency.mean).toBeGreaterThan(50)
+    const fooTask = bench.getTask('foo')
+    const fumTask = bench.getTask('fum')
+    const barTask = bench.getTask('bar')
+
+    expect(fooTask).toBeDefined()
+    if (!fooTask) return
+
+    expect(fumTask).toBeDefined()
+    if (!fumTask) return
+
+    expect(barTask).toBeDefined()
+    if (!barTask) return
+
+    expect(fooTask.result.state).toBe('completed')
+    if (fooTask.result.state !== 'completed') return
+
+    expect(fumTask.result.state).toBe('completed')
+    if (fumTask.result.state !== 'completed') return
+
+    expect(barTask.result.state).toBe('completed')
+    if (barTask.result.state !== 'completed') return
+
+    expect(fooTask.result.latency.mean).toBeGreaterThan(50)
+    expect(fumTask.result.latency.mean).toBeGreaterThan(50)
+    expect(barTask.result.latency.mean).toBeGreaterThan(50)
   }
 )

@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto'
 import { setTimeout } from 'node:timers/promises'
 import { expect, test } from 'vitest'
 
-import { Bench } from '../src'
+import { Bench, Task } from '../src'
 
 test.each(['warmup', 'run'])('%s sequential', async mode => {
   const iterations = 1
@@ -39,7 +39,8 @@ test.each(['warmup', 'run'])('%s sequential', async mode => {
       }
     })
 
-  const tasks = await sequentialBench.run()
+  const tasks = await sequentialBench.run() as [Task, Task, Task]
+  expect(tasks.length).toBe(3)
 
   if (mode === 'warmup') {
     expect(benchTasks).toStrictEqual([
@@ -53,11 +54,11 @@ test.each(['warmup', 'run'])('%s sequential', async mode => {
   } else if (mode === 'run') {
     expect(benchTasks).toStrictEqual(['sample 1', 'sample 2', 'sample 3'])
   }
-  expect(tasks.length).toBe(3)
   expect(benchTasks.length).toBeGreaterThanOrEqual(tasks.length)
-  expect(tasks[0]?.name).toBe('sample 1')
-  expect(tasks[1]?.name).toBe('sample 2')
-  expect(tasks[2]?.name).toBe('sample 3')
+
+  expect(tasks[0].name).toBe('sample 1')
+  expect(tasks[1].name).toBe('sample 2')
+  expect(tasks[2].name).toBe('sample 3')
 })
 
 test.each(['warmup', 'run'])('%s bench concurrency', async mode => {
@@ -134,9 +135,18 @@ test.each(['warmup', 'run'])('%s task concurrency', async mode => {
   await concurrentBench.run()
 
   for (const result of concurrentBench.results) {
-    expect(result?.error).toMatchObject(/AssertionError/)
+    expect(result.state).not.toBe('errored')
+    if (result.state !== 'errored') continue
+
+    expect(result.error).toMatchObject(/AssertionError/)
   }
-  expect(concurrentBench.getTask(taskName)?.runs).toEqual(iterations)
+
+  const concurrentTask = concurrentBench.getTask(taskName)
+
+  expect(concurrentTask).toBeDefined()
+  if (!concurrentTask) return
+
+  expect(concurrentTask.runs).toEqual(iterations)
   expect(runs).toEqual(mode === 'run' ? iterations : 2 * iterations)
   concurrentBench.reset()
   runs = 0
@@ -150,8 +160,16 @@ test.each(['warmup', 'run'])('%s task concurrency', async mode => {
   await concurrentBench.run()
 
   for (const result of concurrentBench.results) {
-    expect(result?.error).toBeUndefined()
+    expect(result.state).not.toBe('errored')
+    if (result.state !== 'errored') continue
+
+    expect(result.error).toBeUndefined()
   }
-  expect(concurrentBench.getTask(taskName)?.runs).toEqual(iterations)
+
+  const task = concurrentBench.getTask(taskName)
+  expect(task).toBeDefined()
+  if (!task) return
+
+  expect(task.runs).toEqual(iterations)
   expect(runs).toEqual(mode === 'run' ? iterations : 2 * iterations)
 })

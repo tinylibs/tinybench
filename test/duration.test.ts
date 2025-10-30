@@ -17,9 +17,17 @@ test('uses overridden task durations (async)', async () => {
 
   await bench.run()
 
-  expect(bench.getTask('foo')?.result?.latency.mean).toBe(150)
-  expect(bench.getTask('foo')?.result?.latency.min).toBe(150)
-  expect(bench.getTask('foo')?.result?.latency.max).toBe(150)
+  const fooTask = bench.getTask('foo')
+
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result.state).toBe('completed')
+  if (fooTask.result.state !== 'completed') return
+
+  expect(fooTask.result.latency.mean).toBe(150)
+  expect(fooTask.result.latency.min).toBe(150)
+  expect(fooTask.result.latency.max).toBe(150)
 })
 
 test('uses overridden task durations (sync)', () => {
@@ -37,7 +45,15 @@ test('uses overridden task durations (sync)', () => {
 
   bench.runSync()
 
-  expect(bench.getTask('foo')?.result?.latency.mean).toBe(150)
-  expect(bench.getTask('foo')?.result?.latency.min).toBe(150)
-  expect(bench.getTask('foo')?.result?.latency.max).toBe(150)
+  const fooTask = bench.getTask('foo')
+
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result.state).toBe('completed')
+  if (fooTask.result.state !== 'completed') return
+
+  expect(fooTask.result.latency.mean).toBe(150)
+  expect(fooTask.result.latency.min).toBe(150)
+  expect(fooTask.result.latency.max).toBe(150)
 })

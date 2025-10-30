@@ -16,9 +16,29 @@ test.each(['warmup', 'run'])('%s error handling (async)', async mode => {
     .add('baz', () => Promise.reject(promiseError))
   await bench.run()
 
-  expect(bench.getTask('foo')?.result?.error).toStrictEqual(error)
-  expect(bench.getTask('bar')?.result?.error).toStrictEqual(promiseError)
-  expect(bench.getTask('baz')?.result?.error).toStrictEqual(promiseError)
+  const fooTask = bench.getTask('foo')
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result.state).toBe('errored')
+  if (fooTask.result.state !== 'errored') return
+  expect(fooTask.result.error).toStrictEqual(error)
+
+  const barTask = bench.getTask('bar')
+  expect(barTask).toBeDefined()
+  if (!barTask) return
+
+  expect(barTask.result.state).toBe('errored')
+  if (barTask.result.state !== 'errored') return
+  expect(barTask.result.error).toStrictEqual(promiseError)
+
+  const bazTask = bench.getTask('baz')
+  expect(bazTask).toBeDefined()
+  if (!bazTask) return
+
+  expect(bazTask.result.state).toBe('errored')
+  if (bazTask.result.state !== 'errored') return
+  expect(bazTask.result.error).toStrictEqual(promiseError)
 })
 
 test.each(['warmup', 'run'])('%s error handling (sync)', mode => {
@@ -39,9 +59,29 @@ test.each(['warmup', 'run'])('%s error handling (sync)', mode => {
 
   bench.runSync()
 
-  expect(bench.getTask('foo')?.result?.error).toStrictEqual(error)
-  expect(bench.getTask('bar')?.result?.error).toStrictEqual(error)
-  expect(bench.getTask('baz')?.result?.error).toStrictEqual(error)
+  const fooTask = bench.getTask('foo')
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result.state).toBe('errored')
+  if (fooTask.result.state !== 'errored') return
+  expect(fooTask.result.error).toStrictEqual(error)
+
+  const barTask = bench.getTask('bar')
+  expect(barTask).toBeDefined()
+  if (!barTask) return
+
+  expect(barTask.result.state).toBe('errored')
+  if (barTask.result.state !== 'errored') return
+  expect(barTask.result.error).toStrictEqual(error)
+
+  const bazTask = bench.getTask('baz')
+  expect(bazTask).toBeDefined()
+  if (!bazTask) return
+
+  expect(bazTask.result.state).toBe('errored')
+  if (bazTask.result.state !== 'errored') return
+  expect(bazTask.result.error).toStrictEqual(error)
 })
 
 test('throw error in beforeAll, afterAll, beforeEach, afterEach (async)', async () => {
@@ -67,10 +107,37 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach (async)', async 
     })
   await bench.run()
 
-  expect(bench.getTask('BA test')?.result?.error).toStrictEqual(BAerror)
-  expect(bench.getTask('BE test')?.result?.error).toStrictEqual(BEerror)
-  expect(bench.getTask('AE test')?.result?.error).toStrictEqual(AEerror)
-  expect(bench.getTask('AA test')?.result?.error).toStrictEqual(AAerror)
+  const beforeEachTask = bench.getTask('BE test')
+  expect(beforeEachTask).toBeDefined()
+  if (!beforeEachTask) return
+
+  expect(beforeEachTask.result.state).toBe('errored')
+  if (beforeEachTask.result.state !== 'errored') return
+  expect(beforeEachTask.result.error).toStrictEqual(BEerror)
+
+  const beforeAllTask = bench.getTask('BA test')
+  expect(beforeAllTask).toBeDefined()
+  if (!beforeAllTask) return
+
+  expect(beforeAllTask.result.state).toBe('errored')
+  if (beforeAllTask.result.state !== 'errored') return
+  expect(beforeAllTask.result.error).toStrictEqual(BAerror)
+
+  const afterEachTask = bench.getTask('AE test')
+  expect(afterEachTask).toBeDefined()
+  if (!afterEachTask) return
+
+  expect(afterEachTask.result.state).toBe('errored')
+  if (afterEachTask.result.state !== 'errored') return
+  expect(afterEachTask.result.error).toStrictEqual(AEerror)
+
+  const afterAllTask = bench.getTask('AA test')
+  expect(afterAllTask).toBeDefined()
+  if (!afterAllTask) return
+
+  expect(afterAllTask.result.state).toBe('errored')
+  if (afterAllTask.result.state !== 'errored') return
+  expect(afterAllTask.result.error).toStrictEqual(AAerror)
 })
 
 test('throw error in beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
@@ -104,8 +171,35 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
     })
   bench.runSync()
 
-  expect(bench.getTask('BA test')?.result?.error).toStrictEqual(BAerror)
-  expect(bench.getTask('BE test')?.result?.error).toStrictEqual(BEerror)
-  expect(bench.getTask('AE test')?.result?.error).toStrictEqual(AEerror)
-  expect(bench.getTask('AA test')?.result?.error).toStrictEqual(AAerror)
+  const beforeEachTask = bench.getTask('BE test')
+  expect(beforeEachTask).toBeDefined()
+  if (!beforeEachTask) return
+
+  expect(beforeEachTask.result.state).toBe('errored')
+  if (beforeEachTask.result.state !== 'errored') return
+  expect(beforeEachTask.result.error).toStrictEqual(BEerror)
+
+  const beforeAllTask = bench.getTask('BA test')
+  expect(beforeAllTask).toBeDefined()
+  if (!beforeAllTask) return
+
+  expect(beforeAllTask.result.state).toBe('errored')
+  if (beforeAllTask.result.state !== 'errored') return
+  expect(beforeAllTask.result.error).toStrictEqual(BAerror)
+
+  const afterEachTask = bench.getTask('AE test')
+  expect(afterEachTask).toBeDefined()
+  if (!afterEachTask) return
+
+  expect(afterEachTask.result.state).toBe('errored')
+  if (afterEachTask.result.state !== 'errored') return
+  expect(afterEachTask.result.error).toStrictEqual(AEerror)
+
+  const afterAllTask = bench.getTask('AA test')
+  expect(afterAllTask).toBeDefined()
+  if (!afterAllTask) return
+
+  expect(afterAllTask.result.state).toBe('errored')
+  if (afterAllTask.result.state !== 'errored') return
+  expect(afterAllTask.result.error).toStrictEqual(AAerror)
 })

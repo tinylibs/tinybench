@@ -2,7 +2,8 @@
 // eslint-disable-next-line @cspell/spellchecker
 // Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
 
-import type { Fn, Statistics } from './types'
+import type { Task } from './task'
+import type { ConvertForConsoleTableFn, Fn, Statistics } from './types'
 
 import { emptyFunction, tTable } from './constants'
 
@@ -186,6 +187,9 @@ export const isPromiseLike = <T>(
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const AsyncFunctionConstructor = (async () => { }).constructor as FunctionConstructor
+
 /**
  * An async function check helper only considering runtime support async syntax
  * @param fn - the function to check
@@ -194,8 +198,7 @@ type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 const isAsyncFunction = (
   fn: Fn | null | undefined
 ): fn is AsyncFunctionType<unknown[], unknown> =>
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  fn?.constructor === (async () => {}).constructor
+  typeof fn === 'function' && fn.constructor === AsyncFunctionConstructor
 
 /**
  * An async function check helper considering runtime support async syntax and promise return
@@ -247,6 +250,8 @@ const average = (samples: Samples) => {
  */
 export type Samples = [number, ...number[]]
 
+export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
+
 /**
  * Checks if a value is a Samples type.
  * @param value - value to check
@@ -257,6 +262,23 @@ export const isSamples = (value: number[] | undefined): value is Samples => {
     Array.isArray(value) &&
     value.length !== 0
   )
+}
+
+/**
+ * Sorts samples and returns a new sorted array.
+ * @param samples - samples to sort
+ * @returns new sorted samples
+ */
+export const toSortedSamples = (samples: Samples): SortedSamples => {
+  return ([...samples] as Samples).sort(sortFn) as SortedSamples
+}
+
+/**
+ * Sorts samples in place.
+ * @param samples - samples to sort
+ */
+export function sortSamples (samples: Samples): asserts samples is SortedSamples {
+  samples.sort(sortFn)
 }
 
 /**
@@ -284,19 +306,18 @@ type ValidQ = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  */
-const quantileSorted = (samples: Samples, q: ValidQ): number => {
+const quantileSorted = (samples: SortedSamples, q: ValidQ): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
-  if (samples[baseIndex + 1] != null) {
-    return (
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      samples[baseIndex]! +
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  let result = samples[baseIndex]!
+  if (samples[baseIndex + 1] !== undefined) {
+    result +=
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
-    )
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return samples[baseIndex]!
+  return result
 }
 
 /**
@@ -304,7 +325,7 @@ const quantileSorted = (samples: Samples, q: ValidQ): number => {
  * @param samples - the sorted sample
  * @returns the median of the sample
  */
-const medianSorted = (samples: Samples) => quantileSorted(samples, 0.5)
+const medianSorted = (samples: SortedSamples) => quantileSorted(samples, 0.5)
 
 /**
  * A sort function to be passed to Array.prototype.sort for numbers.
@@ -315,12 +336,12 @@ const medianSorted = (samples: Samples) => quantileSorted(samples, 0.5)
 export const sortFn = (a: number, b: number) => a - b
 
 /**
- * Computes the median of a sample.
+ * Computes the median of an unsorted sample.
  * @param samples - the sample
  * @returns the median of the sample
  */
 const median = (samples: Samples) => {
-  return medianSorted(([...samples] as Samples).sort(sortFn))
+  return medianSorted(toSortedSamples(samples))
 }
 
 /**
@@ -351,7 +372,7 @@ const absoluteDeviation = (
  * @returns the statistics of the sample
  * @throws {TypeError} if the sample is empty
  */
-export const getStatisticsSorted = (samples: Samples): Statistics => {
+export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
   if (samples.length === 0) {
     throw new TypeError('samples must not be empty')
   }
@@ -393,5 +414,61 @@ export const getStatisticsSorted = (samples: Samples): Statistics => {
 export const invariant = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message)
+  }
+}
+
+export const defaultConvertTaskResultForConsoleTable: ConvertForConsoleTableFn = (task: Task): Record<string, number | string> => {
+  if (task.result.state === 'not-started') {
+    /* eslint-disable perfectionist/sort-objects */
+    return {
+      'Task name': task.name,
+      'Latency avg (ns)': 'N/A',
+      'Latency med (ns)': 'N/A',
+      'Throughput avg (ops/s)': 'N/A',
+      'Throughput med (ops/s)': 'N/A',
+      Samples: 'N/A',
+      Remarks: 'Not started',
+    }
+  }
+  if (task.result.state === 'errored') {
+    /* eslint-disable perfectionist/sort-objects */
+    return {
+      'Task name': task.name,
+      Error: task.result.error.message,
+      Stack: task.result.error.stack ?? 'N/A',
+    }
+  }
+  if (task.result.state === 'aborted') {
+    /* eslint-disable perfectionist/sort-objects */
+    return {
+      'Task name': task.name,
+      'Latency avg (ns)': 'N/A',
+      'Latency med (ns)': 'N/A',
+      'Throughput avg (ops/s)': 'N/A',
+      'Throughput med (ops/s)': 'N/A',
+      Samples: 'N/A',
+      Remarks: 'Aborted'
+    }
+  }
+  if (task.result.state === 'aborted-with-statistics') {
+    /* eslint-disable perfectionist/sort-objects */
+    return {
+      'Task name': task.name,
+      'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+      'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
+      'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+      'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
+      Samples: task.result.latency.samples.length,
+      Remarks: 'Aborted',
+    }
+  }
+  /* eslint-disable perfectionist/sort-objects */
+  return {
+    'Task name': task.name,
+    'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+    'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
+    'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+    'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
+    Samples: task.result.latency.samples.length,
   }
 }

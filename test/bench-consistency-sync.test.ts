@@ -22,7 +22,13 @@ test('bench task runs and time consistency (sync)', () => {
 
   const fooTask = bench.getTask('foo')
 
-  expect(fooTask?.runs).toBeGreaterThanOrEqual(bench.opts.iterations)
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
 
-  expect(fooTask?.result?.totalTime).toBeGreaterThanOrEqual(bench.opts.time)
+  expect(fooTask.result.state).toBe('completed')
+  if (fooTask.result.state !== 'completed') return
+
+  expect(fooTask.runs).toBeGreaterThanOrEqual(bench.opts.iterations)
+
+  expect(fooTask.result.totalTime).toBeGreaterThanOrEqual(bench.opts.time)
 })

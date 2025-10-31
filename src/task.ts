@@ -36,7 +36,11 @@ export class Task extends EventTarget {
   /**
    * The result object
    */
-  result: Readonly<TaskResult & TaskResultRuntimeInfo>
+  result = {
+    runtime: 'unknown',
+    runtimeVersion: 'unknown',
+    state: 'not-started',
+  } as Readonly<TaskResult & TaskResultRuntimeInfo>
 
   /**
    * The number of times the task function has been executed
@@ -88,11 +92,9 @@ export class Task extends EventTarget {
       )
     }
 
-    this.result = Object.freeze({
-      runtime: this.bench.runtime,
-      runtimeVersion: this.bench.runtimeVersion,
+    this.setTaskResult({
       state: 'not-started',
-    }) as Readonly<TaskResult & TaskResultRuntimeInfo>
+    })
   }
 
   addEventListener<K extends TaskEvents>(
@@ -134,7 +136,7 @@ export class Task extends EventTarget {
     if (this.result.state !== 'not-started') {
       return this
     }
-    this.mergeTaskResult({
+    this.setTaskResult({
       state: 'started',
     })
     this.dispatchEvent(createBenchEvent('start', this))
@@ -434,20 +436,9 @@ export class Task extends EventTarget {
     return { fnResult, taskTime }
   }
 
-  /**
-   * merge into the result object values
-   * @param result - the task result object to merge with the current result object values
-   */
-  private mergeTaskResult (result: TaskResult): void {
-    this.result = Object.freeze({
-      ...this.result,
-      ...result,
-    })
-  }
-
   private postWarmup (error: Error | undefined): void {
     if (error) {
-      this.mergeTaskResult({
+      this.setTaskResult({
         error,
         state: 'errored',
       })
@@ -496,7 +487,7 @@ export class Task extends EventTarget {
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
       if (isAborted) {
-        this.mergeTaskResult({
+        this.setTaskResult({
           aborted: true,
           period: totalTime / this.runs,
           state: 'aborted-with-statistics',
@@ -508,7 +499,7 @@ export class Task extends EventTarget {
           throughput: throughputStatistics,
         })
       } else {
-        this.mergeTaskResult({
+        this.setTaskResult({
           aborted: false,
           period: totalTime / this.runs,
           state: 'completed',
@@ -522,14 +513,14 @@ export class Task extends EventTarget {
       }
     } else if (isAborted) {
       // If aborted with no samples, still set the aborted flag
-      this.mergeTaskResult({
+      this.setTaskResult({
         aborted: true,
         state: 'aborted',
       })
     }
 
     if (error) {
-      this.mergeTaskResult({
+      this.setTaskResult({
         error,
         state: 'errored',
       })
@@ -544,6 +535,18 @@ export class Task extends EventTarget {
     this.bench.dispatchEvent(createBenchEvent('cycle', this))
     // cycle and complete are equal in Task
     this.dispatchEvent(createBenchEvent('complete', this))
+  }
+
+  /**
+   * set the result object values
+   * @param result - the task result object to merge with the current result object values
+   */
+  private setTaskResult (result: TaskResult): void {
+    this.result = Object.freeze({
+      runtime: this.bench.runtime,
+      runtimeVersion: this.bench.runtimeVersion,
+      ...result,
+    })
   }
 }
 

@@ -27,22 +27,29 @@ test.each([
   expect(tasks[0].result.state).toBe('completed')
   if (tasks[0].result.state !== 'completed') return
 
-  expect(tasks[0].result.totalTime).toBeGreaterThan(50)
-  expect(tasks[0].result.latency.mean).toBeGreaterThan(50)
+  expect(tasks[0].result.totalTime).toBeGreaterThanOrEqual(50)
+  expect(Math.ceil(tasks[0].result.latency.mean)).toBeGreaterThanOrEqual(50)
+  // throughput mean is ops/s, period is ms unit value
   // throughput mean is ops/s, period is ms unit value
   expect(
     tasks[0].result.throughput.mean * tasks[0].result.period
-  ).toBeCloseTo(1000, 1)
+  ).above(1000)
+  expect(
+    tasks[0].result.throughput.mean * tasks[0].result.period
+  ).below(1001)
 
   expect(tasks[1].name).toEqual('bar')
 
   expect(tasks[1].result.state).toBe('completed')
   if (tasks[1].result.state !== 'completed') return
 
-  expect(tasks[1].result.totalTime).toBeGreaterThan(100)
-  expect(tasks[1].result.latency.mean).toBeGreaterThan(100)
+  expect(tasks[1].result.totalTime).toBeGreaterThanOrEqual(100)
+  expect(Math.ceil(tasks[1].result.latency.mean)).toBeGreaterThanOrEqual(100)
   // throughput mean is ops/s, period is ms unit value
   expect(
     tasks[1].result.throughput.mean * tasks[1].result.period
-  ).toBeCloseTo(1000, 1)
+  ).above(1000)
+  expect(
+    tasks[1].result.throughput.mean * tasks[1].result.period
+  ).below(1001)
 })

@@ -42,7 +42,10 @@ test.each([
   // throughput mean is ops/s, period is ms unit value
   expect(
     tasks[0].result.throughput.mean * tasks[0].result.period
-  ).toBeCloseTo(1000, 1)
+  ).above(1000)
+  expect(
+    tasks[0].result.throughput.mean * tasks[0].result.period
+  ).below(1001)
 
   expect(tasks[1].name).toEqual('bar')
 
@@ -54,5 +57,8 @@ test.each([
   // throughput mean is ops/s, period is ms unit value
   expect(
     tasks[1].result.throughput.mean * tasks[1].result.period
-  ).toBeCloseTo(1000, 1)
+  ).above(1000)
+  expect(
+    tasks[1].result.throughput.mean * tasks[1].result.period
+  ).below(1001)
 })

@@ -242,7 +242,7 @@ const average = (samples: Samples) => {
     result += sample
   }
 
-  return (result / samples.length) || 0
+  return result / samples.length
 }
 
 /**

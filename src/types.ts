@@ -342,7 +342,7 @@ export interface TaskEventsMap {
 /**
  * The task result object
  */
-export type TaskResult = TaskResultAborted | TaskResultAbortedWithStatistics | TaskResultCompleted | TaskResultErrored | TaskResultNotStarted
+export type TaskResult = TaskResultAborted | TaskResultAbortedWithStatistics | TaskResultCompleted | TaskResultErrored | TaskResultNotStarted | TaskResultStarted
 
 export interface TaskResultAborted {
   /**
@@ -401,6 +401,10 @@ export interface TaskResultRuntimeInfo {
    * the JavaScript runtime version
    */
   runtimeVersion: string
+}
+
+export interface TaskResultStarted {
+  state: 'started'
 }
 
 export interface TaskResultWithStatistics extends

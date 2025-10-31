@@ -134,6 +134,9 @@ export class Task extends EventTarget {
     if (this.result.state !== 'not-started') {
       return this
     }
+    this.mergeTaskResult({
+      state: 'started',
+    })
     this.dispatchEvent(createBenchEvent('start', this))
     await this.bench.opts.setup(this, 'run')
     const { error, samples: latencySamples } = (await this.benchmark(

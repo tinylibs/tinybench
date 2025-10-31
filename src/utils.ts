@@ -470,6 +470,17 @@ export const defaultConvertTaskResultForConsoleTable: ConvertForConsoleTableFn =
         Samples: 'N/A',
         Remarks: 'Not started',
       }
+    case 'started':
+      /* eslint-disable perfectionist/sort-objects */
+      return {
+        'Task name': task.name,
+        'Latency avg (ns)': 'N/A',
+        'Latency med (ns)': 'N/A',
+        'Throughput avg (ops/s)': 'N/A',
+        'Throughput med (ops/s)': 'N/A',
+        Samples: 'N/A',
+        Remarks: 'Not started',
+      }
     default: {
       // Exhaustive check
       const check: never = task.result

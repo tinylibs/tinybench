@@ -1,4 +1,3 @@
-import { platform } from 'node:os'
 import { expect, test } from 'vitest'
 
 import { Bench, hrtimeNow, now, Task } from '../src'
@@ -16,7 +15,7 @@ function sleep (ms: number): void {
 test.each([
   ['now()', now],
   ['hrtimeNow()', hrtimeNow],
-])('%s basic (sync)', { skip: platform() !== 'linux', timeout: 10000 }, (_, _now) => {
+])('%s basic (sync)', { timeout: 10000 }, (_, _now) => {
   const bench = new Bench({ iterations: 16, now: _now, time: 100 })
   bench
     .add('foo', () => {

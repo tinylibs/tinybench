@@ -1,4 +1,3 @@
-import { platform } from 'node:os'
 import { expect, test } from 'vitest'
 
 import { Bench, hrtimeNow, now, Task } from '../src'
@@ -6,7 +5,7 @@ import { Bench, hrtimeNow, now, Task } from '../src'
 test.each([
   ['now()', now],
   ['hrtimeNow()', hrtimeNow],
-])('%s basic (async)', { skip: platform() !== 'linux', timeout: 10000 }, async (_, _now) => {
+])('%s basic (async)', { timeout: 10000 }, async (_, _now) => {
   const bench = new Bench({ iterations: 16, now: _now, time: 100 })
   bench
     .add('foo', async () => {

@@ -1,11 +1,9 @@
-import { platform } from 'node:os'
 import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
 
 test(
   'detect faster task (async)',
-  { skip: platform() !== 'linux' },
   async () => {
     const bench = new Bench({ iterations: 32, time: 100 })
     bench

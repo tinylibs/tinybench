@@ -1,4 +1,3 @@
-import { platform } from 'node:os'
 import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
@@ -13,7 +12,7 @@ function sleep (ms: number): void {
   }
 }
 
-test('detect faster task (sync)', { skip: platform() !== 'linux', timeout: 10000 }, () => {
+test('detect faster task (sync)', { timeout: 10000 }, () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench
     .add('faster', () => {

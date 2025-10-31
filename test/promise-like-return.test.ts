@@ -1,4 +1,3 @@
-import { platform } from 'node:os'
 import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
@@ -52,7 +51,6 @@ test('task with promiseLike return (sync)', () => {
 
 test(
   'task with promiseLike return (async)',
-  { skip: platform() !== 'linux' },
   async () => {
     const bench = new Bench({ iterations: 16, time: 100 })
 

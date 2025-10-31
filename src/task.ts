@@ -21,6 +21,7 @@ import {
   isSamples,
   Samples,
   sortSamples,
+  toError,
 } from './utils'
 
 /**
@@ -36,11 +37,11 @@ export class Task extends EventTarget {
   /**
    * The result object
    */
-  result = {
+  result: Readonly<TaskResult & TaskResultRuntimeInfo> = {
     runtime: 'unknown',
     runtimeVersion: 'unknown',
     state: 'not-started',
-  } as Readonly<TaskResult & TaskResultRuntimeInfo>
+  }
 
   /**
    * The number of times the task function has been executed
@@ -120,11 +121,10 @@ export class Task extends EventTarget {
   reset (): void {
     this.dispatchEvent(createBenchEvent('reset', this))
     this.runs = 0
-    this.result = Object.freeze({
-      runtime: this.bench.runtime,
-      runtimeVersion: this.bench.runtimeVersion,
+
+    this.setTaskResult({
       state: 'not-started',
-    }) as Readonly<TaskResult & TaskResultRuntimeInfo>
+    })
   }
 
   /**
@@ -145,7 +145,7 @@ export class Task extends EventTarget {
       'run',
       this.bench.opts.time,
       this.bench.opts.iterations
-    )) as { error?: Error; samples?: number[] }
+    ))
     await this.bench.opts.teardown(this, 'run')
 
     this.processRunResult({ error, latencySamples })
@@ -179,7 +179,7 @@ export class Task extends EventTarget {
       'run',
       this.bench.opts.time,
       this.bench.opts.iterations
-    ) as { error?: Error; samples?: number[] }
+    )
 
     const teardownResult = this.bench.opts.teardown(this, 'run')
     invariant(
@@ -206,7 +206,7 @@ export class Task extends EventTarget {
       'warmup',
       this.bench.opts.warmupTime,
       this.bench.opts.warmupIterations
-    )) as { error?: Error }
+    ))
     await this.bench.opts.teardown(this, 'warmup')
 
     this.postWarmup(error)
@@ -233,7 +233,7 @@ export class Task extends EventTarget {
       'warmup',
       this.bench.opts.warmupTime,
       this.bench.opts.warmupIterations
-    ) as { error?: Error }
+    )
 
     const teardownResult = this.bench.opts.teardown(this, 'warmup')
     invariant(
@@ -248,17 +248,18 @@ export class Task extends EventTarget {
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): Promise<{ error?: unknown; samples?: number[] }> {
+  ): Promise<{ error: Error; samples?: never; } | { error?: never; samples?: Samples }> {
     if (this.fnOpts.beforeAll != null) {
       try {
         await this.fnOpts.beforeAll.call(this, mode)
       } catch (error) {
-        return { error }
+        return { error: toError(error) }
       }
     }
 
     let totalTime = 0 // ms
     const samples: number[] = []
+
     const benchmarkTask = async () => {
       if (this.isAborted()) {
         return
@@ -313,24 +314,28 @@ export class Task extends EventTarget {
         void Promise.allSettled(promises)
       }
     } catch (error) {
-      return { error }
+      return { error: toError(error) }
     }
 
     if (this.fnOpts.afterAll != null) {
       try {
         await this.fnOpts.afterAll.call(this, mode)
       } catch (error) {
-        return { error }
+        return { error: toError(error) }
       }
     }
-    return { samples }
+    return {
+      samples: isSamples(samples)
+        ? samples
+        : undefined,
+    }
   }
 
   private benchmarkSync (
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): { error?: unknown; samples?: number[] } {
+  ): { error: Error; samples?: never; } | { error?: never; samples?: Samples } {
     if (this.fnOpts.beforeAll != null) {
       try {
         const beforeAllResult = this.fnOpts.beforeAll.call(this, mode)
@@ -339,7 +344,7 @@ export class Task extends EventTarget {
           '`beforeAll` function must be sync when using `runSync()`'
         )
       } catch (error) {
-        return { error }
+        return { error: toError(error) }
       }
     }
 
@@ -383,7 +388,7 @@ export class Task extends EventTarget {
         benchmarkTask()
       }
     } catch (error) {
-      return { error }
+      return { error: toError(error) }
     }
 
     if (this.fnOpts.afterAll != null) {
@@ -394,10 +399,14 @@ export class Task extends EventTarget {
           '`afterAll` function must be sync when using `runSync()`'
         )
       } catch (error) {
-        return { error }
+        return { error: toError(error) }
       }
     }
-    return { samples }
+    return {
+      samples: isSamples(samples)
+        ? samples
+        : undefined
+    }
   }
 
   /**

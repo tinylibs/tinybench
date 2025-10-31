@@ -46,7 +46,7 @@ export class Bench extends EventTarget {
   /**
    * The benchmark name.
    */
-  readonly name?: string
+  readonly name?: string | undefined
 
   /**
    * The options.
@@ -141,7 +141,7 @@ export class Bench extends EventTarget {
     return this
   }
 
-  addEventListener<K extends BenchEvents>(
+  override addEventListener<K extends BenchEvents>(
     type: K,
     listener: BenchEventsMap[K],
     options?: AddEventListenerOptionsArgument
@@ -172,7 +172,7 @@ export class Bench extends EventTarget {
     return this
   }
 
-  removeEventListener<K extends BenchEvents>(
+  override removeEventListener<K extends BenchEvents>(
     type: K,
     listener: BenchEventsMap[K],
     options?: RemoveEventListenerOptionsArgument

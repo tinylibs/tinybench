@@ -4,13 +4,33 @@
     "strict": true,
     "moduleResolution": "Bundler",
     "noEmit": true,
-    "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "lib": [],
-    "erasableSyntaxOnly": true
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "noStrictGenericChecks": false,
+    "useUnknownInCatchVariables": true,
+
   },
-  "include": ["src", "test", "tsdown.config.ts"],
-  "exclude": ["node_modules", "dist"],
+  "include": [
+    "src",
+    "test",
+    "tsdown.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "removeComments": true,
   "newLine": "lf"
 }

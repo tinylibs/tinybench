@@ -98,7 +98,7 @@ export class Task extends EventTarget {
     })
   }
 
-  addEventListener<K extends TaskEvents>(
+  override addEventListener<K extends TaskEvents>(
     type: K,
     listener: TaskEventsMap[K],
     options?: AddEventListenerOptionsArgument
@@ -106,7 +106,7 @@ export class Task extends EventTarget {
     super.addEventListener(type, listener, options)
   }
 
-  removeEventListener<K extends TaskEvents>(
+  override removeEventListener<K extends TaskEvents>(
     type: K,
     listener: TaskEventsMap[K],
     options?: RemoveEventListenerOptionsArgument
@@ -324,11 +324,10 @@ export class Task extends EventTarget {
         return { error: toError(error) }
       }
     }
-    return {
-      samples: isValidSamples(samples)
-        ? samples
-        : undefined,
-    }
+
+    return isValidSamples(samples)
+      ? { samples }
+      : {}
   }
 
   private benchmarkSync (
@@ -350,6 +349,7 @@ export class Task extends EventTarget {
 
     let totalTime = 0
     const samples: number[] = []
+
     const benchmarkTask = () => {
       if (this.isAborted()) {
         return
@@ -402,11 +402,9 @@ export class Task extends EventTarget {
         return { error: toError(error) }
       }
     }
-    return {
-      samples: isValidSamples(samples)
-        ? samples
-        : undefined
-    }
+    return isValidSamples(samples)
+      ? { samples }
+      : {}
   }
 
   /**
@@ -567,14 +565,14 @@ export class Task extends EventTarget {
 function getOverriddenDurationFromFnResult (
   fnResult: ReturnType<Fn>
 ): number | undefined {
-  if (
+  return (
     fnResult != null &&
     typeof fnResult === 'object' &&
     'overriddenDuration' in fnResult &&
     typeof fnResult.overriddenDuration === 'number' &&
     Number.isFinite(fnResult.overriddenDuration) &&
     fnResult.overriddenDuration >= 0
-  ) {
-    return fnResult.overriddenDuration
-  }
+  )
+    ? fnResult.overriddenDuration
+    : undefined
 }

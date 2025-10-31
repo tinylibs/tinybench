@@ -136,7 +136,7 @@ test.each(['warmup', 'run'])('%s task concurrency', async mode => {
 
   for (const result of concurrentBench.results) {
     expect(result.state).not.toBe('errored')
-    if (result.state !== 'errored') continue
+    if (result.state !== 'errored') break
 
     expect(result.error).toMatchObject(/AssertionError/)
   }
@@ -161,7 +161,7 @@ test.each(['warmup', 'run'])('%s task concurrency', async mode => {
 
   for (const result of concurrentBench.results) {
     expect(result.state).not.toBe('errored')
-    if (result.state !== 'errored') continue
+    if (result.state !== 'errored') break
 
     expect(result.error).toBeUndefined()
   }

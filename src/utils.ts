@@ -193,9 +193,7 @@ const AsyncFunctionConstructor = (async () => { }).constructor as FunctionConstr
  * @param fn - the function to check
  * @returns true if the function is an async function
  */
-const isAsyncFunction = (
-  fn: Fn | null | undefined
-): fn is AsyncFunctionType<unknown[], unknown> =>
+const isAsyncFunction = (fn: Fn | null | undefined): fn is AsyncFunctionType<unknown[], unknown> =>
   typeof fn === 'function' && fn.constructor === AsyncFunctionConstructor
 
 /**
@@ -296,7 +294,7 @@ const variance = (samples: Samples, avg = average(samples)) => {
   return sumSq / (samples.length - 1)
 }
 
-type ValidQ = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
+type Quantile = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
 
 /**
  * Computes the q-quantile of a sorted sample.
@@ -304,7 +302,7 @@ type ValidQ = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  */
-const quantileSorted = (samples: SortedSamples, q: ValidQ): number => {
+const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
 

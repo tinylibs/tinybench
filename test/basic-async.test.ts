@@ -32,7 +32,6 @@ test.each([
   expect(tasks[0].result.totalTime).toBeGreaterThanOrEqual(50)
   expect(Math.ceil(tasks[0].result.latency.mean)).toBeGreaterThanOrEqual(50)
   // throughput mean is ops/s, period is ms unit value
-  // throughput mean is ops/s, period is ms unit value
   expect(
     tasks[0].result.throughput.mean * tasks[0].result.period
   ).above(1000)

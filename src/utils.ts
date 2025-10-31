@@ -154,8 +154,7 @@ export const formatNumber = (
 }
 
 let hrtimeBigint: () => bigint
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-if (typeof (globalThis as any).process?.hrtime?.bigint === 'function') {
+if (typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } }).process?.hrtime?.bigint === 'function') {
   hrtimeBigint = globalThis.process.hrtime.bigint.bind(process.hrtime)
 } else {
   hrtimeBigint = () => {
@@ -309,14 +308,11 @@ const quantileSorted = (samples: SortedSamples, q: ValidQ): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  let result = samples[baseIndex]!
-  if (samples[baseIndex + 1] !== undefined) {
-    result +=
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
-  }
-  return result
+  return ((baseIndex + 1) < samples.length)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    ? samples[baseIndex]! + (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    : samples[baseIndex]!
 }
 
 /**

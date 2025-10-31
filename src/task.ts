@@ -421,7 +421,7 @@ export class Task extends EventTarget {
     const fnResult = await this.fn.call(this)
     let taskTime = this.bench.opts.now() - taskStart
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
-    if (overriddenDuration != null) {
+    if (overriddenDuration !== undefined) {
       taskTime = overriddenDuration
     }
     return { fnResult, taskTime }
@@ -475,18 +475,15 @@ export class Task extends EventTarget {
       const latencyStatistics = getStatisticsSorted(latencySamples)
       const latencyStatisticsMean = latencyStatistics.mean
 
-      const throughputSamples = new Array(latencySamples.length) as unknown as Samples
-
       let totalTime = 0
+      const throughputSamples = [] as unknown as Samples
 
-      for (let i = 0; i < latencySamples.length; i++) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const sample = latencySamples[i]!
+      for (const sample of latencySamples) {
         if (sample !== 0) {
           totalTime += sample
-          throughputSamples[i] = 1000 / sample
+          throughputSamples.push(1000 / sample)
         } else {
-          throughputSamples[i] = latencyStatisticsMean === 0 ? 0 : 1000 / latencyStatisticsMean
+          throughputSamples.push(latencyStatisticsMean === 0 ? 0 : 1000 / latencyStatisticsMean)
         }
       }
 

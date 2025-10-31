@@ -370,7 +370,6 @@ const absoluteDeviation = (
  * The sample must be sorted.
  * @param samples - the sorted sample
  * @returns the statistics of the sample
- * @throws {TypeError} if the sample is empty
  */
 export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
   const mean = average(samples)

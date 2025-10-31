@@ -115,13 +115,6 @@ export type ConvertForConsoleTableFn = (task: Task) => Record<string, number | s
  */
 export type EventListener = (evt: BenchEvent) => void
 
-export type Fn = () =>
-  | FnReturnedObject
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  | Promise<FnReturnedObject | unknown>
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  | unknown
-
 /**
  * The task function.
  *
@@ -130,6 +123,12 @@ export type Fn = () =>
  * object with a `overriddenDuration` field. You should still use
  * `bench.opts.now()` to measure that duration.
  */
+export type Fn = () =>
+  | FnReturnedObject
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  | Promise<FnReturnedObject | unknown>
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  | unknown
 
 /**
  * The task hook function signature.

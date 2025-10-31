@@ -500,7 +500,7 @@ export class Task extends EventTarget {
           totalTime,
           // deprecated statistics included for backward compatibility
           ...latencyStatistics,
-          hz: latencyStatistics.mean,
+          hz: throughputStatistics.mean,
           latency: latencyStatistics,
           throughput: throughputStatistics,
         })

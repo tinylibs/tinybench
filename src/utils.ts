@@ -373,10 +373,6 @@ const absoluteDeviation = (
  * @throws {TypeError} if the sample is empty
  */
 export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
-  if (samples.length === 0) {
-    throw new TypeError('samples must not be empty')
-  }
-
   const mean = average(samples)
   const vr = variance(samples, mean)
   const sd = Math.sqrt(vr)

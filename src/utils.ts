@@ -351,12 +351,12 @@ const median = (samples: Samples) => {
  * @param aggValue - the aggregated value to use
  * @returns the absolute deviation of the sample given the aggregation
  */
-const absoluteDeviation = (
-  samples: Samples,
-  aggFn: (arr: Samples) => number,
+const absoluteDeviation = <S extends Samples = Samples>(
+  samples: S,
+  aggFn: (arr: S) => number,
   aggValue = aggFn(samples)
 ) => {
-  const absoluteDeviations: Samples = [] as unknown as Samples
+  const absoluteDeviations: S = [] as unknown as S
 
   for (const sample of samples) {
     absoluteDeviations.push(Math.abs(sample - aggValue))

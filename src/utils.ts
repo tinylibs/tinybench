@@ -1,5 +1,4 @@
 // Portions copyright evanwashere. 2024. All Rights Reserved.
-// eslint-disable-next-line @cspell/spellchecker
 // Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
 
 import type { Task } from './task'
@@ -68,7 +67,7 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
     runtime = 'spidermonkey'
   } else if (
     typeof g.$ === 'object' && g.$ !== null &&
-    'IsHTMLDDA' in g.$ // eslint-disable-line @cspell/spellchecker
+    'IsHTMLDDA' in g.$
   ) {
     runtime = 'jsc'
   } else if (

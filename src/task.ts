@@ -558,7 +558,6 @@ export class Task extends EventTarget {
 }
 
 /**
- *
  * @param fnResult - the result of the task function.
  * @returns the overridden duration if defined by the function.
  */

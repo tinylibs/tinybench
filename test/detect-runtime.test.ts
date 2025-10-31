@@ -99,7 +99,7 @@ test('detect runtime spidermonkey', () => {
 test('detect runtime jsc', () => {
   const { runtime, version } = detectRuntime({
     $: {
-      IsHTMLDDA: true, // eslint-disable-line @cspell/spellchecker
+      IsHTMLDDA: true,
     },
   })
 

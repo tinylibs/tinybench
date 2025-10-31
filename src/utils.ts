@@ -257,7 +257,7 @@ export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
  * @param value - value to check
  * @returns if the value is a Samples type, meaning a non-empty array of numbers
  */
-export const isSamples = (value: number[] | undefined): value is Samples => {
+export const isValidSamples = (value: number[] | undefined): value is Samples => {
   return (
     Array.isArray(value) &&
     value.length !== 0

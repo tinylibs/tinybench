@@ -18,7 +18,7 @@ import {
   invariant,
   isFnAsyncResource,
   isPromiseLike,
-  isSamples,
+  isValidSamples,
   Samples,
   sortSamples,
   toError,
@@ -325,7 +325,7 @@ export class Task extends EventTarget {
       }
     }
     return {
-      samples: isSamples(samples)
+      samples: isValidSamples(samples)
         ? samples
         : undefined,
     }
@@ -403,7 +403,7 @@ export class Task extends EventTarget {
       }
     }
     return {
-      samples: isSamples(samples)
+      samples: isValidSamples(samples)
         ? samples
         : undefined
     }
@@ -469,7 +469,7 @@ export class Task extends EventTarget {
     // Always set aborted status, even if no samples were collected
     const isAborted = this.isAborted()
 
-    if (isSamples(latencySamples)) {
+    if (isValidSamples(latencySamples)) {
       this.runs = latencySamples.length
 
       sortSamples(latencySamples)

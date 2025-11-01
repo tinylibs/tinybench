@@ -51,7 +51,6 @@ test('task with promiseLike return (sync)', () => {
 
 test(
   'task with promiseLike return (async)',
-
   async () => {
     const bench = new Bench({ iterations: 16, time: 100 })
 

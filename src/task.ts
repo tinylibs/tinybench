@@ -167,6 +167,9 @@ export class Task extends EventTarget {
       this.bench.concurrency === null,
       'Cannot use `concurrency` option when using `runSync`'
     )
+    this.setTaskResult({
+      state: 'started',
+    })
     this.dispatchEvent(createBenchEvent('start', this))
 
     const setupResult = this.bench.opts.setup(this, 'run')

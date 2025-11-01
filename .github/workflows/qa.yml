@@ -33,6 +33,25 @@ jobs:
         env:
           FORCE_COLOR: 2
 
+  qa-deno:
+    runs-on: ubuntu-latest
+    name: Deno QA
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: stable
+      
+      - name: Install dependencies
+        run: deno install --no-lock
+
+      - name: Run unit tests
+        run: deno run test
+        env:
+          FORCE_COLOR: 2
+    
   qa-node:
     runs-on: ${{ matrix.os }}
     strategy:

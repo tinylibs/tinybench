@@ -4,16 +4,14 @@ import { Bench, type Hook, type Task } from '../src'
 
 test('setup and teardown (async)', async () => {
   const calls: string[] = []
-  const setupCalls: [Task, string][] = []
-  const teardownCalls: [Task, string][] = []
+  const setupCalls: [Task | undefined, string | undefined][] = []
+  const teardownCalls: [Task | undefined, string | undefined][] = []
   const setup: Hook = (task, event) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    setupCalls.push([task!, event!])
+    setupCalls.push([task, event])
     calls.push('setup')
   }
   const teardown: Hook = (task, event) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    teardownCalls.push([task!, event!])
+    teardownCalls.push([task, event])
     calls.push('teardown')
   }
   const bench = new Bench({

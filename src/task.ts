@@ -9,6 +9,7 @@ import type {
   TaskEvents,
   TaskEventsMap,
   TaskResult,
+  TaskResultRuntimeInfo,
 } from './types'
 
 import { createBenchEvent, createErrorEvent } from './event'
@@ -17,6 +18,10 @@ import {
   invariant,
   isFnAsyncResource,
   isPromiseLike,
+  isValidSamples,
+  type Samples,
+  sortSamples,
+  toError,
 } from './utils'
 
 /**
@@ -32,7 +37,11 @@ export class Task extends EventTarget {
   /**
    * The result object
    */
-  result: Readonly<TaskResult> | undefined
+  result: Readonly<TaskResult & TaskResultRuntimeInfo> = {
+    runtime: 'unknown',
+    runtimeVersion: 'unknown',
+    state: 'not-started',
+  }
 
   /**
    * The number of times the task function has been executed
@@ -83,9 +92,13 @@ export class Task extends EventTarget {
         { once: true }
       )
     }
+
+    this.setTaskResult({
+      state: 'not-started',
+    })
   }
 
-  addEventListener<K extends TaskEvents>(
+  override addEventListener<K extends TaskEvents>(
     type: K,
     listener: TaskEventsMap[K],
     options?: AddEventListenerOptionsArgument
@@ -93,7 +106,7 @@ export class Task extends EventTarget {
     super.addEventListener(type, listener, options)
   }
 
-  removeEventListener<K extends TaskEvents>(
+  override removeEventListener<K extends TaskEvents>(
     type: K,
     listener: TaskEventsMap[K],
     options?: RemoveEventListenerOptionsArgument
@@ -108,7 +121,10 @@ export class Task extends EventTarget {
   reset (): void {
     this.dispatchEvent(createBenchEvent('reset', this))
     this.runs = 0
-    this.result = undefined
+
+    this.setTaskResult({
+      state: 'not-started',
+    })
   }
 
   /**
@@ -117,16 +133,19 @@ export class Task extends EventTarget {
    * @internal
    */
   async run (): Promise<Task> {
-    if (this.result?.error) {
+    if (this.result.state !== 'not-started') {
       return this
     }
+    this.setTaskResult({
+      state: 'started',
+    })
     this.dispatchEvent(createBenchEvent('start', this))
     await this.bench.opts.setup(this, 'run')
     const { error, samples: latencySamples } = (await this.benchmark(
       'run',
       this.bench.opts.time,
       this.bench.opts.iterations
-    )) as { error?: Error; samples?: number[] }
+    ))
     await this.bench.opts.teardown(this, 'run')
 
     this.processRunResult({ error, latencySamples })
@@ -140,7 +159,7 @@ export class Task extends EventTarget {
    * @internal
    */
   runSync (): this {
-    if (this.result?.error) {
+    if (this.result.state !== 'not-started') {
       return this
     }
 
@@ -148,6 +167,9 @@ export class Task extends EventTarget {
       this.bench.concurrency === null,
       'Cannot use `concurrency` option when using `runSync`'
     )
+    this.setTaskResult({
+      state: 'started',
+    })
     this.dispatchEvent(createBenchEvent('start', this))
 
     const setupResult = this.bench.opts.setup(this, 'run')
@@ -160,7 +182,7 @@ export class Task extends EventTarget {
       'run',
       this.bench.opts.time,
       this.bench.opts.iterations
-    ) as { error?: Error; samples?: number[] }
+    )
 
     const teardownResult = this.bench.opts.teardown(this, 'run')
     invariant(
@@ -178,7 +200,7 @@ export class Task extends EventTarget {
    * @internal
    */
   async warmup (): Promise<void> {
-    if (this.result?.error) {
+    if (this.result.state !== 'not-started') {
       return
     }
     this.dispatchEvent(createBenchEvent('warmup', this))
@@ -187,7 +209,7 @@ export class Task extends EventTarget {
       'warmup',
       this.bench.opts.warmupTime,
       this.bench.opts.warmupIterations
-    )) as { error?: Error }
+    ))
     await this.bench.opts.teardown(this, 'warmup')
 
     this.postWarmup(error)
@@ -198,7 +220,7 @@ export class Task extends EventTarget {
    * @internal
    */
   warmupSync (): void {
-    if (this.result?.error) {
+    if (this.result.state !== 'not-started') {
       return
     }
 
@@ -214,7 +236,7 @@ export class Task extends EventTarget {
       'warmup',
       this.bench.opts.warmupTime,
       this.bench.opts.warmupIterations
-    ) as { error?: Error }
+    )
 
     const teardownResult = this.bench.opts.teardown(this, 'warmup')
     invariant(
@@ -229,17 +251,18 @@ export class Task extends EventTarget {
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): Promise<{ error?: unknown; samples?: number[] }> {
+  ): Promise<{ error: Error, samples?: never } | { error?: never, samples?: Samples }> {
     if (this.fnOpts.beforeAll != null) {
       try {
         await this.fnOpts.beforeAll.call(this, mode)
       } catch (error) {
-        return { error }
+        return { error: toError(error) }
       }
     }
 
     let totalTime = 0 // ms
     const samples: number[] = []
+
     const benchmarkTask = async () => {
       if (this.isAborted()) {
         return
@@ -266,16 +289,18 @@ export class Task extends EventTarget {
     }
 
     try {
+      const promises: Promise<void>[] = [] // only for task level concurrency
       let limit: ReturnType<typeof pLimit> | undefined // only for task level concurrency
+
       if (this.bench.concurrency === 'task') {
         limit = pLimit(Math.max(1, Math.floor(this.bench.threshold)))
       }
-      const promises: Promise<void>[] = [] // only for task level concurrency
+
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
           samples.length + (limit?.activeCount ?? 0) + (limit?.pendingCount ?? 0) < iterations) &&
-        !this.isAborted()
+          !this.isAborted()
       ) {
         if (this.bench.concurrency === 'task') {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -292,24 +317,27 @@ export class Task extends EventTarget {
         void Promise.allSettled(promises)
       }
     } catch (error) {
-      return { error }
+      return { error: toError(error) }
     }
 
     if (this.fnOpts.afterAll != null) {
       try {
         await this.fnOpts.afterAll.call(this, mode)
       } catch (error) {
-        return { error }
+        return { error: toError(error) }
       }
     }
-    return { samples }
+
+    return isValidSamples(samples)
+      ? { samples }
+      : {}
   }
 
   private benchmarkSync (
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): { error?: unknown; samples?: number[] } {
+  ): { error: Error, samples?: never } | { error?: never, samples?: Samples } {
     if (this.fnOpts.beforeAll != null) {
       try {
         const beforeAllResult = this.fnOpts.beforeAll.call(this, mode)
@@ -318,12 +346,13 @@ export class Task extends EventTarget {
           '`beforeAll` function must be sync when using `runSync()`'
         )
       } catch (error) {
-        return { error }
+        return { error: toError(error) }
       }
     }
 
     let totalTime = 0
     const samples: number[] = []
+
     const benchmarkTask = () => {
       if (this.isAborted()) {
         return
@@ -356,13 +385,13 @@ export class Task extends EventTarget {
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
-        samples.length < iterations) &&
-        !this.isAborted()
+          samples.length < iterations) &&
+          !this.isAborted()
       ) {
         benchmarkTask()
       }
     } catch (error) {
-      return { error }
+      return { error: toError(error) }
     }
 
     if (this.fnOpts.afterAll != null) {
@@ -373,10 +402,12 @@ export class Task extends EventTarget {
           '`afterAll` function must be sync when using `runSync()`'
         )
       } catch (error) {
-        return { error }
+        return { error: toError(error) }
       }
     }
-    return { samples }
+    return isValidSamples(samples)
+      ? { samples }
+      : {}
   }
 
   /**
@@ -387,19 +418,19 @@ export class Task extends EventTarget {
     return this.signal?.aborted === true || this.bench.opts.signal?.aborted === true
   }
 
-  private async measureOnce (): Promise<{ fnResult: ReturnType<Fn>; taskTime: number }> {
+  private async measureOnce (): Promise<{ fnResult: ReturnType<Fn>, taskTime: number }> {
     const taskStart = this.bench.opts.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.fn.call(this)
     let taskTime = this.bench.opts.now() - taskStart
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
-    if (overriddenDuration != null) {
+    if (overriddenDuration !== undefined) {
       taskTime = overriddenDuration
     }
     return { fnResult, taskTime }
   }
 
-  private measureOnceSync (): { fnResult: ReturnType<Fn>; taskTime: number } {
+  private measureOnceSync (): { fnResult: ReturnType<Fn>, taskTime: number } {
     const taskStart = this.bench.opts.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = this.fn.call(this)
@@ -409,26 +440,18 @@ export class Task extends EventTarget {
       'task function must be sync when using `runSync()`'
     )
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
-    if (overriddenDuration != null) {
+    if (overriddenDuration !== undefined) {
       taskTime = overriddenDuration
     }
     return { fnResult, taskTime }
   }
 
-  /**
-   * merge into the result object values
-   * @param result - the task result object to merge with the current result object values
-   */
-  private mergeTaskResult (result: Partial<TaskResult>): void {
-    this.result = Object.freeze({
-      ...this.result,
-      ...result,
-    }) as Readonly<TaskResult>
-  }
-
   private postWarmup (error: Error | undefined): void {
     if (error) {
-      this.mergeTaskResult({ error })
+      this.setTaskResult({
+        error,
+        state: 'errored',
+      })
       this.dispatchEvent(createErrorEvent(this, error))
       this.bench.dispatchEvent(createErrorEvent(this, error))
       if (this.bench.opts.throws) {
@@ -447,59 +470,67 @@ export class Task extends EventTarget {
     // Always set aborted status, even if no samples were collected
     const isAborted = this.isAborted()
 
-    if (latencySamples && latencySamples.length > 0) {
+    if (isValidSamples(latencySamples)) {
       this.runs = latencySamples.length
-      const totalTime = latencySamples.reduce((a, b) => a + b, 0)
 
-      // Latency statistics
-      const latencyStatistics = getStatisticsSorted(
-        latencySamples.sort((a, b) => a - b)
-      )
+      sortSamples(latencySamples)
 
-      // Throughput statistics
-      const throughputSamples = latencySamples
-        .map(sample =>
-          sample !== 0
-            ? 1000 / sample
-            : latencyStatistics.mean !== 0
-              ? 1000 / latencyStatistics.mean
-              : 0
-        ) // Use latency average as imputed sample
-        .sort((a, b) => a - b)
+      const latencyStatistics = getStatisticsSorted(latencySamples)
+      const latencyStatisticsMean = latencyStatistics.mean
+
+      let totalTime = 0
+      const throughputSamples = [] as unknown as Samples
+
+      for (const sample of latencySamples) {
+        if (sample !== 0) {
+          totalTime += sample
+          throughputSamples.push(1000 / sample)
+        } else {
+          throughputSamples.push(latencyStatisticsMean === 0 ? 0 : 1000 / latencyStatisticsMean)
+        }
+      }
+
+      sortSamples(throughputSamples)
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
-      this.mergeTaskResult({
-        aborted: isAborted,
-        critical: latencyStatistics.critical,
-        df: latencyStatistics.df,
-        hz: throughputStatistics.mean,
-        latency: latencyStatistics,
-        max: latencyStatistics.max,
-        mean: latencyStatistics.mean,
-        min: latencyStatistics.min,
-        moe: latencyStatistics.moe,
-        p75: latencyStatistics.p75,
-        p99: latencyStatistics.p99,
-        p995: latencyStatistics.p995,
-        p999: latencyStatistics.p999,
-        period: totalTime / this.runs,
-        rme: latencyStatistics.rme,
-        runtime: this.bench.runtime,
-        runtimeVersion: this.bench.runtimeVersion,
-        samples: latencyStatistics.samples,
-        sd: latencyStatistics.sd,
-        sem: latencyStatistics.sem,
-        throughput: throughputStatistics,
-        totalTime,
-        variance: latencyStatistics.variance,
-      })
+      if (isAborted) {
+        this.setTaskResult({
+          aborted: true,
+          period: totalTime / this.runs,
+          state: 'aborted-with-statistics',
+          totalTime,
+          // deprecated statistics included for backward compatibility
+          ...latencyStatistics,
+          hz: throughputStatistics.mean,
+          latency: latencyStatistics,
+          throughput: throughputStatistics,
+        })
+      } else {
+        this.setTaskResult({
+          aborted: false,
+          period: totalTime / this.runs,
+          state: 'completed',
+          totalTime,
+          // deprecated statistics included for backward compatibility
+          ...latencyStatistics,
+          hz: throughputStatistics.mean,
+          latency: latencyStatistics,
+          throughput: throughputStatistics,
+        })
+      }
     } else if (isAborted) {
       // If aborted with no samples, still set the aborted flag
-      this.mergeTaskResult({ aborted: true })
+      this.setTaskResult({
+        aborted: true,
+        state: 'aborted',
+      })
     }
 
     if (error) {
-      this.mergeTaskResult({ error })
+      this.setTaskResult({
+        error,
+        state: 'errored',
+      })
       this.dispatchEvent(createErrorEvent(this, error))
       this.bench.dispatchEvent(createErrorEvent(this, error))
       if (this.bench.opts.throws) {
@@ -512,24 +543,35 @@ export class Task extends EventTarget {
     // cycle and complete are equal in Task
     this.dispatchEvent(createBenchEvent('complete', this))
   }
+
+  /**
+   * set the result object values
+   * @param result - the task result object to merge with the current result object values
+   */
+  private setTaskResult (result: TaskResult): void {
+    this.result = Object.freeze({
+      runtime: this.bench.runtime,
+      runtimeVersion: this.bench.runtimeVersion,
+      ...result,
+    })
+  }
 }
 
 /**
- *
  * @param fnResult - the result of the task function.
  * @returns the overridden duration if defined by the function.
  */
 function getOverriddenDurationFromFnResult (
   fnResult: ReturnType<Fn>
 ): number | undefined {
-  if (
+  return (
     fnResult != null &&
     typeof fnResult === 'object' &&
     'overriddenDuration' in fnResult &&
     typeof fnResult.overriddenDuration === 'number' &&
     Number.isFinite(fnResult.overriddenDuration) &&
     fnResult.overriddenDuration >= 0
-  ) {
-    return fnResult.overriddenDuration
-  }
+  )
+    ? fnResult.overriddenDuration
+    : undefined
 }

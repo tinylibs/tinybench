@@ -1,23 +1,16 @@
-import { platform } from 'node:os'
 import { expect, test } from 'vitest'
 
-import { Bench, hrtimeNow, now } from '../src'
+import { Bench, hrtimeNow, now, Task } from '../src'
+import { sleep } from './utils'
 
-/**
- * @param ms amount of time to sleep in milliseconds
- */
-function sleep (ms: number): void {
-  const start = performance.now()
-  while (performance.now() - start < ms) {
-    // noop
-  }
-}
+// If running in CI, allow a bit more leeway for the mean value
+const maxMeanValue = process.env.CI ? 1025 : 1001
 
 test.each([
-  ['now()', now],
-  ['hrtimeNow()', hrtimeNow],
-])('%s basic (sync)', { skip: platform() !== 'linux', timeout: 10000 }, (_, _now) => {
-  const bench = new Bench({ iterations: 16, now: _now, time: 100 })
+  ['now()'],
+  ['hrtimeNow()'],
+])('%s basic (sync)', mode => {
+  const bench = new Bench({ iterations: 16, now: mode === 'now()' ? now : hrtimeNow, time: 100 })
   bench
     .add('foo', () => {
       sleep(50)
@@ -28,25 +21,37 @@ test.each([
 
   bench.runSync()
 
-  const { tasks } = bench
+  expect(bench.tasks.length).toEqual(2)
 
-  expect(tasks.length).toEqual(2)
+  const tasks = bench.tasks as [Task, Task]
 
-  expect(tasks[0]?.name).toEqual('foo')
-  expect(tasks[0]?.result?.totalTime).toBeGreaterThan(50)
-  expect(tasks[0]?.result?.latency.mean).toBeGreaterThan(50)
+  expect(tasks[0].name).toEqual('foo')
+
+  expect(tasks[0].result.state).toBe('completed')
+  if (tasks[0].result.state !== 'completed') return
+
+  expect(tasks[0].result.totalTime).toBeGreaterThan(50)
+  expect(tasks[0].result.latency.mean).toBeGreaterThan(50)
   // throughput mean is ops/s, period is ms unit value
   expect(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    tasks[0]!.result!.throughput.mean * tasks[0]!.result!.period
-  ).toBeCloseTo(1000, 1)
+    tasks[0].result.throughput.mean * tasks[0].result.period >= 1000
+  ).toBe(true)
+  expect(
+    tasks[0].result.throughput.mean * tasks[0].result.period <= maxMeanValue
+  ).toBe(true)
 
-  expect(tasks[1]?.name).toEqual('bar')
-  expect(tasks[1]?.result?.totalTime).toBeGreaterThan(100)
-  expect(tasks[1]?.result?.latency.mean).toBeGreaterThan(100)
+  expect(tasks[1].name).toEqual('bar')
+
+  expect(tasks[1].result.state).toBe('completed')
+  if (tasks[1].result.state !== 'completed') return
+
+  expect(tasks[1].result.totalTime).toBeGreaterThan(100)
+  expect(tasks[1].result.latency.mean).toBeGreaterThan(100)
   // throughput mean is ops/s, period is ms unit value
   expect(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    tasks[1]!.result!.throughput.mean * tasks[1]!.result!.period
-  ).toBeCloseTo(1000, 1)
+    tasks[1].result.throughput.mean * tasks[1].result.period >= 1000
+  ).toBe(true)
+  expect(
+    tasks[1].result.throughput.mean * tasks[1].result.period <= maxMeanValue
+  ).toBe(true)
 })

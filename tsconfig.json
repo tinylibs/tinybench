@@ -1,16 +1,39 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
+    "target": "ES2020",
     "strict": true,
+    "module": "preserve",
     "moduleResolution": "Bundler",
     "noEmit": true,
-    "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
-    "lib": [],
-    "erasableSyntaxOnly": true
+    "lib": [
+      "ES2020"
+    ],
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "noStrictGenericChecks": false,
+    "useUnknownInCatchVariables": true,
+
   },
-  "include": ["src", "test", "tsdown.config.ts"],
-  "exclude": ["node_modules", "dist"],
+  "include": [
+    "src",
+    "test",
+    "tsdown.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "removeComments": true,
   "newLine": "lf"
 }

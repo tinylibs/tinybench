@@ -22,10 +22,9 @@ import {
 import { createBenchEvent } from './event'
 import { Task } from './task'
 import {
-  formatNumber,
+  defaultConvertTaskResultForConsoleTable,
   invariant,
   type JSRuntime,
-  mToNs,
   now,
   runtime,
   runtimeVersion,
@@ -47,7 +46,7 @@ export class Bench extends EventTarget {
   /**
    * The benchmark name.
    */
-  readonly name?: string
+  readonly name: string | undefined
 
   /**
    * The options.
@@ -74,8 +73,8 @@ export class Bench extends EventTarget {
    * tasks results as an array
    * @returns the tasks results as an array
    */
-  get results (): (Readonly<TaskResult> | undefined)[] {
-    return [...this._tasks.values()].map(task => task.result)
+  get results (): (Readonly<TaskResult>)[] {
+    return this.tasks.map(task => task.result)
   }
 
   /**
@@ -142,7 +141,7 @@ export class Bench extends EventTarget {
     return this
   }
 
-  addEventListener<K extends BenchEvents>(
+  override addEventListener<K extends BenchEvents>(
     type: K,
     listener: BenchEventsMap[K],
     options?: AddEventListenerOptionsArgument
@@ -173,7 +172,7 @@ export class Bench extends EventTarget {
     return this
   }
 
-  removeEventListener<K extends BenchEvents>(
+  override removeEventListener<K extends BenchEvents>(
     type: K,
     listener: BenchEventsMap[K],
     options?: RemoveEventListenerOptionsArgument
@@ -239,31 +238,17 @@ export class Bench extends EventTarget {
    * @returns the tasks results as an array of table records
    */
   table (
-    convert?: (task: Task) => Record<string, number | string | undefined>
+    convert = defaultConvertTaskResultForConsoleTable
   ): (null | Record<string, number | string | undefined>)[] {
     return this.tasks.map(task => {
-      if (task.result) {
-        const { error, latency, throughput } = task.result
-        /* eslint-disable perfectionist/sort-objects */
-        return error
-          ? {
-              'Task name': task.name,
-              Error: error.message,
-              Stack: error.stack,
-            }
-          : (convert?.(task) ?? {
-              'Task name': task.name,
-              'Latency avg (ns)': `${formatNumber(mToNs(latency.mean), 5, 2)} \xb1 ${latency.rme.toFixed(2)}%`,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              'Latency med (ns)': `${formatNumber(mToNs(latency.p50!), 5, 2)} \xb1 ${formatNumber(mToNs(latency.mad!), 5, 2)}`,
-              'Throughput avg (ops/s)': `${Math.round(throughput.mean).toString()} \xb1 ${throughput.rme.toFixed(2)}%`,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              'Throughput med (ops/s)': `${Math.round(throughput.p50!).toString()} \xb1 ${Math.round(throughput.mad!).toString()}`,
-              Samples: latency.samples.length,
-            })
-        /* eslint-enable perfectionist/sort-objects */
-      }
-      return null
+      /* eslint-disable perfectionist/sort-objects */
+      return task.result.state === 'errored'
+        ? {
+            'Task name': task.name,
+            Error: task.result.error.message,
+            Stack: task.result.error.stack,
+          }
+        : convert(task)
     })
   }
 

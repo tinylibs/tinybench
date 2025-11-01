@@ -29,19 +29,22 @@ test('events order (async)', async () => {
 
   const error = bench.getTask('error')
 
-  error?.addEventListener('start', () => {
+  expect(error).toBeDefined()
+  if (!error) return
+
+  error.addEventListener('start', () => {
     events.push('error-start')
   })
 
-  error?.addEventListener('error', () => {
+  error.addEventListener('error', () => {
     events.push('error-error')
   })
 
-  error?.addEventListener('cycle', () => {
+  error.addEventListener('cycle', () => {
     events.push('error-cycle')
   })
 
-  error?.addEventListener('complete', () => {
+  error.addEventListener('complete', () => {
     events.push('error-complete')
   })
 
@@ -62,7 +65,10 @@ test('events order (async)', async () => {
   })
 
   bench.addEventListener('cycle', evt => {
-    expect(evt.task?.name.trim()).not.toBe('')
+    expect(evt.task).toBeDefined()
+    if (!evt.task) return
+
+    expect(evt.task.name.trim()).not.toBe('')
     events.push('cycle')
   })
 
@@ -115,6 +121,10 @@ test('events order (async)', async () => {
   ])
 
   const abortTask = bench.getTask('abort')
+
+  expect(abortTask).toBeDefined()
+  if (!abortTask) return
+
   // aborted has no results
-  expect(abortTask?.result).toBeUndefined()
+  expect(Object.keys(abortTask.result).length).toBe(3)
 }, 10000)

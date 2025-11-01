@@ -34,7 +34,13 @@ jobs:
           FORCE_COLOR: 2
 
   qa-deno:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     name: Deno QA
     steps:
       - uses: actions/checkout@v5

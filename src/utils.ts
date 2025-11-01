@@ -179,10 +179,10 @@ export const isPromiseLike = <T>(
   maybePromiseLike: unknown
 ): maybePromiseLike is PromiseLike<T> =>
     maybePromiseLike !== null &&
-    (
-      typeof maybePromiseLike === 'object' ||
-      typeof maybePromiseLike === 'function') &&
-      typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
+  (
+    typeof maybePromiseLike === 'object' ||
+    typeof maybePromiseLike === 'function') &&
+  typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
@@ -448,74 +448,37 @@ export const toError = (value: unknown): Error => {
   }
 }
 
+const toAverage = (statistics: Statistics): string => `${formatNumber(mToNs(statistics.mean), 5, 2)} \xb1 ${statistics.rme.toFixed(2)}%`
+const toMedian = (statistics: Statistics): string => `${formatNumber(mToNs(statistics.p50), 5, 2)} \xb1 ${formatNumber(mToNs(statistics.mad), 5, 2)}`
+
 export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (task: Task): Record<string, number | string> => {
-  switch (task.result.state) {
-    case 'aborted':
-      /* eslint-disable perfectionist/sort-objects */
-      return {
-        'Task name': task.name,
-        'Latency avg (ns)': 'N/A',
-        'Latency med (ns)': 'N/A',
-        'Throughput avg (ops/s)': 'N/A',
-        'Throughput med (ops/s)': 'N/A',
-        Samples: 'N/A',
-        Remarks: 'Aborted'
-      }
-    case 'aborted-with-statistics':
-      /* eslint-disable perfectionist/sort-objects */
-      return {
-        'Task name': task.name,
-        'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
-        'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
-        'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
-        'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
-        Samples: task.result.latency.samples.length,
-        Remarks: 'Aborted',
-      }
-    case 'completed':
-      /* eslint-disable perfectionist/sort-objects */
-      return {
-        'Task name': task.name,
-        'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
-        'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
-        'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
-        'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
-        Samples: task.result.latency.samples.length,
-      }
-    case 'errored':
-      /* eslint-disable perfectionist/sort-objects */
-      return {
-        'Task name': task.name,
-        Error: task.result.error.message,
-        Stack: task.result.error.stack ?? 'N/A',
-        Remarks: 'Errored',
-      }
-    case 'not-started':
-      /* eslint-disable perfectionist/sort-objects */
-      return {
-        'Task name': task.name,
-        'Latency avg (ns)': 'N/A',
-        'Latency med (ns)': 'N/A',
-        'Throughput avg (ops/s)': 'N/A',
-        'Throughput med (ops/s)': 'N/A',
-        Samples: 'N/A',
-        Remarks: 'Not started',
-      }
-    case 'started':
-      /* eslint-disable perfectionist/sort-objects */
-      return {
-        'Task name': task.name,
-        'Latency avg (ns)': 'N/A',
-        'Latency med (ns)': 'N/A',
-        'Throughput avg (ops/s)': 'N/A',
-        'Throughput med (ops/s)': 'N/A',
-        Samples: 'N/A',
-        Remarks: 'Started',
-      }
-    default: {
-      // Exhaustive check
-      const check: never = task.result
-      return check
-    }
+  const state = task.result.state
+  return {
+    'Task name': task.name,
+    ...((state === 'aborted-with-statistics' || state === 'completed')
+      ? {
+          'Latency avg (ns)': toAverage(task.result.latency),
+          'Latency med (ns)': toMedian(task.result.latency),
+          Samples: task.result.latency.samples.length,
+          'Throughput avg (ops/s)': toAverage(task.result.throughput),
+          'Throughput med (ops/s)': toMedian(task.result.throughput),
+        }
+      : state !== 'errored'
+        ? {
+            'Latency avg (ns)': 'N/A',
+            'Latency med (ns)': 'N/A',
+            Remarks: state,
+            Samples: 'N/A',
+            'Throughput avg (ops/s)': 'N/A',
+            'Throughput med (ops/s)': 'N/A',
+          }
+        : {
+            Error: task.result.error.message,
+            Stack: task.result.error.stack ?? 'N/A',
+          }
+    ),
+    ...(state === 'aborted-with-statistics' && {
+      Remarks: state,
+    }),
   }
 }

@@ -46,7 +46,7 @@ export class Bench extends EventTarget {
   /**
    * The benchmark name.
    */
-  readonly name?: string | undefined
+  readonly name: string | undefined
 
   /**
    * The options.

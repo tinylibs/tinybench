@@ -8,7 +8,7 @@ export type AddEventListenerOptionsArgument = Parameters<
 /**
  * Bench event
  */
-export type BenchEvent = Event & { error?: Error; task?: Task }
+export type BenchEvent = Event & { error?: Error, task?: Task }
 
 /**
  * Bench events

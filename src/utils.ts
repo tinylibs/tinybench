@@ -179,9 +179,10 @@ export const isPromiseLike = <T>(
   maybePromiseLike: unknown
 ): maybePromiseLike is PromiseLike<T> =>
     maybePromiseLike !== null &&
-  (typeof maybePromiseLike === 'object' ||
-    typeof maybePromiseLike === 'function') &&
-  typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
+    (
+      typeof maybePromiseLike === 'object' ||
+      typeof maybePromiseLike === 'function') &&
+      typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
@@ -265,9 +266,7 @@ export const isValidSamples = (value: number[] | undefined): value is Samples =>
  * @param samples - samples to sort
  * @returns new sorted samples
  */
-export const toSortedSamples = (samples: Samples): SortedSamples => {
-  return ([...samples]).sort(sortFn) as SortedSamples
-}
+export const toSortedSamples = (samples: Samples): SortedSamples => ([...samples]).sort(sortFn) as SortedSamples
 
 /**
  * Sorts samples in place.
@@ -333,9 +332,7 @@ export const sortFn = (a: number, b: number) => a - b
  * @param samples - the sample
  * @returns the median of the sample
  */
-const median = (samples: Samples) => {
-  return medianSorted(toSortedSamples(samples))
-}
+const median = (samples: Samples) => medianSorted(toSortedSamples(samples))
 
 /**
  * Computes the absolute deviation of a sample given an aggregation.
@@ -513,7 +510,7 @@ export const defaultConvertTaskResultForConsoleTable: ConvertForConsoleTableFn =
         'Throughput avg (ops/s)': 'N/A',
         'Throughput med (ops/s)': 'N/A',
         Samples: 'N/A',
-        Remarks: 'Not started',
+        Remarks: 'Started',
       }
     default: {
       // Exhaustive check

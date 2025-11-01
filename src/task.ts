@@ -19,7 +19,7 @@ import {
   isFnAsyncResource,
   isPromiseLike,
   isValidSamples,
-  Samples,
+  type Samples,
   sortSamples,
   toError,
 } from './utils'
@@ -248,7 +248,7 @@ export class Task extends EventTarget {
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): Promise<{ error: Error; samples?: never; } | { error?: never; samples?: Samples }> {
+  ): Promise<{ error: Error, samples?: never } | { error?: never, samples?: Samples }> {
     if (this.fnOpts.beforeAll != null) {
       try {
         await this.fnOpts.beforeAll.call(this, mode)
@@ -297,7 +297,7 @@ export class Task extends EventTarget {
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
           samples.length + (limit?.activeCount ?? 0) + (limit?.pendingCount ?? 0) < iterations) &&
-        !this.isAborted()
+          !this.isAborted()
       ) {
         if (this.bench.concurrency === 'task') {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -334,7 +334,7 @@ export class Task extends EventTarget {
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): { error: Error; samples?: never; } | { error?: never; samples?: Samples } {
+  ): { error: Error, samples?: never } | { error?: never, samples?: Samples } {
     if (this.fnOpts.beforeAll != null) {
       try {
         const beforeAllResult = this.fnOpts.beforeAll.call(this, mode)
@@ -383,7 +383,7 @@ export class Task extends EventTarget {
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time ||
           samples.length < iterations) &&
-        !this.isAborted()
+          !this.isAborted()
       ) {
         benchmarkTask()
       }
@@ -415,7 +415,7 @@ export class Task extends EventTarget {
     return this.signal?.aborted === true || this.bench.opts.signal?.aborted === true
   }
 
-  private async measureOnce (): Promise<{ fnResult: ReturnType<Fn>; taskTime: number }> {
+  private async measureOnce (): Promise<{ fnResult: ReturnType<Fn>, taskTime: number }> {
     const taskStart = this.bench.opts.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.fn.call(this)
@@ -427,7 +427,7 @@ export class Task extends EventTarget {
     return { fnResult, taskTime }
   }
 
-  private measureOnceSync (): { fnResult: ReturnType<Fn>; taskTime: number } {
+  private measureOnceSync (): { fnResult: ReturnType<Fn>, taskTime: number } {
     const taskStart = this.bench.opts.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = this.fn.call(this)

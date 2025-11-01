@@ -7,9 +7,13 @@ test('task-level abort: aborts individual task without affecting others (async)'
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
-  bench.add('task1', async () => {
-    await new Promise(resolve => setTimeout(resolve, 50))
-  }, { signal: controller.signal })
+  bench.add(
+    'task1',
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 50))
+    },
+    { signal: controller.signal }
+  )
 
   bench.add('task2', async () => {
     await new Promise(resolve => setTimeout(resolve, 50))
@@ -48,9 +52,13 @@ test('task-level abort: aborts individual task without affecting others (sync)',
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
-  bench.add('task1', () => {
-    sleep(50)
-  }, { signal: controller.signal })
+  bench.add(
+    'task1',
+    () => {
+      sleep(50)
+    },
+    { signal: controller.signal }
+  )
 
   bench.add('task2', () => {
     sleep(50)
@@ -89,11 +97,17 @@ test('task-level abort: aborts during execution (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 50, time: 200 })
 
-  bench.add('long-task', async () => {
-    await new Promise(resolve => setTimeout(resolve, 5))
-  }, { signal: controller.signal })
+  bench.add(
+    'long-task',
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 5))
+    },
+    { signal: controller.signal }
+  )
 
-  setTimeout(() => { controller.abort() }, 50)
+  setTimeout(() => {
+    controller.abort()
+  }, 50)
 
   await bench.run()
 
@@ -124,17 +138,25 @@ test('task-level abort: emits abort event on task', async () => {
   let taskAborted = false
   let benchAborted = false
 
-  bench.add('task', async () => {
-    await new Promise(resolve => setTimeout(resolve, 10))
-  }, { signal: controller.signal })
+  bench.add(
+    'task',
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 10))
+    },
+    { signal: controller.signal }
+  )
 
   const task = bench.getTask('task')
 
   expect(task).toBeDefined()
   if (!task) return
 
-  task.addEventListener('abort', () => { taskAborted = true })
-  bench.addEventListener('abort', () => { benchAborted = true })
+  task.addEventListener('abort', () => {
+    taskAborted = true
+  })
+  bench.addEventListener('abort', () => {
+    benchAborted = true
+  })
 
   controller.abort()
   await bench.run()
@@ -146,11 +168,19 @@ test('task-level abort: emits abort event on task', async () => {
 test('task-level abort: task signal takes precedence over bench signal', async () => {
   const benchController = new AbortController()
   const taskController = new AbortController()
-  const bench = new Bench({ iterations: 16, signal: benchController.signal, time: 100 })
+  const bench = new Bench({
+    iterations: 16,
+    signal: benchController.signal,
+    time: 100,
+  })
 
-  bench.add('task', async () => {
-    await new Promise(resolve => setTimeout(resolve, 10))
-  }, { signal: taskController.signal })
+  bench.add(
+    'task',
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 10))
+    },
+    { signal: taskController.signal }
+  )
 
   taskController.abort()
 
@@ -169,7 +199,11 @@ test('task-level abort: task signal takes precedence over bench signal', async (
 
 test('task-level abort: bench-level signal aborts all tasks', async () => {
   const benchController = new AbortController()
-  const bench = new Bench({ iterations: 16, signal: benchController.signal, time: 100 })
+  const bench = new Bench({
+    iterations: 16,
+    signal: benchController.signal,
+    time: 100,
+  })
 
   bench.add('task1', async () => {
     await new Promise(resolve => setTimeout(resolve, 10))
@@ -204,11 +238,20 @@ test('task-level abort: bench-level signal aborts all tasks', async () => {
 
 test('task-level abort: works during async warmup phase', async () => {
   const controller = new AbortController()
-  const bench = new Bench({ iterations: 16, time: 100, warmup: true, warmupTime: 50 })
+  const bench = new Bench({
+    iterations: 16,
+    time: 100,
+    warmup: true,
+    warmupTime: 50,
+  })
 
-  bench.add('task', async () => {
-    await new Promise(resolve => setTimeout(resolve, 10))
-  }, { signal: controller.signal })
+  bench.add(
+    'task',
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 10))
+    },
+    { signal: controller.signal }
+  )
 
   controller.abort()
 
@@ -234,11 +277,17 @@ test.skip('task-level abort: works with task concurrency', async () => {
   bench.concurrency = 'task'
   bench.threshold = 2
 
-  bench.add('concurrent-task', async () => {
-    await Promise.resolve()
-  }, { signal: controller.signal })
+  bench.add(
+    'concurrent-task',
+    async () => {
+      await Promise.resolve()
+    },
+    { signal: controller.signal }
+  )
 
-  setTimeout(() => { controller.abort() }, 20)
+  setTimeout(() => {
+    controller.abort()
+  }, 20)
 
   await bench.run()
 
@@ -281,9 +330,13 @@ test('task-level abort: aborted should be false if a signal is provided but not 
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
-  bench.add('task', async () => {
-    await new Promise(resolve => setTimeout(resolve, 10))
-  }, { signal: controller.signal })
+  bench.add(
+    'task',
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 10))
+    },
+    { signal: controller.signal }
+  )
 
   // don't abort
   await bench.run()
@@ -304,9 +357,13 @@ test('task-level abort: aborted should be false if signal is aborted after run c
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
-  bench.add('task', async () => {
-    await new Promise(resolve => setTimeout(resolve, 10))
-  }, { signal: controller.signal })
+  bench.add(
+    'task',
+    async () => {
+      await new Promise(resolve => setTimeout(resolve, 10))
+    },
+    { signal: controller.signal }
+  )
 
   await bench.run()
 

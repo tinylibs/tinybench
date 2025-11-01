@@ -1026,7 +1026,7 @@ export const tTable = [
   1.962290172717185,
   1.9622878939521027,
   1.9622856196472673,
-  1.962283349789597
+  1.962283349789597,
 ] as const satisfies readonly number[]
 
 export const defaultMinimumTime = 1000

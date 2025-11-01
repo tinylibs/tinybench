@@ -34,7 +34,7 @@ test('events order at task completion (async)', async () => {
     expect(events).toStrictEqual(['foo-complete', 'bar-complete'])
   })
 
-  const tasks = await bench.run() as [Task, Task]
+  const tasks = (await bench.run()) as [Task, Task]
 
   expect(tasks.length).toBe(2)
   expect(tasks[0].name).toBe('foo')

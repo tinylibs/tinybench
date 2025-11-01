@@ -60,9 +60,9 @@ test('async hooks in sync tests', () => {
   expect(asyncBeforeAllTask.result.state).toBe('errored')
   if (asyncBeforeAllTask.result.state !== 'errored') return
 
-  expect(
-    asyncBeforeAllTask.result.error.message
-  ).toStrictEqual('`beforeAll` function must be sync when using `runSync()`')
+  expect(asyncBeforeAllTask.result.error.message).toStrictEqual(
+    '`beforeAll` function must be sync when using `runSync()`'
+  )
 
   const asyncBeforeEachTask = bench.getTask('async-beforeEach')
   expect(asyncBeforeEachTask).toBeDefined()
@@ -71,9 +71,9 @@ test('async hooks in sync tests', () => {
   expect(asyncBeforeEachTask.result.state).toBe('errored')
   if (asyncBeforeEachTask.result.state !== 'errored') return
 
-  expect(
-    asyncBeforeEachTask.result.error.message
-  ).toStrictEqual('`beforeEach` function must be sync when using `runSync()`')
+  expect(asyncBeforeEachTask.result.error.message).toStrictEqual(
+    '`beforeEach` function must be sync when using `runSync()`'
+  )
 
   const asyncAfterAllTask = bench.getTask('async-afterAll')
   expect(asyncAfterAllTask).toBeDefined()
@@ -93,7 +93,7 @@ test('async hooks in sync tests', () => {
   expect(asyncAfterEachTask.result.state).toBe('errored')
   if (asyncAfterEachTask.result.state !== 'errored') return
 
-  expect(
-    asyncAfterEachTask.result.error.message
-  ).toStrictEqual('`afterEach` function must be sync when using `runSync()`')
+  expect(asyncAfterEachTask.result.error.message).toStrictEqual(
+    '`afterEach` function must be sync when using `runSync()`'
+  )
 })

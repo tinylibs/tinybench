@@ -8,7 +8,7 @@ export type AddEventListenerOptionsArgument = Parameters<
 /**
  * Bench event
  */
-export type BenchEvent = Event & { error?: Error, task?: Task }
+export type BenchEvent = Event & { error?: Error; task?: Task }
 
 /**
  * Bench events
@@ -108,7 +108,9 @@ export interface BenchOptions {
   warmupTime?: number
 }
 
-export type ConsoleTableConverter = (task: Task) => Record<string, number | string>
+export type ConsoleTableConverter = (
+  task: Task
+) => Record<string, number | string>
 
 /**
  * Event listener
@@ -341,7 +343,13 @@ export interface TaskEventsMap {
 /**
  * The task result object
  */
-export type TaskResult = TaskResultAborted | TaskResultAbortedWithStatistics | TaskResultCompleted | TaskResultErrored | TaskResultNotStarted | TaskResultStarted
+export type TaskResult =
+  | TaskResultAborted
+  | TaskResultAbortedWithStatistics
+  | TaskResultCompleted
+  | TaskResultErrored
+  | TaskResultNotStarted
+  | TaskResultStarted
 
 export interface TaskResultAborted {
   /**
@@ -352,8 +360,8 @@ export interface TaskResultAborted {
   state: 'aborted'
 }
 
-export interface TaskResultAbortedWithStatistics extends
-  TaskResultWithStatistics {
+export interface TaskResultAbortedWithStatistics
+  extends TaskResultWithStatistics {
   /**
    * whether the task was aborted
    */
@@ -362,8 +370,7 @@ export interface TaskResultAbortedWithStatistics extends
   state: 'aborted-with-statistics'
 }
 
-export interface TaskResultCompleted extends
-  TaskResultWithStatistics {
+export interface TaskResultCompleted extends TaskResultWithStatistics {
   /**
    * whether the task was aborted
    */
@@ -406,9 +413,7 @@ export interface TaskResultStarted {
   state: 'started'
 }
 
-export interface TaskResultWithStatistics extends
-  DeprecatedStatistics {
-
+export interface TaskResultWithStatistics extends DeprecatedStatistics {
   /**
    * the task latency statistics
    */
@@ -428,7 +433,6 @@ export interface TaskResultWithStatistics extends
    * the time to run the task benchmark cycle (ms)
    */
   totalTime: number
-
 }
 
 interface DeprecatedStatistics {

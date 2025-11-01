@@ -1,6 +1,10 @@
 import { expect, test } from 'vitest'
 
-import { formatNumber, getStatisticsSorted, type SortedSamples } from '../src/utils'
+import {
+  formatNumber,
+  getStatisticsSorted,
+  type SortedSamples,
+} from '../src/utils'
 
 test('formatting integers', () => {
   expect(formatNumber(123456, 5, 2)).toBe('123456')
@@ -26,7 +30,9 @@ test('formatting floats', () => {
 })
 
 test('statistics', () => {
-  let stats = getStatisticsSorted([1, 2, 3, 4, 5, 6] as unknown as SortedSamples)
+  let stats = getStatisticsSorted([
+    1, 2, 3, 4, 5, 6,
+  ] as unknown as SortedSamples)
   expect(stats.min).toBe(1)
   expect(stats.max).toBe(6)
   expect(stats.df).toBe(5)

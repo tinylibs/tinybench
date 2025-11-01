@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto'
 import { setTimeout } from 'node:timers/promises'
 import { expect, test } from 'vitest'
 
-import { Bench, Task } from '../src'
+import { Bench, type Task } from '../src'
 
 test.each(['warmup', 'run'])('%s sequential', async mode => {
   const iterations = 1
@@ -39,7 +39,7 @@ test.each(['warmup', 'run'])('%s sequential', async mode => {
       }
     })
 
-  const tasks = await sequentialBench.run() as [Task, Task, Task]
+  const tasks = (await sequentialBench.run()) as [Task, Task, Task]
   expect(tasks.length).toBe(3)
 
   if (mode === 'warmup') {

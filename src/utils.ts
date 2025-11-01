@@ -10,9 +10,23 @@ import { emptyFunction, tTable } from './constants'
  * The JavaScript runtime environment.
  * @see https://runtime-keys.proposal.wintercg.org/
  */
-export type JSRuntime = 'browser' | 'bun' | 'deno' | 'edge-light' | 'fastly' |
-  'hermes' | 'jsc' | 'lagon' | 'moddable' | 'netlify' | 'node' | 'quickjs-ng' |
-  'spidermonkey' | 'unknown' | 'v8' | 'workerd'
+export type JSRuntime =
+  | 'browser'
+  | 'bun'
+  | 'deno'
+  | 'edge-light'
+  | 'fastly'
+  | 'hermes'
+  | 'jsc'
+  | 'lagon'
+  | 'moddable'
+  | 'netlify'
+  | 'node'
+  | 'quickjs-ng'
+  | 'spidermonkey'
+  | 'unknown'
+  | 'v8'
+  | 'workerd'
 
 /**
  * @param g GlobalThis object
@@ -25,23 +39,43 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
   let runtime: JSRuntime = 'unknown'
   let version = 'unknown'
 
-  if (!!g.Bun || !!(g.process && (g.process as { versions?: Record<string, string> }).versions?.bun)) {
+  if (
+    !!g.Bun ||
+    !!(
+      g.process &&
+      (g.process as { versions?: Record<string, string> }).versions?.bun
+    )
+  ) {
     runtime = 'bun'
     version = (g.Bun as { version: string }).version || 'unknown'
   } else if (g.Deno) {
     runtime = 'deno'
-    version = (g.Deno as { version?: { deno: string } }).version?.deno ?? 'unknown'
-  } else if (g.process && (g.process as { release?: { name: string } }).release?.name === 'node') {
+    version =
+      (g.Deno as { version?: { deno: string } }).version?.deno ?? 'unknown'
+  } else if (
+    g.process &&
+    (g.process as { release?: { name: string } }).release?.name === 'node'
+  ) {
     runtime = 'node'
-    version = (g.process as { versions: { node: string } }).versions.node || 'unknown'
+    version =
+      (g.process as { versions: { node: string } }).versions.node || 'unknown'
   } else if (g.HermesInternal) {
     runtime = 'hermes'
-    version = (g.HermesInternal as { getRuntimeProperties?: () => Record<string, string> }).getRuntimeProperties?.()[
-      'OSS Release Version'
-    ] ?? 'unknown'
-  } else if (hasNavigatorWithUserAgent(g) && g.navigator.userAgent === 'Cloudflare-Workers') {
+    version =
+      (
+        g.HermesInternal as {
+          getRuntimeProperties?: () => Record<string, string>
+        }
+      ).getRuntimeProperties?.()['OSS Release Version'] ?? 'unknown'
+  } else if (
+    hasNavigatorWithUserAgent(g) &&
+    g.navigator.userAgent === 'Cloudflare-Workers'
+  ) {
     runtime = 'workerd'
-  } else if (hasNavigatorWithUserAgent(g) && g.navigator.userAgent.toLowerCase().includes('quickjs-ng')) {
+  } else if (
+    hasNavigatorWithUserAgent(g) &&
+    g.navigator.userAgent.toLowerCase().includes('quickjs-ng')
+  ) {
     runtime = 'quickjs-ng'
   } else if (typeof g.Netlify === 'object') {
     runtime = 'netlify'
@@ -51,29 +85,22 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
     runtime = 'lagon'
   } else if (g.fastly) {
     runtime = 'fastly'
-  } else if (
-    !!g.$262 &&
-    !!g.lockdown &&
-    !!g.AsyncDisposableStack
-  ) {
+  } else if (!!g.$262 && !!g.lockdown && !!g.AsyncDisposableStack) {
     runtime = 'moddable'
   } else if (g.d8) {
     runtime = 'v8'
-    version = typeof g.version === 'function' ? (g.version as () => string)() : 'unknown'
+    version =
+      typeof g.version === 'function'
+        ? (g.version as () => string)()
+        : 'unknown'
   } else if (
     !!g.inIon &&
     !!(g.performance && (g.performance as { mozMemory?: unknown }).mozMemory)
   ) {
     runtime = 'spidermonkey'
-  } else if (
-    typeof g.$ === 'object' && g.$ !== null &&
-    'IsHTMLDDA' in g.$
-  ) {
+  } else if (typeof g.$ === 'object' && g.$ !== null && 'IsHTMLDDA' in g.$) {
     runtime = 'jsc'
-  } else if (
-    !!g.window &&
-    !!g.navigator
-  ) {
+  } else if (!!g.window && !!g.navigator) {
     runtime = 'browser'
   }
 
@@ -87,7 +114,9 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
  * @param g GlobalThis object
  * @returns Whether the global object has a navigator with userAgent
  */
-function hasNavigatorWithUserAgent (g = globalThis as Record<string, unknown>): g is { navigator: Navigator } {
+function hasNavigatorWithUserAgent (
+  g = globalThis as Record<string, unknown>
+): g is { navigator: Navigator } {
   return (
     typeof g.navigator === 'object' &&
     g.navigator !== null &&
@@ -95,10 +124,7 @@ function hasNavigatorWithUserAgent (g = globalThis as Record<string, unknown>): 
   )
 }
 
-export const {
-  runtime,
-  version: runtimeVersion,
-} = detectRuntime()
+export const { runtime, version: runtimeVersion } = detectRuntime()
 
 /**
  * Converts nanoseconds to milliseconds.
@@ -154,8 +180,16 @@ export const formatNumber = (
 }
 
 let hrtimeBigint: () => bigint
-if (typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } }).process?.hrtime?.bigint === 'function') {
-  hrtimeBigint = (globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }).process.hrtime.bigint.bind((globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }).process.hrtime)
+if (
+  typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
+    .process?.hrtime?.bigint === 'function'
+) {
+  hrtimeBigint = (
+    globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }
+  ).process.hrtime.bigint.bind(
+    (globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } })
+      .process.hrtime
+  )
 } else {
   hrtimeBigint = () => {
     throw new Error('hrtime.bigint() is not supported in this JS environment')
@@ -179,22 +213,24 @@ export const isPromiseLike = <T>(
   maybePromiseLike: unknown
 ): maybePromiseLike is PromiseLike<T> =>
     maybePromiseLike !== null &&
-  (
-    typeof maybePromiseLike === 'object' ||
+  (typeof maybePromiseLike === 'object' ||
     typeof maybePromiseLike === 'function') &&
   typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const AsyncFunctionConstructor = (async () => { }).constructor as FunctionConstructor
+const AsyncFunctionConstructor = (async () => {})
+  .constructor as FunctionConstructor
 
 /**
  * An async function check helper only considering runtime support async syntax
  * @param fn - the function to check
  * @returns true if the function is an async function
  */
-const isAsyncFunction = (fn: Fn | null | undefined): fn is AsyncFunctionType<unknown[], unknown> =>
+const isAsyncFunction = (
+  fn: Fn | null | undefined
+): fn is AsyncFunctionType<unknown[], unknown> =>
   typeof fn === 'function' && fn.constructor === AsyncFunctionConstructor
 
 /**
@@ -216,7 +252,7 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
       // silence promise rejection
       try {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        (fnCall as Promise<unknown>).then(emptyFunction)?.catch(emptyFunction)
+        ;(fnCall as Promise<unknown>).then(emptyFunction)?.catch(emptyFunction)
       } catch {
         // ignore
       }
@@ -254,11 +290,10 @@ export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
  * @param value - value to check
  * @returns if the value is a Samples type, meaning a non-empty array of numbers
  */
-export const isValidSamples = (value: number[] | undefined): value is Samples => {
-  return (
-    Array.isArray(value) &&
-    value.length !== 0
-  )
+export const isValidSamples = (
+  value: number[] | undefined
+): value is Samples => {
+  return Array.isArray(value) && value.length !== 0
 }
 
 /**
@@ -266,13 +301,16 @@ export const isValidSamples = (value: number[] | undefined): value is Samples =>
  * @param samples - samples to sort
  * @returns new sorted samples
  */
-export const toSortedSamples = (samples: Samples): SortedSamples => ([...samples]).sort(sortFn) as SortedSamples
+export const toSortedSamples = (samples: Samples): SortedSamples =>
+  [...samples].sort(sortFn) as SortedSamples
 
 /**
  * Sorts samples in place.
  * @param samples - samples to sort
  */
-export function sortSamples (samples: Samples): asserts samples is SortedSamples {
+export function sortSamples (
+  samples: Samples
+): asserts samples is SortedSamples {
   samples.sort(sortFn)
 }
 
@@ -305,9 +343,11 @@ const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
 
-  return ((baseIndex + 1) < samples.length)
+  return baseIndex + 1 < samples.length
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ? samples[baseIndex]! + (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
+    ? samples[baseIndex]! +
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     : samples[baseIndex]!
 }
@@ -448,14 +488,18 @@ export const toError = (value: unknown): Error => {
   }
 }
 
-const toAverage = (statistics: Statistics): string => `${formatNumber(mToNs(statistics.mean), 5, 2)} \xb1 ${statistics.rme.toFixed(2)}%`
-const toMedian = (statistics: Statistics): string => `${formatNumber(mToNs(statistics.p50), 5, 2)} \xb1 ${formatNumber(mToNs(statistics.mad), 5, 2)}`
+const toAverage = (statistics: Statistics): string =>
+  `${formatNumber(mToNs(statistics.mean), 5, 2)} \xb1 ${statistics.rme.toFixed(2)}%`
+const toMedian = (statistics: Statistics): string =>
+  `${formatNumber(mToNs(statistics.p50), 5, 2)} \xb1 ${formatNumber(mToNs(statistics.mad), 5, 2)}`
 
-export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (task: Task): Record<string, number | string> => {
+export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
+  task: Task
+): Record<string, number | string> => {
   const state = task.result.state
   return {
     'Task name': task.name,
-    ...((state === 'aborted-with-statistics' || state === 'completed')
+    ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
           'Latency avg (ns)': toAverage(task.result.latency),
           'Latency med (ns)': toMedian(task.result.latency),
@@ -475,8 +519,7 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (t
         : {
             Error: task.result.error.message,
             Stack: task.result.error.stack ?? 'N/A',
-          }
-    ),
+          }),
     ...(state === 'aborted-with-statistics' && {
       Remarks: state,
     }),

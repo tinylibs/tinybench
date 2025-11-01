@@ -11,7 +11,7 @@ test('detect runtime empty', () => {
 
 test('detect runtime bun without version', () => {
   const { runtime, version } = detectRuntime({
-    Bun: {}
+    Bun: {},
   })
 
   expect(runtime).toBe('bun')
@@ -21,8 +21,8 @@ test('detect runtime bun without version', () => {
 test('detect runtime bun with version', () => {
   const { runtime, version } = detectRuntime({
     Bun: {
-      version: '0.5.0'
-    }
+      version: '0.5.0',
+    },
   })
 
   expect(runtime).toBe('bun')
@@ -33,12 +33,12 @@ test('detect runtime node', () => {
   const { runtime, version } = detectRuntime({
     process: {
       release: {
-        name: 'node'
+        name: 'node',
       },
       versions: {
-        node: '20.4.0'
-      }
-    }
+        node: '20.4.0',
+      },
+    },
   })
 
   expect(runtime).toBe('node')
@@ -57,7 +57,7 @@ test('detect runtime deno', () => {
 test('detect runtime deno with version', () => {
   const { runtime, version } = detectRuntime({
     Deno: {
-      version: { deno: '1.34.3' }
+      version: { deno: '1.34.3' },
     },
   })
 
@@ -135,7 +135,7 @@ test('detect runtime workerd', () => {
   const { runtime, version } = detectRuntime({
     navigator: {
       userAgent: 'Cloudflare-Workers',
-    }
+    },
   })
 
   expect(runtime).toBe('workerd')
@@ -146,7 +146,7 @@ test('detect runtime quickjs-ng', () => {
   const { runtime, version } = detectRuntime({
     navigator: {
       userAgent: 'quickjs-ng',
-    }
+    },
   })
 
   expect(runtime).toBe('quickjs-ng')
@@ -155,7 +155,7 @@ test('detect runtime quickjs-ng', () => {
 
 test('detect runtime lagon', () => {
   const { runtime, version } = detectRuntime({
-    __lagon__: {}
+    __lagon__: {},
   })
 
   expect(runtime).toBe('lagon')
@@ -166,7 +166,7 @@ test('detect runtime lagon', () => {
 
 test('detect runtime netlify', () => {
   const { runtime, version } = detectRuntime({
-    Netlify: {}
+    Netlify: {},
   })
 
   expect(runtime).toBe('netlify')
@@ -175,7 +175,7 @@ test('detect runtime netlify', () => {
 
 test('detect runtime edge-light', () => {
   const { runtime, version } = detectRuntime({
-    EdgeRuntime: 'edge-light'
+    EdgeRuntime: 'edge-light',
   })
 
   expect(runtime).toBe('edge-light')
@@ -184,7 +184,7 @@ test('detect runtime edge-light', () => {
 
 test('detect runtime fastly', () => {
   const { runtime, version } = detectRuntime({
-    fastly: {}
+    fastly: {},
   })
 
   expect(runtime).toBe('fastly')
@@ -195,7 +195,7 @@ test('detect runtime moddable', () => {
   const { runtime, version } = detectRuntime({
     $262: {},
     AsyncDisposableStack: {},
-    lockdown: {}
+    lockdown: {},
   })
 
   expect(runtime).toBe('moddable')
@@ -205,9 +205,9 @@ test('detect runtime moddable', () => {
 test('detect runtime browser', () => {
   const { runtime, version } = detectRuntime({
     navigator: {
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
     },
-    window: {}
+    window: {},
   })
 
   expect(runtime).toBe('browser')

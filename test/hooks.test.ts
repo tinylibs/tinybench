@@ -1,6 +1,6 @@
-import { expect, test, vi } from 'vitest'
+import { expect, test } from 'vitest'
 
-import { Bench, type Task } from '../src'
+import { Bench, type FnHook } from '../src'
 
 test('task beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
   const iterations = 128
@@ -11,18 +11,33 @@ test('task beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
     warmupTime: 0,
   })
 
-  const beforeAll = vi.fn(function hook (this: Task) {
+  const expectedCallArgumentsAll = ['warmup', 'run']
+  const expectedCallArgumentsEach = Array(iterations).fill('warmup').concat(Array(iterations).fill('run'))
+
+  let beforeAllCallCount = 0
+  const beforeAll: FnHook = function hook (this, mode) {
     expect(this).toBe(bench.getTask('foo'))
-  })
-  const afterAll = vi.fn(function hook (this: Task) {
+    expect(mode).toBe(expectedCallArgumentsAll[beforeAllCallCount++])
+  }
+
+  let afterAllCallCount = 0
+  const afterAll: FnHook = function hook (this, mode) {
     expect(this).toBe(bench.getTask('foo'))
-  })
-  const beforeEach = vi.fn(function hook (this: Task) {
+    expect(mode).toBe(expectedCallArgumentsAll[afterAllCallCount++])
+  }
+
+  let beforeEachCallCount = 0
+  const beforeEach: FnHook = function hook (this, mode) {
     expect(this).toBe(bench.getTask('foo'))
-  })
-  const afterEach = vi.fn(function hook (this: Task) {
+    expect(mode).toBe(expectedCallArgumentsEach[beforeEachCallCount++])
+  }
+
+  let afterEachCallCount = 0
+  const afterEach: FnHook = function hook (this, mode) {
     expect(this).toBe(bench.getTask('foo'))
-  })
+    expect(mode).toBe(expectedCallArgumentsEach[afterEachCallCount++])
+  }
+
   bench.add(
     'foo',
     () => {
@@ -37,23 +52,6 @@ test('task beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
   )
 
   bench.runSync()
-
-  expect(beforeAll).toHaveBeenCalledTimes(2 /* warmup + run */)
-  expect(beforeAll.mock.calls).toEqual([['warmup'], ['run']])
-  expect(afterAll).toHaveBeenCalledTimes(2 /* warmup + run */)
-  expect(afterAll.mock.calls).toEqual([['warmup'], ['run']])
-  expect(beforeEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(beforeEach.mock.calls).toEqual(
-    Array(iterations)
-      .fill(['warmup'])
-      .concat(Array(iterations).fill(['run']))
-  )
-  expect(afterEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(afterEach.mock.calls).toEqual(
-    Array(iterations)
-      .fill(['warmup'])
-      .concat(Array(iterations).fill(['run']))
-  )
 })
 
 test('task beforeAll, afterAll, beforeEach, afterEach (async)', async () => {
@@ -65,18 +63,33 @@ test('task beforeAll, afterAll, beforeEach, afterEach (async)', async () => {
     warmupTime: 0,
   })
 
-  const beforeAll = vi.fn(function hook (this: Task) {
+  const expectedCallArgumentsAll = ['warmup', 'run']
+  const expectedCallArgumentsEach = Array(iterations).fill('warmup').concat(Array(iterations).fill('run'))
+
+  let beforeAllCallCount = 0
+  const beforeAll: FnHook = function hook (this, mode) {
     expect(this).toBe(bench.getTask('foo'))
-  })
-  const afterAll = vi.fn(function hook (this: Task) {
+    expect(mode).toBe(expectedCallArgumentsAll[beforeAllCallCount++])
+  }
+
+  let afterAllCallCount = 0
+  const afterAll: FnHook = function hook (this, mode) {
     expect(this).toBe(bench.getTask('foo'))
-  })
-  const beforeEach = vi.fn(function hook (this: Task) {
+    expect(mode).toBe(expectedCallArgumentsAll[afterAllCallCount++])
+  }
+
+  let beforeEachCallCount = 0
+  const beforeEach: FnHook = function hook (this, mode) {
     expect(this).toBe(bench.getTask('foo'))
-  })
-  const afterEach = vi.fn(function hook (this: Task) {
+    expect(mode).toBe(expectedCallArgumentsEach[beforeEachCallCount++])
+  }
+
+  let afterEachCallCount = 0
+  const afterEach: FnHook = function hook (this, mode) {
     expect(this).toBe(bench.getTask('foo'))
-  })
+    expect(mode).toBe(expectedCallArgumentsEach[afterEachCallCount++])
+  }
+
   bench.add(
     'foo',
     async () => {
@@ -91,21 +104,4 @@ test('task beforeAll, afterAll, beforeEach, afterEach (async)', async () => {
   )
 
   await bench.run()
-
-  expect(beforeAll).toHaveBeenCalledTimes(2 /* warmup + run */)
-  expect(beforeAll.mock.calls).toEqual([['warmup'], ['run']])
-  expect(afterAll).toHaveBeenCalledTimes(2 /* warmup + run */)
-  expect(afterAll.mock.calls).toEqual([['warmup'], ['run']])
-  expect(beforeEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(beforeEach.mock.calls).toEqual(
-    Array(iterations)
-      .fill(['warmup'])
-      .concat(Array(iterations).fill(['run']))
-  )
-  expect(afterEach).toHaveBeenCalledTimes(iterations * 2 /* warmup + run */)
-  expect(afterEach.mock.calls).toEqual(
-    Array(iterations)
-      .fill(['warmup'])
-      .concat(Array(iterations).fill(['run']))
-  )
 })

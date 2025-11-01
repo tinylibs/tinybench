@@ -1,15 +1,21 @@
-import { expect, test, vi } from 'vitest'
+import { expect, test } from 'vitest'
 
-import { Bench } from '../src'
+import { Bench, type Hook, type Task } from '../src'
 
 test('setup and teardown (async)', async () => {
   const calls: string[] = []
-  const setup = vi.fn(() => {
+  const setupCalls: [Task, string][] = []
+  const teardownCalls: [Task, string][] = []
+  const setup: Hook = (task, event) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    setupCalls.push([task!, event!])
     calls.push('setup')
-  })
-  const teardown = vi.fn(() => {
+  }
+  const teardown: Hook = (task, event) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    teardownCalls.push([task!, event!])
     calls.push('teardown')
-  })
+  }
   const bench = new Bench({
     iterations: 32,
     setup,
@@ -23,11 +29,17 @@ test('setup and teardown (async)', async () => {
 
   await bench.run()
 
-  expect(setup).toBeCalledWith(fooTask, 'warmup')
-  expect(setup).toBeCalledWith(fooTask, 'run')
-  expect(setup).toHaveBeenCalledTimes(2)
-  expect(teardown).toBeCalledWith(fooTask, 'warmup')
-  expect(teardown).toBeCalledWith(fooTask, 'run')
-  expect(teardown).toHaveBeenCalledTimes(2)
+  expect(setupCalls.length).toBe(2)
+  expect(setupCalls[0]![0]).toBe(fooTask) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  expect(setupCalls[0]![1]).toBe('warmup') // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  expect(setupCalls[1]![0]).toBe(fooTask) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  expect(setupCalls[1]![1]).toBe('run') // eslint-disable-line @typescript-eslint/no-non-null-assertion
+
+  expect(teardownCalls.length).toBe(2)
+  expect(teardownCalls[0]![0]).toBe(fooTask) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  expect(teardownCalls[0]![1]).toBe('warmup') // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  expect(teardownCalls[1]![0]).toBe(fooTask) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  expect(teardownCalls[1]![1]).toBe('run') // eslint-disable-line @typescript-eslint/no-non-null-assertion
+
   expect(calls).toStrictEqual(['setup', 'teardown', 'setup', 'teardown'])
 })

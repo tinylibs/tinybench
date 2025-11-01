@@ -34,11 +34,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -57,6 +52,11 @@ jobs:
         run: pnpm test
         env:
           FORCE_COLOR: 2
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Run examples
         run: cd examples && pnpm all

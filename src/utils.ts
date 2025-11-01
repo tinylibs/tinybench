@@ -2,7 +2,7 @@
 // Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
 
 import type { Task } from './task'
-import type { ConvertForConsoleTableFn, Fn, Statistics } from './types'
+import type { ConsoleTableConverter, Fn, Statistics } from './types'
 
 import { emptyFunction, tTable } from './constants'
 
@@ -448,7 +448,7 @@ export const toError = (value: unknown): Error => {
   }
 }
 
-export const defaultConvertTaskResultForConsoleTable: ConvertForConsoleTableFn = (task: Task): Record<string, number | string> => {
+export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (task: Task): Record<string, number | string> => {
   switch (task.result.state) {
     case 'aborted':
       /* eslint-disable perfectionist/sort-objects */

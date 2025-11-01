@@ -108,7 +108,7 @@ export interface BenchOptions {
   warmupTime?: number
 }
 
-export type ConvertForConsoleTableFn = (task: Task) => Record<string, number | string>
+export type ConsoleTableConverter = (task: Task) => Record<string, number | string>
 
 /**
  * Event listener

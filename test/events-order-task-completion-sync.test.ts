@@ -1,16 +1,7 @@
 import { expect, test } from 'vitest'
 
 import { Bench, type Task } from '../src'
-
-/**
- * @param ms amount of time to sleep in milliseconds
- */
-function sleep (ms: number): void {
-  const start = performance.now()
-  while (performance.now() - start < ms) {
-    // noop
-  }
-}
+import { sleep } from './utils'
 
 test('events order at task completion (sync)', () => {
   const bench = new Bench({ iterations: 16, time: 100 })

@@ -1,16 +1,10 @@
 import { expect, test } from 'vitest'
 
 import { Bench, hrtimeNow, now, Task } from '../src'
+import { sleep } from './utils'
 
-/**
- * @param ms amount of time to sleep in milliseconds
- */
-function sleep (ms: number): void {
-  const start = performance.now()
-  while (performance.now() - start < ms) {
-    // noop
-  }
-}
+// If running in CI, allow a bit more leeway for the mean value
+const maxMeanValue = process.env.CI ? 1025 : 1001
 
 test.each([
   ['now()', now],
@@ -44,7 +38,7 @@ test.each([
   ).above(1000)
   expect(
     tasks[0].result.throughput.mean * tasks[0].result.period
-  ).below(1001)
+  ).below(maxMeanValue)
 
   expect(tasks[1].name).toEqual('bar')
 
@@ -59,5 +53,5 @@ test.each([
   ).above(1000)
   expect(
     tasks[1].result.throughput.mean * tasks[1].result.period
-  ).below(1001)
+  ).below(maxMeanValue)
 })

@@ -155,7 +155,7 @@ export const formatNumber = (
 
 let hrtimeBigint: () => bigint
 if (typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } }).process?.hrtime?.bigint === 'function') {
-  hrtimeBigint = globalThis.process.hrtime.bigint.bind(process.hrtime)
+  hrtimeBigint = (globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }).process.hrtime.bigint.bind((globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }).process.hrtime)
 } else {
   hrtimeBigint = () => {
     throw new Error('hrtime.bigint() is not supported in this JS environment')

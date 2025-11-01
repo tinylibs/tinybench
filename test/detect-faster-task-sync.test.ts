@@ -3,7 +3,7 @@ import { expect, test } from 'vitest'
 import { Bench } from '../src'
 import { sleep } from './utils'
 
-test('detect faster task (sync)', { timeout: 10000 }, () => {
+test('detect faster task (sync)', () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench
     .add('faster', () => {

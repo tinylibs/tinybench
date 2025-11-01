@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: bun install --ignore-scripts --frozen-lockfile
 
+      - name: Ensure bun is used as runtime by bun test runner
+        run: RUNTIME=bun bun test ./test/check-runtime.pretest.ts
+
       - name: Run unit tests
         run: bun test --timeout 10000
         env:
@@ -52,6 +55,9 @@ jobs:
       
       - name: Install dependencies
         run: deno install --no-lock
+
+      - name: Ensure deno is used as runtime by vitest
+        run: RUNTIME=deno deno run ci:pretest
 
       - name: Run unit tests
         run: deno run test
@@ -97,6 +103,9 @@ jobs:
       - name: Lint
         if: matrix.node-version == 22
         run: pnpm lint
+
+      - name: Ensure node is used as runtime by vitest
+        run: RUNTIME=node pnpm run ci:pretest
 
       - name: Run unit tests
         run: pnpm test

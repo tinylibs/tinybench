@@ -7,8 +7,7 @@
     "noEmit": true,
     "skipLibCheck": true,
     "lib": [
-      "ES2020",
-      "DOM"
+      "ES2020"
     ],
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

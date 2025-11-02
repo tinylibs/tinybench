@@ -3,6 +3,7 @@ import type {
   AddEventListenerOptionsArgument,
   Fn,
   FnOptions,
+  PLimitInstance,
   RemoveEventListenerOptionsArgument,
   TaskEvents,
   TaskEventsMap,
@@ -289,7 +290,7 @@ export class Task extends EventTarget {
 
     try {
       const promises: Promise<void>[] = [] // only for task level concurrency
-      let limit: ReturnType<typeof pLimit> | undefined // only for task level concurrency
+      let limit: PLimitInstance | undefined // only for task level concurrency
 
       if (this.bench.concurrency === 'task') {
         limit = pLimit(Math.max(1, Math.floor(this.bench.threshold)))

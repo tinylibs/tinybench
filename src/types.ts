@@ -206,6 +206,28 @@ export type Hook = (
   mode?: 'run' | 'warmup'
 ) => Promise<void> | void
 
+/**
+ * P-limit instance interface for concurrency control
+ */
+export interface PLimitInstance {
+  /**
+   * Executes a function with concurrency limiting
+   * @param fn Function to execute
+   * @returns Promise resolving to the function's result
+   */
+  <R>(fn: () => Promise<R>): Promise<R>
+
+  /**
+   * Number of currently active (running) operations
+   */
+  readonly activeCount: number
+
+  /**
+   * Number of operations waiting in the queue
+   */
+  readonly pendingCount: number
+}
+
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.removeEventListener

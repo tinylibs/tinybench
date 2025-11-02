@@ -2,7 +2,12 @@
 // Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
 
 import type { Task } from './task'
-import type { ConsoleTableConverter, Fn, Statistics } from './types'
+import type {
+  ConsoleTableConverter,
+  Fn,
+  PLimitInstance,
+  Statistics,
+} from './types'
 
 import { emptyFunction, tTable } from './constants'
 
@@ -252,7 +257,7 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
       // silence promise rejection
       try {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        (fnCall as Promise<unknown>).then(emptyFunction)?.catch(emptyFunction)
+        ;(fnCall as Promise<unknown>).then(emptyFunction)?.catch(emptyFunction)
       } catch {
         // ignore
       }
@@ -528,42 +533,46 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   }
 }
 
+interface PLimitQueueItem {
+  fn: () => Promise<unknown>
+  reject: (error: unknown) => void
+  resolve: (value: unknown) => void
+}
+
 /**
  * Creates a concurrency limiter that can execute functions with a maximum concurrency limit.
  * @param limit - Maximum number of concurrent executions
  * @returns A function that accepts a function to execute and returns a promise
  */
-export const pLimit = (limit: number) => {
-  const queue: {
-    fn: () => Promise<unknown>
-    reject: (error: unknown) => void
-    resolve: (value: unknown) => void
-  }[] = []
+export const pLimit = (limit: number): PLimitInstance => {
+  const queue: PLimitQueueItem[] = []
 
   let activeCount = 0
   let pendingCount = 0
 
-  const processNext = async (): Promise<void> => {
-    if (activeCount >= limit || queue.length === 0) {
-      return
-    }
+  const processNext = (): void => {
+    while (activeCount < limit && queue.length > 0) {
+      const item = queue.shift()
+      if (item == null) {
+        break
+      }
+      activeCount++
+      pendingCount--
 
-    const item = queue.shift()
-    if (item == null) {
-      return
-    }
-    activeCount++
-    pendingCount--
-
-    try {
-      const result = await item.fn()
-      item.resolve(result)
-    } catch (error) {
-      item.reject(error)
-    } finally {
-      activeCount--
-      // Process next item in queue if any
-      processNext().catch(emptyFunction)
+      item
+        .fn()
+        .then(
+          result => {
+            item.resolve(result)
+          },
+          (error: unknown) => {
+            item.reject(error)
+          }
+        )
+        .finally(() => {
+          activeCount--
+          processNext()
+        })
     }
   }
 
@@ -572,10 +581,10 @@ export const pLimit = (limit: number) => {
       queue.push({
         fn: fn as () => Promise<unknown>,
         reject,
-        resolve: resolve as (value: unknown) => void,
+        resolve: (value: unknown) => { resolve(value as R) },
       })
       pendingCount++
-      processNext().catch(emptyFunction)
+      processNext()
     })
   }
 
@@ -591,8 +600,5 @@ export const pLimit = (limit: number) => {
     },
   })
 
-  return limiter as typeof limiter & {
-    readonly activeCount: number
-    readonly pendingCount: number
-  }
+  return limiter as PLimitInstance
 }

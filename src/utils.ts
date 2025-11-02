@@ -252,7 +252,7 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
       // silence promise rejection
       try {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        ;(fnCall as Promise<unknown>).then(emptyFunction)?.catch(emptyFunction)
+        (fnCall as Promise<unknown>).then(emptyFunction)?.catch(emptyFunction)
       } catch {
         // ignore
       }

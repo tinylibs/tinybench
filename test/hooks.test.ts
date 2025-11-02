@@ -12,7 +12,9 @@ test('task beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
   })
 
   const expectedCallArgumentsAll = ['warmup', 'run']
-  const expectedCallArgumentsEach = Array(iterations).fill('warmup').concat(Array(iterations).fill('run'))
+  const expectedCallArgumentsEach = Array(iterations)
+    .fill('warmup')
+    .concat(Array(iterations).fill('run'))
 
   let beforeAllCallCount = 0
   const beforeAll: FnHook = function hook (this, mode) {
@@ -64,7 +66,9 @@ test('task beforeAll, afterAll, beforeEach, afterEach (async)', async () => {
   })
 
   const expectedCallArgumentsAll = ['warmup', 'run']
-  const expectedCallArgumentsEach = Array(iterations).fill('warmup').concat(Array(iterations).fill('run'))
+  const expectedCallArgumentsEach = Array(iterations)
+    .fill('warmup')
+    .concat(Array(iterations).fill('run'))
 
   let beforeAllCallCount = 0
   const beforeAll: FnHook = function hook (this, mode) {

@@ -25,6 +25,7 @@
     "lint": "eslint --cache src test examples eslint.config.js tsdown.config.ts vitest.config.ts",
     "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsdown.config.ts vitest.config.ts",
     "release": "bumpp package.json --commit --push --tag",
+    "ci:pretest": "vitest --config vitest.pretest.config.ts run",
     "test": "vitest --retry=5 --run"
   },
   "main": "./dist/index.js",
@@ -63,7 +64,7 @@
     "tsdown": "^0.15.12",
     "typedoc": "^0.28.14",
     "typescript": "~5.9.3",
-    "vitest": "^4.0.6"
+    "vitest": "^3.0.0"
   },
   "keywords": [
     "benchmark",

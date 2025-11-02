@@ -15,7 +15,7 @@
     "simple-gc:dev": "tsx --watch --expose_gc src/simple-gc.ts",
     "example:simple-bun": "bun run src/simple-bun.ts"
   },
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "npm-run-all2": "^8.0.4",
     "tsx": "^4.20.6"

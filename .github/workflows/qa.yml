@@ -32,7 +32,7 @@ jobs:
         run: bun test ./test/check-runtime.pretest.ts
         env:
           RUNTIME: bun
-  
+
       - name: Run unit tests
         run: bun test --timeout 10000
         env:
@@ -46,7 +46,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-    name: Deno QA
+    name: Deno QA on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
 
@@ -54,7 +54,7 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      
+
       - name: Install dependencies
         run: deno install --no-lock
 
@@ -67,7 +67,7 @@ jobs:
         run: deno run test
         env:
           FORCE_COLOR: 2
-    
+
   qa-node:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -118,10 +118,40 @@ jobs:
         env:
           FORCE_COLOR: 2
 
+  qa-examples:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        node-version:
+          - 20
+          - 22
+          - 24
+          - latest
+    needs: ['qa-node', 'qa-bun']
+    name: Examples QA on ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Run examples
-        run: cd examples && pnpm all
+        run: |
+          cd examples
+          pnpm install
+          pnpm all

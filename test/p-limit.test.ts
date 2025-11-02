@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import type { PLimitInstance } from '../src/types'
 
 import { pLimit } from '../src/utils'
+import { asyncSleep } from './utils'
 
 describe('pLimit', () => {
   let limiter: PLimitInstance
@@ -19,7 +20,7 @@ describe('pLimit', () => {
 
   test('executes single task successfully', async () => {
     const result = await limiter(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await asyncSleep(10)
       return 'hello'
     })
 
@@ -37,7 +38,7 @@ describe('pLimit', () => {
         activeTracker.push(limiter.activeCount)
         expect(limiter.activeCount).toBeLessThanOrEqual(2)
 
-        await new Promise(resolve => setTimeout(resolve, delay))
+        await asyncSleep(delay)
         results.push(id)
         return id
       })
@@ -62,24 +63,24 @@ describe('pLimit', () => {
     const promise1 = limiter(async () => {
       expect(limiter.activeCount).toBe(1)
       expect(limiter.pendingCount).toBe(0)
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await asyncSleep(100)
       return 'task1'
     })
 
     const promise2 = limiter(async () => {
       expect(limiter.activeCount).toBe(2)
       expect(limiter.pendingCount).toBe(0)
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await asyncSleep(50)
       return 'task2'
     })
 
     const promise3 = limiter(async () => {
       expect(limiter.activeCount).toBeLessThanOrEqual(2)
-      await new Promise(resolve => setTimeout(resolve, 25))
+      await asyncSleep(25)
       return 'task3'
     })
 
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await asyncSleep(10)
     expect(limiter.activeCount).toBe(2)
     expect(limiter.pendingCount).toBe(1)
 
@@ -94,7 +95,7 @@ describe('pLimit', () => {
 
     const createTask = (id: number) =>
       limiter1(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await asyncSleep(10)
         results.push(id)
         return id
       })
@@ -113,7 +114,7 @@ describe('pLimit', () => {
 
   test('handles task errors properly', async () => {
     const successfulResult = await limiter(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await asyncSleep(10)
       return 'success'
     })
 
@@ -121,13 +122,13 @@ describe('pLimit', () => {
 
     await expect(
       limiter(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await asyncSleep(10)
         throw new Error('Test error')
       })
     ).rejects.toThrow('Test error')
 
     const afterErrorResult = await limiter(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await asyncSleep(10)
       return 'after-error'
     })
 
@@ -139,15 +140,15 @@ describe('pLimit', () => {
   test('handles multiple concurrent errors', async () => {
     const promises = [
       limiter(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50))
+        await asyncSleep(50)
         throw new Error('Error 1')
       }),
       limiter(async () => {
-        await new Promise(resolve => setTimeout(resolve, 25))
+        await asyncSleep(25)
         throw new Error('Error 2')
       }),
       limiter(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await asyncSleep(10)
         return 'success'
       }),
     ]
@@ -177,7 +178,7 @@ describe('pLimit', () => {
 
         expect(serialLimiter.activeCount).toBe(1)
 
-        await new Promise(resolve => setTimeout(resolve, 50))
+        await asyncSleep(50)
         return id
       })
 
@@ -207,7 +208,7 @@ describe('pLimit', () => {
 
     const promises = Array.from({ length: taskCount }, (_, i) =>
       highLimiter(async () => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 10))
+        await asyncSleep(Math.random() * 10)
         results.push(i)
         return i
       })
@@ -234,7 +235,7 @@ describe('pLimit', () => {
         maxActiveCount = Math.max(maxActiveCount, stressLimiter.activeCount)
         expect(stressLimiter.activeCount).toBeLessThanOrEqual(3)
 
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 5))
+        await asyncSleep(Math.random() * 5)
         results.push(i)
         return i
       })
@@ -262,7 +263,7 @@ describe('pLimit', () => {
     expect(objectResult).toEqual({ id: 1, name: 'test' })
     // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
     const undefinedResult = await limiter(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await asyncSleep(10)
       return undefined
     })
     expect(undefinedResult).toBeUndefined()
@@ -294,7 +295,7 @@ describe('pLimit', () => {
     const promises = [1, 2, 3].map(i =>
       outerLimiter(async () => {
         return innerLimiter(async () => {
-          await new Promise(resolve => setTimeout(resolve, 20))
+          await asyncSleep(20)
           results.push(`task-${i.toString()}`)
           return `task-${i.toString()}`
         })

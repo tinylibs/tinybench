@@ -10,3 +10,13 @@ export const sleep = (ms: number): void => {
     // noop
   }
 }
+
+/**
+ * Asynchronously waits for the specified number of milliseconds without blocking the event loop.
+ * Use this for testing asynchronous behavior and concurrency.
+ * @param ms amount of time to wait in milliseconds
+ * @returns A Promise that resolves after the specified delay
+ */
+export const asyncSleep = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}

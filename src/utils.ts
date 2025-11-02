@@ -435,48 +435,30 @@ export const invariant = (condition: boolean, message: string): void => {
 }
 
 /**
- * If we are in a vm context (e.g. jest), instanceof Error checks may fail
- * @param value - value to check
- * @returns whether the value is error-like
- */
-function isErrorLike (value: unknown): value is Error {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as { message?: unknown }).message === 'string'
-  )
-}
-
-/**
  * Thrown errors can be of any type. This function converts any value to an Error object.
  * @param value - value to convert to Error
  * @returns the converted Error
  */
 export const toError = (value: unknown): Error => {
   switch (typeof value) {
-    case 'bigint':
-    case 'boolean':
-    case 'number':
-      return new Error(value.toString())
     case 'function':
       return new Error(value.name)
     case 'object':
-      if (value === null) {
-        return new Error()
+      if (
+        value !== null &&
+        (value instanceof Error ||
+        // If we are in a vm context (e.g. jest), instanceof Error checks may fail
+        typeof (value as { message?: unknown }).message === 'string')
+      ) {
+        return value as Error
       }
-      if (value instanceof Error) {
-        return value
-      }
-      if (isErrorLike(value)) {
-        return value
-      }
+    // eslint-disable-next-line no-fallthrough
+    case 'undefined':
       return new Error()
     case 'string':
       return new Error(value)
-    case 'symbol':
-      return new Error(value.toString())
-    case 'undefined':
-      return new Error()
+    default:
+      return new Error(String(value))
   }
 }
 

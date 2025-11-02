@@ -348,15 +348,13 @@ const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
 
-  if (baseIndex + 1 < samples.length) {
-    const current = samples[baseIndex]
-    const next = samples[baseIndex + 1]
-    if (current !== undefined && next !== undefined) {
-      return current + (base - baseIndex) * (next - current)
-    }
-  }
-  const sample = samples[baseIndex]
-  return sample ?? Number.NaN
+  return baseIndex + 1 < samples.length
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    ? samples[baseIndex]! +
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    : samples[baseIndex]!
 }
 
 /**
@@ -553,25 +551,23 @@ export const pLimit = (limit: number): PLimitInstance => {
   const processNext = (): void => {
     while (activeCount < limit && queue.length > 0) {
       const item = queue.shift()
-      if (item == null) {
-        break
-      }
+      if (item == null) break
+
       activeCount++
       pendingCount--
 
-      item
-        .fn()
-        .then(
-          result => {
-            item.resolve(result)
-          },
-          (error: unknown) => {
-            item.reject(error)
-          }
-        )
-        .finally(() => {
+      item.fn().then(
+        result => {
           activeCount--
-        })
+          item.resolve(result)
+          processNext()
+        },
+        (error: unknown) => {
+          activeCount--
+          item.reject(error)
+          processNext()
+        }
+      )
     }
   }
 

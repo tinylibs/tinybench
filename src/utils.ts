@@ -571,7 +571,6 @@ export const pLimit = (limit: number): PLimitInstance => {
         )
         .finally(() => {
           activeCount--
-          processNext()
         })
     }
   }
@@ -581,7 +580,9 @@ export const pLimit = (limit: number): PLimitInstance => {
       queue.push({
         fn: fn as () => Promise<unknown>,
         reject,
-        resolve: (value: unknown) => { resolve(value as R) },
+        resolve: (value: unknown) => {
+          resolve(value as R)
+        },
       })
       pendingCount++
       processNext()

@@ -1,5 +1,3 @@
-import pLimit from 'p-limit'
-
 import type {
   AddEventListenerOptionsArgument,
   BenchEvents,
@@ -21,6 +19,7 @@ import {
 } from './constants'
 import { createBenchEvent } from './event'
 import { Task } from './task'
+import { pLimit } from './utils'
 import {
   defaultConvertTaskResultForConsoleTable,
   invariant,

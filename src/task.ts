@@ -1,5 +1,3 @@
-import pLimit from 'p-limit'
-
 import type { Bench } from './bench'
 import type {
   AddEventListenerOptionsArgument,
@@ -13,6 +11,7 @@ import type {
 } from './types'
 
 import { createBenchEvent, createErrorEvent } from './event'
+import { pLimit } from './utils'
 import {
   getStatisticsSorted,
   invariant,

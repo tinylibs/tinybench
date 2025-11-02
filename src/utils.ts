@@ -343,13 +343,15 @@ const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
 
-  return baseIndex + 1 < samples.length
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ? samples[baseIndex]! +
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    : samples[baseIndex]!
+  if (baseIndex + 1 < samples.length) {
+    const current = samples[baseIndex]
+    const next = samples[baseIndex + 1]
+    if (current !== undefined && next !== undefined) {
+      return current + (base - baseIndex) * (next - current)
+    }
+  }
+  const sample = samples[baseIndex]
+  return sample ?? 0
 }
 
 /**
@@ -523,5 +525,74 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
     ...(state === 'aborted-with-statistics' && {
       Remarks: state,
     }),
+  }
+}
+
+/**
+ * Creates a concurrency limiter that can execute functions with a maximum concurrency limit.
+ * @param limit - Maximum number of concurrent executions
+ * @returns A function that accepts a function to execute and returns a promise
+ */
+export const pLimit = (limit: number) => {
+  const queue: {
+    fn: () => Promise<unknown>
+    reject: (error: unknown) => void
+    resolve: (value: unknown) => void
+  }[] = []
+
+  let activeCount = 0
+  let pendingCount = 0
+
+  const processNext = async (): Promise<void> => {
+    if (activeCount >= limit || queue.length === 0) {
+      return
+    }
+
+    const item = queue.shift()
+    if (!item) {
+      return
+    }
+    activeCount++
+    pendingCount--
+
+    try {
+      const result = await item.fn()
+      item.resolve(result)
+    } catch (error) {
+      item.reject(error)
+    } finally {
+      activeCount--
+      // Process next item in queue if any
+      processNext().catch(() => undefined)
+    }
+  }
+
+  const limiter = <R>(fn: () => Promise<R>): Promise<R> => {
+    return new Promise<R>((resolve, reject) => {
+      queue.push({
+        fn: fn as () => Promise<unknown>,
+        reject,
+        resolve: resolve as (value: unknown) => void,
+      })
+      pendingCount++
+      processNext().catch(() => undefined)
+    })
+  }
+
+  // Add properties to match p-limit API
+  Object.defineProperties(limiter, {
+    activeCount: {
+      enumerable: true,
+      get: () => activeCount,
+    },
+    pendingCount: {
+      enumerable: true,
+      get: () => pendingCount,
+    },
+  })
+
+  return limiter as typeof limiter & {
+    readonly activeCount: number
+    readonly pendingCount: number
   }
 }

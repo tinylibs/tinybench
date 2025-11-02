@@ -549,7 +549,7 @@ export const pLimit = (limit: number) => {
     }
 
     const item = queue.shift()
-    if (!item) {
+    if (item == null) {
       return
     }
     activeCount++

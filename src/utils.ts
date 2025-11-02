@@ -563,7 +563,7 @@ export const pLimit = (limit: number) => {
     } finally {
       activeCount--
       // Process next item in queue if any
-      processNext().catch(() => undefined)
+      processNext().catch(emptyFunction)
     }
   }
 
@@ -575,7 +575,7 @@ export const pLimit = (limit: number) => {
         resolve: resolve as (value: unknown) => void,
       })
       pendingCount++
-      processNext().catch(() => undefined)
+      processNext().catch(emptyFunction)
     })
   }
 

@@ -153,8 +153,8 @@ export const formatNumber = (
 ): string => {
   if (typeof value !== 'number') return String(value)
 
-  if (value === Number.POSITIVE_INFINITY) return '+∞'
-  if (value === Number.NEGATIVE_INFINITY) return '-∞'
+  if (value === Infinity) return '+∞'
+  if (value === -Infinity) return '-∞'
   if (Number.isNaN(value)) return 'NaN'
 
   const absValue = Math.abs(value)
@@ -410,7 +410,7 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
   const critical = tTable[df || 1] ?? tTable[0]
   const moe = sem * critical
   const absMean = Math.abs(mean)
-  const rme = absMean === 0 ? Number.POSITIVE_INFINITY : (moe / absMean) * 100
+  const rme = absMean === 0 ? Infinity : (moe / absMean) * 100
   const p50 = medianSorted(samples)
 
   return {

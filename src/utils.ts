@@ -351,7 +351,7 @@ const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
     }
   }
   const sample = samples[baseIndex]
-  return sample ?? 0
+  return sample ?? Number.NaN
 }
 
 /**

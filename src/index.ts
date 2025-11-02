@@ -18,4 +18,3 @@ export type {
   TaskResult,
 } from './types'
 export type { JSRuntime } from './utils'
-export { hrtimeNow, now, nToMs } from './utils'

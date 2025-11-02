@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest'
 
-import { Bench, hrtimeNow, now, type Task } from '../src'
+import { Bench, type Task } from '../src'
+import { hrtimeNow, now } from '../src/utils'
 import { sleep } from './utils'
 
 // If running in CI, allow a bit more leeway for the mean value

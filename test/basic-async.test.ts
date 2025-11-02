@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest'
 
-import { Bench, hrtimeNow, now, type Task } from '../src'
+import { Bench, type Task } from '../src'
+import { hrtimeNow, now } from '../src/utils'
 
 // If running in CI, allow a bit more leeway for the mean value
 const maxMeanValue = process.env.CI ? 1025 : 1001

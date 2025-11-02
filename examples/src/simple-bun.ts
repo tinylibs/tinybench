@@ -1,4 +1,5 @@
-import { Bench, nToMs } from '../../src'
+import { Bench } from '../../src'
+import { nToMs } from '../../src/utils'
 
 const bench = new Bench({
   name: 'simple benchmark bun',

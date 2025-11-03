@@ -22,6 +22,10 @@ test('isFnAsyncResource promise', () => {
   expect(isFnAsyncResource(() => Promise.resolve(1))).toBe(true)
 })
 
+test('isFnAsyncResource function throws', () => {
+  expect(isFnAsyncResource(() => { throw new Error() })).toBe(false)
+})
+
 test('isFnAsyncResource promise with error', () => {
   expect(isFnAsyncResource(() => Promise.reject(new Error('error')))).toBe(true)
 })

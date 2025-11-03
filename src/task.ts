@@ -24,6 +24,8 @@ import {
   toError,
 } from './utils'
 
+const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
+
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
  * results, name, the task function, the number times the task function has been executed, ...
@@ -81,6 +83,15 @@ export class Task extends EventTarget {
     this.fnOpts = fnOpts
     this.async = fnOpts.async ?? isFnAsyncResource(fn)
     this.signal = fnOpts.signal
+
+    for (const hookName of hookNames) {
+      if (this.fnOpts[hookName] != null) {
+        invariant(
+          typeof this.fnOpts[hookName] === 'function',
+          `'${hookName}' must be a function if provided`
+        )
+      }
+    }
 
     if (this.signal) {
       this.signal.addEventListener(
@@ -252,7 +263,7 @@ export class Task extends EventTarget {
     time: number,
     iterations: number
   ): Promise<{ error: Error, samples?: never } | { error?: never, samples?: Samples }> {
-    if (this.fnOpts.beforeAll != null) {
+    if (this.fnOpts.beforeAll) {
       try {
         await this.fnOpts.beforeAll.call(this, mode)
       } catch (error) {
@@ -338,7 +349,7 @@ export class Task extends EventTarget {
     time: number,
     iterations: number
   ): { error: Error, samples?: never } | { error?: never, samples?: Samples } {
-    if (this.fnOpts.beforeAll != null) {
+    if (this.fnOpts.beforeAll) {
       try {
         const beforeAllResult = this.fnOpts.beforeAll.call(this, mode)
         invariant(
@@ -358,7 +369,7 @@ export class Task extends EventTarget {
         return
       }
       try {
-        if (this.fnOpts.beforeEach != null) {
+        if (this.fnOpts.beforeEach) {
           const beforeEachResult = this.fnOpts.beforeEach.call(this, mode)
           invariant(
             !isPromiseLike(beforeEachResult),
@@ -371,7 +382,7 @@ export class Task extends EventTarget {
         samples.push(taskTime)
         totalTime += taskTime
       } finally {
-        if (this.fnOpts.afterEach != null) {
+        if (this.fnOpts.afterEach) {
           const afterEachResult = this.fnOpts.afterEach.call(this, mode)
           invariant(
             !isPromiseLike(afterEachResult),
@@ -394,7 +405,7 @@ export class Task extends EventTarget {
       return { error: toError(error) }
     }
 
-    if (this.fnOpts.afterAll != null) {
+    if (this.fnOpts.afterAll) {
       try {
         const afterAllResult = this.fnOpts.afterAll.call(this, mode)
         invariant(

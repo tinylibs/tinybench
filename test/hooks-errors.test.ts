@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { Bench } from '../src'
+import { Bench, FnHook } from '../src'
 
 test.each(['warmup', 'run'])('%s error handling (async)', async mode => {
   const bench = new Bench({ warmup: mode === 'warmup' })
@@ -82,6 +82,36 @@ test.each(['warmup', 'run'])('%s error handling (sync)', mode => {
   expect(bazTask.result.state).toBe('errored')
   if (bazTask.result.state !== 'errored') return
   expect(bazTask.result.error).toStrictEqual(error)
+})
+
+test('throw error if beforeAll, afterAll, beforeEach, afterEach are provided but no function', async () => {
+  const bench = new Bench()
+
+  const notAFunction = new Error('Not a function') as unknown as FnHook
+
+  expect(() => {
+    bench.add('test', () => 1, {
+      beforeAll: notAFunction
+    })
+  }).toThrowError(new Error("'beforeAll' must be a function if provided"))
+
+  expect(() => {
+    bench.add('test', () => 1, {
+      beforeEach: notAFunction
+    })
+  }).toThrowError(new Error("'beforeEach' must be a function if provided"))
+
+  expect(() => {
+    bench.add('test', () => 1, {
+      afterAll: notAFunction
+    })
+  }).toThrowError(new Error("'afterAll' must be a function if provided"))
+
+  expect(() => {
+    bench.add('test', () => 1, {
+      afterEach: notAFunction
+    })
+  }).toThrowError(new Error("'afterEach' must be a function if provided"))
 })
 
 test('throw error in beforeAll, afterAll, beforeEach, afterEach (async)', async () => {

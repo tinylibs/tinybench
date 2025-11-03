@@ -8,6 +8,48 @@ on:
     branches: [main]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm typecheck
+  
   qa-bun:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -19,6 +61,8 @@ jobs:
     name: Bun QA on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -49,6 +93,8 @@ jobs:
     name: Deno QA on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -84,6 +130,8 @@ jobs:
     name: Node.js ${{ matrix.node-version }} QA on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -99,14 +147,6 @@ jobs:
 
       - name: Build
         run: pnpm build
-
-      - name: Type check
-        if: matrix.node-version == 22
-        run: pnpm typecheck
-
-      - name: Lint
-        if: matrix.node-version == 22
-        run: pnpm lint
 
       - name: Ensure node is used as runtime by vitest
         run: pnpm run ci:pretest
@@ -131,10 +171,12 @@ jobs:
           - 22
           - 24
           - latest
-    needs: ['qa-node', 'qa-bun']
+    needs: ['qa-node', 'qa-bun', 'qa-deno', 'lint', 'typecheck']
     name: Examples QA on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4

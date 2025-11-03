@@ -65,9 +65,9 @@ export class Bench extends EventTarget {
 
   /**
    * The maximum number of concurrent tasks to run
-   * @default Number.POSITIVE_INFINITY
+   * @default Infinity
    */
-  threshold = Number.POSITIVE_INFINITY
+  threshold = Infinity
 
   /**
    * tasks results as an array
@@ -260,7 +260,7 @@ export class Bench extends EventTarget {
    * rejects with the first error after the scheduled worker functions settle, as per Promise.all semantics.
    *
    * Notes:
-   * - Concurrency is controlled by Bench.threshold (Number.POSITIVE_INFINITY means unlimited).
+   * - Concurrency is controlled by Bench.threshold (Infinity means unlimited).
    * - No measurements are performed here; measurements happen inside Task.
    * - Used internally by run() and warmupTasks() when concurrency === 'bench'.
    * @template R The resolved type produced by the worker function for each task.

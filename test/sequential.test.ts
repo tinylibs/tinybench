@@ -71,7 +71,7 @@ test.each(['warmup', 'run'])('%s bench concurrency', async mode => {
     warmupIterations: iterations,
     warmupTime: 0,
   })
-  expect(concurrentBench.threshold).toBe(Number.POSITIVE_INFINITY)
+  expect(concurrentBench.threshold).toBe(Infinity)
   expect(concurrentBench.concurrency).toBeNull()
   concurrentBench.concurrency = 'bench'
   expect(concurrentBench.concurrency).toBe('bench')
@@ -117,7 +117,7 @@ test.each(['warmup', 'run'])('%s task concurrency', async mode => {
     warmupIterations: iterations,
     warmupTime: 0,
   })
-  expect(concurrentBench.threshold).toBe(Number.POSITIVE_INFINITY)
+  expect(concurrentBench.threshold).toBe(Infinity)
   expect(concurrentBench.concurrency).toBeNull()
 
   const taskName = 'sample 1'
@@ -147,11 +147,11 @@ test.each(['warmup', 'run'])('%s task concurrency', async mode => {
   expect(runs).toEqual(mode === 'run' ? iterations : 2 * iterations)
   concurrentBench.reset()
   runs = 0
-  expect(concurrentBench.threshold).toBe(Number.POSITIVE_INFINITY)
+  expect(concurrentBench.threshold).toBe(Infinity)
   expect(concurrentBench.concurrency).toBeNull()
 
   concurrentBench.concurrency = 'task'
-  expect(concurrentBench.threshold).toBe(Number.POSITIVE_INFINITY)
+  expect(concurrentBench.threshold).toBe(Infinity)
   expect(concurrentBench.concurrency).toBe('task')
 
   await concurrentBench.run()

@@ -153,13 +153,11 @@ export const mToNs = (ms: number) => ms * 1e6
  */
 export const formatNumber = (
   value: number,
-  significantDigits: number,
-  maxFractionDigits: number
+  significantDigits = 5,
+  maxFractionDigits = 2
 ): string => {
-  if (typeof value !== 'number') return String(value)
-
-  if (value === Number.POSITIVE_INFINITY) return '+∞'
-  if (value === Number.NEGATIVE_INFINITY) return '-∞'
+  if (value === Infinity) return '+∞'
+  if (value === -Infinity) return '-∞'
   if (Number.isNaN(value)) return 'NaN'
 
   const absValue = Math.abs(value)
@@ -184,30 +182,25 @@ export const formatNumber = (
   return value.toFixed(decimals)
 }
 
-let hrtimeBigint: () => bigint
-if (
-  typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
-    .process?.hrtime?.bigint === 'function'
-) {
-  hrtimeBigint = (
-    globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }
-  ).process.hrtime.bigint.bind(
-    (globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } })
-      .process.hrtime
-  )
-} else {
-  hrtimeBigint = () => {
-    throw new Error('hrtime.bigint() is not supported in this JS environment')
-  }
-}
+const hrtimeBigint: () => bigint = typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
+  .process?.hrtime?.bigint === 'function'
+  ? (
+      globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }
+    ).process.hrtime.bigint.bind(
+      (globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } })
+        .process.hrtime
+    )
+  : () => {
+      throw new Error('hrtime.bigint() is not supported in this JS environment')
+    }
+
 /**
  * Returns the current high resolution timestamp in milliseconds using `process.hrtime.bigint()`.
  * @returns the current high resolution timestamp in milliseconds
  */
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
 
-const performanceNow = performance.now.bind(performance)
-export const now = performanceNow
+export const now = performance.now.bind(performance)
 
 /**
  * Checks if a value is a promise-like object.
@@ -256,8 +249,7 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
     if (promiseLike) {
       // silence promise rejection
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        (fnCall as Promise<unknown>).then(emptyFunction)?.catch(emptyFunction)
+        (fnCall.then(emptyFunction) as Promise<unknown>).catch(emptyFunction)
       } catch {
         // ignore
       }
@@ -415,7 +407,7 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
   const critical = tTable[df || 1] ?? tTable[0]
   const moe = sem * critical
   const absMean = Math.abs(mean)
-  const rme = absMean === 0 ? Number.POSITIVE_INFINITY : (moe / absMean) * 100
+  const rme = absMean === 0 ? Infinity : (moe / absMean) * 100
   const p50 = medianSorted(samples)
 
   return {
@@ -448,55 +440,37 @@ export const invariant = (condition: boolean, message: string): void => {
 }
 
 /**
- * If we are in a vm context (e.g. jest), instanceof Error checks may fail
- * @param value - value to check
- * @returns whether the value is error-like
- */
-function isErrorLike (value: unknown): value is Error {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as { message?: unknown }).message === 'string'
-  )
-}
-
-/**
  * Thrown errors can be of any type. This function converts any value to an Error object.
  * @param value - value to convert to Error
  * @returns the converted Error
  */
 export const toError = (value: unknown): Error => {
   switch (typeof value) {
-    case 'bigint':
-    case 'boolean':
-    case 'number':
-      return new Error(value.toString())
     case 'function':
       return new Error(value.name)
     case 'object':
-      if (value === null) {
-        return new Error()
+      if (
+        value !== null &&
+        (value instanceof Error ||
+        // If we are in a vm context (e.g. jest), instanceof Error checks may fail
+        typeof (value as { message?: unknown }).message === 'string')
+      ) {
+        return value as Error
       }
-      if (value instanceof Error) {
-        return value
-      }
-      if (isErrorLike(value)) {
-        return value
-      }
+    // eslint-disable-next-line no-fallthrough
+    case 'undefined':
       return new Error()
     case 'string':
       return new Error(value)
-    case 'symbol':
-      return new Error(value.toString())
-    case 'undefined':
-      return new Error()
+    default:
+      return new Error(String(value))
   }
 }
 
 const toAverage = (statistics: Statistics): string =>
-  `${formatNumber(mToNs(statistics.mean), 5, 2)} \xb1 ${statistics.rme.toFixed(2)}%`
+  `${formatNumber(mToNs(statistics.mean))} \xb1 ${statistics.rme.toFixed(2)}%`
 const toMedian = (statistics: Statistics): string =>
-  `${formatNumber(mToNs(statistics.p50), 5, 2)} \xb1 ${formatNumber(mToNs(statistics.mad), 5, 2)}`
+  `${formatNumber(mToNs(statistics.p50))} \xb1 ${formatNumber(mToNs(statistics.mad))}`
 
 export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   task: Task

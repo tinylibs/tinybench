@@ -84,7 +84,7 @@ test.each(['warmup', 'run'])('%s error handling (sync)', mode => {
   expect(bazTask.result.error).toStrictEqual(error)
 })
 
-test('throw error in beforeAll, afterAll, beforeEach, afterEach (async)', async () => {
+test('hooks error handling (async)', async () => {
   const bench = new Bench()
 
   const BAerror = new Error('BeforeAll')
@@ -140,7 +140,7 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach (async)', async 
   expect(afterAllTask.result.error).toStrictEqual(AAerror)
 })
 
-test('throw error in beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
+test('hooks error handling (sync)', () => {
   const bench = new Bench()
 
   const BAerror = new Error('BeforeAll')

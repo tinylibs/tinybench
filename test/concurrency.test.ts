@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
 
-test('using concurrency should throw (sync)', () => {
+test('concurrency error (sync)', () => {
   const bench = new Bench({
     throws: true,
   })

@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
 
-test('cannot add duplicate task', () => {
+test('task add duplicate error', () => {
   const bench = new Bench()
   bench.add('foo', () => {
     /* noop */

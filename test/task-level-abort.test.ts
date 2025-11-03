@@ -3,7 +3,7 @@ import { expect, test } from 'vitest'
 import { Bench } from '../src'
 import { sleep } from './utils'
 
-test('task-level abort: aborts individual task without affecting others (async)', async () => {
+test('abort individual task (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
@@ -48,7 +48,7 @@ test('task-level abort: aborts individual task without affecting others (async)'
   expect(task2.runs).toBeGreaterThan(0)
 })
 
-test('task-level abort: aborts individual task without affecting others (sync)', () => {
+test('abort individual task (sync)', () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
@@ -93,7 +93,7 @@ test('task-level abort: aborts individual task without affecting others (sync)',
   expect(task2.runs).toBeGreaterThan(0)
 })
 
-test('task-level abort: aborts during execution (async)', async () => {
+test('abort task during execution (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 50, time: 200 })
 
@@ -131,7 +131,7 @@ test('task-level abort: aborts during execution (async)', async () => {
   }
 })
 
-test('task-level abort: emits abort event on task', async () => {
+test('abort event emission (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
@@ -165,7 +165,7 @@ test('task-level abort: emits abort event on task', async () => {
   expect(benchAborted).toBe(true)
 })
 
-test('task-level abort: task signal takes precedence over bench signal', async () => {
+test('abort signal precedence (async)', async () => {
   const benchController = new AbortController()
   const taskController = new AbortController()
   const bench = new Bench({
@@ -197,7 +197,7 @@ test('task-level abort: task signal takes precedence over bench signal', async (
   expect(task.result.aborted).toBe(true)
 })
 
-test('task-level abort: bench-level signal aborts all tasks', async () => {
+test('abort bench-level signal (async)', async () => {
   const benchController = new AbortController()
   const bench = new Bench({
     iterations: 16,
@@ -236,7 +236,7 @@ test('task-level abort: bench-level signal aborts all tasks', async () => {
   expect(task2.result.aborted).toBe(true)
 })
 
-test('task-level abort: works during async warmup phase', async () => {
+test('abort task during warmup (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({
     iterations: 16,
@@ -271,7 +271,7 @@ test('task-level abort: works during async warmup phase', async () => {
 
 // NOTE: This test is skipped due to memory issues with concurrency and
 // task-level abort which can cause OOM errors
-test.skip('task-level abort: works with task concurrency', async () => {
+test.skip('abort with task concurrency (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 10, time: 50 })
   bench.concurrency = 'task'
@@ -305,7 +305,7 @@ test.skip('task-level abort: works with task concurrency', async () => {
   expect(task.runs).toBeLessThan(10)
 })
 
-test('task-level abort: aborted should be false if no signal is provided', async () => {
+test('abort state no signal (async)', async () => {
   const bench = new Bench({ iterations: 16, time: 100 })
 
   bench.add('task', async () => {
@@ -326,7 +326,7 @@ test('task-level abort: aborted should be false if no signal is provided', async
   expect(task.runs).toBeGreaterThan(0)
 })
 
-test('task-level abort: aborted should be false if a signal is provided but not aborted', async () => {
+test('abort state with inactive signal (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
@@ -353,7 +353,7 @@ test('task-level abort: aborted should be false if a signal is provided but not 
   expect(task.runs).toBeGreaterThan(0)
 })
 
-test('task-level abort: aborted should be false if signal is aborted after run completes', async () => {
+test('abort state after completion (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 

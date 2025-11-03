@@ -84,7 +84,7 @@ test.each(['warmup', 'run'])('%s error handling (sync)', mode => {
   expect(bazTask.result.error).toStrictEqual(error)
 })
 
-test('throw error if beforeAll, afterAll, beforeEach, afterEach are provided but no function', () => {
+test('throw error when hooks are provided with no functions', () => {
   const bench = new Bench()
 
   const notAFunction = new Error('Not a function') as unknown as FnHook
@@ -114,7 +114,7 @@ test('throw error if beforeAll, afterAll, beforeEach, afterEach are provided but
   }).toThrowError(new Error("'afterEach' must be a function if provided"))
 })
 
-test('throw error in beforeAll, afterAll, beforeEach, afterEach (async)', async () => {
+test('hooks error handling (async)', async () => {
   const bench = new Bench()
 
   const BAerror = new Error('BeforeAll')
@@ -170,7 +170,7 @@ test('throw error in beforeAll, afterAll, beforeEach, afterEach (async)', async 
   expect(afterAllTask.result.error).toStrictEqual(AAerror)
 })
 
-test('throw error in beforeAll, afterAll, beforeEach, afterEach (sync)', () => {
+test('hooks error handling (sync)', () => {
   const bench = new Bench()
 
   const BAerror = new Error('BeforeAll')

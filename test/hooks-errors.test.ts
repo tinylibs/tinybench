@@ -84,7 +84,7 @@ test.each(['warmup', 'run'])('%s error handling (sync)', mode => {
   expect(bazTask.result.error).toStrictEqual(error)
 })
 
-test('throw error if beforeAll, afterAll, beforeEach, afterEach are provided but no function', async () => {
+test('throw error if beforeAll, afterAll, beforeEach, afterEach are provided but no function', () => {
   const bench = new Bench()
 
   const notAFunction = new Error('Not a function') as unknown as FnHook

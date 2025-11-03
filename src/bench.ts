@@ -81,13 +81,13 @@ export class Bench extends EventTarget {
    * @returns the tasks as an array
    */
   get tasks (): Task[] {
-    return [...this._tasks.values()]
+    return [...this.#tasks.values()]
   }
 
   /**
    * the task map
    */
-  private readonly _tasks = new Map<string, Task>()
+  readonly #tasks = new Map<string, Task>()
 
   constructor (options: BenchOptions = {}) {
     super()
@@ -130,9 +130,9 @@ export class Bench extends EventTarget {
    * @throws {Error} if the task already exists
    */
   add (name: string, fn: Fn, fnOpts: FnOptions = {}): this {
-    if (!this._tasks.has(name)) {
+    if (!this.#tasks.has(name)) {
       const task = new Task(this, name, fn, fnOpts)
-      this._tasks.set(name, task)
+      this.#tasks.set(name, task)
       this.dispatchEvent(createBenchEvent('add', task))
     } else {
       throw new Error(`Task "${name}" already exists`)
@@ -154,7 +154,7 @@ export class Bench extends EventTarget {
    * @returns the Task instance
    */
   getTask (name: string): Task | undefined {
-    return this._tasks.get(name)
+    return this.#tasks.get(name)
   }
 
   /**
@@ -166,7 +166,7 @@ export class Bench extends EventTarget {
     const task = this.getTask(name)
     if (task) {
       this.dispatchEvent(createBenchEvent('remove', task))
-      this._tasks.delete(name)
+      this.#tasks.delete(name)
     }
     return this
   }
@@ -184,7 +184,7 @@ export class Bench extends EventTarget {
    */
   reset (): void {
     this.dispatchEvent(createBenchEvent('reset'))
-    for (const task of this._tasks.values()) {
+    for (const task of this.#tasks.values()) {
       task.reset()
     }
   }
@@ -195,14 +195,14 @@ export class Bench extends EventTarget {
    */
   async run (): Promise<Task[]> {
     if (this.opts.warmup) {
-      await this.warmupTasks()
+      await this.#warmupTasks()
     }
     let values: Task[] = []
     this.dispatchEvent(createBenchEvent('start'))
     if (this.concurrency === 'bench') {
-      values = await this.mapTasksConcurrently(task => task.run())
+      values = await this.#mapTasksConcurrently(task => task.run())
     } else {
-      for (const task of this._tasks.values()) {
+      for (const task of this.#tasks.values()) {
         values.push(await task.run())
       }
     }
@@ -220,11 +220,11 @@ export class Bench extends EventTarget {
       'Cannot use `concurrency` option when using `runSync`'
     )
     if (this.opts.warmup) {
-      this.warmupTasksSync()
+      this.#warmupTasksSync()
     }
     const values: Task[] = []
     this.dispatchEvent(createBenchEvent('start'))
-    for (const task of this._tasks.values()) {
+    for (const task of this.#tasks.values()) {
       values.push(task.runSync())
     }
     this.dispatchEvent(createBenchEvent('complete'))
@@ -266,12 +266,12 @@ export class Bench extends EventTarget {
    * @param workerFn A function invoked for each Task; it must return a Promise<R>.
    * @returns Promise that resolves to an array of results in the same order as task iteration.
    */
-  private async mapTasksConcurrently<R>(
+  async #mapTasksConcurrently<R>(
     workerFn: (task: Task) => Promise<R>
   ): Promise<R[]> {
     const limit = pLimit(Math.max(1, Math.floor(this.threshold)))
     const promises: Promise<R>[] = []
-    for (const task of this._tasks.values()) {
+    for (const task of this.#tasks.values()) {
       promises.push(limit(() => workerFn(task)))
     }
     return Promise.all(promises)
@@ -280,12 +280,12 @@ export class Bench extends EventTarget {
   /**
    * warmup the benchmark tasks.
    */
-  private async warmupTasks (): Promise<void> {
+  async #warmupTasks (): Promise<void> {
     this.dispatchEvent(createBenchEvent('warmup'))
     if (this.concurrency === 'bench') {
-      await this.mapTasksConcurrently(task => task.warmup())
+      await this.#mapTasksConcurrently(task => task.warmup())
     } else {
-      for (const task of this._tasks.values()) {
+      for (const task of this.#tasks.values()) {
         await task.warmup()
       }
     }
@@ -294,9 +294,9 @@ export class Bench extends EventTarget {
   /**
    * warmup the benchmark tasks (sync version)
    */
-  private warmupTasksSync (): void {
+  #warmupTasksSync (): void {
     this.dispatchEvent(createBenchEvent('warmup'))
-    for (const task of this._tasks.values()) {
+    for (const task of this.#tasks.values()) {
       task.warmupSync()
     }
   }

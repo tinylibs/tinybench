@@ -93,7 +93,7 @@ test('abort individual task (sync)', () => {
   expect(task2.runs).toBeGreaterThan(0)
 })
 
-test('abort during execution (async)', async () => {
+test('abort task during execution (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 50, time: 200 })
 
@@ -131,7 +131,7 @@ test('abort during execution (async)', async () => {
   }
 })
 
-test('abort event emission', async () => {
+test('abort event emission (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
@@ -165,7 +165,7 @@ test('abort event emission', async () => {
   expect(benchAborted).toBe(true)
 })
 
-test('abort signal precedence', async () => {
+test('abort signal precedence (async)', async () => {
   const benchController = new AbortController()
   const taskController = new AbortController()
   const bench = new Bench({
@@ -197,7 +197,7 @@ test('abort signal precedence', async () => {
   expect(task.result.aborted).toBe(true)
 })
 
-test('abort bench-level signal', async () => {
+test('abort bench-level signal (async)', async () => {
   const benchController = new AbortController()
   const bench = new Bench({
     iterations: 16,
@@ -236,7 +236,7 @@ test('abort bench-level signal', async () => {
   expect(task2.result.aborted).toBe(true)
 })
 
-test('abort during warmup (async)', async () => {
+test('abort task during warmup (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({
     iterations: 16,
@@ -271,7 +271,7 @@ test('abort during warmup (async)', async () => {
 
 // NOTE: This test is skipped due to memory issues with concurrency and
 // task-level abort which can cause OOM errors
-test.skip('task-level abort: works with task concurrency', async () => {
+test.skip('abort with task concurrency (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 10, time: 50 })
   bench.concurrency = 'task'
@@ -305,7 +305,7 @@ test.skip('task-level abort: works with task concurrency', async () => {
   expect(task.runs).toBeLessThan(10)
 })
 
-test('abort state no signal', async () => {
+test('abort state no signal (async)', async () => {
   const bench = new Bench({ iterations: 16, time: 100 })
 
   bench.add('task', async () => {
@@ -326,7 +326,7 @@ test('abort state no signal', async () => {
   expect(task.runs).toBeGreaterThan(0)
 })
 
-test('abort state with inactive signal', async () => {
+test('abort state with inactive signal (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 
@@ -353,7 +353,7 @@ test('abort state with inactive signal', async () => {
   expect(task.runs).toBeGreaterThan(0)
 })
 
-test('abort state after completion', async () => {
+test('abort state after completion (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })
 

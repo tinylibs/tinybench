@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
 
-test('async hooks in sync', () => {
+test('async hooks in sync (sync)', () => {
   const bench = new Bench({ iterations: 16, time: 100 })
 
   bench

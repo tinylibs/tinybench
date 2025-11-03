@@ -12,13 +12,13 @@ describe('pLimit', () => {
     limiter = pLimit(2)
   })
 
-  test('creates a limiter with correct initial state', () => {
+  test('pLimit initial state', () => {
     expect(typeof limiter).toBe('function')
     expect(limiter.activeCount).toBe(0)
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('executes single task successfully', async () => {
+  test('pLimit single task execution', async () => {
     const result = await limiter(async () => {
       await asyncSleep(10)
       return 'hello'
@@ -29,7 +29,7 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('basic concurrency limiting', async () => {
+  test('pLimit concurrency limiting', async () => {
     const results: number[] = []
     const activeTracker: number[] = []
 
@@ -56,7 +56,7 @@ describe('pLimit', () => {
     expect(Math.max(...activeTracker)).toBe(2)
   })
 
-  test('activeCount and pendingCount tracking', async () => {
+  test('pLimit count tracking', async () => {
     expect(limiter.activeCount).toBe(0)
     expect(limiter.pendingCount).toBe(0)
 
@@ -89,7 +89,7 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('processes tasks in FIFO order', async () => {
+  test('pLimit FIFO order', async () => {
     const limiter1 = pLimit(1) // Single concurrency for strict ordering
     const results: number[] = []
 
@@ -112,7 +112,7 @@ describe('pLimit', () => {
     expect(results).toEqual([1, 2, 3, 4])
   })
 
-  test('handles task errors properly', async () => {
+  test('pLimit error handling', async () => {
     const successfulResult = await limiter(async () => {
       await asyncSleep(10)
       return 'success'
@@ -137,7 +137,7 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('handles multiple concurrent errors', async () => {
+  test('pLimit concurrent errors', async () => {
     const promises = [
       limiter(async () => {
         await asyncSleep(50)
@@ -165,7 +165,7 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('edge case: limit = 1 (complete serialization)', async () => {
+  test('pLimit serialization (limit=1)', async () => {
     const serialLimiter = pLimit(1)
     const executionOrder: number[] = []
     const startTimes: number[] = []
@@ -193,7 +193,7 @@ describe('pLimit', () => {
     expect(startTimes[2]! - startTimes[1]!).toBeGreaterThanOrEqual(40)
   })
 
-  test('edge case: limit = 0 should handle gracefully', () => {
+  test('pLimit edge case (limit=0)', () => {
     expect(() => pLimit(0)).not.toThrow()
     const zeroLimiter = pLimit(0)
 
@@ -201,7 +201,7 @@ describe('pLimit', () => {
     expect(zeroLimiter.pendingCount).toBe(0)
   })
 
-  test('high concurrency limit', async () => {
+  test('pLimit high concurrency', async () => {
     const highLimiter = pLimit(100)
     const taskCount = 50
     const results: number[] = []
@@ -224,7 +224,7 @@ describe('pLimit', () => {
     expect(highLimiter.pendingCount).toBe(0)
   })
 
-  test('stress test: many concurrent tasks', async () => {
+  test('pLimit stress test', async () => {
     const stressLimiter = pLimit(3)
     const taskCount = 100
     const results: number[] = []
@@ -249,7 +249,7 @@ describe('pLimit', () => {
     expect(stressLimiter.pendingCount).toBe(0)
   })
 
-  test('task returns different types', async () => {
+  test('pLimit return types', async () => {
     // eslint-disable-next-line @typescript-eslint/require-await
     const stringResult = await limiter(async () => 'hello')
     expect(stringResult).toBe('hello')
@@ -269,7 +269,7 @@ describe('pLimit', () => {
     expect(undefinedResult).toBeUndefined()
   })
 
-  test('limiter properties are readonly', () => {
+  test('pLimit readonly properties', () => {
     const initialActive = limiter.activeCount
     const initialPending = limiter.pendingCount
 
@@ -287,7 +287,7 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(initialPending)
   })
 
-  test('nested limiter calls', async () => {
+  test('pLimit nested calls', async () => {
     const outerLimiter = pLimit(2)
     const innerLimiter = pLimit(1)
     const results: string[] = []
@@ -308,7 +308,7 @@ describe('pLimit', () => {
     expect(results.sort()).toEqual(['task-1', 'task-2', 'task-3'])
   })
 
-  test('immediate task completion (no async delay)', async () => {
+  test('pLimit immediate completion', async () => {
     const results: number[] = []
 
     const promises = [1, 2, 3, 4].map(i =>

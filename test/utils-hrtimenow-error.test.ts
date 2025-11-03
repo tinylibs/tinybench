@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-test('hrtimeNow - process.hrtime undefined', { skip: 'Bun' in globalThis }, async () => {
+test('hrtimeNow - process.hrtime undefined', async () => {
   // @ts-expect-error set to undefined to simulate unsupported environment
   process.hrtime = undefined
   // @ts-expect-error we use a query param to avoid loading cached module

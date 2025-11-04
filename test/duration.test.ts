@@ -9,10 +9,10 @@ test('uses overridden task durations (async)', async () => {
     throws: true,
   })
 
-  bench.add('foo', () => {
-    return {
+  bench.add('foo', async () => {
+    return await Promise.resolve({
       overriddenDuration: bench.opts.now() + 50,
-    }
+    })
   })
 
   await bench.run()

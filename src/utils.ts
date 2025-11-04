@@ -466,24 +466,25 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   task: Task
 ): Record<string, number | string> => {
   const state = task.result.state
+  /* eslint-disable perfectionist/sort-objects */
   return {
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
           'Latency avg (ns)': toAverage(task.result.latency),
           'Latency med (ns)': toMedian(task.result.latency),
-          Samples: task.result.latency.samples.length,
           'Throughput avg (ops/s)': toAverage(task.result.throughput),
           'Throughput med (ops/s)': toMedian(task.result.throughput),
+          Samples: task.result.latency.samples.length,
         }
       : state !== 'errored'
         ? {
             'Latency avg (ns)': 'N/A',
             'Latency med (ns)': 'N/A',
-            Remarks: state,
-            Samples: 'N/A',
             'Throughput avg (ops/s)': 'N/A',
             'Throughput med (ops/s)': 'N/A',
+            Samples: 'N/A',
+            Remarks: state,
           }
         : {
             Error: task.result.error.message,
@@ -493,4 +494,5 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
       Remarks: state,
     }),
   }
+  /* eslint-enable perfectionist/sort-objects */
 }

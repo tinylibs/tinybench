@@ -25,6 +25,23 @@ test('defaultConvertTaskResultForConsoleTable - not-started', () => {
     'Throughput avg (ops/s)': 'N/A',
     'Throughput med (ops/s)': 'N/A',
   })
+
+  expect(Object.keys(defaultConvertTaskResultForConsoleTable({
+    name: 'Sample Task',
+    result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
+      state: 'not-started',
+    }
+  } as Task))).toStrictEqual([
+    'Task name',
+    'Latency avg (ns)',
+    'Latency med (ns)',
+    'Throughput avg (ops/s)',
+    'Throughput med (ops/s)',
+    'Samples',
+    'Remarks',
+  ])
 })
 
 test('defaultConvertTaskResultForConsoleTable - started', () => {
@@ -44,6 +61,23 @@ test('defaultConvertTaskResultForConsoleTable - started', () => {
     'Throughput avg (ops/s)': 'N/A',
     'Throughput med (ops/s)': 'N/A',
   })
+
+  expect(Object.keys(defaultConvertTaskResultForConsoleTable({
+    name: 'Sample Task',
+    result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
+      state: 'started',
+    }
+  } as Task))).toStrictEqual([
+    'Task name',
+    'Latency avg (ns)',
+    'Latency med (ns)',
+    'Throughput avg (ops/s)',
+    'Throughput med (ops/s)',
+    'Samples',
+    'Remarks',
+  ])
 })
 
 test('defaultConvertTaskResultForConsoleTable - aborted', () => {
@@ -63,6 +97,23 @@ test('defaultConvertTaskResultForConsoleTable - aborted', () => {
     'Throughput avg (ops/s)': 'N/A',
     'Throughput med (ops/s)': 'N/A',
   })
+
+  expect(Object.keys(defaultConvertTaskResultForConsoleTable({
+    name: 'Sample Task',
+    result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
+      state: 'aborted',
+    }
+  } as Task))).toStrictEqual([
+    'Task name',
+    'Latency avg (ns)',
+    'Latency med (ns)',
+    'Throughput avg (ops/s)',
+    'Throughput med (ops/s)',
+    'Samples',
+    'Remarks',
+  ])
 })
 
 test('defaultConvertTaskResultForConsoleTable - errored - with stack', () => {
@@ -81,6 +132,20 @@ test('defaultConvertTaskResultForConsoleTable - errored - with stack', () => {
     Stack: error.stack,
     'Task name': 'Sample Task'
   })
+
+  expect(Object.keys(defaultConvertTaskResultForConsoleTable({
+    name: 'Sample Task',
+    result: {
+      error,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
+      state: 'errored',
+    }
+  } as Task))).toStrictEqual([
+    'Task name',
+    'Error',
+    'Stack',
+  ])
 })
 
 test('defaultConvertTaskResultForConsoleTable - errored - without stack', () => {
@@ -99,6 +164,20 @@ test('defaultConvertTaskResultForConsoleTable - errored - without stack', () => 
     Stack: 'N/A',
     'Task name': 'Sample Task'
   })
+
+  expect(Object.keys(defaultConvertTaskResultForConsoleTable({
+    name: 'Sample Task',
+    result: {
+      error,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
+      state: 'errored',
+    }
+  } as Task))).toStrictEqual([
+    'Task name',
+    'Error',
+    'Stack',
+  ])
 })
 
 test('defaultConvertTaskResultForConsoleTable - aborted-with-statistics', () => {
@@ -123,7 +202,28 @@ test('defaultConvertTaskResultForConsoleTable - aborted-with-statistics', () => 
     'Throughput avg (ops/s)': '1000000000 ± 9.82%',
     'Throughput med (ops/s)': '1000000000 ± 50000000',
   })
+
+  expect(Object.keys(defaultConvertTaskResultForConsoleTable({
+    name: 'Sample Task',
+    result: {
+      latency: statistics,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
+      state: 'aborted-with-statistics',
+      throughput: statistics,
+      ...statistics
+    }
+  } as unknown as Task))).toStrictEqual([
+    'Task name',
+    'Latency avg (ns)',
+    'Latency med (ns)',
+    'Throughput avg (ops/s)',
+    'Throughput med (ops/s)',
+    'Samples',
+    'Remarks',
+  ])
 })
+
 test('defaultConvertTaskResultForConsoleTable - completed', () => {
   const samples = toSortedSamples([900, 950, 1000, 1050, 1100])
   const statistics = getStatisticsSorted(samples)
@@ -145,4 +245,23 @@ test('defaultConvertTaskResultForConsoleTable - completed', () => {
     'Throughput avg (ops/s)': '1000000000 ± 9.82%',
     'Throughput med (ops/s)': '1000000000 ± 50000000',
   })
+
+  expect(Object.keys(defaultConvertTaskResultForConsoleTable({
+    name: 'Sample Task',
+    result: {
+      latency: statistics,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
+      state: 'completed',
+      throughput: statistics,
+      ...statistics
+    }
+  } as unknown as Task))).toStrictEqual([
+    'Task name',
+    'Latency avg (ns)',
+    'Latency med (ns)',
+    'Throughput avg (ops/s)',
+    'Throughput med (ops/s)',
+    'Samples',
+  ])
 })

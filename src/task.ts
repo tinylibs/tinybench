@@ -3,16 +3,17 @@ import pLimit from 'p-limit'
 import type { Bench } from './bench'
 import type {
   AddEventListenerOptionsArgument,
+  EventListener,
+  EventListenerObject,
   Fn,
   FnOptions,
   RemoveEventListenerOptionsArgument,
   TaskEvents,
-  TaskEventsMap,
   TaskResult,
   TaskResultRuntimeInfo,
 } from './types'
 
-import { createBenchEvent, createErrorEvent } from './event'
+import { BenchEvent } from './event'
 import {
   getStatisticsSorted,
   invariant,
@@ -31,6 +32,18 @@ const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
  * results, name, the task function, the number times the task function has been executed, ...
  */
 export class Task extends EventTarget {
+  declare addEventListener: <K extends TaskEvents>(
+    type: K,
+    listener: EventListener<K, 'task'> | EventListenerObject<K, 'task'> | null,
+    options?: AddEventListenerOptionsArgument
+  ) => void
+
+  declare removeEventListener: <K extends TaskEvents>(
+    type: K,
+    listener: EventListener<K, 'task'> | EventListenerObject<K, 'task'> | null,
+    options?: RemoveEventListenerOptionsArgument
+  ) => void
+
   /**
    * The result object
    */
@@ -109,8 +122,9 @@ export class Task extends EventTarget {
       this.#signal.addEventListener(
         'abort',
         () => {
-          this.dispatchEvent(createBenchEvent('abort', this))
-          this.#bench.dispatchEvent(createBenchEvent('abort', this))
+          const ev = new BenchEvent('abort', this)
+          this.dispatchEvent(ev)
+          this.#bench.dispatchEvent(ev)
         },
         { once: true }
       )
@@ -121,28 +135,12 @@ export class Task extends EventTarget {
     })
   }
 
-  override addEventListener<K extends TaskEvents>(
-    type: K,
-    listener: TaskEventsMap[K],
-    options?: AddEventListenerOptionsArgument
-  ): void {
-    super.addEventListener(type, listener, options)
-  }
-
-  override removeEventListener<K extends TaskEvents>(
-    type: K,
-    listener: TaskEventsMap[K],
-    options?: RemoveEventListenerOptionsArgument
-  ): void {
-    super.removeEventListener(type, listener, options)
-  }
-
   /**
    * reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
    * @internal
    */
   reset (): void {
-    this.dispatchEvent(createBenchEvent('reset', this))
+    this.dispatchEvent(new BenchEvent('reset', this))
     this.runs = 0
 
     this.#setTaskResult({
@@ -162,7 +160,7 @@ export class Task extends EventTarget {
     this.#setTaskResult({
       state: 'started',
     })
-    this.dispatchEvent(createBenchEvent('start', this))
+    this.dispatchEvent(new BenchEvent('start', this))
     await this.#bench.opts.setup(this, 'run')
     const { error, samples: latencySamples } = (await this.#benchmark(
       'run',
@@ -193,7 +191,7 @@ export class Task extends EventTarget {
     this.#setTaskResult({
       state: 'started',
     })
-    this.dispatchEvent(createBenchEvent('start', this))
+    this.dispatchEvent(new BenchEvent('start', this))
 
     const setupResult = this.#bench.opts.setup(this, 'run')
     invariant(
@@ -226,7 +224,7 @@ export class Task extends EventTarget {
     if (this.result.state !== 'not-started') {
       return
     }
-    this.dispatchEvent(createBenchEvent('warmup', this))
+    this.dispatchEvent(new BenchEvent('warmup', this))
     await this.#bench.opts.setup(this, 'warmup')
     const { error } = (await this.#benchmark(
       'warmup',
@@ -247,7 +245,7 @@ export class Task extends EventTarget {
       return
     }
 
-    this.dispatchEvent(createBenchEvent('warmup', this))
+    this.dispatchEvent(new BenchEvent('warmup', this))
 
     const setupResult = this.#bench.opts.setup(this, 'warmup')
     invariant(
@@ -467,8 +465,9 @@ export class Task extends EventTarget {
         error,
         state: 'errored',
       })
-      this.dispatchEvent(createErrorEvent(this, error))
-      this.#bench.dispatchEvent(createErrorEvent(this, error))
+      const ev = new BenchEvent('error', this, error)
+      this.dispatchEvent(ev)
+      this.#bench.dispatchEvent(ev)
       if (this.#bench.opts.throws) {
         throw error
       }
@@ -543,17 +542,19 @@ export class Task extends EventTarget {
         error,
         state: 'errored',
       })
-      this.dispatchEvent(createErrorEvent(this, error))
-      this.#bench.dispatchEvent(createErrorEvent(this, error))
+      const ev = new BenchEvent('error', this, error)
+      this.dispatchEvent(ev)
+      this.#bench.dispatchEvent(ev)
       if (this.#bench.opts.throws) {
         throw error
       }
     }
 
-    this.dispatchEvent(createBenchEvent('cycle', this))
-    this.#bench.dispatchEvent(createBenchEvent('cycle', this))
+    const ev = new BenchEvent('cycle', this)
+    this.dispatchEvent(ev)
+    this.#bench.dispatchEvent(ev)
     // cycle and complete are equal in Task
-    this.dispatchEvent(createBenchEvent('complete', this))
+    this.dispatchEvent(new BenchEvent('complete', this))
   }
 
   /**

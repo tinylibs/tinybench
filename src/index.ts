@@ -3,7 +3,6 @@ export { Task } from './task'
 export type {
   BenchEvent,
   BenchEvents,
-  BenchEventsMap,
   BenchOptions,
   EventListener,
   Fn,
@@ -14,7 +13,6 @@ export type {
   ResolvedBenchOptions,
   Statistics,
   TaskEvents,
-  TaskEventsMap,
   TaskResult,
 } from './types'
 export type { JSRuntime } from './utils'

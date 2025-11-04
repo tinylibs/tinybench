@@ -1,34 +1,31 @@
 import type { Task } from './task'
-import type { BenchEvents } from './types'
+import type { BenchEvents, BenchEventsOptionalTask, BenchEventsWithError, BenchEventsWithTask } from './types'
 
-const createBenchEvent = (eventType: BenchEvents, target?: Task) => {
-  const event = new globalThis.Event(eventType)
-  if (target) {
-    Object.defineProperty(event, 'task', {
-      configurable: false,
-      enumerable: false,
-      value: target,
-      writable: false,
-    })
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface BenchEvent<K extends BenchEvents=BenchEvents, M extends 'bench' | 'task' = 'bench'> extends globalThis.Event {
+  readonly type: K;
+}
+
+class BenchEvent<K extends BenchEvents=BenchEvents, M extends 'bench' | 'task' = 'bench'> extends globalThis.Event {
+  get error (): K extends BenchEventsWithError ? Error : undefined {
+    return this.#error as K extends BenchEventsWithError ? Error : undefined
   }
-  return event
+
+  get task (): M extends 'task' ? Task : K extends BenchEventsWithTask ? Task : undefined {
+    return this.#task as M extends 'task' ? Task : K extends BenchEventsWithTask ? Task : undefined
+  }
+
+  #error?: Error
+  #task?: Task
+
+  constructor (type: BenchEventsWithError, task: Task, error: Error)
+  constructor (type: BenchEventsWithTask, task: Task)
+  constructor (type: BenchEventsOptionalTask, task?: Task)
+  constructor (type: BenchEvents, task?: Task, error?: Error) {
+    super(type)
+    this.#task = task
+    this.#error = error
+  }
 }
 
-const createErrorEvent = (target: Task, error: Error) => {
-  const event = new globalThis.Event('error')
-  Object.defineProperty(event, 'task', {
-    configurable: false,
-    enumerable: false,
-    value: target,
-    writable: false,
-  })
-  Object.defineProperty(event, 'error', {
-    configurable: false,
-    enumerable: false,
-    value: error,
-    writable: false,
-  })
-  return event
-}
-
-export { createBenchEvent, createErrorEvent }
+export { BenchEvent }

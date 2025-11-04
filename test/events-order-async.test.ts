@@ -66,8 +66,6 @@ test('events order (async)', async () => {
 
   bench.addEventListener('cycle', evt => {
     expect(evt.task).toBeDefined()
-    if (!evt.task) return
-
     expect(evt.task.name.trim()).not.toBe('')
     events.push('cycle')
   })

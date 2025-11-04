@@ -27,25 +27,23 @@ import {
 
 const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
 
-export interface Task {
-  addEventListener<K extends TaskEvents>(
-    type: K,
-    listener: EventListener<K, 'task'> | EventListenerObject<K, 'task'> | null,
-    options?: AddEventListenerOptionsArgument
-  ): void;
-
-  removeEventListener<K extends TaskEvents>(
-    type: K,
-    listener: EventListener<K, 'task'> | EventListenerObject<K, 'task'> | null,
-    options?: RemoveEventListenerOptionsArgument
-  ): void;
-}
-
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
  * results, name, the task function, the number times the task function has been executed, ...
  */
 export class Task extends EventTarget {
+  declare addEventListener: <K extends TaskEvents>(
+    type: K,
+    listener: EventListener<K, 'task'> | EventListenerObject<K, 'task'> | null,
+    options?: AddEventListenerOptionsArgument
+  ) => void
+
+  declare removeEventListener: <K extends TaskEvents>(
+    type: K,
+    listener: EventListener<K, 'task'> | EventListenerObject<K, 'task'> | null,
+    options?: RemoveEventListenerOptionsArgument
+  ) => void
+
   /**
    * The result object
    */

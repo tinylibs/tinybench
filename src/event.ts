@@ -1,12 +1,9 @@
 import type { Task } from './task'
 import type { BenchEvents, BenchEventsOptionalTask, BenchEventsWithError, BenchEventsWithTask } from './types'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface BenchEvent<K extends BenchEvents=BenchEvents, M extends 'bench' | 'task' = 'bench'> extends globalThis.Event {
-  readonly type: K;
-}
-
 class BenchEvent<K extends BenchEvents=BenchEvents, M extends 'bench' | 'task' = 'bench'> extends globalThis.Event {
+  declare type: K
+
   get error (): K extends BenchEventsWithError ? Error : undefined {
     return this.#error as K extends BenchEventsWithError ? Error : undefined
   }

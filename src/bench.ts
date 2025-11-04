@@ -31,23 +31,16 @@ import {
   runtimeVersion,
 } from './utils'
 
-export interface Bench {
-  addEventListener<K extends BenchEvents>(
-    type: K,
-    listener: EventListener<K> | EventListenerObject<K> | null,
-    options?: AddEventListenerOptionsArgument
-  ): void;
-  removeEventListener<K extends BenchEvents>(
-    type: K,
-    listener: EventListener<K> | EventListenerObject<K> | null,
-    options?: RemoveEventListenerOptionsArgument
-  ): void;
-}
-
 /**
  * The Bench class keeps track of the benchmark tasks and controls them.
  */
 export class Bench extends EventTarget {
+  declare addEventListener: <K extends BenchEvents>(
+    type: K,
+    listener: EventListener<K> | EventListenerObject<K> | null,
+    options?: AddEventListenerOptionsArgument
+  ) => void
+
   /**
    * Executes tasks concurrently based on the specified concurrency mode.
    *
@@ -66,6 +59,12 @@ export class Bench extends EventTarget {
    * The options.
    */
   readonly opts: Readonly<ResolvedBenchOptions>
+
+  declare removeEventListener: <K extends BenchEvents>(
+    type: K,
+    listener: EventListener<K> | EventListenerObject<K> | null,
+    options?: RemoveEventListenerOptionsArgument
+  ) => void
 
   /**
    * The JavaScript runtime environment.

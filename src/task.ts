@@ -469,10 +469,10 @@ export class Task extends EventTarget {
       this.#setTaskResult({
         state: 'aborted',
       })
+      const ev = new BenchEvent('abort', this)
+      this.dispatchEvent(ev)
+      this.#bench.dispatchEvent(ev)
     }
-    const ev = new BenchEvent('abort', this)
-    this.dispatchEvent(ev)
-    this.#bench.dispatchEvent(ev)
   }
 
   #postWarmup (error: Error | undefined): void {

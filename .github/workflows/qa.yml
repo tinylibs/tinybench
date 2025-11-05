@@ -1,4 +1,4 @@
-name: QA
+name: qa
 on:
   push:
     branches: [main]

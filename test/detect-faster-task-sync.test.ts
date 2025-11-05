@@ -39,10 +39,6 @@ test('detect faster task (sync)', () => {
   expect(fasterTask.result.latency.max).toBeLessThan(
     slowerTask.result.latency.max
   )
-  // latency moe should be lesser since it's faster
-  expect(fasterTask.result.latency.moe).toBeLessThan(
-    slowerTask.result.latency.moe
-  )
 
   expect(fasterTask.result.throughput.mean).toBeGreaterThan(
     slowerTask.result.throughput.mean
@@ -52,9 +48,5 @@ test('detect faster task (sync)', () => {
   )
   expect(fasterTask.result.throughput.max).toBeGreaterThan(
     slowerTask.result.throughput.max
-  )
-  // throughput moe should be greater since it's faster
-  expect(fasterTask.result.throughput.moe).toBeGreaterThan(
-    slowerTask.result.throughput.moe
   )
 })

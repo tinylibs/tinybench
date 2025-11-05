@@ -1,14 +1,11 @@
+import type { BenchEvent } from '../src/event'
 import type { Task } from '../src/task'
 import type { JSRuntime } from './utils'
+export type { BenchEvent } from '../src/event'
 
 export type AddEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.addEventListener
 >[2]
-
-/**
- * Bench event
- */
-export type BenchEvent = Event & { error?: Error; task?: Task }
 
 /**
  * Bench events
@@ -24,23 +21,9 @@ export type BenchEvents =
   | 'start' // when running the benchmarks gets started
   | 'warmup' // when the benchmarks start getting warmed up
 
-export interface BenchEventsMap {
-  abort: EventListener
-  add: EventListener
-  complete: EventListener
-  cycle: EventListener
-  error: EventListener
-  remove: EventListener
-  reset: EventListener
-  start: EventListener
-  warmup: EventListener
-}
-
-/**
- * Both the `Task` and `Bench` objects extend the `EventTarget` object.
- * So you can attach a listeners to different types of events to each class instance
- * using the universal `addEventListener` and `removeEventListener` methods.
- */
+export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+export type BenchEventsWithError = Extract<BenchEvents, 'error'>
+export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
 
 /**
  * Bench options
@@ -113,9 +96,19 @@ export type ConsoleTableConverter = (
 ) => Record<string, number | string>
 
 /**
+ * Both the `Task` and `Bench` objects extend the `EventTarget` object.
+ * So you can attach a listeners to different types of events to each class instance
+ * using the universal `addEventListener` and `removeEventListener` methods.
+ */
+
+/**
  * Event listener
  */
-export type EventListener = (evt: BenchEvent) => void
+export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> = (evt: BenchEvent<E, M>) => void
+
+export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
+  handleEvent(evt: BenchEvent<E, M>): void
+}
 
 /**
  * The task function.
@@ -343,24 +336,15 @@ export interface Statistics {
 /**
  * Task events
  */
-export type TaskEvents =
-  | 'abort'
-  | 'complete'
-  | 'cycle'
-  | 'error'
-  | 'reset'
-  | 'start'
-  | 'warmup'
-
-export interface TaskEventsMap {
-  abort: EventListener
-  complete: EventListener
-  cycle: EventListener
-  error: EventListener
-  reset: EventListener
-  start: EventListener
-  warmup: EventListener
-}
+export type TaskEvents = Extract<BenchEvents,
+  | 'abort' // when a signal aborts
+  | 'complete' // when running a task finishes
+  | 'cycle'// when running a task gets done
+  | 'error' // when the task throws
+  | 'reset' // when the reset method gets called
+  | 'start'// when running the task gets started
+  | 'warmup' // when the task start getting warmed up
+>
 
 /**
  * The task result object
@@ -374,30 +358,15 @@ export type TaskResult =
   | TaskResultStarted
 
 export interface TaskResultAborted {
-  /**
-   * whether the task was aborted
-   */
-  aborted: true
-
   state: 'aborted'
 }
 
 export interface TaskResultAbortedWithStatistics
   extends TaskResultWithStatistics {
-  /**
-   * whether the task was aborted
-   */
-  aborted: true
-
   state: 'aborted-with-statistics'
 }
 
 export interface TaskResultCompleted extends TaskResultWithStatistics {
-  /**
-   * whether the task was aborted
-   */
-  aborted: false
-
   /**
    * how long each operation takes (ms)
    */

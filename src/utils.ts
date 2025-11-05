@@ -63,7 +63,7 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
   ) {
     runtime = 'node'
     version =
-      (g.process as { versions: { node: string } }).versions.node || 'unknown'
+      (g.process as { versions?: { node: string } }).versions?.node ?? 'unknown'
   } else if (g.HermesInternal) {
     runtime = 'hermes'
     version =
@@ -175,9 +175,7 @@ export const formatNumber = (
   }
 
   // Avoid scientific notation
-  const integerDigits = absValue >= 1 ? Math.floor(Math.log10(absValue)) + 1 : 0
-  let decimals = Math.max(0, significantDigits - integerDigits)
-  decimals = Math.min(decimals, maxFractionDigits)
+  const decimals = Math.min(Math.max(0, significantDigits - (Math.floor(Math.log10(absValue)) + 1)), maxFractionDigits)
 
   return value.toFixed(decimals)
 }
@@ -218,7 +216,7 @@ export const isPromiseLike = <T>(
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const AsyncFunctionConstructor = (async () => {})
+const AsyncFunctionConstructor = (async () => { })
   .constructor as FunctionConstructor
 
 /**
@@ -343,8 +341,8 @@ const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
   return baseIndex + 1 < samples.length
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ? samples[baseIndex]! +
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     : samples[baseIndex]!
 }
@@ -362,7 +360,7 @@ const medianSorted = (samples: SortedSamples) => quantileSorted(samples, 0.5)
  * @param b - second number
  * @returns a number indicating the sort order
  */
-export const sortFn = (a: number, b: number) => a - b
+const sortFn = (a: number, b: number) => a - b
 
 /**
  * Computes the median of an unsorted sample.
@@ -449,13 +447,10 @@ export const toError = (value: unknown): Error => {
     case 'function':
       return new Error(value.name)
     case 'object':
-      if (
-        value !== null &&
-        (value instanceof Error ||
-        // If we are in a vm context (e.g. jest), instanceof Error checks may fail
-        typeof (value as { message?: unknown }).message === 'string')
-      ) {
-        return value as Error
+      if (value !== null) {
+        return value instanceof Error
+          ? value
+          : new Error((value as { message?: string; }).message ?? '')
       }
     // eslint-disable-next-line no-fallthrough
     case 'undefined':
@@ -476,24 +471,25 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   task: Task
 ): Record<string, number | string> => {
   const state = task.result.state
+  /* eslint-disable perfectionist/sort-objects */
   return {
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
           'Latency avg (ns)': toAverage(task.result.latency),
           'Latency med (ns)': toMedian(task.result.latency),
-          Samples: task.result.latency.samples.length,
           'Throughput avg (ops/s)': toAverage(task.result.throughput),
           'Throughput med (ops/s)': toMedian(task.result.throughput),
+          Samples: task.result.latency.samples.length,
         }
       : state !== 'errored'
         ? {
             'Latency avg (ns)': 'N/A',
             'Latency med (ns)': 'N/A',
-            Remarks: state,
-            Samples: 'N/A',
             'Throughput avg (ops/s)': 'N/A',
             'Throughput med (ops/s)': 'N/A',
+            Samples: 'N/A',
+            Remarks: state,
           }
         : {
             Error: task.result.error.message,
@@ -503,6 +499,7 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
       Remarks: state,
     }),
   }
+  /* eslint-enable perfectionist/sort-objects */
 }
 
 interface PLimitQueueItem {

@@ -6,7 +6,7 @@ test('detect faster task (async)', async () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench
     .add('faster', async () => {
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise(resolve => setTimeout(resolve, 1))
     })
     .add('slower', async () => {
       await new Promise(resolve => setTimeout(resolve, 50))

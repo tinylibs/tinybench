@@ -1,4 +1,4 @@
-name: QA
+name: qa
 on:
   push:
     branches: [main]
@@ -59,6 +59,7 @@ jobs:
   qa-bun:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
@@ -91,6 +92,7 @@ jobs:
   qa-deno:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
@@ -123,6 +125,7 @@ jobs:
   qa-node:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest

@@ -45,6 +45,19 @@ test('detect runtime node', () => {
   expect(version).toBe('20.4.0')
 })
 
+test('detect runtime node without versions', () => {
+  const { runtime, version } = detectRuntime({
+    process: {
+      release: {
+        name: 'node',
+      },
+    },
+  })
+
+  expect(runtime).toBe('node')
+  expect(version).toBe('unknown')
+})
+
 test('detect runtime deno', () => {
   const { runtime, version } = detectRuntime({
     Deno: {},

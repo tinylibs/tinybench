@@ -33,7 +33,6 @@ test('abort individual task (async)', async () => {
   expect(task1.result.state).toBe('aborted')
   if (task1.result.state !== 'aborted') return
 
-  expect(task1.result.aborted).toBe(true)
   expect(task1.runs).toBe(0) // No iterations ran
 
   const task2 = bench.getTask('task2')
@@ -44,7 +43,6 @@ test('abort individual task (async)', async () => {
   expect(task2.result.state).toBe('completed')
   if (task2.result.state !== 'completed') return
 
-  expect(task2.result.aborted).toBe(false)
   expect(task2.runs).toBeGreaterThan(0)
 })
 
@@ -78,7 +76,6 @@ test('abort individual task (sync)', () => {
   expect(task1.result.state).toBe('aborted')
   if (task1.result.state !== 'aborted') return
 
-  expect(task1.result.aborted).toBe(true)
   expect(task1.runs).toBe(0)
 
   const task2 = bench.getTask('task2')
@@ -89,7 +86,6 @@ test('abort individual task (sync)', () => {
   expect(task2.result.state).toBe('completed')
   if (task2.result.state !== 'completed') return
 
-  expect(task2.result.aborted).toBe(false)
   expect(task2.runs).toBeGreaterThan(0)
 })
 
@@ -119,7 +115,6 @@ test('abort task during execution (async)', async () => {
   expect(task.result.state).toBe('aborted')
   if (task.result.state !== 'aborted') return
 
-  expect(task.result.aborted).toBe(true)
   // Should have completed some iterations before abort
   // Note: Due to timing, this might be 0 if abort happens very quickly
   if (task.runs && task.runs > 0) {
@@ -192,9 +187,7 @@ test('abort signal precedence (async)', async () => {
   if (!task) return
 
   expect(task.result.state).toBe('aborted')
-  if (task.result.state !== 'aborted') return
-
-  expect(task.result.aborted).toBe(true)
+  expect(task.runs).toBe(0)
 })
 
 test('abort bench-level signal (async)', async () => {
@@ -227,13 +220,9 @@ test('abort bench-level signal (async)', async () => {
   if (!task2) return
 
   expect(task1.result.state).toBe('aborted')
-  if (task1.result.state !== 'aborted') return
-
+  expect(task1.runs).toBe(0)
   expect(task2.result.state).toBe('aborted')
-  if (task2.result.state !== 'aborted') return
-
-  expect(task1.result.aborted).toBe(true)
-  expect(task2.result.aborted).toBe(true)
+  expect(task2.runs).toBe(0)
 })
 
 test('abort task during warmup (async)', async () => {
@@ -265,7 +254,6 @@ test('abort task during warmup (async)', async () => {
   expect(task.result.state).toBe('aborted')
   if (task.result.state !== 'aborted') return
 
-  expect(task.result.aborted).toBe(true)
   expect(task.runs).toBe(0)
 })
 
@@ -299,7 +287,6 @@ test.skip('abort with task concurrency (async)', async () => {
   expect(task.result.state).toBe('aborted')
   if (task.result.state !== 'aborted') return
 
-  expect(task.result.aborted).toBe(true)
   // only some iterations should have run
   expect(task.runs).toBeGreaterThan(0)
   expect(task.runs).toBeLessThan(10)
@@ -322,7 +309,6 @@ test('abort state no signal (async)', async () => {
   expect(task.result.state).toBe('completed')
   if (task.result.state !== 'completed') return
 
-  expect(task.result.aborted).toBe(false)
   expect(task.runs).toBeGreaterThan(0)
 })
 
@@ -349,7 +335,6 @@ test('abort state with inactive signal (async)', async () => {
   expect(task.result.state).toBe('completed')
   if (task.result.state !== 'completed') return
 
-  expect(task.result.aborted).toBe(false)
   expect(task.runs).toBeGreaterThan(0)
 })
 
@@ -378,6 +363,5 @@ test('abort state after completion (async)', async () => {
   expect(task.result.state).toBe('completed')
   if (task.result.state !== 'completed') return
 
-  expect(task.result.aborted).toBe(false)
   expect(task.runs).toBeGreaterThan(0)
 })

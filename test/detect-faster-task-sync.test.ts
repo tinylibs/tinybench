@@ -7,7 +7,7 @@ test('detect faster task (sync)', () => {
   const bench = new Bench({ iterations: 32, time: 100 })
   bench
     .add('faster', () => {
-      // noop
+      sleep(1)
     })
     .add('slower', () => {
       sleep(50)

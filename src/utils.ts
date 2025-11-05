@@ -5,8 +5,8 @@ import type { Task } from './task'
 import type {
   ConsoleTableConverter,
   Fn,
-  PLimitInstance,
   Statistics,
+  withConcurrencyInstance,
 } from './types'
 
 import { emptyFunction, tTable } from './constants'
@@ -502,7 +502,7 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   /* eslint-enable perfectionist/sort-objects */
 }
 
-interface PLimitQueueItem {
+interface ConcurrencyQueueItem {
   fn: () => Promise<unknown>
   reject: (error: unknown) => void
   resolve: (value: unknown) => void
@@ -513,16 +513,16 @@ interface PLimitQueueItem {
  * @param limit - Maximum number of concurrent executions
  * @returns A function that accepts a function to execute and returns a promise
  */
-export const pLimit = (limit: number): PLimitInstance => {
-  const queue: PLimitQueueItem[] = []
+export const withConcurrency = (limit: number): withConcurrencyInstance => {
+  const queue: ConcurrencyQueueItem[] = []
 
   let activeCount = 0
   let pendingCount = 0
 
   const processNext = (): void => {
-    while (activeCount < limit && queue.length > 0) {
-      const item = queue.shift()
-      if (item == null) break
+    while (activeCount < limit && queue.length !== 0) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const item = queue.shift()!
 
       activeCount++
       pendingCount--
@@ -542,31 +542,27 @@ export const pLimit = (limit: number): PLimitInstance => {
     }
   }
 
-  const limiter = <R>(fn: () => Promise<R>): Promise<R> => {
+  const push = <R>(fn: () => Promise<R>): Promise<R> => {
     return new Promise<R>((resolve, reject) => {
       queue.push({
-        fn: fn as () => Promise<unknown>,
+        fn,
         reject,
-        resolve: (value: unknown) => {
-          resolve(value as R)
-        },
-      })
+        resolve,
+      } as ConcurrencyQueueItem)
       pendingCount++
       processNext()
     })
   }
 
-  // Add properties to match p-limit API
-  Object.defineProperties(limiter, {
-    activeCount: {
-      enumerable: true,
-      get: () => activeCount,
-    },
-    pendingCount: {
-      enumerable: true,
-      get: () => pendingCount,
-    },
+  Object.defineProperty(push, 'activeCount', {
+    enumerable: true,
+    get: () => activeCount,
   })
 
-  return limiter as PLimitInstance
+  Object.defineProperty(push, 'pendingCount', {
+    enumerable: true,
+    get: () => pendingCount,
+  })
+
+  return push as withConcurrencyInstance
 }

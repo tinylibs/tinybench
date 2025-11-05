@@ -20,7 +20,7 @@ import {
 } from './constants'
 import { BenchEvent } from './event'
 import { Task } from './task'
-import { pLimit } from './utils'
+import { withConcurrency } from './utils'
 import {
   defaultConvertTaskResultForConsoleTable,
   invariant,
@@ -267,7 +267,7 @@ export class Bench extends EventTarget {
   async #mapTasksConcurrently<R>(
     workerFn: (task: Task) => Promise<R>
   ): Promise<R[]> {
-    const limit = pLimit(Math.max(1, Math.floor(this.threshold)))
+    const limit = withConcurrency(Math.max(1, Math.floor(this.threshold)))
     const promises: Promise<R>[] = []
     for (const task of this.#tasks.values()) {
       promises.push(limit(() => workerFn(task)))

@@ -5,15 +5,15 @@ import type {
   EventListenerObject,
   Fn,
   FnOptions,
-  PLimitInstance,
   RemoveEventListenerOptionsArgument,
   TaskEvents,
   TaskResult,
   TaskResultRuntimeInfo,
+  withConcurrencyInstance,
 } from './types'
 
-import { pLimit } from './utils'
 import { BenchEvent } from './event'
+import { withConcurrency } from './utils'
 import {
   getStatisticsSorted,
   invariant,
@@ -314,10 +314,10 @@ export class Task extends EventTarget {
 
     try {
       const promises: Promise<void>[] = [] // only for task level concurrency
-      let limit: PLimitInstance | undefined // only for task level concurrency
+      let limit: undefined | withConcurrencyInstance // only for task level concurrency
 
       if (this.#bench.concurrency === 'task') {
-        limit = pLimit(Math.max(1, Math.floor(this.#bench.threshold)))
+        limit = withConcurrency(Math.max(1, Math.floor(this.#bench.threshold)))
       }
 
       while (

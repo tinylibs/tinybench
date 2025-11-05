@@ -1,24 +1,24 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 
-import type { PLimitInstance } from '../src/types'
+import type { withConcurrencyInstance } from '../src/types'
 
-import { pLimit } from '../src/utils'
+import { withConcurrency } from '../src/utils'
 import { asyncSleep } from './utils'
 
-describe('pLimit', () => {
-  let limiter: PLimitInstance
+describe('withConcurrency', () => {
+  let limiter: withConcurrencyInstance
 
   beforeEach(() => {
-    limiter = pLimit(2)
+    limiter = withConcurrency(2)
   })
 
-  test('pLimit initial state', () => {
+  test('withConcurrency initial state', () => {
     expect(typeof limiter).toBe('function')
     expect(limiter.activeCount).toBe(0)
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('pLimit single task execution', async () => {
+  test('withConcurrency single task execution', async () => {
     const result = await limiter(async () => {
       await asyncSleep(10)
       return 'hello'
@@ -29,7 +29,7 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('pLimit concurrency limiting', async () => {
+  test('withConcurrency concurrency limiting', async () => {
     const results: number[] = []
     const activeTracker: number[] = []
 
@@ -56,7 +56,7 @@ describe('pLimit', () => {
     expect(Math.max(...activeTracker)).toBe(2)
   })
 
-  test('pLimit count tracking', async () => {
+  test('withConcurrency count tracking', async () => {
     expect(limiter.activeCount).toBe(0)
     expect(limiter.pendingCount).toBe(0)
 
@@ -89,8 +89,8 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('pLimit FIFO order', async () => {
-    const limiter1 = pLimit(1) // Single concurrency for strict ordering
+  test('withConcurrency FIFO order', async () => {
+    const limiter1 = withConcurrency(1) // Single concurrency for strict ordering
     const results: number[] = []
 
     const createTask = (id: number) =>
@@ -112,7 +112,7 @@ describe('pLimit', () => {
     expect(results).toEqual([1, 2, 3, 4])
   })
 
-  test('pLimit error handling', async () => {
+  test('withConcurrency error handling', async () => {
     const successfulResult = await limiter(async () => {
       await asyncSleep(10)
       return 'success'
@@ -137,7 +137,7 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('pLimit concurrent errors', async () => {
+  test('withConcurrency concurrent errors', async () => {
     const promises = [
       limiter(async () => {
         await asyncSleep(50)
@@ -165,8 +165,8 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(0)
   })
 
-  test('pLimit serialization (limit=1)', async () => {
-    const serialLimiter = pLimit(1)
+  test('withConcurrency serialization (limit=1)', async () => {
+    const serialLimiter = withConcurrency(1)
     const executionOrder: number[] = []
     const startTimes: number[] = []
 
@@ -193,16 +193,16 @@ describe('pLimit', () => {
     expect(startTimes[2]! - startTimes[1]!).toBeGreaterThanOrEqual(40)
   })
 
-  test('pLimit edge case (limit=0)', () => {
-    expect(() => pLimit(0)).not.toThrow()
-    const zeroLimiter = pLimit(0)
+  test('withConcurrency edge case (limit=0)', () => {
+    expect(() => withConcurrency(0)).not.toThrow()
+    const zeroLimiter = withConcurrency(0)
 
     expect(zeroLimiter.activeCount).toBe(0)
     expect(zeroLimiter.pendingCount).toBe(0)
   })
 
-  test('pLimit high concurrency', async () => {
-    const highLimiter = pLimit(100)
+  test('withConcurrency high concurrency', async () => {
+    const highLimiter = withConcurrency(100)
     const taskCount = 50
     const results: number[] = []
 
@@ -224,8 +224,8 @@ describe('pLimit', () => {
     expect(highLimiter.pendingCount).toBe(0)
   })
 
-  test('pLimit stress test', async () => {
-    const stressLimiter = pLimit(3)
+  test('withConcurrency stress test', async () => {
+    const stressLimiter = withConcurrency(3)
     const taskCount = 100
     const results: number[] = []
     let maxActiveCount = 0
@@ -249,7 +249,7 @@ describe('pLimit', () => {
     expect(stressLimiter.pendingCount).toBe(0)
   })
 
-  test('pLimit return types', async () => {
+  test('withConcurrency return types', async () => {
     // eslint-disable-next-line @typescript-eslint/require-await
     const stringResult = await limiter(async () => 'hello')
     expect(stringResult).toBe('hello')
@@ -269,7 +269,7 @@ describe('pLimit', () => {
     expect(undefinedResult).toBeUndefined()
   })
 
-  test('pLimit readonly properties', () => {
+  test('withConcurrency readonly properties', () => {
     const initialActive = limiter.activeCount
     const initialPending = limiter.pendingCount
 
@@ -287,9 +287,9 @@ describe('pLimit', () => {
     expect(limiter.pendingCount).toBe(initialPending)
   })
 
-  test('pLimit nested calls', async () => {
-    const outerLimiter = pLimit(2)
-    const innerLimiter = pLimit(1)
+  test('withConcurrency nested calls', async () => {
+    const outerLimiter = withConcurrency(2)
+    const innerLimiter = withConcurrency(1)
     const results: string[] = []
 
     const promises = [1, 2, 3].map(i =>
@@ -308,7 +308,7 @@ describe('pLimit', () => {
     expect(results.sort()).toEqual(['task-1', 'task-2', 'task-3'])
   })
 
-  test('pLimit immediate completion', async () => {
+  test('withConcurrency immediate completion', async () => {
     const results: number[] = []
 
     const promises = [1, 2, 3, 4].map(i =>

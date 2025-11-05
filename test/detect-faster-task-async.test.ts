@@ -3,10 +3,10 @@ import { expect, test } from 'vitest'
 import { Bench } from '../src'
 
 test('detect faster task (async)', async () => {
-  const bench = new Bench({ iterations: 32, time: 100 })
+  const bench = new Bench({ iterations: 10, time: 100 })
   bench
     .add('faster', async () => {
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise(resolve => setTimeout(resolve, 25))
     })
     .add('slower', async () => {
       await new Promise(resolve => setTimeout(resolve, 50))

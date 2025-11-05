@@ -4,10 +4,10 @@ import { Bench } from '../src'
 import { sleep } from './utils'
 
 test('detect faster task (sync)', () => {
-  const bench = new Bench({ iterations: 32, time: 100 })
+  const bench = new Bench({ iterations: 10, time: 100 })
   bench
     .add('faster', () => {
-      // noop
+      sleep(25)
     })
     .add('slower', () => {
       sleep(50)

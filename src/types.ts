@@ -1,8 +1,7 @@
+import type { BenchEvent } from '../src/event'
 import type { Task } from '../src/task'
 import type { JSRuntime } from './utils'
-
-import { BenchEvent } from '../src/event'
-export { BenchEvent } from '../src/event'
+export type { BenchEvent } from '../src/event'
 
 export type AddEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.addEventListener
@@ -337,30 +336,15 @@ export type TaskResult =
   | TaskResultStarted
 
 export interface TaskResultAborted {
-  /**
-   * whether the task was aborted
-   */
-  aborted: true
-
   state: 'aborted'
 }
 
 export interface TaskResultAbortedWithStatistics
   extends TaskResultWithStatistics {
-  /**
-   * whether the task was aborted
-   */
-  aborted: true
-
   state: 'aborted-with-statistics'
 }
 
 export interface TaskResultCompleted extends TaskResultWithStatistics {
-  /**
-   * whether the task was aborted
-   */
-  aborted: false
-
   /**
    * how long each operation takes (ms)
    */

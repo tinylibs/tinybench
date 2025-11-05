@@ -113,6 +113,11 @@ test('events order (async)', async () => {
     'cycle',
     'error-complete',
     'abort',
+    'abort',
+    'abort',
+    'abort',
+    'abort',
+    'abort',
     'cycle',
     'complete',
     'reset',
@@ -124,5 +129,9 @@ test('events order (async)', async () => {
   if (!abortTask) return
 
   // aborted has no results
-  expect(Object.keys(abortTask.result).length).toBe(3)
+  const keys = Object.keys(abortTask.result)
+  expect(keys.length).toBe(3)
+  expect(keys).toContain('state')
+  expect(keys).toContain('runtime')
+  expect(keys).toContain('runtimeVersion')
 }, 10000)

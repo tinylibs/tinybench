@@ -27,6 +27,8 @@ import {
 
 const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
 
+const abortableStates = ['not-started', 'started'] as const
+
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
  * results, name, the task function, the number times the task function has been executed, ...
@@ -121,31 +123,32 @@ export class Task extends EventTarget {
     if (this.#signal) {
       this.#signal.addEventListener(
         'abort',
-        () => {
-          const ev = new BenchEvent('abort', this)
-          this.dispatchEvent(ev)
-          this.#bench.dispatchEvent(ev)
-        },
+        this.#onAbort.bind(this),
         { once: true }
       )
     }
 
-    this.#setTaskResult({
-      state: 'not-started',
-    })
+    if (this.#bench.opts.signal) {
+      this.#bench.opts.signal.addEventListener(
+        'abort',
+        this.#onAbort.bind(this),
+        { once: true }
+      )
+    }
+
+    this.reset(false)
   }
 
   /**
    * reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
+   * @param emit - whether to emit the `reset` event or not
    * @internal
    */
-  reset (): void {
-    this.dispatchEvent(new BenchEvent('reset', this))
+  reset (emit = true): void {
+    if (emit) this.dispatchEvent(new BenchEvent('reset', this))
     this.runs = 0
 
-    this.#setTaskResult({
-      state: 'not-started',
-    })
+    this.#setTaskResult({ state: this.#aborted ? 'aborted' : 'not-started' })
   }
 
   /**
@@ -158,7 +161,7 @@ export class Task extends EventTarget {
       return this
     }
     this.#setTaskResult({
-      state: 'started',
+      state: 'started'
     })
     this.dispatchEvent(new BenchEvent('start', this))
     await this.#bench.opts.setup(this, 'run')
@@ -189,7 +192,7 @@ export class Task extends EventTarget {
       'Cannot use `concurrency` option when using `runSync`'
     )
     this.#setTaskResult({
-      state: 'started',
+      state: 'started'
     })
     this.dispatchEvent(new BenchEvent('start', this))
 
@@ -459,6 +462,19 @@ export class Task extends EventTarget {
     return { fnResult, taskTime }
   }
 
+  #onAbort (): void {
+    if (
+      abortableStates.includes(this.result.state as typeof abortableStates[number])
+    ) {
+      this.#setTaskResult({
+        state: 'aborted',
+      })
+    }
+    const ev = new BenchEvent('abort', this)
+    this.dispatchEvent(ev)
+    this.#bench.dispatchEvent(ev)
+  }
+
   #postWarmup (error: Error | undefined): void {
     if (error) {
       this.#setTaskResult({
@@ -504,35 +520,19 @@ export class Task extends EventTarget {
       sortSamples(throughputSamples)
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
-      if (this.#aborted) {
-        this.#setTaskResult({
-          aborted: true,
-          period: totalTime / this.runs,
-          state: 'aborted-with-statistics',
-          totalTime,
-          // deprecated statistics included for backward compatibility
-          ...latencyStatistics,
-          hz: throughputStatistics.mean,
-          latency: latencyStatistics,
-          throughput: throughputStatistics,
-        })
-      } else {
-        this.#setTaskResult({
-          aborted: false,
-          period: totalTime / this.runs,
-          state: 'completed',
-          totalTime,
-          // deprecated statistics included for backward compatibility
-          ...latencyStatistics,
-          hz: throughputStatistics.mean,
-          latency: latencyStatistics,
-          throughput: throughputStatistics,
-        })
-      }
+      this.#setTaskResult({
+        period: totalTime / this.runs,
+        state: this.#aborted ? 'aborted-with-statistics' : 'completed',
+        totalTime,
+        // deprecated statistics included for backward compatibility
+        ...latencyStatistics,
+        hz: throughputStatistics.mean,
+        latency: latencyStatistics,
+        throughput: throughputStatistics,
+      })
     } else if (this.#aborted) {
       // If aborted with no samples, still set the aborted flag
       this.#setTaskResult({
-        aborted: true,
         state: 'aborted',
       })
     }

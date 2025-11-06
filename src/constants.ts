@@ -1037,5 +1037,4 @@ export const defaultMinimumWarmupTime = 250
 
 export const defaultMinimumWarmupIterations = 16
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const emptyFunction = Object.freeze(() => {})
+export const emptyFunction = Object.freeze(() => { /* no op */ })

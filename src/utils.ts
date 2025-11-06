@@ -210,8 +210,7 @@ export const isPromiseLike = <T>(
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const AsyncFunctionConstructor = (async () => { })
+const AsyncFunctionConstructor = (async () => { /* no op */ })
   .constructor as FunctionConstructor
 
 /**

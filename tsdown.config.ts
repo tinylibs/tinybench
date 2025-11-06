@@ -6,4 +6,10 @@ export default defineConfig({
     compress: true,
     mangle: true,
   },
+  outExtensions: () => {
+    return {
+      dts: '.d.ts',
+      js: '.js',
+    }
+  },
 })

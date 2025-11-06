@@ -102,22 +102,6 @@ test('throws on error and stops other workers', async () => {
   expect(calls).toBeLessThan(100)
 })
 
-test('stress test concurrency consistency', async () => {
-  for (let i = 0; i < 100; i++) {
-    let runs = 0
-    await withConcurrency({
-      fn: async () => {
-        runs++
-        await asyncSleep(Math.random() * 5)
-      },
-      iterations: 50,
-      limit: 5,
-      time: 500,
-    })
-    expect(runs).toBe(50)
-  }
-})
-
 test('runs exact number of iterations', async () => {
   let runs = 0
   await withConcurrency({

@@ -112,7 +112,7 @@ test('stress test concurrency consistency', async () => {
       },
       iterations: 50,
       limit: 5,
-      time: 1000,
+      time: 500,
     })
     expect(runs).toBe(50)
   }

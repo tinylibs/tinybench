@@ -9,7 +9,6 @@ import type {
   TaskEvents,
   TaskResult,
   TaskResultRuntimeInfo,
-  withConcurrencyInstance,
 } from './types'
 
 import { BenchEvent } from './event'
@@ -165,11 +164,11 @@ export class Task extends EventTarget {
     })
     this.dispatchEvent(new BenchEvent('start', this))
     await this.#bench.opts.setup(this, 'run')
-    const { error, samples: latencySamples } = (await this.#benchmark(
+    const { error, samples: latencySamples } = await this.#benchmark(
       'run',
       this.#bench.opts.time,
       this.#bench.opts.iterations
-    ))
+    )
     await this.#bench.opts.teardown(this, 'run')
 
     this.#processRunResult({ error, latencySamples })
@@ -311,37 +310,32 @@ export class Task extends EventTarget {
         }
       }
     }
-
-    try {
-      const promises: Promise<void>[] = [] // only for task level concurrency
-      let limit: undefined | withConcurrencyInstance // only for task level concurrency
-
-      if (this.#bench.concurrency === 'task') {
-        limit = withConcurrency(Math.max(1, Math.floor(this.#bench.threshold)))
+    if (this.#bench.concurrency === 'task') {
+      try {
+        await withConcurrency({
+          fn: benchmarkTask,
+          iterations,
+          limit: Math.max(1, Math.floor(this.#bench.threshold)),
+          signal: this.#signal ?? this.#bench.opts.signal,
+          time,
+        })
+      } catch (error) {
+        return { error: toError(error) }
       }
-
-      while (
-        // eslint-disable-next-line no-unmodified-loop-condition
-        (totalTime < time ||
-          samples.length + (limit?.activeCount ?? 0) + (limit?.pendingCount ?? 0) < iterations) &&
-        !this.#aborted
-      ) {
-        if (this.#bench.concurrency === 'task') {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          promises.push((limit!)(benchmarkTask))
-        } else {
+      this.runs = samples.length
+    } else {
+      try {
+        while (
+          // eslint-disable-next-line no-unmodified-loop-condition
+          (totalTime < time ||
+            samples.length < iterations) &&
+          !this.#aborted
+        ) {
           await benchmarkTask()
         }
+      } catch (error) {
+        return { error: toError(error) }
       }
-      if (!this.#aborted && promises.length > 0) {
-        await Promise.all(promises)
-      } else if (promises.length > 0) {
-        // Abort path
-        // eslint-disable-next-line no-void
-        void Promise.allSettled(promises)
-      }
-    } catch (error) {
-      return { error: toError(error) }
     }
 
     if (this.#fnOpts.afterAll != null) {

@@ -108,6 +108,9 @@ export class Bench extends EventTarget {
     this.name = name
     this.runtime = runtime
     this.runtimeVersion = runtimeVersion
+    this.concurrency = restOptions.concurrency ?? null
+    this.threshold = restOptions.threshold ?? Infinity
+
     this.opts = {
       ...{
         iterations: defaultMinimumIterations,
@@ -197,7 +200,7 @@ export class Bench extends EventTarget {
     let values: Task[] = []
     this.dispatchEvent(new BenchEvent('start'))
     if (this.concurrency === 'bench') {
-      values = await this.#mapTasksConcurrently(task => task.run())
+      values = await this.#mapTasksConcurrently<Task>(task => task.run(), this.opts.iterations)
     } else {
       for (const task of this.#tasks.values()) {
         values.push(await task.run())
@@ -262,15 +265,22 @@ export class Bench extends EventTarget {
    * - Used internally by run() and warmupTasks() when concurrency === 'bench'.
    * @template R The resolved type produced by the worker function for each task.
    * @param workerFn A function invoked for each Task; it must return a Promise<R>.
+   * @param iterations The number of iterations to pass to each worker function.
    * @returns Promise that resolves to an array of results in the same order as task iteration.
    */
   async #mapTasksConcurrently<R>(
-    workerFn: (task: Task) => Promise<R>
-  ): Promise<R[]> {
-    const limit = withConcurrency(Math.max(1, Math.floor(this.threshold)))
-    const promises: Promise<R>[] = []
+    workerFn: (task: Task) => Promise<R>,
+    iterations: number
+  ) {
+    const promises: Promise<R[]>[] = []
     for (const task of this.#tasks.values()) {
-      promises.push(limit(() => workerFn(task)))
+      promises.push(withConcurrency<R>({
+        fn: () => workerFn(task),
+        iterations,
+        limit: Math.max(1, Math.floor(this.threshold)),
+        signal: this.opts.signal,
+        time: Infinity,
+      }))
     }
     return Promise.all(promises)
   }
@@ -281,7 +291,7 @@ export class Bench extends EventTarget {
   async #warmupTasks (): Promise<void> {
     this.dispatchEvent(new BenchEvent('warmup'))
     if (this.concurrency === 'bench') {
-      await this.#mapTasksConcurrently(task => task.warmup())
+      await this.#mapTasksConcurrently(task => task.warmup(), this.opts.warmupIterations)
     } else {
       for (const task of this.#tasks.values()) {
         await task.warmup()

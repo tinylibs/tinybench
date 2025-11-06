@@ -26,8 +26,8 @@
     "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsdown.config.ts vitest.config.ts vitest.pretest.config.ts",
     "release": "bumpp package.json --commit --push --tag",
     "ci:pretest": "vitest --config vitest.pretest.config.ts run",
-    "test": "vitest --retry=5 run",
-    "test:coverage": "vitest --retry=5 --coverage run"
+    "test": "vitest run",
+    "test:coverage": "vitest --coverage run"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",

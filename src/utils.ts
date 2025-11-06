@@ -6,7 +6,6 @@ import type {
   ConsoleTableConverter,
   Fn,
   Statistics,
-  withConcurrencyInstance,
 } from './types'
 
 import { emptyFunction, tTable } from './constants'
@@ -502,67 +501,82 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   /* eslint-enable perfectionist/sort-objects */
 }
 
-interface ConcurrencyQueueItem {
-  fn: () => Promise<unknown>
-  reject: (error: unknown) => void
-  resolve: (value: unknown) => void
+interface ConcurrencyResource<R> {
+  fn: () => Promise<R>
+  iterations: number
+  limit: number
+  signal?: AbortSignal
+  time: number
 }
 
 /**
  * Creates a concurrency limiter that can execute functions with a maximum concurrency limit.
- * @param limit - Maximum number of concurrent executions
+ * @param resource - The resource containing the function to execute and other options
  * @returns A function that accepts a function to execute and returns a promise
  */
-export const withConcurrency = (limit: number): withConcurrencyInstance => {
-  const queue: ConcurrencyQueueItem[] = []
+export const withConcurrency = async <R>(resource: ConcurrencyResource<R>): Promise<R[]> => {
+  let runs = 0
+  const {
+    fn,
+    iterations,
+    limit,
+    signal,
+    time,
+  } = resource
 
-  let activeCount = 0
-  let pendingCount = 0
-
-  const processNext = (): void => {
-    while (activeCount < limit && queue.length !== 0) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const item = queue.shift()!
-
-      activeCount++
-      pendingCount--
-
-      item.fn().then(
-        result => {
-          activeCount--
-          item.resolve(result)
-          processNext()
-        },
-        (error: unknown) => {
-          activeCount--
-          item.reject(error)
-          processNext()
-        }
-      )
-    }
-  }
-
-  const push = <R>(fn: () => Promise<R>): Promise<R> => {
-    return new Promise<R>((resolve, reject) => {
-      queue.push({
-        fn,
-        reject,
-        resolve,
-      } as ConcurrencyQueueItem)
-      pendingCount++
-      processNext()
+  if (signal) {
+    signal.addEventListener('abort', () => {
+      finished = true
     })
   }
 
-  Object.defineProperty(push, 'activeCount', {
-    enumerable: true,
-    get: () => activeCount,
-  })
+  const maxWorkerCount = iterations === 0
+    ? limit
+    : Math.max(0, Math.min(limit, iterations))
 
-  Object.defineProperty(push, 'pendingCount', {
-    enumerable: true,
-    get: () => pendingCount,
-  })
+  const queue = new Array(maxWorkerCount)
+  let finished = false
+  let startTime = 0
 
-  return push as withConcurrencyInstance
+  const errors: Error[] = []
+  const result: R[] = []
+
+  const worker = async () => {
+    let resultValue: R
+
+    while (!finished) {
+      try {
+        runs++
+        resultValue = await fn()
+        result.push(resultValue)
+      } catch (error) {
+        finished = true
+        errors.push(toError(error))
+        break
+      }
+
+      if (
+        (iterations !== 0 && runs > iterations) ||
+        ((hrtimeNow() - startTime) >= time)
+      ) {
+        finished = true
+        break
+      }
+    }
+  }
+
+  startTime = hrtimeNow()
+  for (let i = 0; i < maxWorkerCount; i++) {
+    queue[i] = worker()
+  }
+
+  await Promise.allSettled(queue)
+
+  if (errors.length === 0) {
+    return result
+  } else if (errors.length === 1) {
+    throw toError(errors[0])
+  } else {
+    throw new AggregateError(errors, 'Multiple errors occurred during concurrent execution')
+  }
 }

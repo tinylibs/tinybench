@@ -197,7 +197,7 @@ const hrtimeBigint: () => bigint = typeof (globalThis as { process?: { hrtime?: 
  */
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
 
-export const now = performance.now.bind(performance)
+export const performanceNow = performance.now.bind(performance)
 
 /**
  * Checks if a value is a promise-like object.
@@ -504,6 +504,7 @@ interface WithConcurrencyOptions<R> {
   fn: () => Promise<R>
   iterations: number
   limit: number
+  now?: () => number
   signal?: AbortSignal
   time?: number
 }
@@ -514,7 +515,7 @@ interface WithConcurrencyOptions<R> {
  * @returns A promise that resolves to an array of results.
  */
 export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Promise<R[]> => {
-  const { fn, iterations, limit, signal, time = 0 } = options
+  const { fn, iterations, limit, now = performanceNow, signal, time = 0 } = options
 
   const maxWorkers = iterations === 0 ? limit : Math.max(0, Math.min(limit, iterations))
 
@@ -523,7 +524,7 @@ export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Pr
 
   let finished = false
   let nextIndex = 0
-  const startTime = hrtimeNow()
+  const startTime = Number.isFinite(time) && time !== 0 ? now() : 0
 
   const doNext = (): boolean => {
     if (finished) return false
@@ -546,7 +547,7 @@ export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Pr
     while (!finished) {
       if (!doNext()) break
 
-      if (time && hrtimeNow() - startTime >= time) {
+      if (startTime !== 0 && now() - startTime >= time) {
         finished = true
         break
       }

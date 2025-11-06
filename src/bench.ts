@@ -24,7 +24,7 @@ import {
   defaultConvertTaskResultForConsoleTable,
   invariant,
   type JSRuntime,
-  now,
+  performanceNow,
   runtime,
   runtimeVersion,
 } from './utils'
@@ -113,7 +113,7 @@ export class Bench extends EventTarget {
     this.opts = {
       ...{
         iterations: defaultMinimumIterations,
-        now,
+        now: performanceNow,
         setup: emptyFunction,
         teardown: emptyFunction,
         throws: false,

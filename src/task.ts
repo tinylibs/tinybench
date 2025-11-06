@@ -316,6 +316,7 @@ export class Task extends EventTarget {
           fn: benchmarkTask,
           iterations,
           limit: Math.max(1, Math.floor(this.#bench.threshold)),
+          now: this.#bench.opts.now,
           signal: this.#signal ?? this.#bench.opts.signal,
           time,
         })

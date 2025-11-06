@@ -501,7 +501,7 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   /* eslint-enable perfectionist/sort-objects */
 }
 
-interface ConcurrencyResource<R> {
+interface WithConcurrencyOptions<R> {
   fn: () => Promise<R>
   iterations: number
   limit: number
@@ -511,11 +511,11 @@ interface ConcurrencyResource<R> {
 
 /**
  * Creates a concurrency limiter that can execute functions with a maximum concurrency limit.
- * @param resource - The resource containing the function to execute and other options
- * @returns A function that accepts a function to execute and returns a promise
+ * @param options - The resource containing the function to execute and other options
+ * @returns A promise that resolves to an array of results.
  */
-export const withConcurrency = async <R>(resource: ConcurrencyResource<R>): Promise<R[]> => {
-  const { fn, iterations, limit, signal, time = 0 } = resource
+export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Promise<R[]> => {
+  const { fn, iterations, limit, signal, time = 0 } = options
 
   const maxWorkers = iterations === 0 ? limit : Math.max(0, Math.min(limit, iterations))
 
@@ -536,11 +536,11 @@ export const withConcurrency = async <R>(resource: ConcurrencyResource<R>): Prom
   const pushResult = (r: R) => { if (!finished) results.push(r) }
   const pushError = (e: unknown) => { errors.push(toError(e)) }
 
-  const abortHandler = () => { finished = true }
+  const onAbort = () => { finished = true }
 
   if (signal) {
     if (signal.aborted) return []
-    signal.addEventListener('abort', abortHandler)
+    signal.addEventListener('abort', onAbort)
   }
 
   const worker = async () => {
@@ -555,7 +555,6 @@ export const withConcurrency = async <R>(resource: ConcurrencyResource<R>): Prom
       try {
         const value = await fn()
         pushResult(value)
-        if (finished) break
       } catch (err) {
         pushError(err)
         finished = true
@@ -567,7 +566,7 @@ export const withConcurrency = async <R>(resource: ConcurrencyResource<R>): Prom
   const promises = Array.from({ length: maxWorkers }, () => worker())
   await Promise.allSettled(promises)
 
-  if (signal) signal.removeEventListener('abort', abortHandler)
+  if (signal) signal.removeEventListener('abort', onAbort)
 
   if (errors.length === 0) return results
   if (errors.length === 1) throw toError(errors[0])

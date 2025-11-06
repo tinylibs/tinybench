@@ -415,28 +415,6 @@ export interface TaskResultWithStatistics extends DeprecatedStatistics {
   totalTime: number
 }
 
-/**
- * P-limit instance interface for concurrency control
- */
-export interface withConcurrencyInstance {
-  /**
-   * Executes a function with concurrency limiting
-   * @param fn Function to execute
-   * @returns Promise resolving to the function's result
-   */
-  <R>(fn: () => Promise<R>): Promise<R>
-
-  /**
-   * Number of currently active (running) operations
-   */
-  readonly activeCount: number
-
-  /**
-   * Number of operations waiting in the queue
-   */
-  readonly pendingCount: number
-}
-
 interface DeprecatedStatistics {
   /**
    * the latency samples critical value

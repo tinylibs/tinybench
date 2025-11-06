@@ -162,7 +162,7 @@ test('limit greater than iterations', async () => {
 
 test('limit equals zero', async () => {
   const result = await withConcurrency({
-    fn: async () => 1,
+    fn: async () => 1, // eslint-disable-line @typescript-eslint/require-await
     iterations: 0,
     limit: 0,
     time: 10,
@@ -191,7 +191,7 @@ test('abort signal before start returns immediately', async () => {
   const controller = new AbortController()
   controller.abort()
   const result = await withConcurrency({
-    fn: async () => 1,
+    fn: async () => 1, // eslint-disable-line @typescript-eslint/require-await
     iterations: 100,
     limit: 10,
     signal: controller.signal,
@@ -237,7 +237,7 @@ test('throws AggregateError when multiple errors occur', async () => {
 
 test('throws single error correctly', async () => {
   let count = 0
-  const fn = async () => {
+  const fn = async () => { // eslint-disable-line @typescript-eslint/require-await
     count++
     if (count === 3) throw new Error('boom')
   }

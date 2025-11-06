@@ -506,7 +506,7 @@ interface ConcurrencyResource<R> {
   iterations: number
   limit: number
   signal?: AbortSignal
-  time: number
+  time?: number
 }
 
 /**
@@ -515,68 +515,61 @@ interface ConcurrencyResource<R> {
  * @returns A function that accepts a function to execute and returns a promise
  */
 export const withConcurrency = async <R>(resource: ConcurrencyResource<R>): Promise<R[]> => {
-  let runs = 0
-  const {
-    fn,
-    iterations,
-    limit,
-    signal,
-    time,
-  } = resource
+  const { fn, iterations, limit, signal, time = 0 } = resource
 
-  if (signal) {
-    signal.addEventListener('abort', () => {
-      finished = true
-    })
-  }
-
-  const maxWorkerCount = iterations === 0
-    ? limit
-    : Math.max(0, Math.min(limit, iterations))
-
-  const queue = new Array(maxWorkerCount)
-  let finished = false
-  let startTime = 0
+  const maxWorkers = iterations === 0 ? limit : Math.max(0, Math.min(limit, iterations))
 
   const errors: Error[] = []
-  const result: R[] = []
+  const results: R[] = []
+
+  let finished = false
+  let nextIndex = 0
+  const startTime = hrtimeNow()
+
+  const doNext = (): boolean => {
+    if (finished) return false
+    if (iterations !== 0 && nextIndex >= iterations) return false
+    nextIndex++
+    return true
+  }
+
+  const pushResult = (r: R) => { if (!finished) results.push(r) }
+  const pushError = (e: unknown) => { errors.push(toError(e)) }
+
+  const abortHandler = () => { finished = true }
+
+  if (signal) {
+    if (signal.aborted) return []
+    signal.addEventListener('abort', abortHandler)
+  }
 
   const worker = async () => {
-    let resultValue: R
-
     while (!finished) {
-      try {
-        runs++
-        resultValue = await fn()
-        result.push(resultValue)
-      } catch (error) {
+      if (!doNext()) break
+
+      if (time && hrtimeNow() - startTime >= time) {
         finished = true
-        errors.push(toError(error))
         break
       }
 
-      if (
-        (iterations !== 0 && runs > iterations) ||
-        ((hrtimeNow() - startTime) >= time)
-      ) {
+      try {
+        const value = await fn()
+        pushResult(value)
+        if (finished) break
+      } catch (err) {
+        pushError(err)
         finished = true
         break
       }
     }
   }
 
-  startTime = hrtimeNow()
-  for (let i = 0; i < maxWorkerCount; i++) {
-    queue[i] = worker()
-  }
+  const promises = Array.from({ length: maxWorkers }, () => worker())
+  await Promise.allSettled(promises)
 
-  await Promise.allSettled(queue)
+  if (signal) signal.removeEventListener('abort', abortHandler)
 
-  if (errors.length === 0) {
-    return result
-  } else if (errors.length === 1) {
-    throw toError(errors[0])
-  } else {
-    throw new AggregateError(errors, 'Multiple errors occurred during concurrent execution')
-  }
+  if (errors.length === 0) return results
+  if (errors.length === 1) throw toError(errors[0])
+  throw new AggregateError(errors, 'Multiple errors occurred during concurrent execution')
 }

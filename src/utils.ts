@@ -74,9 +74,10 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
     runtime = 'workerd'
   } else if (
     hasNavigatorWithUserAgent(g) &&
-    g.navigator.userAgent.toLowerCase().includes('quickjs-ng')
+    g.navigator.userAgent.toLowerCase().startsWith('quickjs-ng')
   ) {
     runtime = 'quickjs-ng'
+    version = g.navigator.userAgent.split('/')[1] ?? 'unknown'
   } else if (typeof g.Netlify === 'object') {
     runtime = 'netlify'
   } else if (typeof g.EdgeRuntime === 'string') {

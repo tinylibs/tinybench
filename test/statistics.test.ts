@@ -14,47 +14,12 @@ test('statistics (async)', async () => {
   if (!fooTask) return
 
   expect(fooTask.result).toBeDefined()
-  expect(fooTask.result.runtime).toStrictEqual(bench.runtime)
-  expect(fooTask.result.runtimeVersion).toStrictEqual(bench.runtimeVersion)
 
   expect(fooTask.result.state).toBe('completed')
   if (fooTask.result.state !== 'completed') return
 
   expect(fooTask.result.totalTime).toBeTypeOf('number')
   expect(fooTask.result.period).toBeTypeOf('number')
-  // deprecated
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(Array.isArray(fooTask.result.samples)).toBe(true)
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.hz).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.min).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.max).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.mean).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.variance).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.sd).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.sem).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.df).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.critical).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.moe).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.rme).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.p75).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.p99).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.p995).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.p999).toBeTypeOf('number')
   // latency statistics
   expect(fooTask.result.latency).toBeTypeOf('object')
   expect(Array.isArray(fooTask.result.latency.samples)).toBe(true)
@@ -112,43 +77,8 @@ test('statistics (sync)', () => {
   expect(fooTask.result.state).toBe('completed')
   if (fooTask.result.state !== 'completed') return
 
-  expect(fooTask.result.runtime).toStrictEqual(bench.runtime)
-  expect(fooTask.result.runtimeVersion).toStrictEqual(bench.runtimeVersion)
   expect(fooTask.result.totalTime).toBeTypeOf('number')
   expect(fooTask.result.period).toBeTypeOf('number')
-  // deprecated
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(Array.isArray(fooTask.result.samples)).toBe(true)
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.hz).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.min).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.max).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.mean).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.variance).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.sd).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.sem).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.df).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.critical).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.moe).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.rme).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.p75).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.p99).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.p995).toBeTypeOf('number')
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  expect(fooTask.result.p999).toBeTypeOf('number')
   // latency statistics
   expect(fooTask.result.latency).toBeTypeOf('object')
   expect(Array.isArray(fooTask.result.latency.samples)).toBe(true)

@@ -10,7 +10,6 @@ import type {
   RemoveEventListenerOptionsArgument,
   TaskEvents,
   TaskResult,
-  TaskResultRuntimeInfo,
 } from './types'
 
 import { BenchEvent } from './event'
@@ -28,6 +27,10 @@ import {
 const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
 
 const abortableStates = ['not-started', 'started'] as const
+
+const notStartedTaskResult: TaskResult = Object.freeze({ state: 'not-started' })
+const abortedTaskResult: TaskResult = Object.freeze({ state: 'aborted' })
+const startedTaskResult: TaskResult = Object.freeze({ state: 'started' })
 
 /**
  * A class that represents each benchmark task in Tinybench. It keeps track of the
@@ -49,11 +52,7 @@ export class Task extends EventTarget {
   /**
    * The result object
    */
-  result: Readonly<TaskResult & TaskResultRuntimeInfo> = {
-    runtime: 'unknown',
-    runtimeVersion: 'unknown',
-    state: 'not-started',
-  }
+  result: TaskResult = notStartedTaskResult
 
   /**
    * The number of times the task function has been executed
@@ -148,7 +147,7 @@ export class Task extends EventTarget {
     if (emit) this.dispatchEvent(new BenchEvent('reset', this))
     this.runs = 0
 
-    this.#setTaskResult({ state: this.#aborted ? 'aborted' : 'not-started' })
+    this.result = this.#aborted ? abortedTaskResult : notStartedTaskResult
   }
 
   /**
@@ -160,9 +159,7 @@ export class Task extends EventTarget {
     if (this.result.state !== 'not-started') {
       return this
     }
-    this.#setTaskResult({
-      state: 'started'
-    })
+    this.result = { state: 'started' }
     this.dispatchEvent(new BenchEvent('start', this))
     await this.#bench.opts.setup(this, 'run')
     const { error, samples: latencySamples } = (await this.#benchmark(
@@ -191,9 +188,7 @@ export class Task extends EventTarget {
       this.#bench.concurrency === null,
       'Cannot use `concurrency` option when using `runSync`'
     )
-    this.#setTaskResult({
-      state: 'started'
-    })
+    this.result = startedTaskResult
     this.dispatchEvent(new BenchEvent('start', this))
 
     const setupResult = this.#bench.opts.setup(this, 'run')
@@ -466,9 +461,7 @@ export class Task extends EventTarget {
     if (
       abortableStates.includes(this.result.state as typeof abortableStates[number])
     ) {
-      this.#setTaskResult({
-        state: 'aborted',
-      })
+      this.result = abortedTaskResult
       const ev = new BenchEvent('abort', this)
       this.dispatchEvent(ev)
       this.#bench.dispatchEvent(ev)
@@ -477,10 +470,9 @@ export class Task extends EventTarget {
 
   #postWarmup (error: Error | undefined): void {
     if (error) {
-      this.#setTaskResult({
-        error,
-        state: 'errored',
-      })
+      /* eslint-disable perfectionist/sort-objects */
+      this.result = Object.freeze({ state: 'errored', error })
+      /* eslint-enable perfectionist/sort-objects */
       const ev = new BenchEvent('error', this, error)
       this.dispatchEvent(ev)
       this.#bench.dispatchEvent(ev)
@@ -520,28 +512,27 @@ export class Task extends EventTarget {
       sortSamples(throughputSamples)
       const throughputStatistics = getStatisticsSorted(throughputSamples)
 
-      this.#setTaskResult({
-        period: totalTime / this.runs,
+      /* eslint-disable perfectionist/sort-objects */
+      this.result = Object.freeze({
         state: this.#aborted ? 'aborted-with-statistics' : 'completed',
-        totalTime,
-        // deprecated statistics included for backward compatibility
-        ...latencyStatistics,
-        hz: throughputStatistics.mean,
         latency: latencyStatistics,
+        period: totalTime / this.runs,
         throughput: throughputStatistics,
+        totalTime,
       })
+      /* eslint-enable perfectionist/sort-objects */
     } else if (this.#aborted) {
       // If aborted with no samples, still set the aborted flag
-      this.#setTaskResult({
-        state: 'aborted',
-      })
+      this.result = abortedTaskResult
     }
 
     if (error) {
-      this.#setTaskResult({
-        error,
+      /* eslint-disable perfectionist/sort-objects */
+      this.result = Object.freeze({
         state: 'errored',
+        error,
       })
+      /* eslint-enable perfectionist/sort-objects */
       const ev = new BenchEvent('error', this, error)
       this.dispatchEvent(ev)
       this.#bench.dispatchEvent(ev)
@@ -555,18 +546,6 @@ export class Task extends EventTarget {
     this.#bench.dispatchEvent(ev)
     // cycle and complete are equal in Task
     this.dispatchEvent(new BenchEvent('complete', this))
-  }
-
-  /**
-   * set the result object values
-   * @param result - the task result object to merge with the current result object values
-   */
-  #setTaskResult (result: TaskResult): void {
-    this.result = Object.freeze({
-      runtime: this.#bench.runtime,
-      runtimeVersion: this.#bench.runtimeVersion,
-      ...result,
-    })
   }
 }
 

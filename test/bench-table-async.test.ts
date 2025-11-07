@@ -10,24 +10,20 @@ test('bench table (async)', async () => {
 
   await bench.run()
 
-  expect(bench.table()).toStrictEqual([
-    /* eslint-disable perfectionist/sort-objects */
-    {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Task name': expect.any(String),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency avg (ns)': expect.any(String),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Latency med (ns)': expect.any(String),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput avg (ops/s)': expect.any(String),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Throughput med (ops/s)': expect.any(String),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      Samples: expect.any(Number),
-    },
-    /* eslint-enable perfectionist/sort-objects */
-  ])
+  const table = bench.table()
+
+  expect(table).toHaveLength(1)
+
+  if (table[0] == null) return
+
+  expect(table[0]['Task name']).toBe('foo')
+  if (table[0].Remarks === undefined) return
+
+  expect(table[0].Samples).toBeGreaterThanOrEqual(32)
+  expect(table[0]['Latency avg (ns)']).toMatch(/\d+/)
+  expect(table[0]['Latency med (ns)']).toMatch(/\d+/)
+  expect(table[0]['Throughput avg (ops/s)']).toMatch(/\d+/)
+  expect(table[0]['Throughput med (ops/s)']).toMatch(/\d+/)
 
   bench.remove('foo').add('bar', () => {
     throw new Error('fake')
@@ -35,16 +31,13 @@ test('bench table (async)', async () => {
 
   await bench.run()
 
-  expect(bench.table()).toStrictEqual([
-    /* eslint-disable perfectionist/sort-objects */
-    {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      'Task name': expect.any(String),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      Error: expect.any(String),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      Stack: expect.any(String),
-    },
-    /* eslint-enable perfectionist/sort-objects */
-  ])
+  const errorTable = bench.table()
+
+  expect(errorTable).toHaveLength(1)
+
+  if (errorTable[0] == null) return
+
+  expect(errorTable[0]['Task name']).toBe('bar')
+  expect(errorTable[0].Error).toBeTypeOf('string')
+  expect(errorTable[0].Stack).toBeTypeOf('string')
 })

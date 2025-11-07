@@ -11,8 +11,8 @@ export const sleep = nil !== false
       Atomics.wait(nil, 0, 0, ms)
     }
   : (ms: number): void => {
-      const start = performance.now()
-      while (performance.now() - start < ms) {
+      const target = performance.now() + ms
+      while (target > performance.now()) {
       // noop
       }
     }

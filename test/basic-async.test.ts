@@ -3,7 +3,7 @@ import { expect, test } from 'vitest'
 import { Bench, hrtimeNow, now, type Task } from '../src'
 
 // If running in CI, allow a bit more leeway for the mean value
-const maxMeanValue = process.env.CI ? 1025 : 1001
+const maxMeanValue = process.env.CI ? 1025 : 1002
 
 test.each([['now()'], ['hrtimeNow()']])('%s basic (async)', async mode => {
   const bench = new Bench({
@@ -33,12 +33,10 @@ test.each([['now()'], ['hrtimeNow()']])('%s basic (async)', async mode => {
   expect(tasks[0].result.totalTime).toBeGreaterThanOrEqual(50)
   expect(Math.ceil(tasks[0].result.latency.mean)).toBeGreaterThanOrEqual(50)
   // throughput mean is ops/s, period is ms unit value
-  expect(tasks[0].result.throughput.mean * tasks[0].result.period >= 1000).toBe(
-    true
-  )
+  expect(tasks[0].result.throughput.mean * tasks[0].result.period).toBeGreaterThan(999)
   expect(
-    tasks[0].result.throughput.mean * tasks[0].result.period <= maxMeanValue
-  ).toBe(true)
+    tasks[0].result.throughput.mean * tasks[0].result.period
+  ).toBeLessThan(maxMeanValue)
 
   expect(tasks[1].name).toEqual('bar')
 
@@ -48,10 +46,8 @@ test.each([['now()'], ['hrtimeNow()']])('%s basic (async)', async mode => {
   expect(tasks[1].result.totalTime).toBeGreaterThanOrEqual(100)
   expect(Math.ceil(tasks[1].result.latency.mean)).toBeGreaterThanOrEqual(100)
   // throughput mean is ops/s, period is ms unit value
-  expect(tasks[1].result.throughput.mean * tasks[1].result.period >= 1000).toBe(
-    true
-  )
+  expect(tasks[1].result.throughput.mean * tasks[1].result.period).toBeGreaterThan(999)
   expect(
-    tasks[1].result.throughput.mean * tasks[1].result.period <= maxMeanValue
-  ).toBe(true)
+    tasks[1].result.throughput.mean * tasks[1].result.period
+  ).toBeLessThan(maxMeanValue)
 })

@@ -9,11 +9,10 @@ const loadNodeOS = async (jsRuntime: JSRuntime, g: typeof globalThis = globalThi
         cpus: typeof g.navigator?.hardwareConcurrency === 'number'
           ? () => {
               return Array
-                .from({ length: (g.navigator as unknown as { hardwareConcurrency: number }).hardwareConcurrency })
-                .fill({
-                  model: 'unknown',
-                  speed: -1,
-                })
+                .from(
+                  { length: (g.navigator as unknown as { hardwareConcurrency: number }).hardwareConcurrency },
+                  () => ({ model: 'unknown', speed: -1 })
+                )
             }
           : () => ([]),
         freemem: () => -1,
@@ -22,7 +21,10 @@ const loadNodeOS = async (jsRuntime: JSRuntime, g: typeof globalThis = globalThi
         machine: typeof g.navigator?.platform === 'string'
           ? () => normalizeMachine(g.navigator.platform.split(' ')[1])
           : () => 'unknown',
-        platform: () => normalizeOSType(g.navigator.platform.split(' ')[0]),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        platform: () => typeof g.navigator?.platform === 'string'
+          ? () => normalizeMachine(g.navigator.platform.split(' ')[0])
+          : () => 'unknown',
         release: () => 'unknown',
         totalmem: typeof (g as unknown as { navigator?: { deviceMemory: number } }).navigator?.deviceMemory === 'number'
           ? () => (g as unknown as { navigator: { deviceMemory: number } }).navigator.deviceMemory * 2 ** 30

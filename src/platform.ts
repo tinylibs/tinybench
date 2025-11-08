@@ -24,8 +24,8 @@ const loadNodeOS = async (jsRuntime: JSRuntime, g: typeof globalThis = globalThi
           : () => 'unknown',
         platform: () => normalizeOSType(g.navigator.platform.split(' ')[0]),
         release: () => 'unknown',
-        totalmem: typeof g.navigator.hardwareConcurrency === 'number'
-          ? () => g.navigator.hardwareConcurrency
+        totalmem: typeof (g as unknown as { navigator?: { deviceMemory: number } }).navigator?.deviceMemory === 'number'
+          ? () => (g as unknown as { navigator: { deviceMemory: number } }).navigator.deviceMemory * 2 ** 30
           : () => -1,
       }
 }

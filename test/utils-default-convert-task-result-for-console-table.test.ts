@@ -12,6 +12,8 @@ test('defaultConvertTaskResultForConsoleTable - not-started', () => {
   expect(defaultConvertTaskResultForConsoleTable({
     name: 'Sample Task',
     result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'not-started',
     }
   } as Task)).toStrictEqual({
@@ -27,6 +29,8 @@ test('defaultConvertTaskResultForConsoleTable - not-started', () => {
   expect(Object.keys(defaultConvertTaskResultForConsoleTable({
     name: 'Sample Task',
     result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'not-started',
     }
   } as Task))).toStrictEqual([
@@ -44,6 +48,8 @@ test('defaultConvertTaskResultForConsoleTable - started', () => {
   expect(defaultConvertTaskResultForConsoleTable({
     name: 'Sample Task',
     result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'started',
     }
   } as Task)).toStrictEqual({
@@ -59,6 +65,8 @@ test('defaultConvertTaskResultForConsoleTable - started', () => {
   expect(Object.keys(defaultConvertTaskResultForConsoleTable({
     name: 'Sample Task',
     result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'started',
     }
   } as Task))).toStrictEqual([
@@ -76,6 +84,8 @@ test('defaultConvertTaskResultForConsoleTable - aborted', () => {
   expect(defaultConvertTaskResultForConsoleTable({
     name: 'Sample Task',
     result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'aborted',
     }
   } as Task)).toStrictEqual({
@@ -91,6 +101,8 @@ test('defaultConvertTaskResultForConsoleTable - aborted', () => {
   expect(Object.keys(defaultConvertTaskResultForConsoleTable({
     name: 'Sample Task',
     result: {
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'aborted',
     }
   } as Task))).toStrictEqual([
@@ -111,6 +123,8 @@ test('defaultConvertTaskResultForConsoleTable - errored - with stack', () => {
     name: 'Sample Task',
     result: {
       error,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'errored',
     }
   } as Task)).toStrictEqual({
@@ -123,6 +137,8 @@ test('defaultConvertTaskResultForConsoleTable - errored - with stack', () => {
     name: 'Sample Task',
     result: {
       error,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'errored',
     }
   } as Task))).toStrictEqual([
@@ -139,6 +155,8 @@ test('defaultConvertTaskResultForConsoleTable - errored - without stack', () => 
     name: 'Sample Task',
     result: {
       error,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'errored',
     }
   } as Task)).toStrictEqual({
@@ -151,6 +169,8 @@ test('defaultConvertTaskResultForConsoleTable - errored - without stack', () => 
     name: 'Sample Task',
     result: {
       error,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'errored',
     }
   } as Task))).toStrictEqual([
@@ -167,6 +187,8 @@ test('defaultConvertTaskResultForConsoleTable - aborted-with-statistics', () => 
     name: 'Sample Task',
     result: {
       latency: statistics,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'aborted-with-statistics',
       throughput: statistics,
       ...statistics
@@ -185,6 +207,8 @@ test('defaultConvertTaskResultForConsoleTable - aborted-with-statistics', () => 
     name: 'Sample Task',
     result: {
       latency: statistics,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'aborted-with-statistics',
       throughput: statistics,
       ...statistics
@@ -207,6 +231,8 @@ test('defaultConvertTaskResultForConsoleTable - completed', () => {
     name: 'Sample Task',
     result: {
       latency: statistics,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'completed',
       throughput: statistics,
       ...statistics
@@ -224,6 +250,8 @@ test('defaultConvertTaskResultForConsoleTable - completed', () => {
     name: 'Sample Task',
     result: {
       latency: statistics,
+      runtime: 'unknown',
+      runtimeVersion: 'unknown',
       state: 'completed',
       throughput: statistics,
       ...statistics

@@ -127,6 +127,8 @@ test('events order (async)', async () => {
 
   // aborted has no results
   const keys = Object.keys(abortTask.result)
-  expect(keys.length).toBe(1)
+  expect(keys.length).toBe(3)
   expect(keys).toContain('state')
+  expect(keys).toContain('runtime')
+  expect(keys).toContain('runtimeVersion')
 }, 10000)

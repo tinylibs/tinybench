@@ -188,6 +188,12 @@ export interface FnReturnedObject {
   overriddenDuration?: number
 }
 
+export interface GetPlatformMetricsOptions {
+  g?: typeof globalThis;
+  runtime?: JSRuntime;
+  useCache?: boolean;
+}
+
 /**
  * The hook function signature.
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
@@ -198,6 +204,34 @@ export type Hook = (
   task?: Task,
   mode?: 'run' | 'warmup'
 ) => Promise<void> | void
+
+export type Machine = (Lowercase<string> & Record<never, never>) | (
+  | 'arm64'
+  | 'arm'
+  | 'i686'
+  | 'ia32'
+  | 'loong64'
+  | 'mips64'
+  | 'mips'
+  | 'ppc64'
+  | 'riscv64'
+  | 's390x'
+  | 'x86_64')
+
+export type OS = (Lowercase<string> & Record<never, never>) | (
+  | 'aix'
+  | 'android'
+  | 'cygwin'
+  | 'darwin'
+  | 'freebsd'
+  | 'haiku'
+  | 'linux'
+  | 'netbsd'
+  | 'openbsd'
+  | 'sunos'
+  | 'win32')
+
+export type PlatformMetrics = PlatformMetricsBase | PlatformMetricsBrowser | PlatformMetricsNodeLike
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
@@ -500,4 +534,35 @@ interface DeprecatedStatistics {
    * @deprecated use `.latency.variance` instead
    */
   variance: number
+}
+
+interface PlatformMetricsBase {
+  cpuMachine: Machine;
+  memoryFree: number;
+  memoryTotal: number;
+  osType: OS;
+  runtime: Omit<JSRuntime, 'browser' | 'bun' | 'deno' | 'node'>;
+  userAgent: string;
+}
+
+interface PlatformMetricsBrowser {
+  cpuMachine: Machine;
+  memoryFree: number;
+  memoryTotal: number;
+  osType: OS;
+  runtime: Extract<JSRuntime, 'browser'>;
+  userAgent: string;
+}
+
+interface PlatformMetricsNodeLike {
+  cpuCores: number;
+  cpuMachine: Machine;
+  cpuModel: string;
+  cpuSpeed: number;
+  memoryFree: number;
+  memoryTotal: number;
+  osKernel: string;
+  osType: OS;
+  priority: null | number;
+  runtime: Extract<JSRuntime, 'bun' | 'deno' | 'node'>
 }

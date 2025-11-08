@@ -22,7 +22,7 @@ const loadNodeOS = async (jsRuntime: JSRuntime, g: typeof globalThis = globalThi
           ? () => normalizeMachine(g.navigator.platform.split(' ')[1])
           : () => 'unknown',
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        platform: () => typeof g.navigator?.platform === 'string'
+        platform: typeof g.navigator?.platform === 'string'
           ? () => normalizeMachine(g.navigator.platform.split(' ')[0])
           : () => 'unknown',
         release: () => 'unknown',

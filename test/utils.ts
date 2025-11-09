@@ -29,8 +29,6 @@ export const sleep = nil32 !== false && platform === 'linux'
       }
     }
 
-
-
 /**
  * Sorts samples and returns a new sorted array.
  * @param samples - samples to sort

@@ -254,32 +254,6 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 }
 
 /**
- * Computes the arithmetic mean (average) of numeric samples
- * using Kahan summation for improved numerical stability.
- * @param samples - array of numbers
- * @returns mean of the samples, or NaN if empty
- */
-export const average = (samples: Samples): number => {
-  const len = samples.length
-  if (len === 1) return samples[0]
-
-  let sum = 0
-  let c = 0 // compensation for lost low-order bits
-  let y: number
-  let t: number
-  let i = 0
-
-  while (i < len) {
-    y = samples[i++]! - c // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    t = sum + y
-    c = (t - sum) - y
-    sum = t
-  }
-
-  return sum / len
-}
-
-/**
  * A type representing a samples-array with at least one number.
  */
 export type Samples = [number, ...number[]]
@@ -369,21 +343,15 @@ export const sortFn = (a: number, b: number) => a - b
  */
 export const absoluteDeviationMean = (samples: Samples, mean: number): number => {
   let sum = 0
-  let c = 0 // Kahan compensation
-  let y: number
-  let t: number
-  let i = 0
   const len = samples.length
 
+  let i = 0
+
   while (i < len) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    y = Math.abs(samples[i++]! - mean) - c
-    t = sum + y
-    c = (t - sum) - y
-    sum = t
+    sum += (Math.abs(samples[i++]! - mean) - sum) / i // eslint-disable-line @typescript-eslint/no-non-null-assertion
   }
 
-  return sum / len
+  return sum
 }
 
 /**

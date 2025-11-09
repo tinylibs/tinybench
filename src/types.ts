@@ -382,7 +382,7 @@ export interface TaskResultStarted {
   state: 'started'
 }
 
-export interface TaskResultWithStatistics extends DeprecatedStatistics {
+export interface TaskResultWithStatistics {
   /**
    * the task latency statistics
    */
@@ -402,102 +402,4 @@ export interface TaskResultWithStatistics extends DeprecatedStatistics {
    * the time to run the task benchmark cycle (ms)
    */
   totalTime: number
-}
-
-interface DeprecatedStatistics {
-  /**
-   * the latency samples critical value
-   * @deprecated use `.latency.critical` instead
-   */
-  critical: number
-
-  /**
-   * the latency samples degrees of freedom
-   * @deprecated use `.latency.df` instead
-   */
-  df: number
-
-  /**
-   * the number of operations per second
-   * @deprecated use `.throughput.mean` instead
-   */
-  hz: number
-
-  /**
-   * the maximum latency samples value
-   * @deprecated use `.latency.max` instead
-   */
-  max: number
-
-  /**
-   * the latency samples mean/average
-   * @deprecated use `.latency.mean` instead
-   */
-  mean: number
-
-  /**
-   * the minimum latency samples value
-   * @deprecated use `.latency.min` instead
-   */
-  min: number
-
-  /**
-   * the latency samples margin of error
-   * @deprecated use `.latency.moe` instead
-   */
-  moe: number
-
-  /**
-   * the latency samples p75 percentile
-   * @deprecated use `.latency.p75` instead
-   */
-  p75: number
-
-  /**
-   * the latency samples p99 percentile
-   * @deprecated use `.latency.p99` instead
-   */
-  p99: number
-
-  /**
-   * the latency samples p995 percentile
-   * @deprecated use `.latency.p995` instead
-   */
-  p995: number
-
-  /**
-   * the latency samples p999 percentile
-   * @deprecated use `.latency.p999` instead
-   */
-  p999: number
-
-  /**
-   * the latency samples relative margin of error
-   * @deprecated use `.latency.rme` instead
-   */
-  rme: number
-
-  /**
-   * latency samples (ms)
-   * @deprecated use `.latency.samples` instead
-   */
-  samples: number[]
-
-  /**
-   * the latency samples standard deviation
-   * @deprecated use `.latency.sd` instead
-   */
-  sd: number
-
-  /**
-   * the latency standard error of the mean (a.k.a. the standard deviation of the distribution of the sample mean/average)
-   * @deprecated use `.latency.sem` instead
-   */
-  sem: number
-
-  /**
-   * the latency samples variance
-   * @deprecated use `.latency.variance` instead
-   */
-  variance: number
 }

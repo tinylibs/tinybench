@@ -166,6 +166,17 @@ test('detect runtime quickjs-ng', () => {
   expect(version).toBe('unknown')
 })
 
+test('detect runtime quickjs-ng with version', () => {
+  const { runtime, version } = detectRuntime({
+    navigator: {
+      userAgent: 'quickjs-ng/0.11.0',
+    },
+  })
+
+  expect(runtime).toBe('quickjs-ng')
+  expect(version).toBe('0.11.0')
+})
+
 test('detect runtime lagon', () => {
   const { runtime, version } = detectRuntime({
     __lagon__: {},

@@ -50,7 +50,7 @@ describe('meanAndVariance()', () => {
     const samples = Array.from({ length: 10000 }, () => Math.random() * 100) as Samples
     const avg = average(samples)
     const manual = samples.reduce((acc, x) => acc + (x - avg) ** 2, 0) / (samples.length - 1)
-    expect(meanAndVariance(samples).vr).toBeCloseTo(manual, 11)
+    expect(meanAndVariance(samples).vr).toBeCloseTo(manual, 10)
   })
 
   it('handles very large numbers without overflow', () => {

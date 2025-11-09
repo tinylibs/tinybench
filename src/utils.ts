@@ -342,16 +342,16 @@ export const sortFn = (a: number, b: number) => a - b
  * @returns the average absolute deviation
  */
 export const absoluteDeviationMean = (samples: Samples, mean: number): number => {
-  let sum = 0
+  let result = 0
   const len = samples.length
 
   let i = 0
 
   while (i < len) {
-    sum += (Math.abs(samples[i++]! - mean) - sum) / i // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    result += (Math.abs(samples[i++]! - mean) - result) / i // eslint-disable-line @typescript-eslint/no-non-null-assertion
   }
 
-  return sum
+  return result
 }
 
 /**

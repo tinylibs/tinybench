@@ -513,6 +513,8 @@ interface WithConcurrencyOptions<R> {
  * Creates a concurrency limiter that can execute functions with a maximum concurrency limit.
  * @param options - The resource containing the function to execute and other options
  * @returns A promise that resolves to an array of results.
+ * @throws {Error} if a single error occurs during execution
+ * @throws {AggregateError} if multiple errors occur during execution
  */
 export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Promise<R[]> => {
   const { fn, iterations, limit, now = performanceNow, signal, time = 0 } = options

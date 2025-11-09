@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
+import { asyncSleep } from './utils'
 
 test('iteration limit not exceeded with task concurrency', async () => {
   const bench = new Bench({
@@ -15,7 +16,7 @@ test('iteration limit not exceeded with task concurrency', async () => {
 
   bench.add('task', async () => {
     callCount++
-    await new Promise(resolve => setTimeout(resolve, 5))
+    await asyncSleep(5)
   })
 
   await bench.run()
@@ -46,7 +47,7 @@ test('iteration limit not exceeded with high concurrency', async () => {
 
   bench.add('fast-task', async () => {
     callCount++
-    await new Promise(resolve => setTimeout(resolve, 1))
+    await asyncSleep(1)
   })
 
   await bench.run()
@@ -77,7 +78,7 @@ test('iteration limit edge case - limit equals threshold', async () => {
 
   bench.add('task', async () => {
     callCount++
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await asyncSleep(10)
   })
 
   await bench.run()

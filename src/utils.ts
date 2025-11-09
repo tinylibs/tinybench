@@ -472,11 +472,6 @@ export const toError = (value: unknown): Error => {
   }
 }
 
-const toAverage = (statistics: Statistics): string =>
-  `${formatNumber(mToNs(statistics.mean))} \xb1 ${statistics.rme.toFixed(2)}%`
-const toMedian = (statistics: Statistics): string =>
-  `${formatNumber(mToNs(statistics.p50))} \xb1 ${formatNumber(mToNs(statistics.mad))}`
-
 export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   task: Task
 ): Record<string, number | string> => {
@@ -486,10 +481,10 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
-          'Latency avg (ns)': toAverage(task.result.latency),
-          'Latency med (ns)': toMedian(task.result.latency),
-          'Throughput avg (ops/s)': toAverage(task.result.throughput),
-          'Throughput med (ops/s)': toMedian(task.result.throughput),
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
+          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+          'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
           Samples: task.result.latency.samples.length,
         }
       : state !== 'errored'

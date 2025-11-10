@@ -69,6 +69,10 @@ export interface BenchOptions {
    */
   teardown?: Hook
 
+  /**
+   * The maximum number of concurrent tasks to run
+   * @default Infinity
+   */
   threshold?: number
 
   /**

@@ -539,8 +539,6 @@ export class Task extends EventTarget {
       }
       /* eslint-enable perfectionist/sort-objects */
 
-      latencySamples = undefined // make it eligible for GC
-      throughputSamples = undefined // make it eligible for GC
     } else if (this.#aborted) {
       // If aborted with no samples, still set the aborted flag
       this.#result = abortedTaskResult

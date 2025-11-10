@@ -535,21 +535,26 @@ export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Pr
   const errors: Error[] = []
   const results: R[] = []
 
-  let finished = false
+  let isRunning = true
   let nextIndex = 0
-  const startTime = Number.isFinite(time) && time !== 0 ? now() : 0
 
-  const doNext = (): boolean => {
-    if (finished) return false
-    if (iterations !== 0 && nextIndex >= iterations) return false
-    nextIndex++
-    return true
-  }
+  const hasTimeLimit = Number.isFinite(time) && time > 0
+  const hasIterationsLimit = iterations > 0
+  let targetTime = 0
 
-  const pushResult = (r: R) => { if (!finished) results.push(r) }
+  // Reduce checks based on provided limits to avoid tainting the benchmark results
+  const doNext: () => boolean = hasIterationsLimit
+    ? hasTimeLimit
+      ? () => isRunning && (nextIndex++ < iterations) && ((now() < targetTime) || (isRunning = false))
+      : () => isRunning && (nextIndex++ < iterations)
+    : hasTimeLimit
+      ? () => isRunning && ((now() < targetTime) || (isRunning = false))
+      : () => isRunning
+
+  const pushResult = (r: R) => { isRunning && results.push(r) }
   const pushError = (e: unknown) => { errors.push(toError(e)) }
 
-  const onAbort = () => { finished = true }
+  const onAbort = () => (isRunning = false)
 
   if (signal) {
     if (signal.aborted) return []
@@ -557,29 +562,20 @@ export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Pr
   }
 
   const worker = async () => {
-    while (!finished) {
-      if (!doNext()) break
-
-      if (startTime !== 0 && now() - startTime >= time) {
-        finished = true
-        break
-      }
-
+    while (doNext()) {
       try {
-        const value = await fn()
-        pushResult(value)
+        pushResult(await fn())
       } catch (err) {
+        isRunning = false
         pushError(err)
-        finished = true
         break
       }
     }
   }
 
+  if (hasTimeLimit) targetTime = now() + time
   const promises = Array.from({ length: maxWorkers }, () => worker())
   await Promise.allSettled(promises)
-
-  if (signal) signal.removeEventListener('abort', onAbort)
 
   if (errors.length === 0) return results
   if (errors.length === 1) throw toError(errors[0])

@@ -1,6 +1,7 @@
 import { Bench } from '../../src'
 
 const bench = new Bench({
+  iterations: 64,
   name: 'simple benchmark gc',
   setup: (_task, mode) => {
     // Run the garbage collector before warmup at each cycle
@@ -8,7 +9,7 @@ const bench = new Bench({
       globalThis.gc()
     }
   },
-  time: 100,
+  time: 100
 })
 
 bench

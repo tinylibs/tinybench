@@ -1,6 +1,7 @@
 import { Bench, nToMs } from '../../src'
 
 const bench = new Bench({
+  iterations: 64,
   name: 'simple benchmark bun',
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   now: () => nToMs(Bun.nanoseconds()),
@@ -11,7 +12,7 @@ const bench = new Bench({
       Bun.gc(true)
     }
   },
-  time: 100,
+  time: 100
 })
 
 bench

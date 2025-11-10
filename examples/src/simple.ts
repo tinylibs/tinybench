@@ -1,6 +1,6 @@
 import { Bench } from '../../src'
 
-const bench = new Bench({ name: 'simple benchmark', time: 100 })
+const bench = new Bench({ iterations: 64, name: 'simple benchmark', time: 100 })
 
 bench
   .add('faster task', () => {

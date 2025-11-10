@@ -5,8 +5,8 @@ import type { Task } from '../src'
 import {
   defaultConvertTaskResultForConsoleTable,
   getStatisticsSorted,
-  toSortedSamples
 } from '../src/utils'
+import { toSortedSamples } from './utils'
 
 test('defaultConvertTaskResultForConsoleTable - not-started', () => {
   expect(defaultConvertTaskResultForConsoleTable({

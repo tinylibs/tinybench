@@ -1,3 +1,5 @@
+import { type Samples, type SortedSamples, sortFn } from '../src/utils'
+
 const nil32 = typeof SharedArrayBuffer !== 'undefined' && typeof Atomics !== 'undefined' && new Int32Array(new SharedArrayBuffer(4))
 
 const platform = await (async () => {
@@ -26,3 +28,11 @@ export const sleep = nil32 !== false && platform === 'linux'
       // noop
       }
     }
+
+/**
+ * Sorts samples and returns a new sorted array.
+ * @param samples - samples to sort
+ * @returns new sorted samples
+ */
+export const toSortedSamples = (samples: Samples): SortedSamples =>
+  [...samples].sort(sortFn) as SortedSamples

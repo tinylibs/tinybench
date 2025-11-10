@@ -3,6 +3,34 @@ import type { Task } from '../src/task'
 import type { JSRuntime } from './utils'
 export type { BenchEvent } from '../src/event'
 
+export interface AbstractBench extends EventTarget {
+  addEventListener: <K extends BenchEvents>(
+    type: K,
+    listener: EventListener<K> | EventListenerObject<K> | null,
+    options?: AddEventListenerOptionsArgument
+  ) => void
+
+  concurrency: Concurrency
+
+  iterations: number
+  now: NowFn
+  removeEventListener: <K extends BenchEvents>(
+    type: K,
+    listener: EventListener<K> | EventListenerObject<K> | null,
+    options?: RemoveEventListenerOptionsArgument
+  ) => void
+  runtime: JSRuntime
+  runtimeVersion: string
+  setup: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  signal?: AbortSignal
+  teardown: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  threshold: number
+  throws: boolean
+  time: number
+  warmupIterations: number
+  warmupTime: number
+}
+
 export type AddEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.addEventListener
 >[2]
@@ -20,9 +48,9 @@ export type BenchEvents =
   | 'reset' // when the reset method gets called
   | 'start' // when running the benchmarks gets started
   | 'warmup' // when the benchmarks start getting warmed up
-
 export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
 export type BenchEventsWithError = Extract<BenchEvents, 'error'>
+
 export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
 
 /**
@@ -36,7 +64,7 @@ export interface BenchOptions {
    * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
    * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
    */
-  concurrency?: 'bench' | 'task' | null
+  concurrency?: Concurrency
 
   /**
    * number of times that a task should run if even the time option is finished
@@ -52,7 +80,7 @@ export interface BenchOptions {
   /**
    * function to get the current timestamp in milliseconds
    */
-  now?: () => number
+  now?: NowFn
 
   /**
    * setup function to run before each benchmark task (cycle)
@@ -111,15 +139,15 @@ export type ConsoleTableConverter = (
 ) => Record<string, number | string>
 
 /**
+ * Event listener
+ */
+export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> = (evt: BenchEvent<E, M>) => void
+
+/**
  * Both the `Task` and `Bench` objects extend the `EventTarget` object.
  * So you can attach a listeners to different types of events to each class instance
  * using the universal `addEventListener` and `removeEventListener` methods.
  */
-
-/**
- * Event listener
- */
-export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> = (evt: BenchEvent<E, M>) => void
 
 export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
   handleEvent(evt: BenchEvent<E, M>): void
@@ -418,3 +446,7 @@ export interface TaskResultWithStatistics {
    */
   totalTime: number
 }
+
+type Concurrency = 'bench' | 'task' | null
+
+type NowFn = () => number

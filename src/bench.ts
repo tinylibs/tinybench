@@ -1,4 +1,5 @@
 import type {
+  AbstractBench,
   AddEventListenerOptionsArgument,
   BenchEvents,
   BenchOptions,
@@ -7,15 +8,14 @@ import type {
   Fn,
   FnOptions,
   RemoveEventListenerOptionsArgument,
-  ResolvedBenchOptions,
   TaskResult,
 } from './types'
 
 import {
-  defaultMinimumIterations,
-  defaultMinimumTime,
-  defaultMinimumWarmupIterations,
+  defaultMinimumIterations as defaultIterations,
   defaultMinimumWarmupTime,
+  defaultMinimumTime as defaultTime,
+  defaultMinimumWarmupIterations as defaultWarmupIterations,
   emptyFunction,
 } from './constants'
 import { BenchEvent } from './event'
@@ -32,7 +32,7 @@ import {
 /**
  * The Bench class keeps track of the benchmark tasks and controls them.
  */
-export class Bench extends EventTarget {
+export class Bench extends EventTarget implements AbstractBench {
   declare addEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
@@ -46,17 +46,16 @@ export class Bench extends EventTarget {
    * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
    * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
    */
-  concurrency: 'bench' | 'task' | null = null
+  readonly concurrency: 'bench' | 'task' | null = null
+
+  readonly iterations: number
 
   /**
    * The benchmark name.
    */
   readonly name: string | undefined
 
-  /**
-   * The options.
-   */
-  readonly opts: Readonly<ResolvedBenchOptions>
+  readonly now: () => number
 
   declare removeEventListener: <K extends BenchEvents>(
     type: K,
@@ -74,11 +73,27 @@ export class Bench extends EventTarget {
    */
   readonly runtimeVersion: string
 
+  readonly setup: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+
+  readonly signal: AbortSignal | undefined
+
+  readonly teardown: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+
   /**
    * The maximum number of concurrent tasks to run
    * @default Infinity
    */
-  threshold = Infinity
+  readonly threshold = Infinity
+
+  readonly throws: boolean
+
+  readonly time: number
+
+  readonly warmup: boolean
+
+  readonly warmupIterations: number
+
+  readonly warmupTime: number
 
   /**
    * tasks results as an array
@@ -110,23 +125,21 @@ export class Bench extends EventTarget {
     this.concurrency = restOptions.concurrency ?? null
     this.threshold = restOptions.threshold ?? Infinity
 
-    this.opts = {
-      ...{
-        iterations: defaultMinimumIterations,
-        now: performanceNow,
-        setup: emptyFunction,
-        teardown: emptyFunction,
-        throws: false,
-        time: defaultMinimumTime,
-        warmup: true,
-        warmupIterations: defaultMinimumWarmupIterations,
-        warmupTime: defaultMinimumWarmupTime,
-      },
-      ...restOptions,
-    }
+    this.time = restOptions.time ?? defaultTime
+    this.iterations = restOptions.iterations ?? defaultIterations
+    this.now = restOptions.now ?? performanceNow
+    this.warmup = restOptions.warmup ?? true
+    this.warmupIterations =
+      restOptions.warmupIterations ?? defaultWarmupIterations
+    this.warmupTime =
+      restOptions.warmupTime ?? defaultMinimumWarmupTime
+    this.setup = restOptions.setup ?? emptyFunction
+    this.teardown = restOptions.teardown ?? emptyFunction
+    this.throws = restOptions.throws ?? false
+    this.signal = restOptions.signal
 
-    if (this.opts.signal) {
-      this.opts.signal.addEventListener(
+    if (this.signal) {
+      this.signal.addEventListener(
         'abort',
         () => {
           this.dispatchEvent(new BenchEvent('abort'))
@@ -193,7 +206,7 @@ export class Bench extends EventTarget {
    * @returns the tasks array
    */
   async run (): Promise<Task[]> {
-    if (this.opts.warmup) {
+    if (this.warmup) {
       await this.#warmupTasks()
     }
 
@@ -226,7 +239,7 @@ export class Bench extends EventTarget {
       this.concurrency === null,
       'Cannot use `concurrency` option when using `runSync`'
     )
-    if (this.opts.warmup) {
+    if (this.warmup) {
       this.#warmupTasksSync()
     }
     const values: Task[] = []

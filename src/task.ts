@@ -1,5 +1,5 @@
-import type { Bench } from './bench'
 import type {
+  AbstractBench,
   AddEventListenerOptionsArgument,
   EventListener,
   EventListenerObject,
@@ -79,7 +79,7 @@ export class Task extends EventTarget {
   /**
    * The Bench instance reference
    */
-  readonly #bench: Bench
+  readonly #bench: AbstractBench
 
   /**
    * The task function
@@ -111,7 +111,7 @@ export class Task extends EventTarget {
    */
   readonly #signal: AbortSignal | undefined
 
-  constructor (bench: Bench, name: string, fn: Fn, fnOpts: FnOptions = {}) {
+  constructor (bench: AbstractBench, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
     this.#bench = bench
     this.#name = name
@@ -143,11 +143,11 @@ export class Task extends EventTarget {
       }
     }
 
-    if (this.#bench.opts.signal) {
-      if (this.#bench.opts.signal.aborted) {
+    if (this.#bench.signal) {
+      if (this.#bench.signal.aborted) {
         this.#onAbort()
       } else {
-        this.#bench.opts.signal.addEventListener(
+        this.#bench.signal.addEventListener(
           'abort',
           this.#onAbort.bind(this),
           { once: true }
@@ -179,13 +179,13 @@ export class Task extends EventTarget {
     }
     this.#result = { state: 'started' }
     this.dispatchEvent(new BenchEvent('start', this))
-    await this.#bench.opts.setup(this, 'run')
+    await this.#bench.setup(this, 'run')
     const { error, samples: latencySamples } = await this.#benchmark(
       'run',
-      this.#bench.opts.time,
-      this.#bench.opts.iterations
+      this.#bench.time,
+      this.#bench.iterations
     )
-    await this.#bench.opts.teardown(this, 'run')
+    await this.#bench.teardown(this, 'run')
 
     this.#processRunResult({ error, latencySamples })
 
@@ -209,7 +209,7 @@ export class Task extends EventTarget {
     this.#result = startedTaskResult
     this.dispatchEvent(new BenchEvent('start', this))
 
-    const setupResult = this.#bench.opts.setup(this, 'run')
+    const setupResult = this.#bench.setup(this, 'run')
     invariant(
       !isPromiseLike(setupResult),
       '`setup` function must be sync when using `runSync()`'
@@ -217,11 +217,11 @@ export class Task extends EventTarget {
 
     const { error, samples: latencySamples } = this.#benchmarkSync(
       'run',
-      this.#bench.opts.time,
-      this.#bench.opts.iterations
+      this.#bench.time,
+      this.#bench.iterations
     )
 
-    const teardownResult = this.#bench.opts.teardown(this, 'run')
+    const teardownResult = this.#bench.teardown(this, 'run')
     invariant(
       !isPromiseLike(teardownResult),
       '`teardown` function must be sync when using `runSync()`'
@@ -241,13 +241,13 @@ export class Task extends EventTarget {
       return
     }
     this.dispatchEvent(new BenchEvent('warmup', this))
-    await this.#bench.opts.setup(this, 'warmup')
+    await this.#bench.setup(this, 'warmup')
     const { error } = (await this.#benchmark(
       'warmup',
-      this.#bench.opts.warmupTime,
-      this.#bench.opts.warmupIterations
+      this.#bench.warmupTime,
+      this.#bench.warmupIterations
     ))
-    await this.#bench.opts.teardown(this, 'warmup')
+    await this.#bench.teardown(this, 'warmup')
 
     this.#postWarmup(error)
   }
@@ -263,7 +263,7 @@ export class Task extends EventTarget {
 
     this.dispatchEvent(new BenchEvent('warmup', this))
 
-    const setupResult = this.#bench.opts.setup(this, 'warmup')
+    const setupResult = this.#bench.setup(this, 'warmup')
     invariant(
       !isPromiseLike(setupResult),
       '`setup` function must be sync when using `runSync()`'
@@ -271,11 +271,11 @@ export class Task extends EventTarget {
 
     const { error } = this.#benchmarkSync(
       'warmup',
-      this.#bench.opts.warmupTime,
-      this.#bench.opts.warmupIterations
+      this.#bench.warmupTime,
+      this.#bench.warmupIterations
     )
 
-    const teardownResult = this.#bench.opts.teardown(this, 'warmup')
+    const teardownResult = this.#bench.teardown(this, 'warmup')
     invariant(
       !isPromiseLike(teardownResult),
       '`teardown` function must be sync when using `runSync()`'
@@ -330,8 +330,8 @@ export class Task extends EventTarget {
           fn: benchmarkTask,
           iterations,
           limit: Math.max(1, Math.floor(this.#bench.threshold)),
-          now: this.#bench.opts.now,
-          signal: this.#signal ?? this.#bench.opts.signal,
+          now: this.#bench.now,
+          signal: this.#signal ?? this.#bench.signal,
           time,
         })
       } catch (error) {
@@ -444,10 +444,10 @@ export class Task extends EventTarget {
   }
 
   async #measureOnce (): Promise<{ fnResult: ReturnType<Fn>, taskTime: number }> {
-    const taskStart = this.#bench.opts.now()
+    const taskStart = this.#bench.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
-    let taskTime = this.#bench.opts.now() - taskStart
+    let taskTime = this.#bench.now() - taskStart
 
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
@@ -457,10 +457,10 @@ export class Task extends EventTarget {
   }
 
   #measureOnceSync (): { fnResult: ReturnType<Fn>, taskTime: number } {
-    const taskStart = this.#bench.opts.now()
+    const taskStart = this.#bench.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
-    let taskTime = this.#bench.opts.now() - taskStart
+    let taskTime = this.#bench.now() - taskStart
 
     invariant(
       !isPromiseLike(fnResult),
@@ -493,7 +493,7 @@ export class Task extends EventTarget {
       const ev = new BenchEvent('error', this, error)
       this.dispatchEvent(ev)
       this.#bench.dispatchEvent(ev)
-      if (this.#bench.opts.throws) {
+      if (this.#bench.throws) {
         throw error
       }
     }
@@ -553,7 +553,7 @@ export class Task extends EventTarget {
       const ev = new BenchEvent('error', this, error)
       this.dispatchEvent(ev)
       this.#bench.dispatchEvent(ev)
-      if (this.#bench.opts.throws) {
+      if (this.#bench.throws) {
         throw error
       }
     }

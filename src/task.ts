@@ -515,7 +515,7 @@ export class Task extends EventTarget {
       const latencyStatisticsMean = latencyStatistics.mean
 
       let totalTime = 0
-      let throughputSamples: Samples | undefined = [] as unknown as Samples
+      const throughputSamples: Samples | undefined = [] as unknown as Samples
 
       for (const sample of latencySamples) {
         if (sample !== 0) {
@@ -538,7 +538,6 @@ export class Task extends EventTarget {
         totalTime,
       }
       /* eslint-enable perfectionist/sort-objects */
-
     } else if (this.#aborted) {
       // If aborted with no samples, still set the aborted flag
       this.#result = abortedTaskResult

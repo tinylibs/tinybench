@@ -201,14 +201,14 @@ export class Bench extends EventTarget {
 
     this.dispatchEvent(new BenchEvent('start'))
 
-    const values: Task[] = []
+    let values: Task[] = []
 
     if (this.concurrency === 'bench') {
       const taskPromises = []
       for (const task of this.#tasks.values()) {
         taskPromises.push(task.run())
       }
-      values.push(...await Promise.all(taskPromises))
+      values = await Promise.all(taskPromises)
     } else {
       for (const task of this.#tasks.values()) {
         values.push(await task.run())

@@ -257,27 +257,25 @@ test('abort task during warmup (async)', async () => {
   expect(task.runs).toBe(0)
 })
 
-// NOTE: This test is skipped due to memory issues with concurrency and
-// task-level abort which can cause OOM errors
-test.skip('abort with task concurrency (async)', async () => {
+test('abort with task concurrency (async)', async () => {
   const controller = new AbortController()
-  const bench = new Bench({ iterations: 10, time: 50 })
-  bench.concurrency = 'task'
-  bench.threshold = 2
+  const bench = new Bench({ concurrency: 'task', iterations: 10, threshold: 2, time: 50, warmupIterations: 0 })
 
   bench.add(
     'concurrent-task',
     async () => {
-      await Promise.resolve()
+      await new Promise(resolve => setTimeout(resolve, 10))
     },
     { signal: controller.signal }
   )
+
+  const run = bench.run()
 
   setTimeout(() => {
     controller.abort()
   }, 20)
 
-  await bench.run()
+  await run
 
   const task = bench.getTask('concurrent-task')
 

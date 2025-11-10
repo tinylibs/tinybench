@@ -1,5 +1,3 @@
-import pLimit from 'p-limit'
-
 import type { Bench } from './bench'
 import type {
   AddEventListenerOptionsArgument,
@@ -14,6 +12,7 @@ import type {
 } from './types'
 
 import { BenchEvent } from './event'
+import { withConcurrency } from './utils'
 import {
   getStatisticsSorted,
   invariant,
@@ -50,11 +49,6 @@ export class Task extends EventTarget {
     options?: RemoveEventListenerOptionsArgument
   ) => void
 
-  /**
-   * The number of times the task function has been executed
-   */
-  runs = 0
-
   get name (): string {
     return this.#name
   }
@@ -66,6 +60,16 @@ export class Task extends EventTarget {
       runtimeVersion: this.#bench.runtimeVersion,
     }
   }
+
+  get runs (): number {
+    return this.#runs
+  }
+
+  /**
+   * Check if either our signal or the bench-level signal is aborted
+   * `true` if either signal is aborted
+   */
+  #aborted = false
 
   /**
    * The task asynchronous status
@@ -98,17 +102,14 @@ export class Task extends EventTarget {
   #result: TaskResult = notStartedTaskResult
 
   /**
+   * The number of times the task function has been executed
+   */
+  #runs = 0
+
+  /**
    * The task-level abort signal
    */
   readonly #signal: AbortSignal | undefined
-
-  /**
-   * Check if either our signal or the bench-level signal is aborted
-   * @returns `true` if either signal is aborted
-   */
-  get #aborted (): boolean {
-    return this.#signal?.aborted === true || this.#bench.opts.signal?.aborted === true
-  }
 
   constructor (bench: Bench, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
@@ -128,23 +129,31 @@ export class Task extends EventTarget {
       }
     }
 
+    this.reset(false)
+
     if (this.#signal) {
-      this.#signal.addEventListener(
-        'abort',
-        this.#onAbort.bind(this),
-        { once: true }
-      )
+      if (this.#signal.aborted) {
+        this.#onAbort()
+      } else {
+        this.#signal.addEventListener(
+          'abort',
+          this.#onAbort.bind(this),
+          { once: true }
+        )
+      }
     }
 
     if (this.#bench.opts.signal) {
-      this.#bench.opts.signal.addEventListener(
-        'abort',
-        this.#onAbort.bind(this),
-        { once: true }
-      )
+      if (this.#bench.opts.signal.aborted) {
+        this.#onAbort()
+      } else {
+        this.#bench.opts.signal.addEventListener(
+          'abort',
+          this.#onAbort.bind(this),
+          { once: true }
+        )
+      }
     }
-
-    this.reset(false)
   }
 
   /**
@@ -153,10 +162,10 @@ export class Task extends EventTarget {
    * @internal
    */
   reset (emit = true): void {
-    if (emit) this.dispatchEvent(new BenchEvent('reset', this))
-    this.runs = 0
-
+    this.#runs = 0
     this.#result = this.#aborted ? abortedTaskResult : notStartedTaskResult
+
+    if (emit) this.dispatchEvent(new BenchEvent('reset', this))
   }
 
   /**
@@ -171,11 +180,11 @@ export class Task extends EventTarget {
     this.#result = { state: 'started' }
     this.dispatchEvent(new BenchEvent('start', this))
     await this.#bench.opts.setup(this, 'run')
-    const { error, samples: latencySamples } = (await this.#benchmark(
+    const { error, samples: latencySamples } = await this.#benchmark(
       'run',
       this.#bench.opts.time,
       this.#bench.opts.iterations
-    ))
+    )
     await this.#bench.opts.teardown(this, 'run')
 
     this.#processRunResult({ error, latencySamples })
@@ -315,37 +324,33 @@ export class Task extends EventTarget {
         }
       }
     }
-
-    try {
-      const promises: Promise<void>[] = [] // only for task level concurrency
-      let limit: ReturnType<typeof pLimit> | undefined // only for task level concurrency
-
-      if (this.#bench.concurrency === 'task') {
-        limit = pLimit(Math.max(1, Math.floor(this.#bench.threshold)))
+    if (this.#bench.concurrency === 'task') {
+      try {
+        await withConcurrency({
+          fn: benchmarkTask,
+          iterations,
+          limit: Math.max(1, Math.floor(this.#bench.threshold)),
+          now: this.#bench.opts.now,
+          signal: this.#signal ?? this.#bench.opts.signal,
+          time,
+        })
+      } catch (error) {
+        return { error: toError(error) }
       }
-
-      while (
-        // eslint-disable-next-line no-unmodified-loop-condition
-        (totalTime < time ||
-          samples.length + (limit?.activeCount ?? 0) + (limit?.pendingCount ?? 0) < iterations) &&
-        !this.#aborted
-      ) {
-        if (this.#bench.concurrency === 'task') {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          promises.push((limit!)(benchmarkTask))
-        } else {
+      this.#runs = samples.length
+    } else {
+      try {
+        while (
+          // eslint-disable-next-line no-unmodified-loop-condition
+          (totalTime < time ||
+            samples.length < iterations) &&
+          !this.#aborted
+        ) {
           await benchmarkTask()
         }
+      } catch (error) {
+        return { error: toError(error) }
       }
-      if (!this.#aborted && promises.length > 0) {
-        await Promise.all(promises)
-      } else if (promises.length > 0) {
-        // Abort path
-        // eslint-disable-next-line no-void
-        void Promise.allSettled(promises)
-      }
-    } catch (error) {
-      return { error: toError(error) }
     }
 
     if (this.#fnOpts.afterAll != null) {
@@ -443,6 +448,7 @@ export class Task extends EventTarget {
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
     let taskTime = this.#bench.opts.now() - taskStart
+
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
       taskTime = overriddenDuration
@@ -454,11 +460,12 @@ export class Task extends EventTarget {
     const taskStart = this.#bench.opts.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
+    let taskTime = this.#bench.opts.now() - taskStart
+
     invariant(
       !isPromiseLike(fnResult),
       'task function must be sync when using `runSync()`'
     )
-    let taskTime = this.#bench.opts.now() - taskStart
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
       taskTime = overriddenDuration
@@ -467,6 +474,7 @@ export class Task extends EventTarget {
   }
 
   #onAbort (): void {
+    this.#aborted = true
     if (
       abortableStates.includes(this.#result.state as typeof abortableStates[number])
     ) {
@@ -499,7 +507,7 @@ export class Task extends EventTarget {
     latencySamples?: number[]
   }): void {
     if (isValidSamples(latencySamples)) {
-      this.runs = latencySamples.length
+      this.#runs = latencySamples.length
 
       sortSamples(latencySamples)
 

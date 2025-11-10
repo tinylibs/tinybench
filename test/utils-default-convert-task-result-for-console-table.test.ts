@@ -5,8 +5,8 @@ import type { Task } from '../src'
 import {
   defaultConvertTaskResultForConsoleTable,
   getStatisticsSorted,
-  toSortedSamples
 } from '../src/utils'
+import { toSortedSamples } from './utils'
 
 test('defaultConvertTaskResultForConsoleTable - not-started', () => {
   expect(defaultConvertTaskResultForConsoleTable({
@@ -199,8 +199,8 @@ test('defaultConvertTaskResultForConsoleTable - aborted-with-statistics', () => 
     Remarks: 'aborted-with-statistics',
     Samples: 5,
     'Task name': 'Sample Task',
-    'Throughput avg (ops/s)': '1000000000 ± 9.82%',
-    'Throughput med (ops/s)': '1000000000 ± 50000000',
+    'Throughput avg (ops/s)': '1000 ± 9.82%',
+    'Throughput med (ops/s)': '1000 ± 50',
   })
 
   expect(Object.keys(defaultConvertTaskResultForConsoleTable({
@@ -242,8 +242,8 @@ test('defaultConvertTaskResultForConsoleTable - completed', () => {
     'Latency med (ns)': '1000000000 ± 50000000',
     Samples: 5,
     'Task name': 'Sample Task',
-    'Throughput avg (ops/s)': '1000000000 ± 9.82%',
-    'Throughput med (ops/s)': '1000000000 ± 50000000',
+    'Throughput avg (ops/s)': '1000 ± 9.82%',
+    'Throughput med (ops/s)': '1000 ± 50',
   })
 
   expect(Object.keys(defaultConvertTaskResultForConsoleTable({

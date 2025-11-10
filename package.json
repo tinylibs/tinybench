@@ -26,8 +26,8 @@
     "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsdown.config.ts vitest.config.ts vitest.pretest.config.ts",
     "release": "bumpp package.json --commit --push --tag",
     "ci:pretest": "vitest --config vitest.pretest.config.ts run",
-    "test": "vitest --retry=5 run",
-    "test:coverage": "vitest --retry=5 --coverage run"
+    "test": "vitest run",
+    "test:coverage": "vitest --coverage run"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -60,10 +60,9 @@
     "eslint-plugin-perfectionist": "^4.15.1",
     "nano-staged": "^0.8.0",
     "neostandard": "^0.12.2",
-    "p-limit": "^7.2.0",
     "simple-git-hooks": "^2.13.1",
     "size-limit": "^11.2.0",
-    "tsdown": "^0.16.0",
+    "tsdown": "^0.16.1",
     "typedoc": "^0.28.14",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4"

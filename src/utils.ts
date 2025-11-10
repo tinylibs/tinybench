@@ -2,7 +2,11 @@
 // Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
 
 import type { Task } from './task'
-import type { ConsoleTableConverter, Fn, Statistics } from './types'
+import type {
+  ConsoleTableConverter,
+  Fn,
+  Statistics,
+} from './types'
 
 import { emptyFunction, tTable } from './constants'
 
@@ -194,7 +198,7 @@ const hrtimeBigint: () => bigint = typeof (globalThis as { process?: { hrtime?: 
  */
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
 
-export const now = performance.now.bind(performance)
+export const performanceNow = performance.now.bind(performance)
 
 /**
  * Checks if a value is a promise-like object.
@@ -254,21 +258,6 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 }
 
 /**
- * Computes the average of a sample.
- * @param samples - the sample
- * @returns the average of the sample
- */
-const average = (samples: Samples) => {
-  let result = 0
-
-  for (const sample of samples) {
-    result += sample
-  }
-
-  return result / samples.length
-}
-
-/**
  * A type representing a samples-array with at least one number.
  */
 export type Samples = [number, ...number[]]
@@ -287,14 +276,6 @@ export const isValidSamples = (
 }
 
 /**
- * Sorts samples and returns a new sorted array.
- * @param samples - samples to sort
- * @returns new sorted samples
- */
-export const toSortedSamples = (samples: Samples): SortedSamples =>
-  [...samples].sort(sortFn) as SortedSamples
-
-/**
  * Sorts samples in place.
  * @param samples - samples to sort
  */
@@ -304,21 +285,29 @@ export function sortSamples (
   samples.sort(sortFn)
 }
 
-/**
- * Computes the variance of a sample with Bessel's correction.
- * @param samples - the sample
- * @param avg - the average of the sample
- * @returns the variance of the sample
- */
-const variance = (samples: Samples, avg = average(samples)) => {
-  if (samples.length === 1) {
-    return 0
+export const meanAndVariance = (samples: Samples): { mean: number; vr: number } => {
+  const len = samples.length
+  if (len === 1) {
+    return { mean: samples[0], vr: 0 }
   }
-  let sumSq = 0
-  for (const sample of samples) {
-    sumSq += (sample - avg) ** 2
+
+  let mean = 0
+  let m = 0
+  let x = 0
+  let d = 0
+  let i = 0
+
+  while (i < len) {
+    x = samples[i++]! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    d = x - mean
+    mean += d / i
+    m += d * (x - mean)
   }
-  return sumSq / (samples.length - 1)
+
+  return {
+    mean,
+    vr: m / (len - 1)
+  }
 }
 
 type Quantile = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
@@ -343,46 +332,77 @@ const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
 }
 
 /**
- * Computes the median of a sorted sample.
- * @param samples - the sorted sample
- * @returns the median of the sample
- */
-const medianSorted = (samples: SortedSamples) => quantileSorted(samples, 0.5)
-
-/**
  * A sort function to be passed to Array.prototype.sort for numbers.
  * @param a - first number
  * @param b - second number
  * @returns a number indicating the sort order
  */
-const sortFn = (a: number, b: number) => a - b
+export const sortFn = (a: number, b: number) => a - b
 
 /**
- * Computes the median of an unsorted sample.
+ * Computes the average absolute deviation from the mean.
  * @param samples - the sample
- * @returns the median of the sample
+ * @param mean - the mean of the sample
+ * @returns the average absolute deviation
  */
-const median = (samples: Samples) => medianSorted(toSortedSamples(samples))
+export const absoluteDeviationMean = (samples: Samples, mean: number): number => {
+  let result = 0
+  const len = samples.length
 
-/**
- * Computes the absolute deviation of a sample given an aggregation.
- * @param samples - the sample
- * @param aggFn - the aggregation function to use
- * @param aggValue - the aggregated value to use
- * @returns the absolute deviation of the sample given the aggregation
- */
-const absoluteDeviation = <S extends Samples = Samples>(
-  samples: S,
-  aggFn: (arr: S) => number,
-  aggValue = aggFn(samples)
-) => {
-  const absoluteDeviations: S = [] as unknown as S
+  let i = 0
 
-  for (const sample of samples) {
-    absoluteDeviations.push(Math.abs(sample - aggValue))
+  while (i < len) {
+    result += (Math.abs(samples[i++]! - mean) - result) / i // eslint-disable-line @typescript-eslint/no-non-null-assertion
   }
 
-  return aggFn(absoluteDeviations)
+  return result
+}
+
+/**
+ * Computes the median absolute deviation from the median.
+ * @param samples - the sorted sample
+ * @param median - the median of the sample
+ * @returns the median absolute deviation
+ */
+export function absoluteDeviationMedian (samples: SortedSamples, median: number): number {
+  const len = samples.length
+  if (len === 1) return 0
+
+  const mid = len >> 1
+  const halfLen = (len + 1) >> 1
+
+  let low = 0
+  let high = mid
+  let c1, c2, l1, l2, r1, r2
+
+  while (low <= high) {
+    c1 = (low + high) >> 1
+    c2 = halfLen - c1
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    l1 = c1 === 0 ? -Infinity : median - samples[mid - c1]!
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    r1 = c1 === mid ? Infinity : median - samples[mid - c1 - 1]!
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    l2 = c2 === 0 ? -Infinity : samples[mid + c2 - 1]! - median
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    r2 = c2 === len - mid ? Infinity : samples[mid + c2]! - median
+
+    if (l1 <= r2 && l2 <= r1) {
+      return len & 1 // check for odd length
+        ? Math.max(l1, l2)
+        : (Math.max(l1, l2) + Math.min(r1, r2)) / 2
+    }
+
+    if (l1 > r2) {
+      high = c1 - 1
+    } else {
+      low = c1 + 1
+    }
+  }
+  return 0 // should never reach here
 }
 
 /**
@@ -392,8 +412,7 @@ const absoluteDeviation = <S extends Samples = Samples>(
  * @returns the statistics of the sample
  */
 export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
-  const mean = average(samples)
-  const vr = variance(samples, mean)
+  const { mean, vr } = meanAndVariance(samples)
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)
   const df = samples.length - 1
@@ -401,13 +420,13 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
   const moe = sem * critical
   const absMean = Math.abs(mean)
   const rme = absMean === 0 ? Infinity : (moe / absMean) * 100
-  const p50 = medianSorted(samples)
+  const p50 = quantileSorted(samples, 0.5)
 
   return {
-    aad: absoluteDeviation(samples, average, mean),
+    aad: absoluteDeviationMean(samples, mean),
     critical,
     df,
-    mad: absoluteDeviation(samples, median, p50),
+    mad: absoluteDeviationMedian(samples, p50),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     max: samples[df]!,
     mean,
@@ -457,11 +476,6 @@ export const toError = (value: unknown): Error => {
   }
 }
 
-const toAverage = (statistics: Statistics): string =>
-  `${formatNumber(mToNs(statistics.mean))} \xb1 ${statistics.rme.toFixed(2)}%`
-const toMedian = (statistics: Statistics): string =>
-  `${formatNumber(mToNs(statistics.p50))} \xb1 ${formatNumber(mToNs(statistics.mad))}`
-
 export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
   task: Task
 ): Record<string, number | string> => {
@@ -471,10 +485,10 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
-          'Latency avg (ns)': toAverage(task.result.latency),
-          'Latency med (ns)': toMedian(task.result.latency),
-          'Throughput avg (ops/s)': toAverage(task.result.throughput),
-          'Throughput med (ops/s)': toMedian(task.result.throughput),
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
+          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+          'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
           Samples: task.result.latency.samples.length,
         }
       : state !== 'errored'
@@ -495,4 +509,75 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
     }),
   }
   /* eslint-enable perfectionist/sort-objects */
+}
+
+interface WithConcurrencyOptions<R> {
+  fn: () => Promise<R>
+  iterations: number
+  limit: number
+  now?: () => number
+  signal?: AbortSignal
+  time?: number
+}
+
+/**
+ * Creates a concurrency limiter that can execute functions with a maximum concurrency limit.
+ * @param options - The resource containing the function to execute and other options
+ * @returns A promise that resolves to an array of results.
+ * @throws {Error} if a single error occurs during execution
+ * @throws {AggregateError} if multiple errors occur during execution
+ */
+export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Promise<R[]> => {
+  const { fn, iterations, limit, now = performanceNow, signal, time = 0 } = options
+
+  const maxWorkers = iterations === 0 ? limit : Math.max(0, Math.min(limit, iterations))
+
+  const errors: Error[] = []
+  const results: R[] = []
+
+  let isRunning = true
+  let nextIndex = 0
+
+  const hasTimeLimit = Number.isFinite(time) && time > 0
+  const hasIterationsLimit = iterations > 0
+  let targetTime = 0
+
+  // Reduce checks based on provided limits to avoid tainting the benchmark results
+  const doNext: () => boolean = hasIterationsLimit
+    ? hasTimeLimit
+      ? () => isRunning && (nextIndex++ < iterations) && ((now() < targetTime) || (isRunning = false))
+      : () => isRunning && (nextIndex++ < iterations)
+    : hasTimeLimit
+      ? () => isRunning && ((now() < targetTime) || (isRunning = false))
+      : () => isRunning
+
+  const pushResult = (r: R) => { isRunning && results.push(r) }
+  const pushError = (e: unknown) => { errors.push(toError(e)) }
+
+  const onAbort = () => (isRunning = false)
+
+  if (signal) {
+    if (signal.aborted) return []
+    signal.addEventListener('abort', onAbort)
+  }
+
+  const worker = async () => {
+    while (doNext()) {
+      try {
+        pushResult(await fn())
+      } catch (err) {
+        isRunning = false
+        pushError(err)
+        break
+      }
+    }
+  }
+
+  if (hasTimeLimit) targetTime = now() + time
+  const promises = Array.from({ length: maxWorkers }, () => worker())
+  await Promise.allSettled(promises)
+
+  if (errors.length === 0) return results
+  if (errors.length === 1) throw toError(errors[0])
+  throw new AggregateError(errors, 'Multiple errors occurred during concurrent execution')
 }

@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "strict": true,
     "module": "preserve",
     "moduleResolution": "Bundler",
     "noEmit": true,
     "skipLibCheck": true,
-    "lib": ["ES2020"],
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "erasableSyntaxOnly": true,

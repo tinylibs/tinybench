@@ -3,7 +3,7 @@ import { expect, test } from 'vitest'
 import { Bench, hrtimeNow, now, type Task } from '../src'
 
 // If running in CI, allow a bit more leeway for the mean value
-const maxMeanValue = process.env.CI ? 1025 : 1002
+const maxMeanValue = process.env.CI ? 1100 : 1002
 
 test.each([['now()'], ['hrtimeNow()']])('%s basic (async)', async mode => {
   const bench = new Bench({

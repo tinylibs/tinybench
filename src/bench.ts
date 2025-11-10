@@ -172,8 +172,8 @@ export class Bench extends EventTarget {
   remove (name: string): this {
     const task = this.getTask(name)
     if (task) {
-      this.dispatchEvent(new BenchEvent('remove', task))
       this.#tasks.delete(name)
+      this.dispatchEvent(new BenchEvent('remove', task))
     }
     return this
   }
@@ -182,10 +182,10 @@ export class Bench extends EventTarget {
    * reset tasks and remove their result
    */
   reset (): void {
-    this.dispatchEvent(new BenchEvent('reset'))
     for (const task of this.#tasks.values()) {
       task.reset()
     }
+    this.dispatchEvent(new BenchEvent('reset'))
   }
 
   /**

@@ -49,11 +49,6 @@ export class Task extends EventTarget {
     options?: RemoveEventListenerOptionsArgument
   ) => void
 
-  /**
-   * The number of times the task function has been executed
-   */
-  runs = 0
-
   get name (): string {
     return this.#name
   }
@@ -65,6 +60,16 @@ export class Task extends EventTarget {
       runtimeVersion: this.#bench.runtimeVersion,
     }
   }
+
+  get runs (): number {
+    return this.#runs
+  }
+
+  /**
+   * Check if either our signal or the bench-level signal is aborted
+   * `true` if either signal is aborted
+   */
+  #aborted = false
 
   /**
    * The task asynchronous status
@@ -97,17 +102,14 @@ export class Task extends EventTarget {
   #result: TaskResult = notStartedTaskResult
 
   /**
+   * The number of times the task function has been executed
+   */
+  #runs = 0
+
+  /**
    * The task-level abort signal
    */
   readonly #signal: AbortSignal | undefined
-
-  /**
-   * Check if either our signal or the bench-level signal is aborted
-   * @returns `true` if either signal is aborted
-   */
-  get #aborted (): boolean {
-    return this.#signal?.aborted === true || this.#bench.opts.signal?.aborted === true
-  }
 
   constructor (bench: Bench, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
@@ -127,23 +129,31 @@ export class Task extends EventTarget {
       }
     }
 
+    this.reset(false)
+
     if (this.#signal) {
-      this.#signal.addEventListener(
-        'abort',
-        this.#onAbort.bind(this),
-        { once: true }
-      )
+      if (this.#signal.aborted) {
+        this.#onAbort()
+      } else {
+        this.#signal.addEventListener(
+          'abort',
+          this.#onAbort.bind(this),
+          { once: true }
+        )
+      }
     }
 
     if (this.#bench.opts.signal) {
-      this.#bench.opts.signal.addEventListener(
-        'abort',
-        this.#onAbort.bind(this),
-        { once: true }
-      )
+      if (this.#bench.opts.signal.aborted) {
+        this.#onAbort()
+      } else {
+        this.#bench.opts.signal.addEventListener(
+          'abort',
+          this.#onAbort.bind(this),
+          { once: true }
+        )
+      }
     }
-
-    this.reset(false)
   }
 
   /**
@@ -152,10 +162,10 @@ export class Task extends EventTarget {
    * @internal
    */
   reset (emit = true): void {
-    if (emit) this.dispatchEvent(new BenchEvent('reset', this))
-    this.runs = 0
-
+    this.#runs = 0
     this.#result = this.#aborted ? abortedTaskResult : notStartedTaskResult
+
+    if (emit) this.dispatchEvent(new BenchEvent('reset', this))
   }
 
   /**
@@ -464,6 +474,7 @@ export class Task extends EventTarget {
   }
 
   #onAbort (): void {
+    this.#aborted = true
     if (
       abortableStates.includes(this.#result.state as typeof abortableStates[number])
     ) {
@@ -496,7 +507,7 @@ export class Task extends EventTarget {
     latencySamples?: number[]
   }): void {
     if (isValidSamples(latencySamples)) {
-      this.runs = latencySamples.length
+      this.#runs = latencySamples.length
 
       sortSamples(latencySamples)
 

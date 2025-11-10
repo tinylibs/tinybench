@@ -30,6 +30,15 @@ export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error'
  */
 export interface BenchOptions {
   /**
+   * Executes tasks concurrently based on the specified concurrency mode.
+   *
+   * - When `mode` is set to `null` (default), concurrency is disabled.
+   * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
+   * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
+   */
+  concurrency?: 'bench' | 'task' | null
+
+  /**
    * number of times that a task should run if even the time option is finished
    * @default 64
    */
@@ -59,6 +68,12 @@ export interface BenchOptions {
    * teardown function to run after each benchmark task (cycle)
    */
   teardown?: Hook
+
+  /**
+   * The maximum number of concurrent tasks to run
+   * @default Infinity
+   */
+  threshold?: number
 
   /**
    * Throws if a task fails

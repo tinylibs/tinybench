@@ -30,6 +30,16 @@ export const sleep = nil32 !== false && platform === 'linux'
     }
 
 /**
+ * Asynchronously waits for the specified number of milliseconds without blocking the event loop.
+ * Use this for testing asynchronous behavior.
+ * @param ms amount of time to wait in milliseconds
+ * @returns A Promise that resolves after the specified delay
+ */
+export const asyncSleep = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
  * Sorts samples and returns a new sorted array.
  * @param samples - samples to sort
  * @returns new sorted samples

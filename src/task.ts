@@ -438,6 +438,7 @@ export class Task extends EventTarget {
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
     let taskTime = this.#bench.opts.now() - taskStart
+
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
       taskTime = overriddenDuration
@@ -449,11 +450,12 @@ export class Task extends EventTarget {
     const taskStart = this.#bench.opts.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
+    let taskTime = this.#bench.opts.now() - taskStart
+
     invariant(
       !isPromiseLike(fnResult),
       'task function must be sync when using `runSync()`'
     )
-    let taskTime = this.#bench.opts.now() - taskStart
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
       taskTime = overriddenDuration

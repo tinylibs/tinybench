@@ -248,17 +248,7 @@ export class Bench extends EventTarget {
   table (
     convert = defaultConvertTaskResultForConsoleTable
   ): (null | Record<string, number | string | undefined>)[] {
-    return this.tasks.map(task => {
-      /* eslint-disable perfectionist/sort-objects */
-      return task.result.state === 'errored'
-        ? {
-            'Task name': task.name,
-            Error: task.result.error.message,
-            Stack: task.result.error.stack,
-          }
-        : convert(task)
-      /* eslint-enable perfectionist/sort-objects */
-    })
+    return this.tasks.map(convert)
   }
 
   /**

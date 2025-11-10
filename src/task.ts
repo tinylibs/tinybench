@@ -337,7 +337,7 @@ export class Task extends EventTarget {
       } catch (error) {
         return { error: toError(error) }
       }
-      this.runs = samples.length
+      this.#runs = samples.length
     } else {
       try {
         while (

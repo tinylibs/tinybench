@@ -123,8 +123,6 @@ export class Bench extends EventTarget {
         warmupTime: defaultMinimumWarmupTime,
       },
       ...restOptions,
-      ...(restOptions.iterations !== undefined && restOptions.time === undefined && { time: 0 }),
-      ...(restOptions.warmupIterations !== undefined && restOptions.warmupTime === undefined && { warmupTime: 0 }),
     }
 
     if (this.opts.signal) {

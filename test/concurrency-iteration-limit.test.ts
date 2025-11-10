@@ -31,7 +31,7 @@ test('iteration limit not exceeded with task concurrency', async () => {
 
   expect(callCount).toBe(10)
   expect(task.runs).toBe(10)
-  expect(task.result.latency.samples.length).toBe(10)
+  expect(task.result.latency.samplesCount).toBe(10)
 })
 
 test('iteration limit not exceeded with high concurrency', async () => {
@@ -62,7 +62,7 @@ test('iteration limit not exceeded with high concurrency', async () => {
 
   expect(callCount).toBe(100)
   expect(task.runs).toBe(100)
-  expect(task.result.latency.samples.length).toBe(100)
+  expect(task.result.latency.samplesCount).toBe(100)
 })
 
 test('iteration limit edge case - limit equals threshold', async () => {

@@ -308,7 +308,7 @@ export interface Statistics {
   /**
    * samples
    */
-  samples: number[]
+  samplesCount: number
 
   /**
    * standard deviation

@@ -25,7 +25,7 @@ test('statistics (async)', async () => {
   expect(fooTask.result.period).toBeTypeOf('number')
   // latency statistics
   expect(fooTask.result.latency).toBeTypeOf('object')
-  expect(Array.isArray(fooTask.result.latency.samples)).toBe(true)
+  expect(fooTask.result.latency.samplesCount).toBeTypeOf('number')
   expect(fooTask.result.latency.min).toBeTypeOf('number')
   expect(fooTask.result.latency.max).toBeTypeOf('number')
   expect(fooTask.result.latency.mean).toBeTypeOf('number')
@@ -45,7 +45,7 @@ test('statistics (async)', async () => {
   expect(fooTask.result.latency.p999).toBeTypeOf('number')
   // throughput statistics
   expect(fooTask.result.throughput).toBeTypeOf('object')
-  expect(Array.isArray(fooTask.result.throughput.samples)).toBe(true)
+  expect(fooTask.result.throughput.samplesCount).toBeTypeOf('number')
   expect(fooTask.result.throughput.max).toBeTypeOf('number')
   expect(fooTask.result.throughput.mean).toBeTypeOf('number')
   expect(fooTask.result.throughput.variance).toBeTypeOf('number')
@@ -86,7 +86,7 @@ test('statistics (sync)', () => {
   expect(fooTask.result.period).toBeTypeOf('number')
   // latency statistics
   expect(fooTask.result.latency).toBeTypeOf('object')
-  expect(Array.isArray(fooTask.result.latency.samples)).toBe(true)
+  expect(fooTask.result.latency.samplesCount).toBeTypeOf('number')
   expect(fooTask.result.latency.min).toBeTypeOf('number')
   expect(fooTask.result.latency.max).toBeTypeOf('number')
   expect(fooTask.result.latency.mean).toBeTypeOf('number')
@@ -106,7 +106,7 @@ test('statistics (sync)', () => {
   expect(fooTask.result.latency.p999).toBeTypeOf('number')
   // throughput statistics
   expect(fooTask.result.throughput).toBeTypeOf('object')
-  expect(Array.isArray(fooTask.result.throughput.samples)).toBe(true)
+  expect(fooTask.result.throughput.samplesCount).toBeTypeOf('number')
   expect(fooTask.result.throughput.max).toBeTypeOf('number')
   expect(fooTask.result.throughput.mean).toBeTypeOf('number')
   expect(fooTask.result.throughput.variance).toBeTypeOf('number')

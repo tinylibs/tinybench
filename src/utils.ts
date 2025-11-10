@@ -438,7 +438,7 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
     p995: quantileSorted(samples, 0.995),
     p999: quantileSorted(samples, 0.999),
     rme,
-    samples,
+    samplesCount: samples.length,
     sd,
     sem,
     variance: vr,
@@ -489,7 +489,7 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
           'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
           'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
           'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
-          Samples: task.result.latency.samples.length,
+          Samples: task.result.latency.samplesCount,
         }
       : state !== 'errored'
         ? {

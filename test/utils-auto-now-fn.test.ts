@@ -17,7 +17,7 @@ test('autoNowFn - bun', () => {
   if (runtime !== 'bun') {
     expect(autoNowFn('bun')).toBe(undefined)
   } else {
-    expect(autoNowFn('bun').name).toBe('bunNanoseconds')
+    expect(autoNowFn('bun').name).toBe('nanoseconds')
   }
 })
 

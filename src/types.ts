@@ -3,6 +3,28 @@ import type { Task } from '../src/task'
 import type { JSRuntime } from './utils'
 export type { BenchEvent } from '../src/event'
 
+export type AddEventListenerOptionsArgument = Parameters<
+  typeof EventTarget.prototype.addEventListener
+>[2]
+
+/**
+ * Bench events
+ */
+export type BenchEvents =
+  | 'abort' // when a signal aborts
+  | 'add' // when a task gets added to the Bench instance
+  | 'complete' // when running a benchmark finishes
+  | 'cycle' // when running each benchmark task gets done
+  | 'error' // when the benchmark task throws
+  | 'remove' // when a task gets removed of the Bench instance
+  | 'reset' // when the reset method gets called
+  | 'start' // when running the benchmarks gets started
+  | 'warmup' // when the benchmarks start getting warmed up
+
+export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+export type BenchEventsWithError = Extract<BenchEvents, 'error'>
+export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+
 export interface BenchLike extends EventTarget {
   addEventListener: <K extends BenchEvents>(
     type: K,
@@ -31,28 +53,6 @@ export interface BenchLike extends EventTarget {
   warmupIterations: number
   warmupTime: number
 }
-
-export type AddEventListenerOptionsArgument = Parameters<
-  typeof EventTarget.prototype.addEventListener
->[2]
-
-/**
- * Bench events
- */
-export type BenchEvents =
-  | 'abort' // when a signal aborts
-  | 'add' // when a task gets added to the Bench instance
-  | 'complete' // when running a benchmark finishes
-  | 'cycle' // when running each benchmark task gets done
-  | 'error' // when the benchmark task throws
-  | 'remove' // when a task gets removed of the Bench instance
-  | 'reset' // when the reset method gets called
-  | 'start' // when running the benchmarks gets started
-  | 'warmup' // when the benchmarks start getting warmed up
-export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
-export type BenchEventsWithError = Extract<BenchEvents, 'error'>
-
-export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
 
 /**
  * Bench options

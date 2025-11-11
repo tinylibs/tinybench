@@ -1,7 +1,7 @@
 import type {
-  BenchLike,
   AddEventListenerOptionsArgument,
   BenchEvents,
+  BenchLike,
   BenchOptions,
   EventListener,
   EventListenerObject,

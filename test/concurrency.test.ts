@@ -2,22 +2,24 @@ import { expect, test } from 'vitest'
 
 import { Bench } from '../src'
 
-test('concurrency error (sync)', () => {
+test('concurrency error (sync) - concurrency task', () => {
   const bench = new Bench({
-    throws: true,
+    concurrency: 'task',
+    throws: true
   })
 
   bench.add('foo', () => 1)
 
-  bench.concurrency = 'task'
-
   expect(() => {
     bench.runSync()
   }).toThrowError('Cannot use `concurrency` option when using `runSync`')
+})
 
-  bench.concurrency = 'bench'
+test('concurrency error (sync) - concurrency bench', () => {
+  const bench = new Bench({
+    concurrency: 'bench',
+    throws: true
+  })
 
-  expect(() => {
-    bench.runSync()
-  }).toThrowError('Cannot use `concurrency` option when using `runSync`')
+  bench.add('foo', () => 1)
 })

@@ -64,16 +64,15 @@ test.each(['warmup', 'run'])('%s sequential', async mode => {
 test.each(['warmup', 'run'])('%s bench concurrency', async mode => {
   const iterations = 128
   const concurrentBench = new Bench({
+    concurrency: 'bench',
     iterations,
     throws: true,
     time: 0,
     warmup: mode === 'warmup',
     warmupIterations: iterations,
-    warmupTime: 0,
+    warmupTime: 0
   })
   expect(concurrentBench.threshold).toBe(Infinity)
-  expect(concurrentBench.concurrency).toBeNull()
-  concurrentBench.concurrency = 'bench'
   expect(concurrentBench.concurrency).toBe('bench')
 
   let shouldBeDefined1: true | undefined
@@ -110,15 +109,16 @@ test.each(['warmup', 'run'])('%s bench concurrency', async mode => {
 test.each(['warmup', 'run'])('%s task concurrency', async mode => {
   const iterations = 16
   const concurrentBench = new Bench({
+    concurrency: 'task',
     iterations,
     throws: true,
     time: 0,
     warmup: mode === 'warmup',
     warmupIterations: iterations,
-    warmupTime: 0,
+    warmupTime: 0
   })
   expect(concurrentBench.threshold).toBe(Infinity)
-  expect(concurrentBench.concurrency).toBeNull()
+  expect(concurrentBench.concurrency).toBe('task')
 
   const taskName = 'sample 1'
   let runs = 0
@@ -147,10 +147,7 @@ test.each(['warmup', 'run'])('%s task concurrency', async mode => {
   expect(runs).toEqual(mode === 'run' ? iterations : 2 * iterations)
   concurrentBench.reset()
   runs = 0
-  expect(concurrentBench.threshold).toBe(Infinity)
-  expect(concurrentBench.concurrency).toBeNull()
 
-  concurrentBench.concurrency = 'task'
   expect(concurrentBench.threshold).toBe(Infinity)
   expect(concurrentBench.concurrency).toBe('task')
 

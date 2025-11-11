@@ -407,7 +407,7 @@ export function absoluteDeviationMedian (samples: SortedSamples, median: number)
  * @param retainSamples - whether to keep the samples in the statistics
  * @returns the statistics of the sample
  */
-export function getStatisticsSorted (samples: SortedSamples, retainSamples: boolean): Statistics {
+export function getStatisticsSorted (samples: SortedSamples, retainSamples = false): Statistics {
   const { mean, vr } = meanAndVariance(samples)
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)

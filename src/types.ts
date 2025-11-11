@@ -27,6 +27,7 @@ export interface AbstractBench extends EventTarget {
   threshold: number
   throws: boolean
   time: number
+  warmup: boolean
   warmupIterations: number
   warmupTime: number
 }

@@ -34,7 +34,7 @@ export interface BenchLike extends EventTarget {
   concurrency: Concurrency
 
   iterations: number
-  now: HighResolutionTimeStampFns | NowFn
+  now: NowFn
   removeEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,

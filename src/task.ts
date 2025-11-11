@@ -12,7 +12,7 @@ import type {
 } from './types'
 
 import { BenchEvent } from './event'
-import { getNowFn, withConcurrency } from './utils'
+import { withConcurrency } from './utils'
 import {
   getStatisticsSorted,
   invariant,
@@ -297,7 +297,7 @@ export class Task extends EventTarget {
       }
     }
 
-    const now = getNowFn(this.#bench.now)
+    const now = this.#bench.now
     let totalTime = 0 // ms
     const samples: number[] = []
 
@@ -445,7 +445,7 @@ export class Task extends EventTarget {
   }
 
   async #measureOnce (): Promise<{ fnResult: ReturnType<Fn>, taskTime: number }> {
-    const now = getNowFn(this.#bench.now)
+    const now = this.#bench.now
     const taskStart = now()
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
@@ -459,7 +459,7 @@ export class Task extends EventTarget {
   }
 
   #measureOnceSync (): { fnResult: ReturnType<Fn>, taskTime: number } {
-    const now = getNowFn(this.#bench.now)
+    const now = this.#bench.now
 
     const taskStart = now()
     // eslint-disable-next-line no-useless-call

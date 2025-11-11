@@ -5,32 +5,11 @@ import type { Task } from './task'
 import type {
   ConsoleTableConverter,
   Fn,
+  JSRuntime,
   Statistics,
 } from './types'
 
 import { emptyFunction, tTable } from './constants'
-
-/**
- * The JavaScript runtime environment.
- * @see https://runtime-keys.proposal.wintercg.org/
- */
-export type JSRuntime =
-  | 'browser'
-  | 'bun'
-  | 'deno'
-  | 'edge-light'
-  | 'fastly'
-  | 'hermes'
-  | 'jsc'
-  | 'lagon'
-  | 'moddable'
-  | 'netlify'
-  | 'node'
-  | 'quickjs-ng'
-  | 'spidermonkey'
-  | 'unknown'
-  | 'v8'
-  | 'workerd'
 
 /**
  * @param g GlobalThis object
@@ -310,15 +289,13 @@ export const meanAndVariance = (samples: Samples): { mean: number; vr: number } 
   }
 }
 
-type Quantile = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
-
 /**
  * Computes the q-quantile of a sorted sample.
  * @param samples - the sorted sample
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  */
-const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
+const quantileSorted = (samples: SortedSamples, q: 0.5 | 0.75 | 0.99 | 0.995 | 0.999): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
 

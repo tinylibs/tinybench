@@ -7,6 +7,7 @@ import type {
   EventListenerObject,
   Fn,
   FnOptions,
+  JSRuntime,
   RemoveEventListenerOptionsArgument,
   TaskResult,
 } from './types'
@@ -23,7 +24,6 @@ import { Task } from './task'
 import {
   defaultConvertTaskResultForConsoleTable,
   invariant,
-  type JSRuntime,
   performanceNow,
   runtime,
   runtimeVersion,

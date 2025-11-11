@@ -41,6 +41,7 @@ export interface BenchLike extends EventTarget {
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: RemoveEventListenerOptionsArgument
   ) => void
+  retainSamples: boolean
   runtime: JSRuntime
   runtimeVersion: string
   setup: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
@@ -82,6 +83,12 @@ export interface BenchOptions {
    * function to get the current timestamp in milliseconds
    */
   now?: NowFn
+
+  /**
+   * keep samples for statistics calculation
+   * @default false
+   */
+  retainSamples?: boolean
 
   /**
    * setup function to run before each benchmark task (cycle)
@@ -210,6 +217,11 @@ export interface FnOptions {
   beforeEach?: FnHook
 
   /**
+   * Retain samples for this task, overriding the bench-level retainSamples option
+   */
+  retainSamples?: boolean
+
+  /**
    * An AbortSignal for aborting this specific task
    *
    * If not provided, falls back to {@link BenchOptions.signal}
@@ -259,6 +271,13 @@ export interface ResolvedBenchOptions extends BenchOptions {
   warmupIterations: NonNullable<BenchOptions['warmupIterations']>
   warmupTime: NonNullable<BenchOptions['warmupTime']>
 }
+
+/**
+ * A type representing a samples-array with at least one number.
+ */
+export type Samples = [number, ...number[]]
+
+export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
 
 /**
  * The statistics object
@@ -334,8 +353,10 @@ export interface Statistics {
    */
   rme: number
 
+  samples: SortedSamples | undefined
+
   /**
-   * samples
+   * samples count
    */
   samplesCount: number
 

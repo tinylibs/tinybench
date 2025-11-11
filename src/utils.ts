@@ -5,6 +5,8 @@ import type { Task } from './task'
 import type {
   ConsoleTableConverter,
   Fn,
+  Samples,
+  SortedSamples,
   Statistics,
 } from './types'
 
@@ -258,13 +260,6 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 }
 
 /**
- * A type representing a samples-array with at least one number.
- */
-export type Samples = [number, ...number[]]
-
-export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
-
-/**
  * Checks if a value is a Samples type.
  * @param value - value to check
  * @returns if the value is a Samples type, meaning a non-empty array of numbers
@@ -409,9 +404,10 @@ export function absoluteDeviationMedian (samples: SortedSamples, median: number)
  * Computes the statistics of a sample.
  * The sample must be sorted.
  * @param samples - the sorted sample
+ * @param retainSamples - whether to keep the samples in the statistics
  * @returns the statistics of the sample
  */
-export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
+export function getStatisticsSorted (samples: SortedSamples, retainSamples: boolean): Statistics {
   const { mean, vr } = meanAndVariance(samples)
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)
@@ -438,6 +434,7 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
     p995: quantileSorted(samples, 0.995),
     p999: quantileSorted(samples, 0.999),
     rme,
+    samples: retainSamples ? samples : undefined,
     samplesCount: samples.length,
     sd,
     sem,

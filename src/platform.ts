@@ -17,13 +17,13 @@ const loadNodeOS = async (jsRuntime: JSRuntime, g: typeof globalThis = globalThi
           : () => ([]),
         freemem: () => -1,
         getPriority: () => -1,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-deprecated
         machine: typeof g.navigator?.platform === 'string'
-          ? () => normalizeMachine(g.navigator.platform.split(' ')[1])
+          ? () => normalizeMachine(g.navigator.platform.split(' ')[1]) // eslint-disable-line @typescript-eslint/no-deprecated
           : () => 'unknown',
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-deprecated
         platform: typeof g.navigator?.platform === 'string'
-          ? () => normalizeMachine(g.navigator.platform.split(' ')[0])
+          ? () => normalizeMachine(g.navigator.platform.split(' ')[0]) // eslint-disable-line @typescript-eslint/no-deprecated
           : () => 'unknown',
         release: () => 'unknown',
         totalmem: typeof (g as unknown as { navigator?: { deviceMemory: number } }).navigator?.deviceMemory === 'number'

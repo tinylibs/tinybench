@@ -64,13 +64,13 @@ test.each(['warmup', 'run'])('%s sequential', async mode => {
 test.each(['warmup', 'run'])('%s bench concurrency', async mode => {
   const iterations = 128
   const concurrentBench = new Bench({
+    concurrency: 'bench',
     iterations,
     throws: true,
     time: 0,
     warmup: mode === 'warmup',
     warmupIterations: iterations,
-    warmupTime: 0,
-    concurrency: 'bench'
+    warmupTime: 0
   })
   expect(concurrentBench.threshold).toBe(Infinity)
   expect(concurrentBench.concurrency).toBe('bench')
@@ -109,13 +109,13 @@ test.each(['warmup', 'run'])('%s bench concurrency', async mode => {
 test.each(['warmup', 'run'])('%s task concurrency', async mode => {
   const iterations = 16
   const concurrentBench = new Bench({
+    concurrency: 'task',
     iterations,
     throws: true,
     time: 0,
     warmup: mode === 'warmup',
     warmupIterations: iterations,
-    warmupTime: 0,
-    concurrency: 'task'
+    warmupTime: 0
   })
   expect(concurrentBench.threshold).toBe(Infinity)
   expect(concurrentBench.concurrency).toBe('task')

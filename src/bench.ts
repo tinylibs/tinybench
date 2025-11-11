@@ -1,5 +1,5 @@
 import type {
-  AbstractBench,
+  BenchLike,
   AddEventListenerOptionsArgument,
   BenchEvents,
   BenchOptions,
@@ -32,7 +32,7 @@ import {
 /**
  * The Bench class keeps track of the benchmark tasks and controls them.
  */
-export class Bench extends EventTarget implements AbstractBench {
+export class Bench extends EventTarget implements BenchLike {
   declare addEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,

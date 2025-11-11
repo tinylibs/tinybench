@@ -1,5 +1,5 @@
 import type {
-  AbstractBench,
+  BenchLike,
   AddEventListenerOptionsArgument,
   EventListener,
   EventListenerObject,
@@ -79,7 +79,7 @@ export class Task extends EventTarget {
   /**
    * The Bench instance reference
    */
-  readonly #bench: AbstractBench
+  readonly #bench: BenchLike
 
   /**
    * The task function
@@ -111,7 +111,7 @@ export class Task extends EventTarget {
    */
   readonly #signal: AbortSignal | undefined
 
-  constructor (bench: AbstractBench, name: string, fn: Fn, fnOpts: FnOptions = {}) {
+  constructor (bench: BenchLike, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
     this.#bench = bench
     this.#name = name

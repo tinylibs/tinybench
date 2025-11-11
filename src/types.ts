@@ -3,7 +3,7 @@ import type { Task } from '../src/task'
 import type { JSRuntime } from './utils'
 export type { BenchEvent } from '../src/event'
 
-export interface AbstractBench extends EventTarget {
+export interface BenchLike extends EventTarget {
   addEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,

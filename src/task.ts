@@ -12,7 +12,7 @@ import type {
 } from './types'
 
 import { BenchEvent } from './event'
-import { withConcurrency } from './utils'
+import { getNowFn, withConcurrency } from './utils'
 import {
   getStatisticsSorted,
   invariant,
@@ -297,6 +297,7 @@ export class Task extends EventTarget {
       }
     }
 
+    const now = getNowFn(this.#bench.now)
     let totalTime = 0 // ms
     const samples: number[] = []
 
@@ -330,7 +331,7 @@ export class Task extends EventTarget {
           fn: benchmarkTask,
           iterations,
           limit: Math.max(1, Math.floor(this.#bench.threshold)),
-          now: this.#bench.now,
+          now,
           signal: this.#signal ?? this.#bench.signal,
           time,
         })
@@ -444,10 +445,11 @@ export class Task extends EventTarget {
   }
 
   async #measureOnce (): Promise<{ fnResult: ReturnType<Fn>, taskTime: number }> {
-    const taskStart = this.#bench.now()
+    const now = getNowFn(this.#bench.now)
+    const taskStart = now()
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
-    let taskTime = this.#bench.now() - taskStart
+    let taskTime = now() - taskStart
 
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
@@ -457,10 +459,12 @@ export class Task extends EventTarget {
   }
 
   #measureOnceSync (): { fnResult: ReturnType<Fn>, taskTime: number } {
-    const taskStart = this.#bench.now()
+    const now = getNowFn(this.#bench.now)
+
+    const taskStart = now()
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
-    let taskTime = this.#bench.now() - taskStart
+    let taskTime = now() - taskStart
 
     invariant(
       !isPromiseLike(fnResult),

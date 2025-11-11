@@ -5,7 +5,9 @@ import type { Task } from './task'
 import type {
   ConsoleTableConverter,
   Fn,
+  HighResolutionTimeStampFns,
   JSRuntime,
+  NowFn,
   Statistics,
 } from './types'
 
@@ -177,7 +179,38 @@ const hrtimeBigint: () => bigint = typeof (globalThis as { process?: { hrtime?: 
  */
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
 
-export const performanceNow = performance.now.bind(performance)
+export const performanceNow = globalThis.performance.now.bind(globalThis.performance)
+
+export const bunNanoseconds = (globalThis as { Bun?: { nanoseconds: NowFn } }).Bun?.nanoseconds
+
+export const autoNowFn = (jsRuntime: JSRuntime = runtime): NowFn => {
+  if (jsRuntime === 'bun') {
+    return bunNanoseconds! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  } else if (jsRuntime === 'deno') {
+    return performanceNow
+  } else if (jsRuntime === 'node') {
+    return hrtimeNow
+  } else {
+    return performanceNow
+  }
+}
+
+export const getNowFn = (value: HighResolutionTimeStampFns | NowFn | undefined): NowFn => {
+  if (typeof value === 'function') {
+    return value
+  }
+
+  switch (value) {
+    case 'auto':
+      return autoNowFn()
+    case 'bunNanoseconds':
+      return bunNanoseconds ?? getNowFn('auto')
+    case 'hrtimeNow':
+      return hrtimeNow
+    default:
+      return performanceNow
+  }
+}
 
 /**
  * Checks if a value is a promise-like object.

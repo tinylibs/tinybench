@@ -7,6 +7,7 @@ import type {
   EventListenerObject,
   Fn,
   FnOptions,
+  HighResolutionTimeStampFns,
   JSRuntime,
   RemoveEventListenerOptionsArgument,
   TaskResult,
@@ -23,8 +24,8 @@ import { BenchEvent } from './event'
 import { Task } from './task'
 import {
   defaultConvertTaskResultForConsoleTable,
+  getNowFn,
   invariant,
-  performanceNow,
   runtime,
   runtimeVersion,
 } from './utils'
@@ -54,8 +55,6 @@ export class Bench extends EventTarget implements BenchLike {
    * The benchmark name.
    */
   readonly name: string | undefined
-
-  readonly now: () => number
 
   declare removeEventListener: <K extends BenchEvents>(
     type: K,
@@ -95,6 +94,10 @@ export class Bench extends EventTarget implements BenchLike {
 
   readonly warmupTime: number
 
+  get now (): () => number {
+    return getNowFn(this.#now)
+  }
+
   /**
    * tasks results as an array
    * @returns the tasks results as an array
@@ -110,6 +113,8 @@ export class Bench extends EventTarget implements BenchLike {
   get tasks (): Task[] {
     return [...this.#tasks.values()]
   }
+
+  readonly #now: (() => number) | HighResolutionTimeStampFns
 
   /**
    * the task map
@@ -127,7 +132,7 @@ export class Bench extends EventTarget implements BenchLike {
 
     this.time = restOptions.time ?? defaultTime
     this.iterations = restOptions.iterations ?? defaultIterations
-    this.now = restOptions.now ?? performanceNow
+    this.#now = restOptions.now ?? 'performanceNow'
     this.warmup = restOptions.warmup ?? true
     this.warmupIterations =
       restOptions.warmupIterations ?? defaultWarmupIterations

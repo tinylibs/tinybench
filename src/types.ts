@@ -34,7 +34,7 @@ export interface BenchLike extends EventTarget {
   concurrency: Concurrency
 
   iterations: number
-  now: NowFn
+  now: HighResolutionTimeStampFns | NowFn
   removeEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
@@ -80,7 +80,7 @@ export interface BenchOptions {
   /**
    * function to get the current timestamp in milliseconds
    */
-  now?: NowFn
+  now?: HighResolutionTimeStampFns | NowFn
 
   /**
    * setup function to run before each benchmark task (cycle)
@@ -146,12 +146,6 @@ export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'b
 export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
   handleEvent(evt: BenchEvent<E, M>): void
 }
-
-/**
- * Both the `Task` and `Bench` objects extend the `EventTarget` object.
- * So you can attach a listeners to different types of events to each class instance
- * using the universal `addEventListener` and `removeEventListener` methods.
- */
 
 /**
  * The task function.
@@ -231,6 +225,12 @@ export interface FnReturnedObject {
   overriddenDuration?: number
 }
 
+export type HighResolutionTimeStampFns =
+  | 'auto'
+  | 'bunNanoseconds'
+  | 'hrtimeNow'
+  | 'performanceNow'
+
 /**
  * The hook function signature.
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
@@ -263,6 +263,8 @@ export type JSRuntime =
   | 'unknown'
   | 'v8'
   | 'workerd'
+
+export type NowFn = () => number
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
@@ -470,5 +472,3 @@ export interface TaskResultWithStatistics {
 }
 
 type Concurrency = 'bench' | 'task' | null
-
-type NowFn = () => number

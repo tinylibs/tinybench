@@ -1,14 +1,16 @@
 import { expect, test } from 'vitest'
 
-import { Bench, hrtimeNow, now, type Task } from '../src'
+import type { HighResolutionTimeStampFns } from '../src/types'
+
+import { Bench, type Task } from '../src'
 
 // If running in CI, allow a bit more leeway for the mean value
 const maxMeanValue = process.env.CI ? 1100 : 1002
 
-test.each([['now()'], ['hrtimeNow()']])('%s basic (async)', async mode => {
+test.each([['performanceNow'], ['hrtimeNow'], ['auto'], ['bunNanoseconds']] as HighResolutionTimeStampFns[][])('%s basic (async)', async now => {
   const bench = new Bench({
     iterations: 16,
-    now: mode === 'now()' ? now : hrtimeNow,
+    now,
     time: 100,
   })
   bench

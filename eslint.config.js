@@ -18,6 +18,8 @@ export default defineConfig([
           autoFix: true,
           cspell: {
             words: [
+              'loong',
+              'riscv',
               'evanwashere',
               'fastly',
               'IsHTMLDDA',

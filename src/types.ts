@@ -1,6 +1,5 @@
 import type { BenchEvent } from '../src/event'
 import type { Task } from '../src/task'
-import type { JSRuntime } from './utils'
 export type { BenchEvent } from '../src/event'
 
 export type AddEventListenerOptionsArgument = Parameters<
@@ -22,9 +21,9 @@ export type BenchEvents =
   | 'warmup' // when the benchmarks start getting warmed up
 
 export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+
 export type BenchEventsWithError = Extract<BenchEvents, 'error'>
 export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
-
 export interface BenchLike extends EventTarget {
   addEventListener: <K extends BenchEvents>(
     type: K,
@@ -151,15 +150,15 @@ export type ConsoleTableConverter = (
  */
 export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> = (evt: BenchEvent<E, M>) => void
 
+export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
+  handleEvent(evt: BenchEvent<E, M>): void
+}
+
 /**
  * Both the `Task` and `Bench` objects extend the `EventTarget` object.
  * So you can attach a listeners to different types of events to each class instance
  * using the universal `addEventListener` and `removeEventListener` methods.
  */
-
-export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
-  handleEvent(evt: BenchEvent<E, M>): void
-}
 
 /**
  * The task function.
@@ -254,6 +253,28 @@ export type Hook = (
   task?: Task,
   mode?: 'run' | 'warmup'
 ) => Promise<void> | void
+
+/**
+ * The JavaScript runtime environment.
+ * @see https://runtime-keys.proposal.wintercg.org/
+ */
+export type JSRuntime =
+  | 'browser'
+  | 'bun'
+  | 'deno'
+  | 'edge-light'
+  | 'fastly'
+  | 'hermes'
+  | 'jsc'
+  | 'lagon'
+  | 'moddable'
+  | 'netlify'
+  | 'node'
+  | 'quickjs-ng'
+  | 'spidermonkey'
+  | 'unknown'
+  | 'v8'
+  | 'workerd'
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<

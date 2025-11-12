@@ -10,10 +10,10 @@ export type {
   FnOptions,
   FnReturnedObject,
   Hook,
+  JSRuntime,
   ResolvedBenchOptions,
   Statistics,
   TaskEvents,
   TaskResult,
 } from './types'
-export type { JSRuntime } from './utils'
 export { hrtimeNow, performanceNow as now, nToMs } from './utils'

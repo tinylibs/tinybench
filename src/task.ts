@@ -533,7 +533,7 @@ export class Task extends EventTarget {
       }
 
       sortSamples(throughputSamples)
-      const throughputStatistics = getStatisticsSorted(throughputSamples, this.#bench.retainSamples)
+      const throughputStatistics = getStatisticsSorted(throughputSamples, this.#retainSamples)
 
       /* eslint-disable perfectionist/sort-objects */
       this.#result = {

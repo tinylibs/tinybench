@@ -5,9 +5,9 @@ import type { Task } from './task'
 import type {
   ConsoleTableConverter,
   Fn,
+  JSRuntime,
   Samples,
   SortedSamples,
-  JSRuntime,
   Statistics,
 } from './types'
 

@@ -159,15 +159,19 @@ await bench.run()
 
 ## Retaining Samples
 
-By default, Tinybench does not retain individual samples (latency measurements) for each task to save memory.
+By default Tinybench does not keep the samples for `latency` and `throughput` to
+minimize memory usage. Enable sample retention if you need the raw samples for
+plotting, custom analysis, or exporting results.
 
-You can enable samples retention at the bench level by setting the `retainSamples` option to `true` when creating a `Bench` instance:
+You can enable samples retention at the bench level by setting the
+`retainSamples` option to `true` when creating a `Bench` instance:
 
 ```tsts
 const bench = new Bench({ retainSamples: true })
 ```
 
-You can also enable samples retention by setting the `retainSamples` option to `true` when adding a task:
+You can also enable samples retention by setting the `retainSamples` option to
+`true` when adding a task:
 
 ```ts
 bench.add('task with samples', () => {

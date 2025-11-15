@@ -16,4 +16,11 @@ export type {
   TaskEvents,
   TaskResult,
 } from './types'
-export { hrtimeNow, performanceNow as now, nToMs } from './utils'
+export {
+  bunNanoseconds,
+  hrtimeNow,
+  /** @deprecated Use 'performanceNow' instead */
+  performanceNow as now,
+  nToMs,
+  performanceNow,
+} from './utils'

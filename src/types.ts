@@ -73,7 +73,7 @@ export interface BenchLike extends EventTarget {
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: RemoveEventListenerOptionsArgument
   ) => void
-  
+
   /**
    * Should samples be retained for further custom processing
    */
@@ -391,7 +391,15 @@ export interface ResolvedBenchOptions extends BenchOptions {
  */
 export type Samples = [number, ...number[]]
 
-export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
+/**
+ * A type representing a sorted samples-array with at least one number.
+ */
+export type SortedSamples = Samples & {
+  /**
+   * A unique symbol to identify sorted samples
+   */
+  readonly __sorted__: unique symbol
+}
 
 /**
  * The statistics object
@@ -467,6 +475,9 @@ export interface Statistics {
    */
   rme: number
 
+  /**
+   * samples used to calculate the statistics
+   */
   samples: SortedSamples | undefined
 
   /**

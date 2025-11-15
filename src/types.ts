@@ -24,6 +24,10 @@ export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error
 
 export type BenchEventsWithError = Extract<BenchEvents, 'error'>
 export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+
+/**
+ * Used to decouple Bench and Task
+ */
 export interface BenchLike extends EventTarget {
   addEventListener: <K extends BenchEvents>(
     type: K,
@@ -134,6 +138,10 @@ export interface BenchOptions {
   warmupTime?: number
 }
 
+/**
+ */
+export type Concurrency = 'bench' | 'task' | null
+
 export type ConsoleTableConverter = (
   task: Task
 ) => Record<string, number | string>
@@ -143,15 +151,15 @@ export type ConsoleTableConverter = (
  */
 export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> = (evt: BenchEvent<E, M>) => void
 
-export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
-  handleEvent(evt: BenchEvent<E, M>): void
-}
-
 /**
  * Both the `Task` and `Bench` objects extend the `EventTarget` object.
  * So you can attach a listeners to different types of events to each class instance
  * using the universal `addEventListener` and `removeEventListener` methods.
  */
+
+export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
+  handleEvent(evt: BenchEvent<E, M>): void
+}
 
 /**
  * The task function.
@@ -264,11 +272,15 @@ export type JSRuntime =
   | 'v8'
   | 'workerd'
 
+export type NowFn = () => number
+
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.removeEventListener
 >[2]
 
+/**
+ */
 export interface ResolvedBenchOptions extends BenchOptions {
   iterations: NonNullable<BenchOptions['iterations']>
   now: NonNullable<BenchOptions['now']>
@@ -390,7 +402,7 @@ export type TaskEvents = Extract<BenchEvents,
 >
 
 /**
- * The task result object
+ * The task result
  */
 export type TaskResult =
   | TaskResultAborted
@@ -400,15 +412,24 @@ export type TaskResult =
   | TaskResultNotStarted
   | TaskResultStarted
 
+/**
+ * The task result for aborted tasks.
+ */
 export interface TaskResultAborted {
   state: 'aborted'
 }
 
+/**
+ * The task result for aborted tasks, having also statistical data.
+ */
 export interface TaskResultAbortedWithStatistics
   extends TaskResultWithStatistics {
   state: 'aborted-with-statistics'
 }
 
+/**
+ * The task result for completed tasks with statistical data.
+ */
 export interface TaskResultCompleted extends TaskResultWithStatistics {
   /**
    * how long each operation takes (ms)
@@ -418,6 +439,9 @@ export interface TaskResultCompleted extends TaskResultWithStatistics {
   state: 'completed'
 }
 
+/**
+ * The task result for errored tasks
+ */
 export interface TaskResultErrored {
   /**
    * the error that caused the task to fail
@@ -427,10 +451,16 @@ export interface TaskResultErrored {
   state: 'errored'
 }
 
+/**
+ * The task result for not started tasks
+ */
 export interface TaskResultNotStarted {
   state: 'not-started'
 }
 
+/**
+ * The additional runtime information for task results
+ */
 export interface TaskResultRuntimeInfo {
   /**
    * the JavaScript runtime environment
@@ -442,11 +472,16 @@ export interface TaskResultRuntimeInfo {
    */
   runtimeVersion: string
 }
-
+/**
+ * The task result for started tasks
+ */
 export interface TaskResultStarted {
   state: 'started'
 }
 
+/**
+ * The statistical data for task results
+ */
 export interface TaskResultWithStatistics {
   /**
    * the task latency statistics
@@ -468,7 +503,3 @@ export interface TaskResultWithStatistics {
    */
   totalTime: number
 }
-
-type Concurrency = 'bench' | 'task' | null
-
-type NowFn = () => number

@@ -75,6 +75,11 @@ export interface BenchLike extends EventTarget {
   ) => void
 
   /**
+   * Should samples be retained for further custom processing
+   */
+  retainSamples: boolean
+
+  /**
    * The JavaScript runtime environment.
    */
   runtime: JSRuntime
@@ -149,6 +154,12 @@ export interface BenchOptions {
    * function to get the current timestamp in milliseconds
    */
   now?: NowFn
+
+  /**
+   * keep samples for statistics calculation
+   * @default false
+   */
+  retainSamples?: boolean
 
   /**
    * setup function to run before each benchmark task (cycle)
@@ -290,6 +301,11 @@ export interface FnOptions {
   beforeEach?: FnHook
 
   /**
+   * Retain samples for this task, overriding the bench-level retainSamples option
+   */
+  retainSamples?: boolean
+
+  /**
    * An AbortSignal for aborting this specific task
    *
    * If not provided, falls back to {@link BenchOptions.signal}
@@ -371,6 +387,21 @@ export interface ResolvedBenchOptions extends BenchOptions {
 }
 
 /**
+ * A type representing a samples-array with at least one number.
+ */
+export type Samples = [number, ...number[]]
+
+/**
+ * A type representing a sorted samples-array with at least one number.
+ */
+export type SortedSamples = Samples & {
+  /**
+   * A unique symbol to identify sorted samples
+   */
+  readonly __sorted__: unique symbol
+}
+
+/**
  * The statistics object
  */
 export interface Statistics {
@@ -445,9 +476,14 @@ export interface Statistics {
   rme: number
 
   /**
-   * samples
+   * samples used to calculate the statistics
    */
-  samples: number[]
+  samples: SortedSamples | undefined
+
+  /**
+   * samples count
+   */
+  samplesCount: number
 
   /**
    * standard deviation

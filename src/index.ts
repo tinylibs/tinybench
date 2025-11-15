@@ -18,6 +18,8 @@ export type {
   JSRuntime,
   NowFn,
   ResolvedBenchOptions,
+  Samples,
+  SortedSamples,
   Statistics,
   TaskEvents,
   TaskResult,

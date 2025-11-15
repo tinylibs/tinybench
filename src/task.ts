@@ -6,22 +6,22 @@ import type {
   Fn,
   FnOptions,
   RemoveEventListenerOptionsArgument,
+  Samples,
   TaskEvents,
   TaskResult,
   TaskResultRuntimeInfo,
 } from './types'
 
 import { BenchEvent } from './event'
-import { withConcurrency } from './utils'
 import {
   getStatisticsSorted,
   invariant,
   isFnAsyncResource,
   isPromiseLike,
   isValidSamples,
-  type Samples,
   sortSamples,
   toError,
+  withConcurrency
 } from './utils'
 
 const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
@@ -114,6 +114,11 @@ export class Task extends EventTarget {
   #result: TaskResult = notStartedTaskResult
 
   /**
+   * Retain samples
+   */
+  readonly #retainSamples: boolean
+
+  /**
    * The number of times the task function has been executed
    */
   #runs = 0
@@ -131,6 +136,7 @@ export class Task extends EventTarget {
     this.#fnOpts = fnOpts
     this.#async = fnOpts.async ?? isFnAsyncResource(fn)
     this.#signal = fnOpts.signal
+    this.#retainSamples = fnOpts.retainSamples ?? bench.retainSamples
 
     for (const hookName of hookNames) {
       if (this.#fnOpts[hookName] != null) {
@@ -529,11 +535,11 @@ export class Task extends EventTarget {
 
       sortSamples(latencySamples)
 
-      const latencyStatistics = getStatisticsSorted(latencySamples)
+      const latencyStatistics = getStatisticsSorted(latencySamples, this.#retainSamples)
       const latencyStatisticsMean = latencyStatistics.mean
 
       let totalTime = 0
-      const throughputSamples = [] as unknown as Samples
+      const throughputSamples: Samples | undefined = [] as unknown as Samples
 
       for (const sample of latencySamples) {
         if (sample !== 0) {
@@ -545,7 +551,7 @@ export class Task extends EventTarget {
       }
 
       sortSamples(throughputSamples)
-      const throughputStatistics = getStatisticsSorted(throughputSamples)
+      const throughputStatistics = getStatisticsSorted(throughputSamples, this.#retainSamples)
 
       /* eslint-disable perfectionist/sort-objects */
       this.#result = {

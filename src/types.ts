@@ -2,6 +2,9 @@ import type { BenchEvent } from '../src/event'
 import type { Task } from '../src/task'
 export type { BenchEvent } from '../src/event'
 
+/**
+ * Options for adding an event listener
+ */
 export type AddEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.addEventListener
 >[2]
@@ -20,36 +23,101 @@ export type BenchEvents =
   | 'start' // when running the benchmarks gets started
   | 'warmup' // when the benchmarks start getting warmed up
 
+/**
+ * Bench events that may have an associated Task
+ */
 export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
 
+/**
+ * Bench events that have an associated error
+ */
 export type BenchEventsWithError = Extract<BenchEvents, 'error'>
+/**
+ * Bench events that have an associated Task
+ */
 export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+
+/**
+ * Used to decouple Bench and Task
+ */
 export interface BenchLike extends EventTarget {
+  /**
+   * Adds a listener for the specified event type.
+   */
   addEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: AddEventListenerOptionsArgument
   ) => void
-
+  /**
+   * Executes tasks concurrently based on the specified concurrency mode, if set.
+   *
+   * - When `mode` is set to `null` (default), concurrency is disabled.
+   * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
+   * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
+   */
   concurrency: Concurrency
-
+  /**
+   * The amount of executions per task.
+   */
   iterations: number
+  /**
+   * A function to get a timestamp.
+   */
   now: NowFn
+  /**
+   * Removes a previously registered event listener.
+   */
   removeEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: RemoveEventListenerOptionsArgument
   ) => void
+
+  /**
+   * The JavaScript runtime environment.
+   */
   runtime: JSRuntime
+
+  /**
+   * The JavaScript runtime version.
+   */
   runtimeVersion: string
+  /**
+   * A setup function that runs before each task execution.
+   */
   setup: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  /**
+   * An AbortSignal to cancel the benchmark
+   */
   signal?: AbortSignal
+  /**
+   * A teardown function that runs after each task execution.
+   */
   teardown: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  /**
+   * The maximum number of concurrent tasks to run
+   */
   threshold: number
+  /**
+   * Whether to throw an error if a task function throws
+   */
   throws: boolean
+  /**
+   * The amount of time to run each task.
+   */
   time: number
+  /**
+   * Whether to warmup the tasks before running them
+   */
   warmup: boolean
+  /**
+   * The amount of warmup iterations per task.
+   */
   warmupIterations: number
+  /**
+   * The amount of time to warmup each task.
+   */
   warmupTime: number
 }
 
@@ -134,6 +202,16 @@ export interface BenchOptions {
   warmupTime?: number
 }
 
+/**
+ * - When `mode` is set to `null` (default), concurrency is disabled.
+ * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
+ * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
+ */
+export type Concurrency = 'bench' | 'task' | null
+
+/**
+ * Converts a Task to a console.table friendly object
+ */
 export type ConsoleTableConverter = (
   task: Task
 ) => Record<string, number | string>
@@ -143,15 +221,18 @@ export type ConsoleTableConverter = (
  */
 export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> = (evt: BenchEvent<E, M>) => void
 
-export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
-  handleEvent(evt: BenchEvent<E, M>): void
-}
-
 /**
  * Both the `Task` and `Bench` objects extend the `EventTarget` object.
  * So you can attach a listeners to different types of events to each class instance
  * using the universal `addEventListener` and `removeEventListener` methods.
  */
+
+export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
+  /**
+   * A method called when the event is dispatched.
+   */
+  handleEvent(evt: BenchEvent<E, M>): void
+}
 
 /**
  * The task function.
@@ -264,11 +345,19 @@ export type JSRuntime =
   | 'v8'
   | 'workerd'
 
+/**
+ * A function that returns the current timestamp.
+ */
+export type NowFn = () => number
+
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.removeEventListener
 >[2]
 
+/**
+ * The resolved benchmark options
+ */
 export interface ResolvedBenchOptions extends BenchOptions {
   iterations: NonNullable<BenchOptions['iterations']>
   now: NonNullable<BenchOptions['now']>
@@ -390,7 +479,7 @@ export type TaskEvents = Extract<BenchEvents,
 >
 
 /**
- * The task result object
+ * The task result
  */
 export type TaskResult =
   | TaskResultAborted
@@ -400,37 +489,70 @@ export type TaskResult =
   | TaskResultNotStarted
   | TaskResultStarted
 
+/**
+ * The task result for aborted tasks.
+ */
 export interface TaskResultAborted {
+  /**
+   * the task state
+   */
   state: 'aborted'
 }
 
+/**
+ * The task result for aborted tasks, having also statistical data.
+ */
 export interface TaskResultAbortedWithStatistics
   extends TaskResultWithStatistics {
+  /**
+   * the task state
+   */
   state: 'aborted-with-statistics'
 }
 
+/**
+ * The task result for completed tasks with statistical data.
+ */
 export interface TaskResultCompleted extends TaskResultWithStatistics {
   /**
    * how long each operation takes (ms)
    */
   period: number
 
+  /**
+   * the task state
+   */
   state: 'completed'
 }
 
+/**
+ * The task result for errored tasks
+ */
 export interface TaskResultErrored {
   /**
    * the error that caused the task to fail
    */
   error: Error
 
+  /**
+   * the task state
+   */
   state: 'errored'
 }
 
+/**
+ * The task result for not started tasks
+ */
 export interface TaskResultNotStarted {
+  /**
+   * the task state
+   */
   state: 'not-started'
 }
 
+/**
+ * The additional runtime information for task results
+ */
 export interface TaskResultRuntimeInfo {
   /**
    * the JavaScript runtime environment
@@ -442,11 +564,19 @@ export interface TaskResultRuntimeInfo {
    */
   runtimeVersion: string
 }
-
+/**
+ * The task result for started tasks
+ */
 export interface TaskResultStarted {
+  /**
+   * the task state
+   */
   state: 'started'
 }
 
+/**
+ * The statistical data for task results
+ */
 export interface TaskResultWithStatistics {
   /**
    * the task latency statistics
@@ -468,7 +598,3 @@ export interface TaskResultWithStatistics {
    */
   totalTime: number
 }
-
-type Concurrency = 'bench' | 'task' | null
-
-type NowFn = () => number

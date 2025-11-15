@@ -48,6 +48,9 @@ export class Bench extends EventTarget implements BenchLike {
    */
   readonly concurrency: 'bench' | 'task' | null = null
 
+  /**
+   * The amount of executions per task.
+   */
   readonly iterations: number
 
   /**
@@ -55,8 +58,14 @@ export class Bench extends EventTarget implements BenchLike {
    */
   readonly name: string | undefined
 
+  /**
+   * A function to get a timestamp.
+   */
   readonly now: () => number
 
+  /**
+   * Removes a previously registered event listener.
+   */
   declare removeEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
@@ -73,10 +82,19 @@ export class Bench extends EventTarget implements BenchLike {
    */
   readonly runtimeVersion: string
 
+  /**
+   * A setup function that runs before each task execution.
+   */
   readonly setup: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
 
+  /**
+   * An AbortSignal to cancel the benchmark.
+   */
   readonly signal: AbortSignal | undefined
 
+  /**
+   * A teardown function that runs after each task execution.
+   */
   readonly teardown: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
 
   /**
@@ -85,14 +103,30 @@ export class Bench extends EventTarget implements BenchLike {
    */
   readonly threshold = Infinity
 
+  /**
+   * Whether to throw an error if a task function throws
+   * @default false
+   */
   readonly throws: boolean
 
+  /**
+   * The amount of time to run each task.
+   */
   readonly time: number
 
+  /**
+   * Whether to warmup the tasks before running them
+   */
   readonly warmup: boolean
 
+  /**
+   * The amount of warmup iterations per task.
+   */
   readonly warmupIterations: number
 
+  /**
+   * The amount of time to warmup each task.
+   */
   readonly warmupTime: number
 
   /**

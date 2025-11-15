@@ -49,10 +49,18 @@ export class Task extends EventTarget {
     options?: RemoveEventListenerOptionsArgument
   ) => void
 
+  /**
+   * The name of the task
+   * @returns the name of the task
+   */
   get name (): string {
     return this.#name
   }
 
+  /**
+   * The result of the task
+   * @returns the result of the task
+   */
   get result (): TaskResult & TaskResultRuntimeInfo {
     return {
       ...this.#result,
@@ -61,6 +69,10 @@ export class Task extends EventTarget {
     }
   }
 
+  /**
+   * The number of times the task function has been executed
+   * @returns the number of times the task function has been executed
+   */
   get runs (): number {
     return this.#runs
   }
@@ -366,6 +378,12 @@ export class Task extends EventTarget {
       : {}
   }
 
+  /**
+   * @param mode - 'run' | 'warmup'
+   * @param time - the amount of time to run the benchmark
+   * @param iterations - the amount of iterations to run the benchmark
+   * @returns the error if any, and the samples if any
+   */
   #benchmarkSync (
     mode: 'run' | 'warmup',
     time: number,

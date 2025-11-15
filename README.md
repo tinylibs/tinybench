@@ -166,7 +166,7 @@ plotting, custom analysis, or exporting results.
 You can enable samples retention at the bench level by setting the
 `retainSamples` option to `true` when creating a `Bench` instance:
 
-```tsts
+```ts
 const bench = new Bench({ retainSamples: true })
 ```
 

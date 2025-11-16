@@ -60,11 +60,6 @@ export class Bench extends EventTarget implements BenchLike {
   readonly name: string | undefined
 
   /**
-   * A function to get a timestamp.
-   */
-  readonly now: () => number
-
-  /**
    * Removes a previously registered event listener.
    */
   declare removeEventListener: <K extends BenchEvents>(

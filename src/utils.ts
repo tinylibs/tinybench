@@ -522,11 +522,31 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
 }
 
 interface WithConcurrencyOptions<R> {
+  /**
+   * The function to execute concurrently.
+   */
   fn: () => Promise<R>
+  /**
+   * The number of iterations to execute. If 0, runs until time limit is reached.
+   */
   iterations: number
+  /**
+   * The maximum number of concurrent executions.
+   */
   limit: number
+  /**
+   * A function that returns the current timestamp.
+   * @returns a timestamp
+   */
   now?: () => number
+  /**
+   * An optional AbortSignal to cancel the execution.
+   */
   signal?: AbortSignal
+  /**
+   * The maximum amount of time to run the executions in milliseconds. If 0,
+   * runs until iterations are completed.
+   */
   time?: number
 }
 

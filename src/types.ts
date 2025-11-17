@@ -1,5 +1,6 @@
 import type { BenchEvent } from '../src/event'
 import type { Task } from '../src/task'
+
 export type { BenchEvent } from '../src/event'
 
 /**
@@ -26,7 +27,10 @@ export type BenchEvents =
 /**
  * Bench events that may have an associated Task
  */
-export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+export type BenchEventsOptionalTask = Omit<
+  BenchEvents,
+  'add' | 'cycle' | 'error' | 'remove'
+>
 
 /**
  * Bench events that have an associated error
@@ -35,7 +39,10 @@ export type BenchEventsWithError = Extract<BenchEvents, 'error'>
 /**
  * Bench events that have an associated Task
  */
-export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+export type BenchEventsWithTask = Extract<
+  BenchEvents,
+  'add' | 'cycle' | 'error' | 'remove'
+>
 
 /**
  * Used to decouple Bench and Task
@@ -135,68 +142,68 @@ export interface BenchOptions {
   concurrency?: Concurrency
 
   /**
-   * number of times that a task should run if even the time option is finished
+   * The number of times that a task should run if even the time option is finished.
    * @default 64
    */
   iterations?: number
 
   /**
-   * benchmark name
+   * Benchmark name.
    */
   name?: string
 
   /**
-   * function to get the current timestamp in milliseconds
+   * Function to get the current timestamp in milliseconds.
    */
   now?: NowFn
 
   /**
-   * setup function to run before each benchmark task (cycle)
+   * Setup function to run before each benchmark task (cycle).
    */
   setup?: Hook
 
   /**
-   * An AbortSignal for aborting the benchmark
+   * An AbortSignal for aborting the benchmark.
    */
   signal?: AbortSignal
 
   /**
-   * teardown function to run after each benchmark task (cycle)
+   * Teardown function to run after each benchmark task (cycle).
    */
   teardown?: Hook
 
   /**
    * The maximum number of concurrent tasks to run
-   * @default Infinity
+   * @default Number.POSITIVE_INFINITY
    */
   threshold?: number
 
   /**
-   * Throws if a task fails
+   * Throws if a task fails.
    * @default false
    */
   throws?: boolean
 
   /**
-   * time needed for running a benchmark task (milliseconds)
+   * Time needed for running a benchmark task in milliseconds.
    * @default 1000
    */
   time?: number
 
   /**
-   * warmup benchmark
+   * Warmup benchmark.
    * @default true
    */
   warmup?: boolean
 
   /**
-   * warmup iterations
+   * Warmup iterations.
    * @default 16
    */
   warmupIterations?: number
 
   /**
-   * warmup time (milliseconds)
+   * Warmup time in milliseconds.
    * @default 250
    */
   warmupTime?: number
@@ -219,7 +226,10 @@ export type ConsoleTableConverter = (
 /**
  * Event listener
  */
-export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> = (evt: BenchEvent<E, M>) => void
+export type EventListener<
+  E extends BenchEvents,
+  M extends 'bench' | 'task' = 'bench'
+> = (evt: BenchEvent<E, M>) => void
 
 /**
  * Both the `Task` and `Bench` objects extend the `EventTarget` object.
@@ -227,7 +237,10 @@ export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'b
  * using the universal `addEventListener` and `removeEventListener` methods.
  */
 
-export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
+export interface EventListenerObject<
+  E extends BenchEvents,
+  M extends 'bench' | 'task' = 'bench'
+> {
   /**
    * A method called when the event is dispatched.
    */
@@ -468,13 +481,14 @@ export interface Statistics {
 /**
  * Task events
  */
-export type TaskEvents = Extract<BenchEvents,
+export type TaskEvents = Extract<
+  BenchEvents,
   | 'abort' // when a signal aborts
   | 'complete' // when running a task finishes
-  | 'cycle'// when running a task gets done
+  | 'cycle' // when running a task gets done
   | 'error' // when the task throws
   | 'reset' // when the reset method gets called
-  | 'start'// when running the task gets started
+  | 'start' // when running the task gets started
   | 'warmup' // when the task start getting warmed up
 >
 

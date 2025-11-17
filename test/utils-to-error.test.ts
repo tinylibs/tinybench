@@ -1,8 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  toError,
-} from '../src/utils'
+import { toError } from '../src/utils'
 
 test('toError - null', () => {
   expect(toError(null)).toBeInstanceOf(Error)
@@ -49,7 +47,9 @@ test('toError - symbol', () => {
 })
 
 test('toError - function', () => {
-  const errorFunction = () => { throw new Error('errorFunction') }
+  const errorFunction = () => {
+    throw new Error('errorFunction')
+  }
   expect(toError(errorFunction)).toBeInstanceOf(Error)
   expect(toError(errorFunction).message).toBe('errorFunction')
 })

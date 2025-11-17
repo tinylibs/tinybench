@@ -9,7 +9,7 @@ test('iteration limit not exceeded with task concurrency', async () => {
     iterations: 10,
     threshold: 3,
     time: 10000,
-    warmup: false
+    warmup: false,
   })
 
   let callCount = 0
@@ -40,7 +40,7 @@ test('iteration limit not exceeded with high concurrency', async () => {
     iterations: 100,
     threshold: 10,
     time: 10000,
-    warmup: false
+    warmup: false,
   })
 
   let callCount = 0
@@ -71,7 +71,7 @@ test('iteration limit edge case - limit equals threshold', async () => {
     iterations: 5,
     threshold: 5,
     time: 10000,
-    warmup: false
+    warmup: false,
   })
 
   let callCount = 0
@@ -101,7 +101,7 @@ test('iteration limit with very fast tasks', async () => {
     iterations: 20,
     threshold: 4,
     time: 10000,
-    warmup: false
+    warmup: false,
   })
 
   const callTimestamps: number[] = []

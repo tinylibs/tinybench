@@ -2,18 +2,14 @@
 // Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
 
 import type { Task } from './task'
-import type {
-  ConsoleTableConverter,
-  Fn,
-  JSRuntime,
-  Statistics,
-} from './types'
+import type { ConsoleTableConverter, Fn, JSRuntime, Statistics } from './types'
 
 import { emptyFunction, tTable } from './constants'
 
 /**
- * @param g GlobalThis object
- * @returns Detected runtime and its version
+ * Detects the current JavaScript runtime environment and its version.
+ * @param g - the global object
+ * @returns the detected runtime and its version
  */
 export function detectRuntime (g = globalThis as Record<string, unknown>): {
   runtime: JSRuntime
@@ -95,8 +91,9 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
 }
 
 /**
- * @param g GlobalThis object
- * @returns Whether the global object has a navigator with userAgent
+ * Checks whether the global object has a navigator with userAgent.
+ * @param g - the global object
+ * @returns whether the global object has a navigator with userAgent
  */
 function hasNavigatorWithUserAgent (
   g = globalThis as Record<string, unknown>
@@ -125,18 +122,19 @@ export const nToMs = (ns: number) => ns / 1e6
 export const mToNs = (ms: number) => ms * 1e6
 
 /**
- * @param value number to format
- * @param significantDigits number of significant digits in the output to aim for
- * @param maxFractionDigits hard limit for the number of digits after the decimal dot
- * @returns formatted number
+ * Formats a number with the specified significant digits and maximum fraction digits.
+ * @param value - the number to format
+ * @param significantDigits - the number of significant digits in the output to aim for
+ * @param maxFractionDigits - hard limit for the number of digits after the decimal dot
+ * @returns the formatted number
  */
 export const formatNumber = (
   value: number,
   significantDigits = 5,
   maxFractionDigits = 2
 ): string => {
-  if (value === Infinity) return '+∞'
-  if (value === -Infinity) return '-∞'
+  if (value === Number.POSITIVE_INFINITY) return '+∞'
+  if (value === Number.NEGATIVE_INFINITY) return '-∞'
   if (Number.isNaN(value)) return 'NaN'
 
   const absValue = Math.abs(value)
@@ -154,22 +152,33 @@ export const formatNumber = (
   }
 
   // Avoid scientific notation
-  const decimals = Math.min(Math.max(0, significantDigits - (Math.floor(Math.log10(absValue)) + 1)), maxFractionDigits)
+  const decimals = Math.min(
+    Math.max(0, significantDigits - (Math.floor(Math.log10(absValue)) + 1)),
+    maxFractionDigits
+  )
 
   return value.toFixed(decimals)
 }
 
-const hrtimeBigint: () => bigint = typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
-  .process?.hrtime?.bigint === 'function'
-  ? (
-      globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }
-    ).process.hrtime.bigint.bind(
-      (globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } })
-        .process.hrtime
-    )
-  : () => {
-      throw new Error('hrtime.bigint() is not supported in this JS environment')
-    }
+const hrtimeBigint: () => bigint =
+  typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
+    .process?.hrtime?.bigint === 'function'
+    ? (
+        globalThis as unknown as {
+          process: { hrtime: { bigint: () => bigint } }
+        }
+      ).process.hrtime.bigint.bind(
+        (
+          globalThis as unknown as {
+            process: { hrtime: { bigint: () => bigint } }
+          }
+        ).process.hrtime
+      )
+    : () => {
+        throw new Error(
+          'hrtime.bigint() is not supported in this JS environment'
+        )
+      }
 
 /**
  * Returns the current high resolution timestamp in milliseconds using `process.hrtime.bigint()`.
@@ -179,13 +188,14 @@ export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
 
 /**
  * Returns the current high resolution timestamp in milliseconds using `performance.now()`.
+ * @returns the current high resolution timestamp in milliseconds
  */
 export const performanceNow = performance.now.bind(performance)
 
 /**
- * Checks if a value is a promise-like object.
+ * Checks whether a value is a promise-like object.
  * @param maybePromiseLike - the value to check
- * @returns true if the value is a promise-like object
+ * @returns whether the value is a promise-like object
  */
 export const isPromiseLike = <T>(
   maybePromiseLike: unknown
@@ -197,13 +207,14 @@ export const isPromiseLike = <T>(
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
-const AsyncFunctionConstructor = (async () => { /* no op */ })
-  .constructor as FunctionConstructor
+const AsyncFunctionConstructor = (async () => {
+  /* no op */
+}).constructor as FunctionConstructor
 
 /**
- * An async function check helper only considering runtime support async syntax
+ * Checks whether a function is an async function, only considering runtime support for async syntax.
  * @param fn - the function to check
- * @returns true if the function is an async function
+ * @returns whether the function is an async function
  */
 const isAsyncFunction = (
   fn: Fn | null | undefined
@@ -211,9 +222,9 @@ const isAsyncFunction = (
   typeof fn === 'function' && fn.constructor === AsyncFunctionConstructor
 
 /**
- * An async function check helper considering runtime support async syntax and promise return
+ * Checks whether a function is an async function or returns a promise, considering runtime support for async syntax and promise return.
  * @param fn - the function to check
- * @returns true if the function is an async function or returns a promise
+ * @returns whether the function is an async function or returns a promise
  */
 export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
   if (fn == null) {
@@ -247,9 +258,9 @@ export type Samples = [number, ...number[]]
 export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
 
 /**
- * Checks if a value is a Samples type.
- * @param value - value to check
- * @returns if the value is a Samples type, meaning a non-empty array of numbers
+ * Checks whether a value is a Samples type.
+ * @param value - the value to check
+ * @returns whether the value is a Samples type, meaning a non-empty array of numbers
  */
 export const isValidSamples = (
   value: number[] | undefined
@@ -267,7 +278,14 @@ export function sortSamples (
   samples.sort(sortFn)
 }
 
-export const meanAndVariance = (samples: Samples): { mean: number; vr: number } => {
+/**
+ * Computes the mean and variance of a sample.
+ * @param samples - the sample
+ * @returns an object containing the mean and variance
+ */
+export const meanAndVariance = (
+  samples: Samples
+): { mean: number; vr: number } => {
   const len = samples.length
   if (len === 1) {
     return { mean: samples[0], vr: 0 }
@@ -288,7 +306,7 @@ export const meanAndVariance = (samples: Samples): { mean: number; vr: number } 
 
   return {
     mean,
-    vr: m / (len - 1)
+    vr: m / (len - 1),
   }
 }
 
@@ -298,15 +316,18 @@ export const meanAndVariance = (samples: Samples): { mean: number; vr: number } 
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  */
-const quantileSorted = (samples: SortedSamples, q: 0.5 | 0.75 | 0.99 | 0.995 | 0.999): number => {
+const quantileSorted = (
+  samples: SortedSamples,
+  q: 0.5 | 0.75 | 0.99 | 0.995 | 0.999
+): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
 
   return baseIndex + 1 < samples.length
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ? samples[baseIndex]! +
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     : samples[baseIndex]!
 }
@@ -325,7 +346,10 @@ export const sortFn = (a: number, b: number) => a - b
  * @param mean - the mean of the sample
  * @returns the average absolute deviation
  */
-export const absoluteDeviationMean = (samples: Samples, mean: number): number => {
+export const absoluteDeviationMean = (
+  samples: Samples,
+  mean: number
+): number => {
   let result = 0
   const len = samples.length
 
@@ -344,7 +368,10 @@ export const absoluteDeviationMean = (samples: Samples, mean: number): number =>
  * @param median - the median of the sample
  * @returns the median absolute deviation
  */
-export function absoluteDeviationMedian (samples: SortedSamples, median: number): number {
+export function absoluteDeviationMedian (
+  samples: SortedSamples,
+  median: number
+): number {
   const len = samples.length
   if (len === 1) return 0
 
@@ -360,15 +387,17 @@ export function absoluteDeviationMedian (samples: SortedSamples, median: number)
     c2 = halfLen - c1
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    l1 = c1 === 0 ? -Infinity : median - samples[mid - c1]!
+    l1 = c1 === 0 ? Number.NEGATIVE_INFINITY : median - samples[mid - c1]!
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    r1 = c1 === mid ? Infinity : median - samples[mid - c1 - 1]!
+    r1 = c1 === mid ? Number.POSITIVE_INFINITY : median - samples[mid - c1 - 1]!
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    l2 = c2 === 0 ? -Infinity : samples[mid + c2 - 1]! - median
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    r2 = c2 === len - mid ? Infinity : samples[mid + c2]! - median
+    l2 = c2 === 0 ? Number.NEGATIVE_INFINITY : samples[mid + c2 - 1]! - median
+
+    r2 =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      c2 === len - mid ? Number.POSITIVE_INFINITY : samples[mid + c2]! - median
 
     if (l1 <= r2 && l2 <= r1) {
       return len & 1 // check for odd length
@@ -399,7 +428,7 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
   const critical = tTable[df || 1] ?? tTable[0]
   const moe = sem * critical
   const absMean = Math.abs(mean)
-  const rme = absMean === 0 ? Infinity : (moe / absMean) * 100
+  const rme = absMean === 0 ? Number.POSITIVE_INFINITY : (moe / absMean) * 100
   const p50 = quantileSorted(samples, 0.5)
 
   return {
@@ -425,6 +454,12 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
   }
 }
 
+/**
+ * Throws an error if the condition is false.
+ * @param condition - the condition to check
+ * @param message - the error message to throw if the condition is false
+ * @throws {Error} if the condition is false
+ */
 export const invariant = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message)
@@ -444,7 +479,7 @@ export const toError = (value: unknown): Error => {
       if (value !== null) {
         return value instanceof Error
           ? value
-          : new Error((value as { message?: string; }).message ?? '')
+          : new Error((value as { message?: string }).message ?? '')
       }
     // eslint-disable-next-line no-fallthrough
     case 'undefined':
@@ -527,10 +562,20 @@ interface WithConcurrencyOptions<R> {
  * @throws {Error} if a single error occurs during execution
  * @throws {AggregateError} if multiple errors occur during execution
  */
-export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Promise<R[]> => {
-  const { fn, iterations, limit, now = performanceNow, signal, time = 0 } = options
+export const withConcurrency = async <R>(
+  options: WithConcurrencyOptions<R>
+): Promise<R[]> => {
+  const {
+    fn,
+    iterations,
+    limit,
+    now = performanceNow,
+    signal,
+    time = 0,
+  } = options
 
-  const maxWorkers = iterations === 0 ? limit : Math.max(0, Math.min(limit, iterations))
+  const maxWorkers =
+    iterations === 0 ? limit : Math.max(0, Math.min(limit, iterations))
 
   const errors: Error[] = []
   const results: R[] = []
@@ -545,14 +590,21 @@ export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Pr
   // Reduce checks based on provided limits to avoid tainting the benchmark results
   const doNext: () => boolean = hasIterationsLimit
     ? hasTimeLimit
-      ? () => isRunning && (nextIndex++ < iterations) && ((now() < targetTime) || (isRunning = false))
-      : () => isRunning && (nextIndex++ < iterations)
+      ? () =>
+          isRunning &&
+          nextIndex++ < iterations &&
+          (now() < targetTime || (isRunning = false))
+      : () => isRunning && nextIndex++ < iterations
     : hasTimeLimit
-      ? () => isRunning && ((now() < targetTime) || (isRunning = false))
+      ? () => isRunning && (now() < targetTime || (isRunning = false))
       : () => isRunning
 
-  const pushResult = (r: R) => { isRunning && results.push(r) }
-  const pushError = (e: unknown) => { errors.push(toError(e)) }
+  const pushResult = (r: R) => {
+    isRunning && results.push(r)
+  }
+  const pushError = (e: unknown) => {
+    errors.push(toError(e))
+  }
 
   const onAbort = () => (isRunning = false)
 
@@ -579,5 +631,8 @@ export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Pr
 
   if (errors.length === 0) return results
   if (errors.length === 1) throw toError(errors[0])
-  throw new AggregateError(errors, 'Multiple errors occurred during concurrent execution')
+  throw new AggregateError(
+    errors,
+    'Multiple errors occurred during concurrent execution'
+  )
 }

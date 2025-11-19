@@ -1,9 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  getStatisticsSorted,
-  type SortedSamples,
-} from '../src/utils'
+import { getStatisticsSorted, type SortedSamples } from '../src/utils'
 
 test('getStatisticsSorted', () => {
   let stats = getStatisticsSorted([
@@ -57,7 +54,7 @@ test('getStatisticsSorted - sample [0]', () => {
   expect(stats.sd).toBe(0)
   expect(stats.sem).toBe(0)
   expect(stats.moe).toBe(0)
-  expect(stats.rme).toBe(Infinity)
+  expect(stats.rme).toBe(Number.POSITIVE_INFINITY)
   expect(stats.p50).toBe(0)
   expect(stats.p75).toBe(0)
   expect(stats.p99).toBe(0)
@@ -68,7 +65,9 @@ test('getStatisticsSorted - sample [0]', () => {
 })
 
 test('getStatisticsSorted - big sample [0, 0, ...]', () => {
-  const stats = getStatisticsSorted(new Array(2000).fill(0) as unknown as SortedSamples)
+  const stats = getStatisticsSorted(
+    new Array(2000).fill(0) as unknown as SortedSamples
+  )
   expect(stats.min).toBe(0)
   expect(stats.max).toBe(0)
   expect(stats.df).toBe(1999)
@@ -78,7 +77,7 @@ test('getStatisticsSorted - big sample [0, 0, ...]', () => {
   expect(stats.sd).toBe(0)
   expect(stats.sem).toBe(0)
   expect(stats.moe).toBe(0)
-  expect(stats.rme).toBe(Infinity)
+  expect(stats.rme).toBe(Number.POSITIVE_INFINITY)
   expect(stats.p50).toBe(0)
   expect(stats.p75).toBe(0)
   expect(stats.p99).toBe(0)

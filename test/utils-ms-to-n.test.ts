@@ -1,8 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  mToNs,
-} from '../src/utils'
+import { mToNs } from '../src/utils'
 
 test('mToNs', () => {
   expect(mToNs(1)).toBe(1000000)

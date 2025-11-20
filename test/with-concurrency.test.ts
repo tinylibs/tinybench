@@ -74,7 +74,9 @@ test('aborts cleanly when signal is triggered', async () => {
     signal: controller.signal,
   })
 
-  setTimeout(() => { controller.abort() }, 30)
+  setTimeout(() => {
+    controller.abort()
+  }, 30)
 
   const result = await promise
   expect(Array.isArray(result)).toBe(true)
@@ -196,7 +198,9 @@ test('abort during execution stops new tasks', async () => {
     limit: 10,
     signal: controller.signal,
   })
-  setTimeout(() => { controller.abort() }, 25)
+  setTimeout(() => {
+    controller.abort()
+  }, 25)
   const result = await promise
   expect(Array.isArray(result)).toBe(true)
   expect(calls).toBeGreaterThan(0)
@@ -221,7 +225,8 @@ test('throws AggregateError when multiple errors occur', async () => {
 
 test('throws single error correctly', async () => {
   let count = 0
-  const fn = async () => { // eslint-disable-line @typescript-eslint/require-await
+  // eslint-disable-next-line @typescript-eslint/require-await
+  const fn = async () => {
     count++
     if (count === 3) throw new Error('boom')
   }
@@ -244,7 +249,7 @@ test('result values are collected correctly', async () => {
     iterations: 10,
     limit: 3,
   })
-  expect(results.every((v) => v === 42)).toBe(true)
+  expect(results.every(v => v === 42)).toBe(true)
 })
 
 test('works with synchronous function returning immediately', async () => {

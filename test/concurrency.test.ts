@@ -5,7 +5,7 @@ import { Bench } from '../src'
 test('concurrency error (sync) - concurrency task', () => {
   const bench = new Bench({
     concurrency: 'task',
-    throws: true
+    throws: true,
   })
 
   bench.add('foo', () => 1)
@@ -18,7 +18,7 @@ test('concurrency error (sync) - concurrency task', () => {
 test('concurrency error (sync) - concurrency bench', () => {
   const bench = new Bench({
     concurrency: 'bench',
-    throws: true
+    throws: true,
   })
 
   bench.add('foo', () => 1)

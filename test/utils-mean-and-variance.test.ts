@@ -19,7 +19,10 @@ describe('meanAndVariance()', () => {
     expect(meanAndVariance([1, 2, 3]).vr).toBeCloseTo(1, 10)
 
     // Reference: meanAndVariance([2, 4, 4, 4, 5, 5, 7, 9]) = 4.57142857
-    expect(meanAndVariance([2, 4, 4, 4, 5, 5, 7, 9]).vr).toBeCloseTo(4.57142857, 8)
+    expect(meanAndVariance([2, 4, 4, 4, 5, 5, 7, 9]).vr).toBeCloseTo(
+      4.57142857,
+      8
+    )
   })
 
   it('matches known population vs sample behavior', () => {
@@ -39,7 +42,8 @@ describe('meanAndVariance()', () => {
   it('handles floating point numbers accurately', () => {
     const samples = [0.1, 0.2, 0.3, 0.4] as Samples
     const avg = 0.25
-    const expected = samples.reduce((acc, x) => acc + (x - avg) ** 2, 0) / (samples.length - 1)
+    const expected =
+      samples.reduce((acc, x) => acc + (x - avg) ** 2, 0) / (samples.length - 1)
     expect(meanAndVariance(samples).vr).toBe(expected)
   })
 
@@ -49,9 +53,13 @@ describe('meanAndVariance()', () => {
   })
 
   it('returns correct meanAndVariance for large random arrays (approximate)', () => {
-    const samples = Array.from({ length: 10000 }, () => Math.random() * 100) as Samples
+    const samples = Array.from(
+      { length: 10000 },
+      () => Math.random() * 100
+    ) as Samples
     const avg = samples.reduce((acc, x) => acc + x, 0) / samples.length
-    const manual = samples.reduce((acc, x) => acc + (x - avg) ** 2, 0) / (samples.length - 1)
+    const manual =
+      samples.reduce((acc, x) => acc + (x - avg) ** 2, 0) / (samples.length - 1)
     expect(meanAndVariance(samples).vr).toBeCloseTo(manual, 10)
   })
 

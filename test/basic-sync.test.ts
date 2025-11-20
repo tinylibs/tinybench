@@ -34,10 +34,12 @@ test.each([['now()'], ['hrtimeNow()']])('%s basic (sync)', mode => {
   expect(tasks[0].result.totalTime).toBeGreaterThan(50)
   expect(tasks[0].result.latency.mean).toBeGreaterThan(50)
   // throughput mean is ops/s, period is ms unit value
-  expect(tasks[0].result.throughput.mean * tasks[0].result.period).toBeGreaterThan(999)
   expect(
     tasks[0].result.throughput.mean * tasks[0].result.period
-  ).toBeLessThan(maxMeanValue)
+  ).toBeGreaterThan(999)
+  expect(tasks[0].result.throughput.mean * tasks[0].result.period).toBeLessThan(
+    maxMeanValue
+  )
 
   expect(tasks[1].name).toEqual('bar')
 
@@ -47,8 +49,10 @@ test.each([['now()'], ['hrtimeNow()']])('%s basic (sync)', mode => {
   expect(tasks[1].result.totalTime).toBeGreaterThan(100)
   expect(tasks[1].result.latency.mean).toBeGreaterThan(100)
   // throughput mean is ops/s, period is ms unit value
-  expect(tasks[1].result.throughput.mean * tasks[1].result.period).toBeGreaterThan(999)
   expect(
     tasks[1].result.throughput.mean * tasks[1].result.period
-  ).toBeLessThan(maxMeanValue)
+  ).toBeGreaterThan(999)
+  expect(tasks[1].result.throughput.mean * tasks[1].result.period).toBeLessThan(
+    maxMeanValue
+  )
 })

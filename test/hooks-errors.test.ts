@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { Bench, FnHook } from '../src'
+import { Bench, type FnHook } from '../src'
 
 test.each(['warmup', 'run'])('%s error handling (async)', async mode => {
   const bench = new Bench({ warmup: mode === 'warmup' })
@@ -91,25 +91,25 @@ test('throw error when hooks are provided with no functions', () => {
 
   expect(() => {
     bench.add('test', () => 1, {
-      beforeAll: notAFunction
+      beforeAll: notAFunction,
     })
   }).toThrowError(new Error("'beforeAll' must be a function if provided"))
 
   expect(() => {
     bench.add('test', () => 1, {
-      beforeEach: notAFunction
+      beforeEach: notAFunction,
     })
   }).toThrowError(new Error("'beforeEach' must be a function if provided"))
 
   expect(() => {
     bench.add('test', () => 1, {
-      afterAll: notAFunction
+      afterAll: notAFunction,
     })
   }).toThrowError(new Error("'afterAll' must be a function if provided"))
 
   expect(() => {
     bench.add('test', () => 1, {
-      afterEach: notAFunction
+      afterEach: notAFunction,
     })
   }).toThrowError(new Error("'afterEach' must be a function if provided"))
 })

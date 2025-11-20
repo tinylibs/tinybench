@@ -21,15 +21,32 @@ import {
   isValidSamples,
   sortSamples,
   toError,
-  withConcurrency
+  withConcurrency,
 } from './utils'
 
+/**
+ * The names of all supported task lifecycle hooks.
+ */
 const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
 
+/**
+ * Task states that can be aborted.
+ */
 const abortableStates = ['not-started', 'started'] as const
 
+/**
+ * Default task result for tasks that have not yet started.
+ */
 const notStartedTaskResult: TaskResult = { state: 'not-started' }
+
+/**
+ * Default task result for tasks that have been aborted.
+ */
 const abortedTaskResult: TaskResult = { state: 'aborted' }
+
+/**
+ * Default task result for tasks that have started running.
+ */
 const startedTaskResult: TaskResult = { state: 'started' }
 
 /**
@@ -50,16 +67,16 @@ export class Task extends EventTarget {
   ) => void
 
   /**
-   * The name of the task
-   * @returns the name of the task
+   * The name of the task.
+   * @returns The task name as a string
    */
   get name (): string {
     return this.#name
   }
 
   /**
-   * The result of the task
-   * @returns the result of the task
+   * The result of the task.
+   * @returns The task result including state, statistics, and runtime information
    */
   get result (): TaskResult & TaskResultRuntimeInfo {
     return {
@@ -70,16 +87,15 @@ export class Task extends EventTarget {
   }
 
   /**
-   * The number of times the task function has been executed
-   * @returns the number of times the task function has been executed
+   * The number of times the task function has been executed.
+   * @returns The total number of executions performed
    */
   get runs (): number {
     return this.#runs
   }
 
   /**
-   * Check if either our signal or the bench-level signal is aborted
-   * `true` if either signal is aborted
+   * Check if either our signal or the bench-level signal is aborted.
    */
   #aborted = false
 
@@ -153,11 +169,9 @@ export class Task extends EventTarget {
       if (this.#signal.aborted) {
         this.#onAbort()
       } else {
-        this.#signal.addEventListener(
-          'abort',
-          this.#onAbort.bind(this),
-          { once: true }
-        )
+        this.#signal.addEventListener('abort', this.#onAbort.bind(this), {
+          once: true,
+        })
       }
     }
 
@@ -165,19 +179,16 @@ export class Task extends EventTarget {
       if (this.#bench.signal.aborted) {
         this.#onAbort()
       } else {
-        this.#bench.signal.addEventListener(
-          'abort',
-          this.#onAbort.bind(this),
-          { once: true }
-        )
+        this.#bench.signal.addEventListener('abort', this.#onAbort.bind(this), {
+          once: true,
+        })
       }
     }
   }
 
   /**
-   * reset the task to make the `Task.runs` a zero-value and remove the `Task.result` object property
+   * Resets the task to make the `Task.runs` a zero-value and remove the `Task.result` object property.
    * @param emit - whether to emit the `reset` event or not
-   * @internal
    */
   reset (emit = true): void {
     this.#runs = 0
@@ -187,9 +198,8 @@ export class Task extends EventTarget {
   }
 
   /**
-   * run the current task and write the results in `Task.result` object property
+   * Runs the current task and writes the results in `Task.result` object property.
    * @returns the current task
-   * @internal
    */
   async run (): Promise<Task> {
     if (this.#result.state !== 'not-started') {
@@ -211,9 +221,8 @@ export class Task extends EventTarget {
   }
 
   /**
-   * run the current task and write the results in `Task.result` object property (sync version)
+   * Runs the current task synchronously and writes the results in `Task.result` object property.
    * @returns the current task
-   * @internal
    */
   runSync (): this {
     if (this.#result.state !== 'not-started') {
@@ -251,8 +260,7 @@ export class Task extends EventTarget {
   }
 
   /**
-   * warmup the current task
-   * @internal
+   * Warms up the current task.
    */
   async warmup (): Promise<void> {
     if (this.#result.state !== 'not-started') {
@@ -260,19 +268,18 @@ export class Task extends EventTarget {
     }
     this.dispatchEvent(new BenchEvent('warmup', this))
     await this.#bench.setup(this, 'warmup')
-    const { error } = (await this.#benchmark(
+    const { error } = await this.#benchmark(
       'warmup',
       this.#bench.warmupTime,
       this.#bench.warmupIterations
-    ))
+    )
     await this.#bench.teardown(this, 'warmup')
 
     this.#postWarmup(error)
   }
 
   /**
-   * warmup the current task (sync version)
-   * @internal
+   * Warms up the current task synchronously.
    */
   warmupSync (): void {
     if (this.#result.state !== 'not-started') {
@@ -306,7 +313,9 @@ export class Task extends EventTarget {
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): Promise<{ error: Error, samples?: never } | { error?: never, samples?: Samples }> {
+  ): Promise<
+    { error: Error; samples?: never } | { error?: never; samples?: Samples }
+  > {
     if (this.#fnOpts.beforeAll) {
       try {
         await this.#fnOpts.beforeAll.call(this, mode)
@@ -360,8 +369,7 @@ export class Task extends EventTarget {
       try {
         while (
           // eslint-disable-next-line no-unmodified-loop-condition
-          (totalTime < time ||
-            samples.length < iterations) &&
+          (totalTime < time || samples.length < iterations) &&
           !this.#aborted
         ) {
           await benchmarkTask()
@@ -379,9 +387,7 @@ export class Task extends EventTarget {
       }
     }
 
-    return isValidSamples(samples)
-      ? { samples }
-      : {}
+    return isValidSamples(samples) ? { samples } : {}
   }
 
   /**
@@ -394,7 +400,7 @@ export class Task extends EventTarget {
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): { error: Error, samples?: never } | { error?: never, samples?: Samples } {
+  ): { error: Error; samples?: never } | { error?: never; samples?: Samples } {
     if (this.#fnOpts.beforeAll) {
       try {
         const beforeAllResult = this.#fnOpts.beforeAll.call(this, mode)
@@ -441,8 +447,7 @@ export class Task extends EventTarget {
     try {
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
-        (totalTime < time ||
-          samples.length < iterations) &&
+        (totalTime < time || samples.length < iterations) &&
         !this.#aborted
       ) {
         benchmarkTask()
@@ -462,12 +467,17 @@ export class Task extends EventTarget {
         return { error: toError(error) }
       }
     }
-    return isValidSamples(samples)
-      ? { samples }
-      : {}
+    return isValidSamples(samples) ? { samples } : {}
   }
 
-  async #measureOnce (): Promise<{ fnResult: ReturnType<Fn>, taskTime: number }> {
+  /**
+   * Measures a single execution of the task function asynchronously.
+   * @returns An object containing the function result and the measured execution time
+   */
+  async #measureOnce (): Promise<{
+    fnResult: ReturnType<Fn>
+    taskTime: number
+  }> {
     const taskStart = this.#bench.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
@@ -480,7 +490,11 @@ export class Task extends EventTarget {
     return { fnResult, taskTime }
   }
 
-  #measureOnceSync (): { fnResult: ReturnType<Fn>, taskTime: number } {
+  /**
+   * Measures a single execution of the task function synchronously.
+   * @returns An object containing the function result and the measured execution time
+   */
+  #measureOnceSync (): { fnResult: ReturnType<Fn>; taskTime: number } {
     const taskStart = this.#bench.now()
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
@@ -497,10 +511,16 @@ export class Task extends EventTarget {
     return { fnResult, taskTime }
   }
 
+  /**
+   * Handles the abort event from either the task-level or bench-level signal.
+   * Sets the task result to aborted if the task is in an abortable state.
+   */
   #onAbort (): void {
     this.#aborted = true
     if (
-      abortableStates.includes(this.#result.state as typeof abortableStates[number])
+      abortableStates.includes(
+        this.#result.state as (typeof abortableStates)[number]
+      )
     ) {
       this.#result = abortedTaskResult
       const ev = new BenchEvent('abort', this)
@@ -509,6 +529,11 @@ export class Task extends EventTarget {
     }
   }
 
+  /**
+   * Processes the result of the warmup phase.
+   * Dispatches an error event if the warmup encountered an error.
+   * @param error - The error that occurred during warmup, if any
+   */
   #postWarmup (error: Error | undefined): void {
     if (error) {
       /* eslint-disable perfectionist/sort-objects */
@@ -523,6 +548,13 @@ export class Task extends EventTarget {
     }
   }
 
+  /**
+   * Processes the result of a benchmark run and updates the task result.
+   * Calculates statistics from the collected samples and dispatches appropriate events.
+   * @param options - An object containing the error and latency samples from the run
+   * @param options.error - The error that occurred during the run, if any
+   * @param options.latencySamples - The array of latency samples collected during the run
+   */
   #processRunResult ({
     error,
     latencySamples,
@@ -546,7 +578,9 @@ export class Task extends EventTarget {
           totalTime += sample
           throughputSamples.push(1000 / sample)
         } else {
-          throughputSamples.push(latencyStatisticsMean === 0 ? 0 : 1000 / latencyStatisticsMean)
+          throughputSamples.push(
+            latencyStatisticsMean === 0 ? 0 : 1000 / latencyStatisticsMean
+          )
         }
       }
 
@@ -591,20 +625,19 @@ export class Task extends EventTarget {
 }
 
 /**
- * @param fnResult - the result of the task function.
- * @returns the overridden duration if defined by the function.
+ * Extracts the overridden duration from a task function result if present.
+ * @param fnResult - The result of the task function
+ * @returns The overridden duration in milliseconds if defined by the function, otherwise undefined
  */
 function getOverriddenDurationFromFnResult (
   fnResult: ReturnType<Fn>
 ): number | undefined {
-  return (
-    fnResult != null &&
+  return fnResult != null &&
     typeof fnResult === 'object' &&
     'overriddenDuration' in fnResult &&
     typeof fnResult.overriddenDuration === 'number' &&
     Number.isFinite(fnResult.overriddenDuration) &&
     fnResult.overriddenDuration >= 0
-  )
     ? fnResult.overriddenDuration
     : undefined
 }

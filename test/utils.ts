@@ -2,7 +2,10 @@ import type { Samples, SortedSamples } from '../src/types'
 
 import { sortFn } from '../src/utils'
 
-const nil32 = typeof SharedArrayBuffer !== 'undefined' && typeof Atomics !== 'undefined' && new Int32Array(new SharedArrayBuffer(4))
+const nil32 =
+  typeof SharedArrayBuffer !== 'undefined' &&
+  typeof Atomics !== 'undefined' &&
+  new Int32Array(new SharedArrayBuffer(4))
 
 const platform = await (async () => {
   try {
@@ -18,18 +21,19 @@ const platform = await (async () => {
  * Use only in test or non-production code.
  * @param ms amount of time to sleep in milliseconds
  */
-export const sleep = nil32 !== false && platform === 'linux'
-  ? (ms: number): void => {
-      if (Atomics.wait(nil32, 0, 0, ms) !== 'timed-out') {
-        throw new Error('Atomics.wait returned unexpected value')
+export const sleep =
+  nil32 !== false && platform === 'linux'
+    ? (ms: number): void => {
+        if (Atomics.wait(nil32, 0, 0, ms) !== 'timed-out') {
+          throw new Error('Atomics.wait returned unexpected value')
+        }
       }
-    }
-  : (ms: number): void => {
-      const target = performance.now() + ms
-      while (target > performance.now()) {
-      // noop
+    : (ms: number): void => {
+        const target = performance.now() + ms
+        while (target > performance.now()) {
+          // noop
+        }
       }
-    }
 
 /**
  * Asynchronously waits for the specified number of milliseconds without blocking the event loop.

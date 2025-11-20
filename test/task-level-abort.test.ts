@@ -259,7 +259,13 @@ test('abort task during warmup (async)', async () => {
 
 test('abort with task concurrency (async)', async () => {
   const controller = new AbortController()
-  const bench = new Bench({ concurrency: 'task', iterations: 10, threshold: 2, time: 50, warmupIterations: 0 })
+  const bench = new Bench({
+    concurrency: 'task',
+    iterations: 10,
+    threshold: 2,
+    time: 50,
+    warmupIterations: 0,
+  })
 
   bench.add(
     'concurrent-task',

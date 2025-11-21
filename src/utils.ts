@@ -464,7 +464,16 @@ export function getStatisticsSorted (samples: SortedSamples, retainSamples = fal
  */
 export const assert = (condition: boolean, message: string): void => {
   if (!condition) {
-    throw new Error(message)
+    const stackTraceLimit = Error.stackTraceLimit
+    try {
+      Error.stackTraceLimit = 0
+      const error = new Error(message)
+      Error.stackTraceLimit = stackTraceLimit
+      stackTraceLimit !== 0 && Error.captureStackTrace(error, assert)
+      throw error
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit
+    }
   }
 }
 

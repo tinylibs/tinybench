@@ -10,6 +10,10 @@ import type {
   TaskEvents,
   TaskResult,
   TaskResultRuntimeInfo,
+  TaskResultTimestampProviderInfo,
+  TimestampFn,
+  TimestampProvider,
+  TimestampValue,
 } from './types'
 
 import { BenchEvent } from './event'
@@ -78,11 +82,12 @@ export class Task extends EventTarget {
    * The result of the task.
    * @returns The task result including state, statistics, and runtime information
    */
-  get result (): TaskResult & TaskResultRuntimeInfo {
+  get result (): TaskResult & TaskResultRuntimeInfo & TaskResultTimestampProviderInfo {
     return {
       ...this.#result,
       runtime: this.#bench.runtime,
       runtimeVersion: this.#bench.runtimeVersion,
+      timestampProviderName: this.#bench.timestampProvider.name,
     }
   }
 
@@ -144,6 +149,21 @@ export class Task extends EventTarget {
    */
   readonly #signal: AbortSignal | undefined
 
+  /**
+   * The timestamp function
+   */
+  readonly #timestampFn: TimestampFn
+
+  /**
+   * The timestamp provider
+   */
+  readonly #timestampProvider: TimestampProvider
+
+  /**
+   * The timestamp to milliseconds conversion function
+   */
+  readonly #timestampToMs: (value: TimestampValue) => number
+
   constructor (bench: BenchLike, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
     this.#bench = bench
@@ -153,6 +173,9 @@ export class Task extends EventTarget {
     this.#async = fnOpts.async ?? isFnAsyncResource(fn)
     this.#signal = fnOpts.signal
     this.#retainSamples = fnOpts.retainSamples ?? bench.retainSamples
+    this.#timestampProvider = bench.timestampProvider
+    this.#timestampFn = bench.timestampProvider.fn
+    this.#timestampToMs = bench.timestampProvider.toMs
 
     for (const hookName of hookNames) {
       if (this.#fnOpts[hookName] != null) {
@@ -336,12 +359,9 @@ export class Task extends EventTarget {
           await this.#fnOpts.beforeEach.call(this, mode)
         }
 
-        let taskTime: number
-        if (this.#async) {
-          ({ taskTime } = await this.#measureOnce())
-        } else {
-          ({ taskTime } = this.#measureOnceSync())
-        }
+        const taskTime = this.#async
+          ? await this.#measure()
+          : this.#measureSync()
 
         samples.push(taskTime)
         totalTime += taskTime
@@ -351,15 +371,16 @@ export class Task extends EventTarget {
         }
       }
     }
+
     if (this.#bench.concurrency === 'task') {
       try {
         await withConcurrency({
           fn: benchmarkTask,
           iterations,
           limit: Math.max(1, Math.floor(this.#bench.threshold)),
-          now: this.#bench.now,
           signal: this.#signal ?? this.#bench.signal,
           time,
+          timestampProvider: this.#timestampProvider,
         })
       } catch (error) {
         return { error: toError(error) }
@@ -429,7 +450,7 @@ export class Task extends EventTarget {
           )
         }
 
-        const { taskTime } = this.#measureOnceSync()
+        const taskTime = this.#measureSync()
 
         samples.push(taskTime)
         totalTime += taskTime
@@ -472,33 +493,30 @@ export class Task extends EventTarget {
 
   /**
    * Measures a single execution of the task function asynchronously.
-   * @returns An object containing the function result and the measured execution time
+   * @returns The measured execution time
    */
-  async #measureOnce (): Promise<{
-    fnResult: ReturnType<Fn>
-    taskTime: number
-  }> {
-    const taskStart = this.#bench.now()
+  async #measure (): Promise<number> {
+    const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
-    let taskTime = this.#bench.now() - taskStart
+    const taskTime = this.#timestampToMs((this.#timestampFn() as unknown as number) - taskStart)
 
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
-      taskTime = overriddenDuration
+      return overriddenDuration
     }
-    return { fnResult, taskTime }
+    return taskTime
   }
 
   /**
    * Measures a single execution of the task function synchronously.
-   * @returns An object containing the function result and the measured execution time
+   * @returns The measured execution time
    */
-  #measureOnceSync (): { fnResult: ReturnType<Fn>; taskTime: number } {
-    const taskStart = this.#bench.now()
+  #measureSync (): number {
+    const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
-    let taskTime = this.#bench.now() - taskStart
+    const taskTime = this.#timestampToMs(this.#timestampFn() as unknown as number - taskStart)
 
     assert(
       !isPromiseLike(fnResult),
@@ -506,9 +524,9 @@ export class Task extends EventTarget {
     )
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
-      taskTime = overriddenDuration
+      return overriddenDuration
     }
-    return { fnResult, taskTime }
+    return taskTime
   }
 
   /**

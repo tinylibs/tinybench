@@ -6,9 +6,12 @@ import type {
   ConsoleTableConverter,
   Fn,
   JSRuntime,
+  NowFn,
   Samples,
   SortedSamples,
   Statistics,
+  TimestampProvider,
+  TimestampValue,
 } from './types'
 
 import { emptyFunction, tTable } from './constants'
@@ -119,14 +122,35 @@ export const { runtime, version: runtimeVersion } = detectRuntime()
  * @param ns - the nanoseconds to convert
  * @returns the milliseconds
  */
-export const nToMs = (ns: number) => ns / 1e6
+export const nToMs = (ns: TimestampValue) => Number(ns) / 1e6
 
 /**
  * Converts milliseconds to nanoseconds.
  * @param ms - the milliseconds to convert
  * @returns the nanoseconds
  */
-export const mToNs = (ms: number) => ms * 1e6
+export const mToNs = (ms: bigint | number) => Number(ms) * 1e6
+
+/**
+ * Just a passthrough function for milliseconds.
+ * @param ms - the milliseconds
+ * @returns the milliseconds
+ */
+export const mToMs = <T, R extends T = T>(ms: T): R => ms as R // eslint-disable-line @typescript-eslint/no-unnecessary-type-parameters
+
+/**
+ * Converts nanoseconds to milliseconds. Expects bigint input.
+ * @param ns - the nanoseconds
+ * @returns the milliseconds
+ */
+export const nBigintToMs = (ns: bigint) => Number(ns) / 1e6
+
+/**
+ * Converts milliseconds to nanoseconds as bigint.
+ * @param ms - milliseconds
+ * @returns nanoseconds as bigint
+ */
+export const mToNsBigint = (ms: number) => BigInt(ms) * 1_000_000n
 
 /**
  * Formats a number with the specified significant digits and maximum fraction digits.
@@ -166,38 +190,6 @@ export const formatNumber = (
 
   return value.toFixed(decimals)
 }
-
-const hrtimeBigint: () => bigint =
-  typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
-    .process?.hrtime?.bigint === 'function'
-    ? (
-        globalThis as unknown as {
-          process: { hrtime: { bigint: () => bigint } }
-        }
-      ).process.hrtime.bigint.bind(
-        (
-          globalThis as unknown as {
-            process: { hrtime: { bigint: () => bigint } }
-          }
-        ).process.hrtime
-      )
-    : () => {
-        throw new Error(
-          'hrtime.bigint() is not supported in this JS environment'
-        )
-      }
-
-/**
- * Returns the current high resolution timestamp in milliseconds using `process.hrtime.bigint()`.
- * @returns the current high resolution timestamp in milliseconds
- */
-export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
-
-/**
- * Returns the current high resolution timestamp in milliseconds using `performance.now()`.
- * @returns the current high resolution timestamp in milliseconds
- */
-export const performanceNow = performance.now.bind(performance)
 
 /**
  * Checks whether a value is a promise-like object.
@@ -551,11 +543,6 @@ interface WithConcurrencyOptions<R> {
    */
   limit: number
   /**
-   * A function that returns the current timestamp.
-   * @returns a timestamp
-   */
-  now?: () => number
-  /**
    * An optional AbortSignal to cancel the execution.
    */
   signal?: AbortSignal
@@ -564,6 +551,11 @@ interface WithConcurrencyOptions<R> {
    * runs until iterations are completed.
    */
   time?: number
+  /**
+   * The high-resolution timestamp function to use.
+   * @returns a timestamp
+   */
+  timestampProvider?: TimestampProvider
 }
 
 /**
@@ -580,9 +572,9 @@ export const withConcurrency = async <R>(
     fn,
     iterations,
     limit,
-    now = performanceNow,
     signal,
     time = 0,
+    timestampProvider = performanceNowTimestampProvider,
   } = options
 
   const maxWorkers =
@@ -596,7 +588,9 @@ export const withConcurrency = async <R>(
 
   const hasTimeLimit = Number.isFinite(time) && time > 0
   const hasIterationsLimit = iterations > 0
-  let targetTime = 0
+  let targetTime: TimestampValue = 0
+
+  const timestampFn = timestampProvider.fn
 
   // Reduce checks based on provided limits to avoid tainting the benchmark results
   const doNext: () => boolean = hasIterationsLimit
@@ -604,10 +598,10 @@ export const withConcurrency = async <R>(
       ? () =>
           isRunning &&
           nextIndex++ < iterations &&
-          (now() < targetTime || (isRunning = false))
+          (timestampFn() < targetTime || (isRunning = false))
       : () => isRunning && nextIndex++ < iterations
     : hasTimeLimit
-      ? () => isRunning && (now() < targetTime || (isRunning = false))
+      ? () => isRunning && (timestampFn() < targetTime || (isRunning = false))
       : () => isRunning
 
   const pushResult = (r: R) => {
@@ -636,7 +630,7 @@ export const withConcurrency = async <R>(
     }
   }
 
-  if (hasTimeLimit) targetTime = now() + time
+  if (hasTimeLimit) targetTime = timestampFn() as number + (timestampProvider.fromMs(time) as number)
   const promises = Array.from({ length: maxWorkers }, () => worker())
   await Promise.allSettled(promises)
 
@@ -645,5 +639,158 @@ export const withConcurrency = async <R>(
   throw new AggregateError(
     errors,
     'Multiple errors occurred during concurrent execution'
+  )
+}
+
+/**
+ * Returns the current timestamp in milliseconds using `performance.now()`.
+ * @returns the current timestamp in milliseconds
+ */
+export const performanceNow = globalThis.performance.now.bind(globalThis.performance)
+
+/**
+ * The performance.now() based TimestampProvider.
+ */
+export const performanceNowTimestampProvider: TimestampProvider = {
+  fn: performanceNow,
+  fromMs: mToMs,
+  name: 'performanceNow',
+  toMs: mToMs,
+}
+
+/* eslint-disable jsdoc/require-returns-check */
+/**
+ * Returns the current timestamp in nanoseconds using `process.hrtime.bigint()`.
+ * @returns the current timestamp in nanoseconds
+ */
+const hrtimeBigint =
+  typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
+    .process?.hrtime?.bigint === 'function'
+    ? (
+        globalThis as unknown as {
+          process: { hrtime: { bigint: () => bigint } }
+        }
+      ).process.hrtime.bigint.bind(
+        (
+          globalThis as unknown as {
+            process: { hrtime: { bigint: () => bigint } }
+          }
+        ).process.hrtime
+      )
+    : () => {
+        throw new Error(
+          'hrtime.bigint() is not supported in this JS environment'
+        )
+      }
+/* eslint-enable jsdoc/require-returns-check */
+
+/**
+ * Returns the current timestamp in milliseconds using `process.hrtime.bigint()`.
+ * @returns the current timestamp in milliseconds
+ */
+export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
+
+/**
+ * The hrtime.bigint() based TimestampProvider.
+ */
+export const hrtimeNowTimestampProvider: TimestampProvider = {
+  fn: hrtimeBigint,
+  fromMs: mToNsBigint,
+  name: 'hrtimeNow',
+  toMs: nBigintToMs as (ts: TimestampValue) => number,
+}
+
+/**
+ * Returns the current timestamp in nanoseconds using `Bun.nanoseconds()`.
+ * @returns the current timestamp in nanoseconds
+ */
+export const bunNanoseconds = (globalThis as { Bun?: { nanoseconds: NowFn } }).Bun?.nanoseconds
+
+/**
+ * The Bun.nanoseconds() based TimestampProvider, or undefined if Bun is not available.
+ */
+export const bunNanosecondsTimestampProvider: TimestampProvider | undefined = bunNanoseconds
+  ? {
+      fn: bunNanoseconds,
+      fromMs: mToNs,
+      name: 'bunNanoseconds',
+      toMs: nToMs,
+    }
+  : undefined
+
+/**
+ * Creates a custom TimestampProvider.
+ *
+ * Expects the provided function to return time in milliseconds.
+ * @param fn - the function to create a TimestampProvider for
+ * @returns the created TimestampProvider
+ */
+export function createCustomTimestampProvider (fn: NowFn): TimestampProvider {
+  return {
+    fn,
+    fromMs: mToMs,
+    name: 'custom',
+    toMs: mToMs,
+  }
+}
+
+export const getTimestampProviderByJSRuntime = (jsRuntime: JSRuntime = runtime): TimestampProvider => {
+  if (jsRuntime === 'bun') {
+    return bunNanosecondsTimestampProvider! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  } else if (jsRuntime === 'deno') {
+    return performanceNowTimestampProvider
+  } else if (jsRuntime === 'node') {
+    return hrtimeNowTimestampProvider
+  } else {
+    return performanceNowTimestampProvider
+  }
+}
+
+export const getTimestampProvider = (value: unknown): TimestampProvider => {
+  switch (typeof value) {
+    case 'function':
+      return createCustomTimestampProvider(value as NowFn)
+    case 'string':
+      switch (value) {
+        case 'auto':
+          return getTimestampProviderByJSRuntime()
+        case 'bunNanoseconds':
+          return bunNanosecondsTimestampProvider ?? performanceNowTimestampProvider
+        case 'hrtimeNow':
+          return hrtimeNowTimestampProvider
+        default:
+          return performanceNowTimestampProvider
+      }
+    case 'object':
+      if (value === null) {
+        return performanceNowTimestampProvider
+      }
+      assert(
+        isValidTimestampProvider(value),
+        'Invalid Timestamp Provider object'
+      )
+      return value as TimestampProvider
+    case 'undefined':
+      return performanceNowTimestampProvider
+    default:
+      throw new Error('Invalid value for \'timestampProvider\' or \'now\'')
+  }
+}
+
+/**
+ * Checks whether a value is a valid TimestampProvider.
+ * @param value - value to check
+ * @returns whether the value is a valid TimestampProvider
+ */
+function isValidTimestampProvider (
+  value: unknown
+): value is TimestampProvider {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    typeof (value as TimestampProvider).fn === 'function' &&
+    typeof (value as TimestampProvider).name === 'string' &&
+    typeof (value as TimestampProvider).toMs === 'function' &&
+    typeof (value as TimestampProvider).fromMs === 'function'
   )
 }

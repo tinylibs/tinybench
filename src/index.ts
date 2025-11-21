@@ -30,6 +30,11 @@ export type {
   TaskResultNotStarted,
   TaskResultRuntimeInfo,
   TaskResultStarted,
+  TaskResultTimestampProviderInfo,
   TaskResultWithStatistics,
+  TimestampFn,
+  TimestampFns,
+  TimestampProvider,
+  TimestampValue,
 } from './types'
 export { hrtimeNow, performanceNow as now, nToMs } from './utils'

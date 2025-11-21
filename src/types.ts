@@ -72,6 +72,7 @@ export interface BenchLike extends EventTarget {
    * A function to get a timestamp.
    */
   now: NowFn
+
   /**
    * Removes a previously registered event listener.
    */
@@ -119,6 +120,10 @@ export interface BenchLike extends EventTarget {
    * The amount of time to run each task.
    */
   time: number
+  /**
+   * The timestamp provider used by the benchmark.
+   */
+  timestampProvider: TimestampProvider
   /**
    * Whether to warmup the tasks before running them
    */
@@ -200,6 +205,12 @@ export interface BenchOptions {
    * @default 1000
    */
   time?: number
+
+  /**
+   * The timestamp provider used by the benchmark. By default 'performance.now'
+   * will be used.
+   */
+  timestampProvider?: TimestampFns | TimestampProvider
 
   /**
    * Warmup benchmark.
@@ -374,6 +385,7 @@ export type JSRuntime =
   | 'v8'
   | 'workerd'
 
+/**
 /**
  * A function that returns the current timestamp.
  */
@@ -614,6 +626,7 @@ export interface TaskResultRuntimeInfo {
    */
   runtimeVersion: string
 }
+
 /**
  * The task result for started tasks
  */
@@ -622,6 +635,16 @@ export interface TaskResultStarted {
    * the task state
    */
   state: 'started'
+}
+
+/**
+ * The timestamp provider information for task results
+ */
+export interface TaskResultTimestampProviderInfo {
+  /**
+   * the name of the timestamp provider used during the benchmark
+   */
+  timestampProviderName: (string & {}) | TimestampFns
 }
 
 /**
@@ -648,3 +671,53 @@ export interface TaskResultWithStatistics {
    */
   totalTime: number
 }
+
+/**
+ * A timestamp function that returns either a number or bigint.
+ */
+export type TimestampFn = () => TimestampValue
+
+/**
+ * Possible timestamp provider names.
+ * 'custom' is used when a custom timestamp function is provided.
+ */
+export type TimestampFns =
+  | 'auto'
+  | 'bunNanoseconds'
+  | 'custom'
+  | 'hrtimeNow'
+  | 'performanceNow'
+
+/**
+ * A timestamp provider and its related functions.
+ */
+export interface TimestampProvider {
+  /**
+   * The actual function of the timestamp provider.
+   * @returns the timestamp value
+   */
+  fn: TimestampFn
+  /**
+   * Converts milliseconds to the timestamp value.
+   * @param value - the milliseconds value
+   * @returns the timestamp value
+   */
+  fromMs: (value: number) => TimestampValue
+  /**
+   * The name of the timestamp provider.
+   */
+  name: (string & {}) | TimestampFns
+  /**
+   * Converts the timestamp value to milliseconds.
+   * @param value - the timestamp value
+   * @returns the milliseconds
+   */
+  toMs: (value: TimestampValue) => number
+}
+
+/**
+ * A timestamp value, either number or bigint. Internally timestamps can use
+ * either representation depending on the environment and the chosen timestamp
+ * function.
+ */
+export type TimestampValue = bigint | number

@@ -2,10 +2,10 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@10.23.0",
   "volta": {
     "node": "24.11.1",
-    "pnpm": "10.22.0"
+    "pnpm": "10.23.0"
   },
   "scripts": {
     "all": "run-s example:*",

@@ -157,6 +157,28 @@ bench.concurrency = 'task' // The concurrency mode to determine how tasks are ru
 await bench.run()
 ```
 
+## Retaining Samples
+
+By default Tinybench does not keep the samples for `latency` and `throughput` to
+minimize memory usage. Enable sample retention if you need the raw samples for
+plotting, custom analysis, or exporting results.
+
+You can enable samples retention at the bench level by setting the
+`retainSamples` option to `true` when creating a `Bench` instance:
+
+```ts
+const bench = new Bench({ retainSamples: true })
+```
+
+You can also enable samples retention by setting the `retainSamples` option to
+`true` when adding a task:
+
+```ts
+bench.add('task with samples', () => {
+  // Task logic here
+}, { retainSamples: true })
+```
+
 ## Aborting Benchmarks
 
 Tinybench supports aborting benchmarks using `AbortSignal` at both the bench and task levels:

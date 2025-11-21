@@ -1,4 +1,6 @@
-import { type Samples, type SortedSamples, sortFn } from '../src/utils'
+import type { Samples, SortedSamples } from '../src/types'
+
+import { sortFn } from '../src/utils'
 
 const nil32 =
   typeof SharedArrayBuffer !== 'undefined' &&

@@ -633,7 +633,28 @@ export const withConcurrency = async <R>(
   )
 }
 
-const hrtimeBigint: () => bigint =
+/**
+ * Returns the current timestamp in milliseconds using `performance.now()`.
+ * @returns the current timestamp in milliseconds
+ */
+export const performanceNow = globalThis.performance.now.bind(globalThis.performance)
+
+/**
+ * The performance.now() based TimestampProvider.
+ */
+export const performanceNowTimestampProvider: TimestampProvider = {
+  fn: performanceNow,
+  fromMs: mToMs,
+  name: 'performanceNow',
+  toMs: mToMs,
+}
+
+/* eslint-disable jsdoc/require-returns-check */
+/**
+ * Returns the current timestamp in nanoseconds using `process.hrtime.bigint()`.
+ * @returns the current timestamp in nanoseconds
+ */
+const hrtimeBigint =
   typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
     .process?.hrtime?.bigint === 'function'
     ? (
@@ -652,6 +673,7 @@ const hrtimeBigint: () => bigint =
           'hrtime.bigint() is not supported in this JS environment'
         )
       }
+/* eslint-enable jsdoc/require-returns-check */
 
 /**
  * Returns the current timestamp in milliseconds using `process.hrtime.bigint()`.
@@ -660,20 +682,8 @@ const hrtimeBigint: () => bigint =
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
 
 /**
- * Returns the current timestamp in milliseconds using `performance.now()`.
- * @returns the current timestamp in milliseconds
+ * The hrtime.bigint() based TimestampProvider.
  */
-export const performanceNow = globalThis.performance.now.bind(globalThis.performance)
-
-export const bunNanoseconds = (globalThis as { Bun?: { nanoseconds: NowFn } }).Bun?.nanoseconds
-
-export const performanceNowTimestampProvider: TimestampProvider = {
-  fn: performanceNow,
-  fromMs: mToMs,
-  name: 'performanceNow',
-  toMs: mToMs,
-}
-
 export const hrtimeNowTimestampProvider: TimestampProvider = {
   fn: hrtimeBigint,
   fromMs: mToNsBigint,
@@ -681,6 +691,15 @@ export const hrtimeNowTimestampProvider: TimestampProvider = {
   toMs: nBigintToMs as (ts: TimestampValue) => number,
 }
 
+/**
+ * Returns the current timestamp in nanoseconds using `Bun.nanoseconds()`.
+ * @returns the current timestamp in nanoseconds
+ */
+export const bunNanoseconds = (globalThis as { Bun?: { nanoseconds: NowFn } }).Bun?.nanoseconds
+
+/**
+ * The Bun.nanoseconds() based TimestampProvider, or undefined if Bun is not available.
+ */
 export const bunNanosecondsTimestampProvider: TimestampProvider | undefined = bunNanoseconds
   ? {
       fn: bunNanoseconds,

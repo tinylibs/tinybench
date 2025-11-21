@@ -727,7 +727,7 @@ export const getTimestampProvider = (value: unknown): TimestampProvider => {
         case 'auto':
           return getTimestampProviderByJSRuntime()
         case 'bunNanoseconds':
-          return bunNanosecondsTimestampProvider! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          return bunNanosecondsTimestampProvider ?? performanceNowTimestampProvider
         case 'hrtimeNow':
           return hrtimeNowTimestampProvider
         default:

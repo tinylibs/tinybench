@@ -10,6 +10,7 @@ import type {
   TaskEvents,
   TaskResult,
   TaskResultRuntimeInfo,
+  TaskResultTimestampProviderInfo,
   TimestampFn,
   TimestampProvider,
   TimestampValue,
@@ -81,11 +82,12 @@ export class Task extends EventTarget {
    * The result of the task.
    * @returns The task result including state, statistics, and runtime information
    */
-  get result (): TaskResult & TaskResultRuntimeInfo {
+  get result (): TaskResult & TaskResultRuntimeInfo & TaskResultTimestampProviderInfo {
     return {
       ...this.#result,
       runtime: this.#bench.runtime,
       runtimeVersion: this.#bench.runtimeVersion,
+      timestampProviderName: this.#bench.timestampProvider.name,
     }
   }
 

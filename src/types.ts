@@ -642,6 +642,16 @@ export interface TaskResultStarted {
 }
 
 /**
+ * The timestamp provider information for task results
+ */
+export interface TaskResultTimestampProviderInfo {
+  /**
+   * the name of the timestamp provider used during the benchmark
+   */
+  timestampProviderName: (string & {}) | TimestampFns
+}
+
+/**
  * The statistical data for task results
  */
 export interface TaskResultWithStatistics {

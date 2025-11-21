@@ -30,6 +30,7 @@ export type {
   TaskResultNotStarted,
   TaskResultRuntimeInfo,
   TaskResultStarted,
+  TaskResultTimestampProviderInfo,
   TaskResultWithStatistics,
   TimestampFn,
   TimestampFns,

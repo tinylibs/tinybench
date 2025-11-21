@@ -462,7 +462,7 @@ export function getStatisticsSorted (samples: SortedSamples, retainSamples = fal
  * @param message - the error message to throw if the condition is false
  * @throws {Error} if the condition is false
  */
-export const invariant = (condition: boolean, message: string): void => {
+export const assert = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message)
   }

@@ -10,6 +10,7 @@ import type {
   JSRuntime,
   RemoveEventListenerOptionsArgument,
   TaskResult,
+  Timestamp,
 } from './types'
 
 import {
@@ -23,8 +24,8 @@ import { BenchEvent } from './event'
 import { Task } from './task'
 import {
   defaultConvertTaskResultForConsoleTable,
+  getTimestamp,
   invariant,
-  performanceNow,
   runtime,
   runtimeVersion,
 } from './utils'
@@ -120,6 +121,11 @@ export class Bench extends EventTarget implements BenchLike {
   readonly time: number
 
   /**
+   * A function to get a timestamp.
+   */
+  readonly timestamp: Timestamp
+
+  /**
    * Whether to warmup the tasks before running them
    */
   readonly warmup: boolean
@@ -166,7 +172,15 @@ export class Bench extends EventTarget implements BenchLike {
 
     this.time = restOptions.time ?? defaultTime
     this.iterations = restOptions.iterations ?? defaultIterations
-    this.now = restOptions.now ?? performanceNow
+
+    invariant(
+      !(restOptions.now !== undefined && restOptions.timestamp !== undefined),
+      'Cannot set both `now` and `timestamp` options'
+    )
+    this.timestamp = getTimestamp(restOptions.now ?? restOptions.timestamp)
+
+    this.now = () => this.timestamp.toMs(this.timestamp.fn())
+
     this.warmup = restOptions.warmup ?? true
     this.warmupIterations =
       restOptions.warmupIterations ?? defaultWarmupIterations

@@ -338,9 +338,9 @@ export class Task extends EventTarget {
 
         let taskTime: number
         if (this.#async) {
-          ({ taskTime } = await this.#measureOnce())
+          ({ taskTime } = await this.#measure())
         } else {
-          ({ taskTime } = this.#measureOnceSync())
+          ({ taskTime } = this.#measureSync())
         }
 
         samples.push(taskTime)
@@ -357,9 +357,9 @@ export class Task extends EventTarget {
           fn: benchmarkTask,
           iterations,
           limit: Math.max(1, Math.floor(this.#bench.threshold)),
-          now: this.#bench.now,
           signal: this.#signal ?? this.#bench.signal,
           time,
+          timestamp: this.#bench.timestamp,
         })
       } catch (error) {
         return { error: toError(error) }
@@ -429,7 +429,7 @@ export class Task extends EventTarget {
           )
         }
 
-        const { taskTime } = this.#measureOnceSync()
+        const { taskTime } = this.#measureSync()
 
         samples.push(taskTime)
         totalTime += taskTime
@@ -474,14 +474,15 @@ export class Task extends EventTarget {
    * Measures a single execution of the task function asynchronously.
    * @returns An object containing the function result and the measured execution time
    */
-  async #measureOnce (): Promise<{
+  async #measure (): Promise<{
     fnResult: ReturnType<Fn>
     taskTime: number
   }> {
-    const taskStart = this.#bench.now()
+    const now = this.#bench.timestamp.fn
+    const taskStart = now() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
-    let taskTime = this.#bench.now() - taskStart
+    let taskTime = this.#bench.timestamp.toMs((now() as unknown as number) - taskStart)
 
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
@@ -494,11 +495,12 @@ export class Task extends EventTarget {
    * Measures a single execution of the task function synchronously.
    * @returns An object containing the function result and the measured execution time
    */
-  #measureOnceSync (): { fnResult: ReturnType<Fn>; taskTime: number } {
-    const taskStart = this.#bench.now()
+  #measureSync (): { fnResult: ReturnType<Fn>; taskTime: number } {
+    const now = this.#bench.timestamp.fn
+    const taskStart = now() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
-    let taskTime = this.#bench.now() - taskStart
+    let taskTime = this.#bench.timestamp.toMs(now() as unknown as number - taskStart)
 
     invariant(
       !isPromiseLike(fnResult),

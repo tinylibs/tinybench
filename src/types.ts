@@ -700,7 +700,7 @@ export interface TimestampProvider {
   /**
    * The name of the timestamp provider.
    */
-  name: (Record<never, never> & string) | TimestampFns
+  name: (string & {}) | TimestampFns
   /**
    * Converts the timestamp value to milliseconds.
    * @param value - the timestamp value

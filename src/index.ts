@@ -21,10 +21,6 @@ export type {
   Samples,
   SortedSamples,
   Statistics,
-  TimestampProvider,
-  TimestampFn,
-  TimestampFns,
-  TimestampValue,
   TaskEvents,
   TaskResult,
   TaskResultAborted,
@@ -35,5 +31,9 @@ export type {
   TaskResultRuntimeInfo,
   TaskResultStarted,
   TaskResultWithStatistics,
+  TimestampFn,
+  TimestampFns,
+  TimestampProvider,
+  TimestampValue,
 } from './types'
 export { hrtimeNow, performanceNow as now, nToMs } from './utils'

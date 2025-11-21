@@ -73,3 +73,20 @@ test('verify hrtimeNow', () => {
   expect(bench.timestampProvider.toMs(1_000_000n)).toBe(1)
   expect(bench.timestampProvider.fromMs(1)).toBe(1_000_000n)
 })
+
+test('create dateNow like example', () => {
+  const bench = new Bench({
+    throws: true,
+    timestampProvider: {
+      fn: () => Date.now(),
+      fromMs: (ms) => ms,
+      name: 'dateNow',
+      toMs: (ts) => ts as number,
+    },
+  })
+
+  expect(bench.timestampProvider.name).toBe('dateNow')
+  expect(bench.timestampProvider.fn()).toBeTypeOf('number')
+  expect(bench.timestampProvider.toMs(1)).toBe(1)
+  expect(bench.timestampProvider.fromMs(1)).toBe(1)
+})

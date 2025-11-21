@@ -706,7 +706,7 @@ export function createCustomTimestampProvider (fn: NowFn): TimestampProvider {
   }
 }
 
-export const autoNowFn = (jsRuntime: JSRuntime = runtime): TimestampProvider => {
+export const getTimestampProviderByJSRuntime = (jsRuntime: JSRuntime = runtime): TimestampProvider => {
   if (jsRuntime === 'bun') {
     return bunNanosecondsTimestampProvider! // eslint-disable-line @typescript-eslint/no-non-null-assertion
   } else if (jsRuntime === 'deno') {
@@ -725,9 +725,9 @@ export const getTimestampProvider = (value: unknown): TimestampProvider => {
     case 'string':
       switch (value) {
         case 'auto':
-          return autoNowFn()
+          return getTimestampProviderByJSRuntime()
         case 'bunNanoseconds':
-          return bunNanosecondsTimestampProvider ?? getTimestampProvider('auto')
+          return bunNanosecondsTimestampProvider! // eslint-disable-line @typescript-eslint/no-non-null-assertion
         case 'hrtimeNow':
           return hrtimeNowTimestampProvider
         default:
@@ -738,19 +738,31 @@ export const getTimestampProvider = (value: unknown): TimestampProvider => {
         return performanceNowTimestampProvider
       }
       invariant(
-        typeof (value as TimestampProvider).fn === 'function' &&
-          typeof (value as TimestampProvider).toMs === 'function' &&
-          typeof (value as TimestampProvider).fromMs === 'function',
+        isValidTimestampProvider(value),
         'Invalid Timestamp Provider object'
       )
       return value as TimestampProvider
     case 'undefined':
       return performanceNowTimestampProvider
     default:
-      invariant(
-        false,
-        'Invalid Timestamp Provider object or now function'
-      )
-      return performanceNowTimestampProvider
+      throw new Error('Invalid value for \'timestampProvider\' or \'now\'')
   }
+}
+
+/**
+ * Checks whether a value is a valid TimestampProvider.
+ * @param value - value to check
+ * @returns whether the value is a valid TimestampProvider
+ */
+function isValidTimestampProvider (
+  value: unknown
+): value is TimestampProvider {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    typeof (value as TimestampProvider).fn === 'function' &&
+    typeof (value as TimestampProvider).name === 'string' &&
+    typeof (value as TimestampProvider).toMs === 'function' &&
+    typeof (value as TimestampProvider).fromMs === 'function'
+  )
 }

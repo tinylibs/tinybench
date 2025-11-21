@@ -130,8 +130,8 @@ import { Bench, TimestampProvider } from 'tinybench'
 
 // Custom timestamp provider using Date.now()
 const dateNowTimestampProvider: TimestampProvider = {
-  // function that returns the current timestamp
-  fn: Date.now
+  name: 'dateNow', // name of the provider
+  fn: Date.now, // function that returns the current timestamp
   toMs: ts => ts, // convert the timestamp to milliseconds
   fromMs: ts => ts // convert milliseconds to the format used by fn()
 }

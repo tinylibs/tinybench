@@ -100,16 +100,57 @@ task.addEventListener('cycle', (evt) => {
 
 ### [`BenchEvent`](https://tinylibs.github.io/tinybench/types/BenchEvent.html)
 
-## `process.hrtime`
+## Timestamp Providers
 
-if you want more accurate results for nodejs with `process.hrtime`, then import
-the `hrtimeNow` function from the library and pass it to the `Bench` options.
+Tinybench can utilize different timestamp providers for measuring time intervals.
+By default it uses `performance.now()`.
+
+The `timestampProvider` option can be set when creating a `Bench` instance. It
+accepts either a `TimestampProvider` object or shorthands for the common
+providers `hrtimeNow` and `performanceNow`.
+
+If you use `bun` runtime, you can also use `bunNanoseconds` shorthand.
+
+You can set the `timestampProvider` to `auto` to let Tinybench choose the best
+available provider based on the runtime.
 
 ```ts
-import { hrtimeNow } from 'tinybench'
+import { Bench } from 'tinybench'
+
+const bench = new Bench({
+  timestampProvider: 'hrtimeNow' // or 'performanceNow', 'bunNanoseconds', 'auto'
+})
 ```
 
-It may make your benchmarks slower.
+If you want to provide a custom timestamp provider, you can create an object that implements
+the `TimestampProvider` interface:
+
+```ts
+import { Bench, TimestampProvider } from 'tinybench'
+
+// Custom timestamp provider using Date.now()
+const dateNowTimestampProvider: TimestampProvider = {
+  // function that returns the current timestamp
+  fn: Date.now
+  toMs: ts => ts, // convert the timestamp to milliseconds
+  fromMs: ts => ts // convert milliseconds to the format used by fn()
+}
+
+const bench = new Bench({
+  timestampProvider: dateNowTimestampProvider
+})
+```
+
+You can also set the `now` option to a function that returns the current timestamp.
+It will be converted to a `TimestampProvider` internally.
+
+```ts
+import { Bench } from 'tinybench'
+
+const bench = new Bench({
+  now: Date.now
+})
+```
 
 ## Async Detection
 

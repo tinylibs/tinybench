@@ -22,8 +22,8 @@ import {
 import { BenchEvent } from './event'
 import { Task } from './task'
 import {
+  assert,
   defaultConvertTaskResultForConsoleTable,
-  invariant,
   performanceNow,
   runtime,
   runtimeVersion,
@@ -274,7 +274,7 @@ export class Bench extends EventTarget implements BenchLike {
    * @returns the tasks array
    */
   runSync (): Task[] {
-    invariant(
+    assert(
       this.concurrency === null,
       'Cannot use `concurrency` option when using `runSync`'
     )

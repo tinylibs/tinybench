@@ -35,6 +35,29 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+  lint-typedoc:
+    name: Lint Typedoc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm lint:typedoc
+
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest

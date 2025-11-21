@@ -24,6 +24,7 @@
     "typedoc": "typedoc",
     "lint": "eslint --cache src test examples eslint.config.js tsdown.config.ts vitest.config.ts vitest.pretest.config.ts",
     "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsdown.config.ts vitest.config.ts vitest.pretest.config.ts",
+    "lint:typedoc": "typedoc --treatWarningsAsErrors --emit none",
     "release": "bumpp package.json --commit --push --tag",
     "ci:pretest": "vitest --config vitest.pretest.config.ts run",
     "test": "vitest run",

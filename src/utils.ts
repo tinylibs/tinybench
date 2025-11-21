@@ -718,7 +718,7 @@ export const autoNowFn = (jsRuntime: JSRuntime = runtime): TimestampProvider => 
   }
 }
 
-export const getTimestamp = (value: unknown): TimestampProvider => {
+export const getTimestampProvider = (value: unknown): TimestampProvider => {
   switch (typeof value) {
     case 'function':
       return createCustomTimestampProvider(value as NowFn)
@@ -727,7 +727,7 @@ export const getTimestamp = (value: unknown): TimestampProvider => {
         case 'auto':
           return autoNowFn()
         case 'bunNanoseconds':
-          return bunNanosecondsTimestampProvider ?? getTimestamp('auto')
+          return bunNanosecondsTimestampProvider ?? getTimestampProvider('auto')
         case 'hrtimeNow':
           return hrtimeNowTimestampProvider
         default:

@@ -24,7 +24,7 @@ import { BenchEvent } from './event'
 import { Task } from './task'
 import {
   defaultConvertTaskResultForConsoleTable,
-  getTimestamp,
+  getTimestampProvider,
   invariant,
   runtime,
   runtimeVersion,
@@ -177,7 +177,7 @@ export class Bench extends EventTarget implements BenchLike {
       !(restOptions.now !== undefined && restOptions.timestampProvider !== undefined),
       'Cannot set both `now` and `timestampProvider` options'
     )
-    this.timestampProvider = getTimestamp(restOptions.now ?? restOptions.timestampProvider)
+    this.timestampProvider = getTimestampProvider(restOptions.now ?? restOptions.timestampProvider)
 
     this.now = () => this.timestampProvider.toMs(this.timestampProvider.fn())
 

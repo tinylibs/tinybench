@@ -386,10 +386,6 @@ export type JSRuntime =
   | 'workerd'
 
 /**
- * Milliseconds can only be numbers.
- */
-export type Milliseconds = number
-
 /**
  * A function that returns the current timestamp.
  */

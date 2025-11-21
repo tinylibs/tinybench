@@ -10,7 +10,7 @@ import type {
   Samples,
   SortedSamples,
   Statistics,
-  Timestamp,
+  TimestampProvider,
   TimestampValue,
 } from './types'
 
@@ -546,7 +546,7 @@ interface WithConcurrencyOptions<R> {
    * The high-resolution timestamp function to use.
    * @returns a timestamp
    */
-  timestamp?: Timestamp
+  timestampProvider?: TimestampProvider
 }
 
 /**
@@ -565,7 +565,7 @@ export const withConcurrency = async <R>(
     limit,
     signal,
     time = 0,
-    timestamp = performanceNowTimestamp,
+    timestampProvider = performanceNowTimestampProvider,
   } = options
 
   const maxWorkers =
@@ -581,7 +581,7 @@ export const withConcurrency = async <R>(
   const hasIterationsLimit = iterations > 0
   let targetTime: TimestampValue = 0
 
-  const timestampFn = timestamp.fn
+  const timestampFn = timestampProvider.fn
 
   // Reduce checks based on provided limits to avoid tainting the benchmark results
   const doNext: () => boolean = hasIterationsLimit
@@ -621,7 +621,7 @@ export const withConcurrency = async <R>(
     }
   }
 
-  if (hasTimeLimit) targetTime = timestampFn() as number + (timestamp.fromMs(time) as number)
+  if (hasTimeLimit) targetTime = timestampFn() as number + (timestampProvider.fromMs(time) as number)
   const promises = Array.from({ length: maxWorkers }, () => worker())
   await Promise.allSettled(promises)
 
@@ -654,34 +654,34 @@ const hrtimeBigint: () => bigint =
       }
 
 /**
- * Returns the current high resolution timestamp in milliseconds using `process.hrtime.bigint()`.
- * @returns the current high resolution timestamp in milliseconds
+ * Returns the current timestamp in milliseconds using `process.hrtime.bigint()`.
+ * @returns the current timestamp in milliseconds
  */
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
 
 /**
- * Returns the current high resolution timestamp in milliseconds using `performance.now()`.
- * @returns the current high resolution timestamp in milliseconds
+ * Returns the current timestamp in milliseconds using `performance.now()`.
+ * @returns the current timestamp in milliseconds
  */
 export const performanceNow = globalThis.performance.now.bind(globalThis.performance)
 
 export const bunNanoseconds = (globalThis as { Bun?: { nanoseconds: NowFn } }).Bun?.nanoseconds
 
-export const performanceNowTimestamp: Timestamp = {
+export const performanceNowTimestampProvider: TimestampProvider = {
   fn: performanceNow,
   fromMs: mToMs,
   name: 'performanceNow',
   toMs: mToMs,
 }
 
-export const hrtimeNowTimestamp: Timestamp = {
+export const hrtimeNowTimestampProvider: TimestampProvider = {
   fn: hrtimeBigint,
   fromMs: mToNsBigint,
   name: 'hrtimeNow',
   toMs: nBigintToMs as (ts: TimestampValue) => number,
 }
 
-export const bunNanosecondsTimestamp: Timestamp | undefined = bunNanoseconds
+export const bunNanosecondsTimestampProvider: TimestampProvider | undefined = bunNanoseconds
   ? {
       fn: bunNanoseconds,
       fromMs: mToNs,
@@ -691,66 +691,66 @@ export const bunNanosecondsTimestamp: Timestamp | undefined = bunNanoseconds
   : undefined
 
 /**
- * Creates a custom HighResolutionTimestamp.
+ * Creates a custom TimestampProvider.
  *
  * Expects the provided function to return time in milliseconds.
- * @param fn - the function to create a HighResolutionTimestamp for
- * @returns the created HighResolutionTimestamp
+ * @param fn - the function to create a TimestampProvider for
+ * @returns the created TimestampProvider
  */
-export function createCustomHighResolutionTimestamp (fn: NowFn): Timestamp {
+export function createCustomTimestampProvider (fn: NowFn): TimestampProvider {
   return {
     fn,
-    fromMs: mToMs<number>,
+    fromMs: mToMs,
     name: 'custom',
-    toMs: mToMs<TimestampValue, number>,
+    toMs: mToMs,
   }
 }
 
-export const autoNowFn = (jsRuntime: JSRuntime = runtime): Timestamp => {
+export const autoNowFn = (jsRuntime: JSRuntime = runtime): TimestampProvider => {
   if (jsRuntime === 'bun') {
-    return bunNanosecondsTimestamp! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    return bunNanosecondsTimestampProvider! // eslint-disable-line @typescript-eslint/no-non-null-assertion
   } else if (jsRuntime === 'deno') {
-    return performanceNowTimestamp
+    return performanceNowTimestampProvider
   } else if (jsRuntime === 'node') {
-    return hrtimeNowTimestamp
+    return hrtimeNowTimestampProvider
   } else {
-    return performanceNowTimestamp
+    return performanceNowTimestampProvider
   }
 }
 
-export const getTimestamp = (value: unknown): Timestamp => {
+export const getTimestamp = (value: unknown): TimestampProvider => {
   switch (typeof value) {
     case 'function':
-      return createCustomHighResolutionTimestamp(value as NowFn)
+      return createCustomTimestampProvider(value as NowFn)
     case 'string':
       switch (value) {
         case 'auto':
           return autoNowFn()
         case 'bunNanoseconds':
-          return bunNanosecondsTimestamp ?? getTimestamp('auto')
+          return bunNanosecondsTimestampProvider ?? getTimestamp('auto')
         case 'hrtimeNow':
-          return hrtimeNowTimestamp
+          return hrtimeNowTimestampProvider
         default:
-          return performanceNowTimestamp
+          return performanceNowTimestampProvider
       }
     case 'object':
       if (value === null) {
-        return performanceNowTimestamp
+        return performanceNowTimestampProvider
       }
       invariant(
-        typeof (value as Timestamp).fn === 'function' &&
-          typeof (value as Timestamp).toMs === 'function' &&
-          typeof (value as Timestamp).fromMs === 'function',
-        'Invalid Timestamp object'
+        typeof (value as TimestampProvider).fn === 'function' &&
+          typeof (value as TimestampProvider).toMs === 'function' &&
+          typeof (value as TimestampProvider).fromMs === 'function',
+        'Invalid Timestamp Provider object'
       )
-      return value as Timestamp
+      return value as TimestampProvider
     case 'undefined':
-      return performanceNowTimestamp
+      return performanceNowTimestampProvider
     default:
       invariant(
         false,
-        'Invalid Timestamp object or now function'
+        'Invalid Timestamp Provider object or now function'
       )
-      return performanceNowTimestamp
+      return performanceNowTimestampProvider
   }
 }

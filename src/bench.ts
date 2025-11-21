@@ -10,7 +10,7 @@ import type {
   JSRuntime,
   RemoveEventListenerOptionsArgument,
   TaskResult,
-  Timestamp,
+  TimestampProvider,
 } from './types'
 
 import {
@@ -121,9 +121,9 @@ export class Bench extends EventTarget implements BenchLike {
   readonly time: number
 
   /**
-   * A function to get a timestamp.
+   * A timestamp provider and its related functions.
    */
-  readonly timestamp: Timestamp
+  readonly timestampProvider: TimestampProvider
 
   /**
    * Whether to warmup the tasks before running them
@@ -174,12 +174,12 @@ export class Bench extends EventTarget implements BenchLike {
     this.iterations = restOptions.iterations ?? defaultIterations
 
     invariant(
-      !(restOptions.now !== undefined && restOptions.timestamp !== undefined),
-      'Cannot set both `now` and `timestamp` options'
+      !(restOptions.now !== undefined && restOptions.timestampProvider !== undefined),
+      'Cannot set both `now` and `timestampProvider` options'
     )
-    this.timestamp = getTimestamp(restOptions.now ?? restOptions.timestamp)
+    this.timestampProvider = getTimestamp(restOptions.now ?? restOptions.timestampProvider)
 
-    this.now = () => this.timestamp.toMs(this.timestamp.fn())
+    this.now = () => this.timestampProvider.toMs(this.timestampProvider.fn())
 
     this.warmup = restOptions.warmup ?? true
     this.warmupIterations =

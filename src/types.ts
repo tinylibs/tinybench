@@ -121,9 +121,9 @@ export interface BenchLike extends EventTarget {
    */
   time: number
   /**
-   * The timestamp used by the benchmark.
+   * The timestamp provider used by the benchmark.
    */
-  timestamp: Timestamp
+  timestampProvider: TimestampProvider
   /**
    * Whether to warmup the tasks before running them
    */
@@ -207,10 +207,10 @@ export interface BenchOptions {
   time?: number
 
   /**
-   * The timestamp used by the benchmark. If not provided 'performance.now' or equivalent will be used.
-   * Setting this option overrides the 'now' option. Set
+   * The timestamp provider used by the benchmark. By default 'performance.now'
+   * will be used.
    */
-  timestamp?: Timestamp | TimestampFns
+  timestampProvider?: TimestampFns | TimestampProvider
 
   /**
    * Warmup benchmark.
@@ -667,24 +667,38 @@ export interface TaskResultWithStatistics {
 }
 
 /**
- * A timestamp function and its associated conversion functions.
+ * A timestamp function that returns either a number or bigint.
  */
-export interface Timestamp {
+export type TimestampFn = () => TimestampValue
+
+/**
+ * Possible timestamp provider names.
+ * 'custom' is used when a custom timestamp function is provided.
+ */
+export type TimestampFns =
+  | 'auto'
+  | 'bunNanoseconds'
+  | 'custom'
+  | 'hrtimeNow'
+  | 'performanceNow'
+
+/**
+ * A timestamp provider and its related functions.
+ */
+export interface TimestampProvider {
   /**
-   * The timestamp function.
-   * Calls to this function should return a timestamp value. Can be either
-   * number or bigint depending on the implementation.
+   * The actual function of the timestamp provider.
    * @returns the timestamp value
    */
-  fn: () => TimestampValue
+  fn: TimestampFn
   /**
-   *
+   * Converts milliseconds to the timestamp value.
    * @param value - the milliseconds value
    * @returns the timestamp value
    */
   fromMs: (value: number) => TimestampValue
   /**
-   * The name of the timestamp function used.
+   * The name of the timestamp provider.
    */
   name: (Record<never, never> & string) | TimestampFns
   /**
@@ -694,17 +708,6 @@ export interface Timestamp {
    */
   toMs: (value: TimestampValue) => number
 }
-
-/**
- * Possible timestamp function names.
- * 'custom' is used when a custom timestamp function is provided.
- */
-export type TimestampFns =
-  | 'auto'
-  | 'bunNanoseconds'
-  | 'custom'
-  | 'hrtimeNow'
-  | 'performanceNow'
 
 /**
  * A timestamp value, either number or bigint. Internally timestamps can use

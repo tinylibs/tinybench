@@ -10,6 +10,9 @@ import type {
   TaskEvents,
   TaskResult,
   TaskResultRuntimeInfo,
+  TimestampFn,
+  TimestampProvider,
+  TimestampValue,
 } from './types'
 
 import { BenchEvent } from './event'
@@ -144,6 +147,21 @@ export class Task extends EventTarget {
    */
   readonly #signal: AbortSignal | undefined
 
+  /**
+   * The timestamp function
+   */
+  readonly #timestampFn: TimestampFn
+
+  /**
+   * The timestamp provider
+   */
+  readonly #timestampProvider: TimestampProvider
+
+  /**
+   * The timestamp to milliseconds conversion function
+   */
+  readonly #timestampToMs: (value: TimestampValue) => number
+
   constructor (bench: BenchLike, name: string, fn: Fn, fnOpts: FnOptions = {}) {
     super()
     this.#bench = bench
@@ -153,6 +171,9 @@ export class Task extends EventTarget {
     this.#async = fnOpts.async ?? isFnAsyncResource(fn)
     this.#signal = fnOpts.signal
     this.#retainSamples = fnOpts.retainSamples ?? bench.retainSamples
+    this.#timestampProvider = bench.timestampProvider
+    this.#timestampFn = bench.timestampProvider.fn
+    this.#timestampToMs = bench.timestampProvider.toMs
 
     for (const hookName of hookNames) {
       if (this.#fnOpts[hookName] != null) {
@@ -357,7 +378,7 @@ export class Task extends EventTarget {
           limit: Math.max(1, Math.floor(this.#bench.threshold)),
           signal: this.#signal ?? this.#bench.signal,
           time,
-          timestamp: this.#bench.timestamp,
+          timestampProvider: this.#timestampProvider,
         })
       } catch (error) {
         return { error: toError(error) }
@@ -473,11 +494,10 @@ export class Task extends EventTarget {
    * @returns The measured execution time
    */
   async #measure (): Promise<number> {
-    const now = this.#bench.timestamp.fn
-    const taskStart = now() as unknown as number
+    const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
-    const taskTime = this.#bench.timestamp.toMs((now() as unknown as number) - taskStart)
+    const taskTime = this.#timestampToMs((this.#timestampFn() as unknown as number) - taskStart)
 
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
@@ -491,11 +511,10 @@ export class Task extends EventTarget {
    * @returns The measured execution time
    */
   #measureSync (): number {
-    const now = this.#bench.timestamp.fn
-    const taskStart = now() as unknown as number
+    const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
-    const taskTime = this.#bench.timestamp.toMs(now() as unknown as number - taskStart)
+    const taskTime = this.#timestampToMs(this.#timestampFn() as unknown as number - taskStart)
 
     invariant(
       !isPromiseLike(fnResult),

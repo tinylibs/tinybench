@@ -72,6 +72,8 @@ export class Bench extends EventTarget implements BenchLike {
     options?: RemoveEventListenerOptionsArgument
   ) => void
 
+  readonly retainSamples: boolean
+
   /**
    * The JavaScript runtime environment.
    */
@@ -173,6 +175,7 @@ export class Bench extends EventTarget implements BenchLike {
     this.teardown = restOptions.teardown ?? emptyFunction
     this.throws = restOptions.throws ?? false
     this.signal = restOptions.signal
+    this.retainSamples = restOptions.retainSamples === true
 
     if (this.signal) {
       this.signal.addEventListener(

@@ -25,7 +25,7 @@ test('statistics (async)', async () => {
   expect(fooTask.result.period).toBeTypeOf('number')
   // latency statistics
   expect(fooTask.result.latency).toBeTypeOf('object')
-  expect(Array.isArray(fooTask.result.latency.samples)).toBe(true)
+  expect(fooTask.result.latency.samplesCount).toBeTypeOf('number')
   expect(fooTask.result.latency.min).toBeTypeOf('number')
   expect(fooTask.result.latency.max).toBeTypeOf('number')
   expect(fooTask.result.latency.mean).toBeTypeOf('number')
@@ -45,7 +45,7 @@ test('statistics (async)', async () => {
   expect(fooTask.result.latency.p999).toBeTypeOf('number')
   // throughput statistics
   expect(fooTask.result.throughput).toBeTypeOf('object')
-  expect(Array.isArray(fooTask.result.throughput.samples)).toBe(true)
+  expect(fooTask.result.throughput.samplesCount).toBeTypeOf('number')
   expect(fooTask.result.throughput.max).toBeTypeOf('number')
   expect(fooTask.result.throughput.mean).toBeTypeOf('number')
   expect(fooTask.result.throughput.variance).toBeTypeOf('number')
@@ -86,7 +86,7 @@ test('statistics (sync)', () => {
   expect(fooTask.result.period).toBeTypeOf('number')
   // latency statistics
   expect(fooTask.result.latency).toBeTypeOf('object')
-  expect(Array.isArray(fooTask.result.latency.samples)).toBe(true)
+  expect(fooTask.result.latency.samplesCount).toBeTypeOf('number')
   expect(fooTask.result.latency.min).toBeTypeOf('number')
   expect(fooTask.result.latency.max).toBeTypeOf('number')
   expect(fooTask.result.latency.mean).toBeTypeOf('number')
@@ -106,7 +106,7 @@ test('statistics (sync)', () => {
   expect(fooTask.result.latency.p999).toBeTypeOf('number')
   // throughput statistics
   expect(fooTask.result.throughput).toBeTypeOf('object')
-  expect(Array.isArray(fooTask.result.throughput.samples)).toBe(true)
+  expect(fooTask.result.throughput.samplesCount).toBeTypeOf('number')
   expect(fooTask.result.throughput.max).toBeTypeOf('number')
   expect(fooTask.result.throughput.mean).toBeTypeOf('number')
   expect(fooTask.result.throughput.variance).toBeTypeOf('number')
@@ -123,4 +123,109 @@ test('statistics (sync)', () => {
   expect(fooTask.result.throughput.p99).toBeTypeOf('number')
   expect(fooTask.result.throughput.p995).toBeTypeOf('number')
   expect(fooTask.result.throughput.p999).toBeTypeOf('number')
+})
+
+test('statistics retainSamples true', () => {
+  const bench = new Bench({ iterations: 32, retainSamples: true, time: 100 })
+  bench.add('foo', () => {
+    // noop
+  })
+  bench.runSync()
+
+  const fooTask = bench.getTask('foo')
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result).toBeDefined()
+
+  expect(fooTask.result.state).toBe('completed')
+  if (fooTask.result.state !== 'completed') return
+
+  // latency statistics
+  expect(fooTask.result.latency).toBeTypeOf('object')
+  expect(fooTask.result.latency.samples).toBeTypeOf('object')
+})
+
+test('statistics retainSamples false', () => {
+  const bench = new Bench({ iterations: 32, retainSamples: false, time: 100 })
+  bench.add('foo', () => {
+    // noop
+  })
+  bench.runSync()
+
+  const fooTask = bench.getTask('foo')
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result).toBeDefined()
+
+  expect(fooTask.result.state).toBe('completed')
+  if (fooTask.result.state !== 'completed') return
+
+  // latency statistics
+  expect(fooTask.result.latency).toBeTypeOf('object')
+  expect(fooTask.result.latency.samples).toBeTypeOf('undefined')
+})
+
+test('statistics retainSamples default is false', () => {
+  const bench = new Bench({ iterations: 32, time: 100 })
+  bench.add('foo', () => {
+    // noop
+  })
+  bench.runSync()
+
+  const fooTask = bench.getTask('foo')
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result).toBeDefined()
+
+  expect(fooTask.result.state).toBe('completed')
+  if (fooTask.result.state !== 'completed') return
+
+  // latency statistics
+  expect(fooTask.result.latency).toBeTypeOf('object')
+  expect(fooTask.result.latency.samples).toBeTypeOf('undefined')
+})
+
+test('statistics retainSamples false on bench level but retainSamples true on task level', () => {
+  const bench = new Bench({ iterations: 32, retainSamples: false, time: 100 })
+  bench.add('foo', () => {
+    // noop
+  }, { retainSamples: true })
+  bench.runSync()
+
+  const fooTask = bench.getTask('foo')
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result).toBeDefined()
+
+  expect(fooTask.result.state).toBe('completed')
+  if (fooTask.result.state !== 'completed') return
+
+  // latency statistics
+  expect(fooTask.result.latency).toBeTypeOf('object')
+  expect(fooTask.result.latency.samples).toBeTypeOf('object')
+})
+
+test('statistics retainSamples true on bench level but retainSamples false on task level', () => {
+  const bench = new Bench({ iterations: 32, retainSamples: true, time: 100 })
+  bench.add('foo', () => {
+    // noop
+  }, { retainSamples: false })
+  bench.runSync()
+
+  const fooTask = bench.getTask('foo')
+  expect(fooTask).toBeDefined()
+  if (!fooTask) return
+
+  expect(fooTask.result).toBeDefined()
+
+  expect(fooTask.result.state).toBe('completed')
+  if (fooTask.result.state !== 'completed') return
+
+  // latency statistics
+  expect(fooTask.result.latency).toBeTypeOf('object')
+  expect(fooTask.result.latency.samples).toBeTypeOf('undefined')
 })

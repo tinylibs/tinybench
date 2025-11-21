@@ -2,7 +2,14 @@
 // Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
 
 import type { Task } from './task'
-import type { ConsoleTableConverter, Fn, JSRuntime, Statistics } from './types'
+import type {
+  ConsoleTableConverter,
+  Fn,
+  JSRuntime,
+  Samples,
+  SortedSamples,
+  Statistics,
+} from './types'
 
 import { emptyFunction, tTable } from './constants'
 
@@ -251,16 +258,9 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 }
 
 /**
- * A type representing a samples-array with at least one number.
- */
-export type Samples = [number, ...number[]]
-
-export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
-
-/**
- * Checks whether a value is a Samples type.
- * @param value - the value to check
- * @returns whether the value is a Samples type, meaning a non-empty array of numbers
+ * Checks if a value is a Samples type.
+ * @param value - value to check
+ * @returns if the value is a Samples type, meaning a non-empty array of numbers
  */
 export const isValidSamples = (
   value: number[] | undefined
@@ -418,9 +418,10 @@ export function absoluteDeviationMedian (
  * Computes the statistics of a sample.
  * The sample must be sorted.
  * @param samples - the sorted sample
+ * @param retainSamples - whether to keep the samples in the statistics
  * @returns the statistics of the sample
  */
-export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
+export function getStatisticsSorted (samples: SortedSamples, retainSamples = false): Statistics {
   const { mean, vr } = meanAndVariance(samples)
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)
@@ -447,7 +448,8 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
     p995: quantileSorted(samples, 0.995),
     p999: quantileSorted(samples, 0.999),
     rme,
-    samples,
+    samples: retainSamples ? samples : undefined,
+    samplesCount: samples.length,
     sd,
     sem,
     variance: vr,
@@ -504,7 +506,7 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
           'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
           'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
           'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
-          Samples: task.result.latency.samples.length,
+          Samples: task.result.latency.samplesCount,
         }
       : state !== 'errored'
         ? {

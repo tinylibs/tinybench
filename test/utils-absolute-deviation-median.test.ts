@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  absoluteDeviationMedian,
-  type Samples,
-  type SortedSamples,
-} from '../src/utils'
+import type { Samples, SortedSamples } from '../src/types'
+
+import { absoluteDeviationMedian } from '../src/utils'
 import { toSortedSamples } from './utils'
 
 // Helper: calculate median of a sorted array

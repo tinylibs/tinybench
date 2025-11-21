@@ -13,6 +13,8 @@ jobs:
     if: github.repository == 'tinylibs/tinybench'
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@v4
 
@@ -49,6 +51,8 @@ jobs:
     needs: build-release
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: true
 
       - uses: pnpm/action-setup@v4
 
@@ -96,6 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - uses: actions/setup-node@v6
@@ -116,6 +121,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          persist-credentials: true
           ref: ${{ github.event.repository.default_branch }}
 
       - name: Setup pnpm

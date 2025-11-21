@@ -111,8 +111,8 @@ providers `hrtimeNow` and `performanceNow`.
 
 If you use `bun` runtime, you can also use `bunNanoseconds` shorthand.
 
-You can set the `timestampProvider` to `auto` to let Tinybench choose the best
-available provider based on the runtime.
+You can set the `timestampProvider` to `auto` to let Tinybench choose the most
+precise available timestamp provider based on the runtime.
 
 ```ts
 import { Bench } from 'tinybench'

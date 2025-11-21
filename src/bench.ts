@@ -23,9 +23,9 @@ import {
 import { BenchEvent } from './event'
 import { Task } from './task'
 import {
+  assert,
   defaultConvertTaskResultForConsoleTable,
   getTimestampProvider,
-  invariant,
   runtime,
   runtimeVersion,
 } from './utils'
@@ -173,7 +173,7 @@ export class Bench extends EventTarget implements BenchLike {
     this.time = restOptions.time ?? defaultTime
     this.iterations = restOptions.iterations ?? defaultIterations
 
-    invariant(
+    assert(
       !(restOptions.now !== undefined && restOptions.timestampProvider !== undefined),
       'Cannot set both `now` and `timestampProvider` options'
     )
@@ -288,7 +288,7 @@ export class Bench extends EventTarget implements BenchLike {
    * @returns the tasks array
    */
   runSync (): Task[] {
-    invariant(
+    assert(
       this.concurrency === null,
       'Cannot use `concurrency` option when using `runSync`'
     )

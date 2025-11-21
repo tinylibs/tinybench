@@ -18,8 +18,8 @@ import type {
 
 import { BenchEvent } from './event'
 import {
+  assert,
   getStatisticsSorted,
-  invariant,
   isFnAsyncResource,
   isPromiseLike,
   isValidSamples,
@@ -179,7 +179,7 @@ export class Task extends EventTarget {
 
     for (const hookName of hookNames) {
       if (this.#fnOpts[hookName] != null) {
-        invariant(
+        assert(
           typeof this.#fnOpts[hookName] === 'function',
           `'${hookName}' must be a function if provided`
         )
@@ -252,7 +252,7 @@ export class Task extends EventTarget {
       return this
     }
 
-    invariant(
+    assert(
       this.#bench.concurrency === null,
       'Cannot use `concurrency` option when using `runSync`'
     )
@@ -260,7 +260,7 @@ export class Task extends EventTarget {
     this.dispatchEvent(new BenchEvent('start', this))
 
     const setupResult = this.#bench.setup(this, 'run')
-    invariant(
+    assert(
       !isPromiseLike(setupResult),
       '`setup` function must be sync when using `runSync()`'
     )
@@ -272,7 +272,7 @@ export class Task extends EventTarget {
     )
 
     const teardownResult = this.#bench.teardown(this, 'run')
-    invariant(
+    assert(
       !isPromiseLike(teardownResult),
       '`teardown` function must be sync when using `runSync()`'
     )
@@ -312,7 +312,7 @@ export class Task extends EventTarget {
     this.dispatchEvent(new BenchEvent('warmup', this))
 
     const setupResult = this.#bench.setup(this, 'warmup')
-    invariant(
+    assert(
       !isPromiseLike(setupResult),
       '`setup` function must be sync when using `runSync()`'
     )
@@ -324,7 +324,7 @@ export class Task extends EventTarget {
     )
 
     const teardownResult = this.#bench.teardown(this, 'warmup')
-    invariant(
+    assert(
       !isPromiseLike(teardownResult),
       '`teardown` function must be sync when using `runSync()`'
     )
@@ -425,7 +425,7 @@ export class Task extends EventTarget {
     if (this.#fnOpts.beforeAll) {
       try {
         const beforeAllResult = this.#fnOpts.beforeAll.call(this, mode)
-        invariant(
+        assert(
           !isPromiseLike(beforeAllResult),
           '`beforeAll` function must be sync when using `runSync()`'
         )
@@ -444,7 +444,7 @@ export class Task extends EventTarget {
       try {
         if (this.#fnOpts.beforeEach) {
           const beforeEachResult = this.#fnOpts.beforeEach.call(this, mode)
-          invariant(
+          assert(
             !isPromiseLike(beforeEachResult),
             '`beforeEach` function must be sync when using `runSync()`'
           )
@@ -457,7 +457,7 @@ export class Task extends EventTarget {
       } finally {
         if (this.#fnOpts.afterEach) {
           const afterEachResult = this.#fnOpts.afterEach.call(this, mode)
-          invariant(
+          assert(
             !isPromiseLike(afterEachResult),
             '`afterEach` function must be sync when using `runSync()`'
           )
@@ -480,7 +480,7 @@ export class Task extends EventTarget {
     if (this.#fnOpts.afterAll) {
       try {
         const afterAllResult = this.#fnOpts.afterAll.call(this, mode)
-        invariant(
+        assert(
           !isPromiseLike(afterAllResult),
           '`afterAll` function must be sync when using `runSync()`'
         )
@@ -518,7 +518,7 @@ export class Task extends EventTarget {
     const fnResult = this.#fn.call(this)
     const taskTime = this.#timestampToMs(this.#timestampFn() as unknown as number - taskStart)
 
-    invariant(
+    assert(
       !isPromiseLike(fnResult),
       'task function must be sync when using `runSync()`'
     )

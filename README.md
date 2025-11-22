@@ -100,6 +100,132 @@ task.addEventListener('cycle', (evt) => {
 
 ### [`BenchEvent`](https://tinylibs.github.io/tinybench/types/BenchEvent.html)
 
+## Async Detection
+
+Tinybench automatically detects if a task function is asynchronous by
+checking if provided function is an `AsyncFunction` or if it returns a
+`Promise`, by calling the provided function once.
+
+You can also explicitly set the `async` option to `true` or `false` when adding
+a task, thus avoiding the detection. This can be useful, for example, for
+functions that return a `Promise` but are actually synchronous.
+
+```ts
+const bench = new Bench()
+
+bench.add('asyncTask', async () => {
+}, { async: true })
+
+bench.add('syncTask', () => {
+}, { async: false })
+
+bench.add('syncTaskReturningPromiseAsAsync', () => {
+  return Promise.resolve()
+}, { async: true })
+
+bench.add('syncTaskReturningPromiseAsSync', () => {
+  // for example running sync logic, which blocks the event loop anyway
+  // like fs.writeFileSync
+
+  // returns promise maybe for API compatibility
+  return Promise.resolve()
+}, { async: false })
+
+await bench.run()
+```
+
+## Concurrency
+
+- When `mode` is set to `null` (default), concurrency is disabled.
+- When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
+- When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
+
+```ts
+bench.threshold = 10 // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
+bench.concurrency = 'task' // The concurrency mode to determine how tasks are run.
+await bench.run()
+```
+
+## Convert task results for `console.table()`
+
+You can convert the benchmark results to a table format suitable for
+`console.table()` using the `bench.table()` method.
+
+```ts
+const table = bench.table()
+console.table(table)
+```
+
+You can also customize the table output by providing a convert-function to the `table` method.
+
+```ts
+import { Bench, type ConsoleTableConverter, formatNumber, mToNs, type Task } from 'tinybench'
+
+/**
+ * The default converter function for console.table output.
+ * Modify it as needed to customize the table format.
+ */
+const defaultConverter: ConsoleTableConverter = (
+  task: Task
+): Record<string, number | string> => {
+  const state = task.result.state
+  return {
+    'Task name': task.name,
+    ...(state === 'aborted-with-statistics' || state === 'completed'
+      ? {
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50))} \xb1 ${formatNumber(mToNs(task.result.latency.mad))}`,
+          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+          'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
+          Samples: task.result.latency.samplesCount,
+        }
+      : state !== 'errored'
+        ? {
+            'Latency avg (ns)': 'N/A',
+            'Latency med (ns)': 'N/A',
+            'Throughput avg (ops/s)': 'N/A',
+            'Throughput med (ops/s)': 'N/A',
+            Samples: 'N/A',
+            Remarks: state,
+          }
+        : {
+            Error: task.result.error.message,
+            Stack: task.result.error.stack ?? 'N/A',
+          }),
+    ...(state === 'aborted-with-statistics' && {
+      Remarks: state,
+    }),
+  }
+}
+
+const bench = new Bench({ name: 'custom table benchmark', time: 100 })
+// add tasks...
+
+console.table(bench.table(defaultConverter))
+```
+
+## Retaining Samples
+
+By default Tinybench does not keep the samples for `latency` and `throughput` to
+minimize memory usage. Enable sample retention if you need the raw samples for
+plotting, custom analysis, or exporting results.
+
+You can enable samples retention at the bench level by setting the
+`retainSamples` option to `true` when creating a `Bench` instance:
+
+```ts
+const bench = new Bench({ retainSamples: true })
+```
+
+You can also enable samples retention by setting the `retainSamples` option to
+`true` when adding a task:
+
+```ts
+bench.add('task with samples', () => {
+  // Task logic here
+}, { retainSamples: true })
+```
+
 ## Timestamp Providers
 
 Tinybench can utilize different timestamp providers for measuring time intervals.
@@ -150,74 +276,6 @@ import { Bench } from 'tinybench'
 const bench = new Bench({
   now: Date.now
 })
-```
-
-## Async Detection
-
-Tinybench automatically detects if a task function is asynchronous by
-checking if provided function is an `AsyncFunction` or if it returns a
-`Promise`, by calling the provided function once.
-
-You can also explicitly set the `async` option to `true` or `false` when adding
-a task, thus avoiding the detection. This can be useful, for example, for
-functions that return a `Promise` but are actually synchronous.
-
-```ts
-const bench = new Bench()
-
-bench.add('asyncTask', async () => {
-}, { async: true })
-
-bench.add('syncTask', () => {
-}, { async: false })
-
-bench.add('syncTaskReturningPromiseAsAsync', () => {
-  return Promise.resolve()
-}, { async: true })
-
-bench.add('syncTaskReturningPromiseAsSync', () => {
-  // for example running sync logic, which blocks the event loop anyway
-  // like fs.writeFileSync
-
-  // returns promise maybe for API compatibility
-  return Promise.resolve()
-}, { async: false })
-
-await bench.run()
-```
-
-## Concurrency
-
-- When `mode` is set to `null` (default), concurrency is disabled.
-- When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
-- When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
-
-```ts
-bench.threshold = 10 // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
-bench.concurrency = 'task' // The concurrency mode to determine how tasks are run.
-await bench.run()
-```
-
-## Retaining Samples
-
-By default Tinybench does not keep the samples for `latency` and `throughput` to
-minimize memory usage. Enable sample retention if you need the raw samples for
-plotting, custom analysis, or exporting results.
-
-You can enable samples retention at the bench level by setting the
-`retainSamples` option to `true` when creating a `Bench` instance:
-
-```ts
-const bench = new Bench({ retainSamples: true })
-```
-
-You can also enable samples retention by setting the `retainSamples` option to
-`true` when adding a task:
-
-```ts
-bench.add('task with samples', () => {
-  // Task logic here
-}, { retainSamples: true })
 ```
 
 ## Aborting Benchmarks

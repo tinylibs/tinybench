@@ -662,25 +662,12 @@ export const performanceNowTimestampProvider: TimestampProvider = {
  * Returns the current timestamp in nanoseconds using `process.hrtime.bigint()`.
  * @returns the current timestamp in nanoseconds
  */
-const hrtimeBigint =
-  typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
-    .process?.hrtime?.bigint === 'function'
-    ? (
-        globalThis as unknown as {
-          process: { hrtime: { bigint: () => bigint } }
-        }
-      ).process.hrtime.bigint.bind(
-        (
-          globalThis as unknown as {
-            process: { hrtime: { bigint: () => bigint } }
-          }
-        ).process.hrtime
-      )
-    : () => {
-        throw new Error(
-          'hrtime.bigint() is not supported in this JS environment'
-        )
-      }
+const hrtimeBigint = globalThis.process?.hrtime?.bigint.bind(globalThis.process?.hrtime) ?? // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  (() => {
+    throw new Error(
+      'hrtime.bigint() is not supported in this JS environment'
+    )
+  })
 /* eslint-enable jsdoc/require-returns-check */
 
 /**

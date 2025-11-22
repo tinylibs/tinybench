@@ -1,12 +1,12 @@
 import { expect, test } from 'vitest'
 
 import {
-  getStatisticsSorted,
+  computeStatistics,
 } from '../src/utils'
 import { toSortedSamples } from './utils'
 
-test('getStatisticsSorted', () => {
-  let stats = getStatisticsSorted(toSortedSamples([1, 2, 3, 4, 5, 6]))
+test('computeStatistics', () => {
+  let stats = computeStatistics(toSortedSamples([1, 2, 3, 4, 5, 6]))
   expect(stats.min, 'min').toBe(1)
   expect(stats.max, 'max').toBe(6)
   expect(stats.df, 'df').toBe(5)
@@ -24,7 +24,7 @@ test('getStatisticsSorted', () => {
   expect(stats.p999, 'p999').toBe(5.995)
   expect(stats.mad, 'mad').toBe(1.5)
   expect(stats.aad, 'aad').toBe(1.5)
-  stats = getStatisticsSorted(toSortedSamples([1, 2, 3, 4, 5, 6, 7]))
+  stats = computeStatistics(toSortedSamples([1, 2, 3, 4, 5, 6, 7]))
   expect(stats.min, 'min').toBe(1)
   expect(stats.max, 'max').toBe(7)
   expect(stats.df, 'df').toBe(6)
@@ -44,8 +44,8 @@ test('getStatisticsSorted', () => {
   expect(stats.aad, 'aad').toBe(1.7142857142857142)
 })
 
-test('getStatisticsSorted - sample [0]', () => {
-  const stats = getStatisticsSorted(toSortedSamples([0]))
+test('computeStatistics - sample [0]', () => {
+  const stats = computeStatistics(toSortedSamples([0]))
   expect(stats.min, 'min').toBe(0)
   expect(stats.max, 'max').toBe(0)
   expect(stats.df, 'df').toBe(0)
@@ -65,8 +65,8 @@ test('getStatisticsSorted - sample [0]', () => {
   expect(stats.aad, 'aad').toBe(0)
 })
 
-test('getStatisticsSorted - big sample [0, 0, ...]', () => {
-  const stats = getStatisticsSorted(toSortedSamples([0, ...new Array<number>(1999).fill(0)]))
+test('computeStatistics - big sample [0, 0, ...]', () => {
+  const stats = computeStatistics(toSortedSamples([0, ...new Array<number>(1999).fill(0)]))
   expect(stats.min, 'min').toBe(0)
   expect(stats.max, 'max').toBe(0)
   expect(stats.df, 'df').toBe(1999)
@@ -86,8 +86,8 @@ test('getStatisticsSorted - big sample [0, 0, ...]', () => {
   expect(stats.aad, 'aad').toBe(0)
 })
 
-test('getStatisticsSorted - big sample [0, 1, 2, 3, ...(n+1)[]]', () => {
-  const stats = getStatisticsSorted(toSortedSamples([0, ...new Array<number>(1999).fill(0).map((_, i) => i + 1)]))
+test('computeStatistics - big sample [0, 1, 2, 3, ...(n+1)[]]', () => {
+  const stats = computeStatistics(toSortedSamples([0, ...new Array<number>(1999).fill(0).map((_, i) => i + 1)]))
   expect(stats.min, 'min').toBe(0)
   expect(stats.max, 'max').toBe(1999)
   expect(stats.df, 'df').toBe(1999)

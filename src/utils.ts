@@ -164,9 +164,9 @@ export const formatNumber = (
   significantDigits = 5,
   maxFractionDigits = 2
 ): string => {
-  if (value === Number.POSITIVE_INFINITY) return '+∞'
-  if (value === Number.NEGATIVE_INFINITY) return '-∞'
-  if (Number.isNaN(value)) return 'NaN'
+  if (value === Infinity) return '+∞'
+  if (value === -Infinity) return '-∞'
+  if (value !== value) return 'NaN' // eslint-disable-line no-self-compare
 
   const absValue = Math.abs(value)
 
@@ -413,15 +413,14 @@ export function absoluteDeviationMedian (
  * @param retainSamples - whether to keep the samples in the statistics
  * @returns the statistics of the sample
  */
-export function getStatisticsSorted (samples: SortedSamples, retainSamples = false): Statistics {
+export function computeStatistics (samples: SortedSamples, retainSamples = false): Statistics {
   const { mean, vr } = meanAndVariance(samples)
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)
   const df = samples.length - 1
   const critical = tTable[df || 1] ?? tTable[0]
   const moe = sem * critical
-  const absMean = Math.abs(mean)
-  const rme = absMean === 0 ? Number.POSITIVE_INFINITY : (moe / absMean) * 100
+  const rme = mean === 0 ? Number.POSITIVE_INFINITY : (moe / Math.abs(mean)) * 100
   const p50 = quantileSorted(samples, 0.5)
 
   return {
@@ -503,8 +502,8 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
-          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
-          'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50))} \xb1 ${formatNumber(mToNs(task.result.latency.mad))}`,
           'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
           'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
           Samples: task.result.latency.samplesCount,
@@ -635,7 +634,7 @@ export const withConcurrency = async <R>(
   await Promise.allSettled(promises)
 
   if (errors.length === 0) return results
-  if (errors.length === 1) throw toError(errors[0])
+  if (errors.length === 1) throw errors[0] // eslint-disable-line @typescript-eslint/only-throw-error
   throw new AggregateError(
     errors,
     'Multiple errors occurred during concurrent execution'
@@ -663,25 +662,12 @@ export const performanceNowTimestampProvider: TimestampProvider = {
  * Returns the current timestamp in nanoseconds using `process.hrtime.bigint()`.
  * @returns the current timestamp in nanoseconds
  */
-const hrtimeBigint =
-  typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
-    .process?.hrtime?.bigint === 'function'
-    ? (
-        globalThis as unknown as {
-          process: { hrtime: { bigint: () => bigint } }
-        }
-      ).process.hrtime.bigint.bind(
-        (
-          globalThis as unknown as {
-            process: { hrtime: { bigint: () => bigint } }
-          }
-        ).process.hrtime
-      )
-    : () => {
-        throw new Error(
-          'hrtime.bigint() is not supported in this JS environment'
-        )
-      }
+const hrtimeBigint = globalThis.process?.hrtime?.bigint.bind(globalThis.process?.hrtime) ?? // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  (() => {
+    throw new Error(
+      'hrtime.bigint() is not supported in this JS environment'
+    )
+  })
 /* eslint-enable jsdoc/require-returns-check */
 
 /**

@@ -634,7 +634,7 @@ export const withConcurrency = async <R>(
   await Promise.allSettled(promises)
 
   if (errors.length === 0) return results
-  if (errors.length === 1) throw toError(errors[0])
+  if (errors.length === 1) throw errors[0] // eslint-disable-line @typescript-eslint/only-throw-error
   throw new AggregateError(
     errors,
     'Multiple errors occurred during concurrent execution'

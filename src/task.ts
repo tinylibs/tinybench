@@ -19,7 +19,7 @@ import type {
 import { BenchEvent } from './event'
 import {
   assert,
-  getStatisticsSorted,
+  computeStatistics,
   isFnAsyncResource,
   isPromiseLike,
   isValidSamples,
@@ -339,41 +339,37 @@ export class Task extends EventTarget {
   ): Promise<
     { error: Error; samples?: never } | { error?: never; samples?: Samples }
   > {
-    if (this.#fnOpts.beforeAll) {
-      try {
+    try {
+      if (this.#fnOpts.beforeAll) {
         await this.#fnOpts.beforeAll.call(this, mode)
-      } catch (error) {
-        return { error: toError(error) }
       }
-    }
 
-    let totalTime = 0 // ms
-    const samples: number[] = []
+      let totalTime = 0 // ms
+      const samples: number[] = []
 
-    const benchmarkTask = async () => {
-      if (this.#aborted) {
-        return
-      }
-      try {
-        if (this.#fnOpts.beforeEach != null) {
-          await this.#fnOpts.beforeEach.call(this, mode)
+      const benchmarkTask = async () => {
+        if (this.#aborted) {
+          return
         }
+        try {
+          if (this.#fnOpts.beforeEach != null) {
+            await this.#fnOpts.beforeEach.call(this, mode)
+          }
 
-        const taskTime = this.#async
-          ? await this.#measure()
-          : this.#measureSync()
+          const taskTime = this.#async
+            ? await this.#measure()
+            : this.#measureSync()
 
-        samples.push(taskTime)
-        totalTime += taskTime
-      } finally {
-        if (this.#fnOpts.afterEach != null) {
-          await this.#fnOpts.afterEach.call(this, mode)
+          samples.push(taskTime)
+          totalTime += taskTime
+        } finally {
+          if (this.#fnOpts.afterEach != null) {
+            await this.#fnOpts.afterEach.call(this, mode)
+          }
         }
       }
-    }
 
-    if (this.#bench.concurrency === 'task') {
-      try {
+      if (this.#bench.concurrency === 'task') {
         await withConcurrency({
           fn: benchmarkTask,
           iterations,
@@ -382,12 +378,8 @@ export class Task extends EventTarget {
           time,
           timestampProvider: this.#timestampProvider,
         })
-      } catch (error) {
-        return { error: toError(error) }
-      }
-      this.#runs = samples.length
-    } else {
-      try {
+        this.#runs = samples.length
+      } else {
         while (
           // eslint-disable-next-line no-unmodified-loop-condition
           (totalTime < time || samples.length < iterations) &&
@@ -395,20 +387,16 @@ export class Task extends EventTarget {
         ) {
           await benchmarkTask()
         }
-      } catch (error) {
-        return { error: toError(error) }
       }
-    }
 
-    if (this.#fnOpts.afterAll != null) {
-      try {
+      if (this.#fnOpts.afterAll != null) {
         await this.#fnOpts.afterAll.call(this, mode)
-      } catch (error) {
-        return { error: toError(error) }
       }
-    }
 
-    return isValidSamples(samples) ? { samples } : {}
+      return isValidSamples(samples) ? { samples } : {}
+    } catch (error) {
+      return { error: toError(error) }
+    }
   }
 
   /**
@@ -422,50 +410,46 @@ export class Task extends EventTarget {
     time: number,
     iterations: number
   ): { error: Error; samples?: never } | { error?: never; samples?: Samples } {
-    if (this.#fnOpts.beforeAll) {
-      try {
+    try {
+      if (this.#fnOpts.beforeAll) {
         const beforeAllResult = this.#fnOpts.beforeAll.call(this, mode)
         assert(
           !isPromiseLike(beforeAllResult),
           '`beforeAll` function must be sync when using `runSync()`'
         )
-      } catch (error) {
-        return { error: toError(error) }
       }
-    }
 
-    let totalTime = 0
-    const samples: number[] = []
+      let totalTime = 0
+      const samples: number[] = []
 
-    const benchmarkTask = () => {
-      if (this.#aborted) {
-        return
-      }
-      try {
-        if (this.#fnOpts.beforeEach) {
-          const beforeEachResult = this.#fnOpts.beforeEach.call(this, mode)
-          assert(
-            !isPromiseLike(beforeEachResult),
-            '`beforeEach` function must be sync when using `runSync()`'
-          )
+      const benchmarkTask = () => {
+        if (this.#aborted) {
+          return
         }
+        try {
+          if (this.#fnOpts.beforeEach) {
+            const beforeEachResult = this.#fnOpts.beforeEach.call(this, mode)
+            assert(
+              !isPromiseLike(beforeEachResult),
+              '`beforeEach` function must be sync when using `runSync()`'
+            )
+          }
 
-        const taskTime = this.#measureSync()
+          const taskTime = this.#measureSync()
 
-        samples.push(taskTime)
-        totalTime += taskTime
-      } finally {
-        if (this.#fnOpts.afterEach) {
-          const afterEachResult = this.#fnOpts.afterEach.call(this, mode)
-          assert(
-            !isPromiseLike(afterEachResult),
-            '`afterEach` function must be sync when using `runSync()`'
-          )
+          samples.push(taskTime)
+          totalTime += taskTime
+        } finally {
+          if (this.#fnOpts.afterEach) {
+            const afterEachResult = this.#fnOpts.afterEach.call(this, mode)
+            assert(
+              !isPromiseLike(afterEachResult),
+              '`afterEach` function must be sync when using `runSync()`'
+            )
+          }
         }
       }
-    }
 
-    try {
       while (
         // eslint-disable-next-line no-unmodified-loop-condition
         (totalTime < time || samples.length < iterations) &&
@@ -473,22 +457,18 @@ export class Task extends EventTarget {
       ) {
         benchmarkTask()
       }
-    } catch (error) {
-      return { error: toError(error) }
-    }
 
-    if (this.#fnOpts.afterAll) {
-      try {
+      if (this.#fnOpts.afterAll) {
         const afterAllResult = this.#fnOpts.afterAll.call(this, mode)
         assert(
           !isPromiseLike(afterAllResult),
           '`afterAll` function must be sync when using `runSync()`'
         )
-      } catch (error) {
-        return { error: toError(error) }
       }
+      return isValidSamples(samples) ? { samples } : {}
+    } catch (error) {
+      return { error: toError(error) }
     }
-    return isValidSamples(samples) ? { samples } : {}
   }
 
   /**
@@ -585,7 +565,7 @@ export class Task extends EventTarget {
 
       sortSamples(latencySamples)
 
-      const latencyStatistics = getStatisticsSorted(latencySamples, this.#retainSamples)
+      const latencyStatistics = computeStatistics(latencySamples, this.#retainSamples)
       const latencyStatisticsMean = latencyStatistics.mean
 
       let totalTime = 0
@@ -603,7 +583,7 @@ export class Task extends EventTarget {
       }
 
       sortSamples(throughputSamples)
-      const throughputStatistics = getStatisticsSorted(throughputSamples, this.#retainSamples)
+      const throughputStatistics = computeStatistics(throughputSamples, this.#retainSamples)
 
       /* eslint-disable perfectionist/sort-objects */
       this.#result = {

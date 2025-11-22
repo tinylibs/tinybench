@@ -3,8 +3,8 @@ import { expect, test } from 'vitest'
 import type { Task } from '../src'
 
 import {
+  computeStatistics,
   defaultConvertTaskResultForConsoleTable,
-  getStatisticsSorted,
 } from '../src/utils'
 import { toSortedSamples } from './utils'
 
@@ -204,7 +204,7 @@ test('defaultConvertTaskResultForConsoleTable - errored - without stack', () => 
 
 test('defaultConvertTaskResultForConsoleTable - aborted-with-statistics', () => {
   const samples = toSortedSamples([900, 950, 1000, 1050, 1100])
-  const statistics = getStatisticsSorted(samples)
+  const statistics = computeStatistics(samples)
   expect(
     defaultConvertTaskResultForConsoleTable({
       name: 'Sample Task',
@@ -254,7 +254,7 @@ test('defaultConvertTaskResultForConsoleTable - aborted-with-statistics', () => 
 
 test('defaultConvertTaskResultForConsoleTable - completed', () => {
   const samples = toSortedSamples([900, 950, 1000, 1050, 1100])
-  const statistics = getStatisticsSorted(samples)
+  const statistics = computeStatistics(samples)
   expect(
     defaultConvertTaskResultForConsoleTable({
       name: 'Sample Task',

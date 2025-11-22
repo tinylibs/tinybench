@@ -47,7 +47,7 @@ export class Bench extends EventTarget implements BenchLike {
    * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
    * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
    */
-  readonly concurrency: 'bench' | 'task' | null = null
+  readonly concurrency: 'bench' | 'task' | null
 
   /**
    * The amount of executions per task.
@@ -107,7 +107,7 @@ export class Bench extends EventTarget implements BenchLike {
    * The maximum number of concurrent tasks to run
    * @default Number.POSITIVE_INFINITY
    */
-  readonly threshold = Number.POSITIVE_INFINITY
+  readonly threshold: number
 
   /**
    * Whether to throw an error if a task function throws
@@ -159,7 +159,7 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * The task map
    */
-  readonly #tasks = new Map<string, Task>()
+  readonly #tasks: Map<string, Task> = new Map<string, Task>()
 
   constructor (options: BenchOptions = {}) {
     super()
@@ -168,7 +168,7 @@ export class Bench extends EventTarget implements BenchLike {
     this.runtime = runtime
     this.runtimeVersion = runtimeVersion
     this.concurrency = restOptions.concurrency ?? null
-    this.threshold = restOptions.threshold ?? Number.POSITIVE_INFINITY
+    this.threshold = restOptions.threshold ?? Infinity
 
     this.time = restOptions.time ?? defaultTime
     this.iterations = restOptions.iterations ?? defaultIterations

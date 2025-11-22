@@ -1,25 +1,26 @@
 import { expect, test } from 'vitest'
 
-import { Bench, hrtimeNow, now, type Task } from '../src'
+import { Bench, type Task } from '../src'
+import { sleep } from './utils'
 
 // If running in CI, allow a bit more leeway for the mean value
 const maxMeanValue = process.env.CI ? 1100 : 1002
 
-test.each([['now()'], ['hrtimeNow()']])('%s basic (async)', async mode => {
+test('hrtimeNow basic (sync)', () => {
   const bench = new Bench({
     iterations: 16,
-    now: mode === 'now()' ? now : hrtimeNow,
     time: 100,
+    timestampProvider: 'hrtimeNow',
   })
   bench
-    .add('foo', async () => {
-      await new Promise(resolve => setTimeout(resolve, 50))
+    .add('foo', () => {
+      sleep(50)
     })
-    .add('bar', async () => {
-      await new Promise(resolve => setTimeout(resolve, 100))
+    .add('bar', () => {
+      sleep(100)
     })
 
-  await bench.run()
+  bench.runSync()
 
   expect(bench.tasks.length).toEqual(2)
 
@@ -30,8 +31,8 @@ test.each([['now()'], ['hrtimeNow()']])('%s basic (async)', async mode => {
   expect(tasks[0].result.state).toBe('completed')
   if (tasks[0].result.state !== 'completed') return
 
-  expect(tasks[0].result.totalTime).toBeGreaterThanOrEqual(50)
-  expect(Math.ceil(tasks[0].result.latency.mean)).toBeGreaterThanOrEqual(50)
+  expect(tasks[0].result.totalTime).toBeGreaterThan(50)
+  expect(tasks[0].result.latency.mean).toBeGreaterThan(50)
   // throughput mean is ops/s, period is ms unit value
   expect(
     tasks[0].result.throughput.mean * tasks[0].result.period
@@ -45,8 +46,8 @@ test.each([['now()'], ['hrtimeNow()']])('%s basic (async)', async mode => {
   expect(tasks[1].result.state).toBe('completed')
   if (tasks[1].result.state !== 'completed') return
 
-  expect(tasks[1].result.totalTime).toBeGreaterThanOrEqual(100)
-  expect(Math.ceil(tasks[1].result.latency.mean)).toBeGreaterThanOrEqual(100)
+  expect(tasks[1].result.totalTime).toBeGreaterThan(100)
+  expect(tasks[1].result.latency.mean).toBeGreaterThan(100)
   // throughput mean is ops/s, period is ms unit value
   expect(
     tasks[1].result.throughput.mean * tasks[1].result.period

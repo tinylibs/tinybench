@@ -159,7 +159,7 @@ console.table(table)
 You can also customize the table output by providing a convert-function to the `table` method.
 
 ```ts
-import { Bench, type ConsoleTableConverter, formatNumber, mToNs } from 'tinybench'
+import { Bench, type ConsoleTableConverter, formatNumber, mToNs, type Task } from 'tinybench'
 
 /**
  * The default converter function for console.table output.

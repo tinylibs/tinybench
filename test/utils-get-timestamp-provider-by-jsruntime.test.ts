@@ -1,9 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  getTimestampProviderByJSRuntime,
-  runtime,
-} from '../src/utils'
+import { getTimestampProviderByJSRuntime, runtime } from '../src/utils'
 
 test('autoNowFn - node', () => {
   expect(getTimestampProviderByJSRuntime('node').name).toBe('hrtimeNow')

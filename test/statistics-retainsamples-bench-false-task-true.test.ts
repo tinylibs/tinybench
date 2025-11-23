@@ -4,9 +4,13 @@ import { Bench } from '../src'
 
 test('statistics retainSamples false on bench level but retainSamples true on task level', () => {
   const bench = new Bench({ iterations: 32, retainSamples: false, time: 100 })
-  bench.add('foo', () => {
-    // noop
-  }, { retainSamples: true })
+  bench.add(
+    'foo',
+    () => {
+      // noop
+    },
+    { retainSamples: true }
+  )
   bench.runSync()
 
   const fooTask = bench.getTask('foo')

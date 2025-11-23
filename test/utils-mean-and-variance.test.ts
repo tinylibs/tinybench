@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { Samples } from '../src/types'
+import type { Samples } from '../src/types'
+
 import { meanAndVariance } from '../src/utils'
 
 describe('meanAndVariance()', () => {

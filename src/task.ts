@@ -82,7 +82,9 @@ export class Task extends EventTarget {
    * The result of the task.
    * @returns The task result including state, statistics, and runtime information
    */
-  get result (): TaskResult & TaskResultRuntimeInfo & TaskResultTimestampProviderInfo {
+  get result (): TaskResult &
+    TaskResultRuntimeInfo &
+    TaskResultTimestampProviderInfo {
     return {
       ...this.#result,
       runtime: this.#bench.runtime,
@@ -479,7 +481,9 @@ export class Task extends EventTarget {
     const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
-    const taskTime = this.#timestampToMs((this.#timestampFn() as unknown as number) - taskStart)
+    const taskTime = this.#timestampToMs(
+      (this.#timestampFn() as unknown as number) - taskStart
+    )
 
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
@@ -496,7 +500,9 @@ export class Task extends EventTarget {
     const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
-    const taskTime = this.#timestampToMs(this.#timestampFn() as unknown as number - taskStart)
+    const taskTime = this.#timestampToMs(
+      (this.#timestampFn() as unknown as number) - taskStart
+    )
 
     assert(
       !isPromiseLike(fnResult),
@@ -565,7 +571,10 @@ export class Task extends EventTarget {
 
       sortSamples(latencySamples)
 
-      const latencyStatistics = computeStatistics(latencySamples, this.#retainSamples)
+      const latencyStatistics = computeStatistics(
+        latencySamples,
+        this.#retainSamples
+      )
       const latencyStatisticsMean = latencyStatistics.mean
 
       let totalTime = 0
@@ -583,7 +592,10 @@ export class Task extends EventTarget {
       }
 
       sortSamples(throughputSamples)
-      const throughputStatistics = computeStatistics(throughputSamples, this.#retainSamples)
+      const throughputStatistics = computeStatistics(
+        throughputSamples,
+        this.#retainSamples
+      )
 
       /* eslint-disable perfectionist/sort-objects */
       this.#result = {

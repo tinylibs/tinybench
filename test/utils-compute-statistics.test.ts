@@ -1,8 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  computeStatistics,
-} from '../src/utils'
+import { computeStatistics } from '../src/utils'
 import { toSortedSamples } from './utils'
 
 test('computeStatistics', () => {
@@ -55,7 +53,7 @@ test('computeStatistics - sample [0]', () => {
   expect(stats.sd, 'sd').toBe(0)
   expect(stats.sem, 'sem').toBe(0)
   expect(stats.moe, 'moe').toBe(0)
-  expect(stats.rme, 'rme').toBe(Infinity)
+  expect(stats.rme, 'rme').toBe(Number.POSITIVE_INFINITY)
   expect(stats.p50, 'p50').toBe(0)
   expect(stats.p75, 'p75').toBe(0)
   expect(stats.p99, 'p99').toBe(0)
@@ -66,7 +64,9 @@ test('computeStatistics - sample [0]', () => {
 })
 
 test('computeStatistics - big sample [0, 0, ...]', () => {
-  const stats = computeStatistics(toSortedSamples([0, ...new Array<number>(1999).fill(0)]))
+  const stats = computeStatistics(
+    toSortedSamples([0, ...new Array<number>(1999).fill(0)])
+  )
   expect(stats.min, 'min').toBe(0)
   expect(stats.max, 'max').toBe(0)
   expect(stats.df, 'df').toBe(1999)
@@ -76,7 +76,7 @@ test('computeStatistics - big sample [0, 0, ...]', () => {
   expect(stats.sd, 'sd').toBe(0)
   expect(stats.sem, 'sem').toBe(0)
   expect(stats.moe, 'moe').toBe(0)
-  expect(stats.rme, 'rme').toBe(Infinity)
+  expect(stats.rme, 'rme').toBe(Number.POSITIVE_INFINITY)
   expect(stats.p50, 'p50').toBe(0)
   expect(stats.p75, 'p75').toBe(0)
   expect(stats.p99, 'p99').toBe(0)
@@ -87,7 +87,12 @@ test('computeStatistics - big sample [0, 0, ...]', () => {
 })
 
 test('computeStatistics - big sample [0, 1, 2, 3, ...(n+1)[]]', () => {
-  const stats = computeStatistics(toSortedSamples([0, ...new Array<number>(1999).fill(0).map((_, i) => i + 1)]))
+  const stats = computeStatistics(
+    toSortedSamples([
+      0,
+      ...new Array<number>(1999).fill(0).map((_, i) => i + 1),
+    ])
+  )
   expect(stats.min, 'min').toBe(0)
   expect(stats.max, 'max').toBe(1999)
   expect(stats.df, 'df').toBe(1999)

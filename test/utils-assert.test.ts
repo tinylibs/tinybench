@@ -32,7 +32,7 @@ test('assert - false stack trace', () => {
         const stackLines = error.stack.split('\n')
         expect(stackLines[0]).toBe('Error: stack trace test')
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        expect((stackLines[1]!).trim().startsWith('at testFunction')).toBe(true)
+        expect(stackLines[1]!.trim().startsWith('at testFunction')).toBe(true)
       }
     }
   }

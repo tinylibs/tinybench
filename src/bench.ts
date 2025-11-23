@@ -168,16 +168,21 @@ export class Bench extends EventTarget implements BenchLike {
     this.runtime = runtime
     this.runtimeVersion = runtimeVersion
     this.concurrency = restOptions.concurrency ?? null
-    this.threshold = restOptions.threshold ?? Infinity
+    this.threshold = restOptions.threshold ?? Number.POSITIVE_INFINITY
 
     this.time = restOptions.time ?? defaultTime
     this.iterations = restOptions.iterations ?? defaultIterations
 
     assert(
-      !(restOptions.now !== undefined && restOptions.timestampProvider !== undefined),
+      !(
+        restOptions.now !== undefined &&
+        restOptions.timestampProvider !== undefined
+      ),
       'Cannot set both `now` and `timestampProvider` options'
     )
-    this.timestampProvider = getTimestampProvider(restOptions.now ?? restOptions.timestampProvider)
+    this.timestampProvider = getTimestampProvider(
+      restOptions.now ?? restOptions.timestampProvider
+    )
 
     this.now = () => this.timestampProvider.toMs(this.timestampProvider.fn())
 

@@ -8,16 +8,19 @@ test('by default should use performanceNow as timestamp provider', () => {
 })
 
 test('should throw an error if timestampProvider and now are provided as options', () => {
-  expect(() => new Bench({
-    now: () => 100,
-    throws: true,
-    timestampProvider: {
-      fn: () => 100,
-      fromMs: (ms) => ms,
-      name: 'custom',
-      toMs: (ts) => ts as number,
-    },
-  })).toThrowError('Cannot set both `now` and `timestampProvider` options')
+  expect(
+    () =>
+      new Bench({
+        now: () => 100,
+        throws: true,
+        timestampProvider: {
+          fn: () => 100,
+          fromMs: ms => ms,
+          name: 'custom',
+          toMs: ts => ts as number,
+        },
+      })
+  ).toThrowError('Cannot set both `now` and `timestampProvider` options')
 })
 
 test('should convert now function to custom timestampProvider', () => {
@@ -39,9 +42,9 @@ test('when custom timestamp with internal bigint logic, should still return numb
     throws: true,
     timestampProvider: {
       fn: () => 100n,
-      fromMs: (ms) => BigInt(ms * 1e6),
+      fromMs: ms => BigInt(ms * 1e6),
       name: 'custom-bigint',
-      toMs: (ts) => Number(ts) / 1e6,
+      toMs: ts => Number(ts) / 1e6,
     },
   })
 
@@ -79,9 +82,9 @@ test('create dateNow like example', () => {
     throws: true,
     timestampProvider: {
       fn: () => Date.now(),
-      fromMs: (ms) => ms,
+      fromMs: ms => ms,
       name: 'dateNow',
-      toMs: (ts) => ts as number,
+      toMs: ts => ts as number,
     },
   })
 

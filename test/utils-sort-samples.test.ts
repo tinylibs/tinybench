@@ -1,9 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  isValidSamples,
-  sortSamples
-} from '../src/utils'
+import { isValidSamples, sortSamples } from '../src/utils'
 
 test('sortSamples', () => {
   const samples: number[] = [1, 2, 3, 4, 5, 0]

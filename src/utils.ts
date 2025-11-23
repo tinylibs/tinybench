@@ -164,8 +164,8 @@ export const formatNumber = (
   significantDigits = 5,
   maxFractionDigits = 2
 ): string => {
-  if (value === Infinity) return '+∞'
-  if (value === -Infinity) return '-∞'
+  if (value === Number.POSITIVE_INFINITY) return '+∞'
+  if (value === Number.NEGATIVE_INFINITY) return '-∞'
   if (value !== value) return 'NaN' // eslint-disable-line no-self-compare
 
   const absValue = Math.abs(value)
@@ -413,14 +413,18 @@ export function absoluteDeviationMedian (
  * @param retainSamples - whether to keep the samples in the statistics
  * @returns the statistics of the sample
  */
-export function computeStatistics (samples: SortedSamples, retainSamples = false): Statistics {
+export function computeStatistics (
+  samples: SortedSamples,
+  retainSamples = false
+): Statistics {
   const { mean, vr } = meanAndVariance(samples)
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)
   const df = samples.length - 1
   const critical = tTable[df || 1] ?? tTable[0]
   const moe = sem * critical
-  const rme = mean === 0 ? Number.POSITIVE_INFINITY : (moe / Math.abs(mean)) * 100
+  const rme =
+    mean === 0 ? Number.POSITIVE_INFINITY : (moe / Math.abs(mean)) * 100
   const p50 = quantileSorted(samples, 0.5)
 
   return {
@@ -629,7 +633,10 @@ export const withConcurrency = async <R>(
     }
   }
 
-  if (hasTimeLimit) targetTime = timestampFn() as number + (timestampProvider.fromMs(time) as number)
+  if (hasTimeLimit) {
+    targetTime =
+      (timestampFn() as number) + (timestampProvider.fromMs(time) as number)
+  }
   const promises = Array.from({ length: maxWorkers }, () => worker())
   await Promise.allSettled(promises)
 
@@ -645,7 +652,9 @@ export const withConcurrency = async <R>(
  * Returns the current timestamp in milliseconds using `performance.now()`.
  * @returns the current timestamp in milliseconds
  */
-export const performanceNow = globalThis.performance.now.bind(globalThis.performance)
+export const performanceNow = globalThis.performance.now.bind(
+  globalThis.performance
+)
 
 /**
  * The performance.now() based TimestampProvider.
@@ -662,11 +671,10 @@ export const performanceNowTimestampProvider: TimestampProvider = {
  * Returns the current timestamp in nanoseconds using `process.hrtime.bigint()`.
  * @returns the current timestamp in nanoseconds
  */
-const hrtimeBigint = globalThis.process?.hrtime?.bigint.bind(globalThis.process?.hrtime) ?? // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+const hrtimeBigint =
+  globalThis.process?.hrtime?.bigint.bind(globalThis.process?.hrtime) ?? // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   (() => {
-    throw new Error(
-      'hrtime.bigint() is not supported in this JS environment'
-    )
+    throw new Error('hrtime.bigint() is not supported in this JS environment')
   })
 /* eslint-enable jsdoc/require-returns-check */
 
@@ -690,19 +698,21 @@ export const hrtimeNowTimestampProvider: TimestampProvider = {
  * Returns the current timestamp in nanoseconds using `Bun.nanoseconds()`.
  * @returns the current timestamp in nanoseconds
  */
-export const bunNanoseconds = (globalThis as { Bun?: { nanoseconds: NowFn } }).Bun?.nanoseconds
+export const bunNanoseconds = (globalThis as { Bun?: { nanoseconds: NowFn } })
+  .Bun?.nanoseconds
 
 /**
  * The Bun.nanoseconds() based TimestampProvider, or undefined if Bun is not available.
  */
-export const bunNanosecondsTimestampProvider: TimestampProvider | undefined = bunNanoseconds
-  ? {
-      fn: bunNanoseconds,
-      fromMs: mToNs,
-      name: 'bunNanoseconds',
-      toMs: nToMs,
-    }
-  : undefined
+export const bunNanosecondsTimestampProvider: TimestampProvider | undefined =
+  bunNanoseconds
+    ? {
+        fn: bunNanoseconds,
+        fromMs: mToNs,
+        name: 'bunNanoseconds',
+        toMs: nToMs,
+      }
+    : undefined
 
 /**
  * Creates a custom TimestampProvider.
@@ -720,16 +730,19 @@ export function createCustomTimestampProvider (fn: NowFn): TimestampProvider {
   }
 }
 
-export const getTimestampProviderByJSRuntime = (jsRuntime: JSRuntime = runtime): TimestampProvider => {
+export const getTimestampProviderByJSRuntime = (
+  jsRuntime: JSRuntime = runtime
+): TimestampProvider => {
   if (jsRuntime === 'bun') {
     return bunNanosecondsTimestampProvider! // eslint-disable-line @typescript-eslint/no-non-null-assertion
-  } else if (jsRuntime === 'deno') {
-    return performanceNowTimestampProvider
-  } else if (jsRuntime === 'node') {
-    return hrtimeNowTimestampProvider
-  } else {
+  }
+  if (jsRuntime === 'deno') {
     return performanceNowTimestampProvider
   }
+  if (jsRuntime === 'node') {
+    return hrtimeNowTimestampProvider
+  }
+  return performanceNowTimestampProvider
 }
 
 export const getTimestampProvider = (value: unknown): TimestampProvider => {
@@ -741,7 +754,9 @@ export const getTimestampProvider = (value: unknown): TimestampProvider => {
         case 'auto':
           return getTimestampProviderByJSRuntime()
         case 'bunNanoseconds':
-          return bunNanosecondsTimestampProvider ?? performanceNowTimestampProvider
+          return (
+            bunNanosecondsTimestampProvider ?? performanceNowTimestampProvider
+          )
         case 'hrtimeNow':
           return hrtimeNowTimestampProvider
         default:
@@ -759,7 +774,7 @@ export const getTimestampProvider = (value: unknown): TimestampProvider => {
     case 'undefined':
       return performanceNowTimestampProvider
     default:
-      throw new Error('Invalid value for \'timestampProvider\' or \'now\'')
+      throw new Error("Invalid value for 'timestampProvider' or 'now'")
   }
 }
 
@@ -768,9 +783,7 @@ export const getTimestampProvider = (value: unknown): TimestampProvider => {
  * @param value - value to check
  * @returns whether the value is a valid TimestampProvider
  */
-function isValidTimestampProvider (
-  value: unknown
-): value is TimestampProvider {
+function isValidTimestampProvider (value: unknown): value is TimestampProvider {
   return (
     value !== null &&
     typeof value === 'object' &&

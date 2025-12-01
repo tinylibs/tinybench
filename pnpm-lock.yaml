@@ -24,8 +24,8 @@ importers:
         specifier: ^12.0.0
         version: 12.0.0(size-limit@12.0.0(jiti@2.6.1))
       '@size-limit/time':
-        specifier: ^11.2.0
-        version: 11.2.0(size-limit@12.0.0(jiti@2.6.1))
+        specifier: ^12.0.0
+        version: 12.0.0(size-limit@12.0.0(jiti@2.6.1))
       '@types/node':
         specifier: ^24.10.1
         version: 24.10.1
@@ -1119,11 +1119,11 @@ packages:
     peerDependencies:
       size-limit: 12.0.0
 
-  '@size-limit/time@11.2.0':
-    resolution: {integrity: sha512-bL7EnxL3jivVipnlf1xUYDgbnAOinkl6pbNc3WSFkEOFEwy7i58rqOFs5H4iS3Y0mrCueafakUpIW25HiKZZPA==}
-    engines: {node: ^18.0.0 || >=20.0.0}
+  '@size-limit/time@12.0.0':
+    resolution: {integrity: sha512-MAMr1OK1qEEoxbrYjA79cGzncY6KVhNRx6Hid4L1vZLbR6P+k0Cs8zREzCslS4XtOXqyxMtvIJfpq10MN+pAtg==}
+    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
     peerDependencies:
-      size-limit: 11.2.0
+      size-limit: 12.0.0
 
   '@stylistic/eslint-plugin@2.11.0':
     resolution: {integrity: sha512-PNRHbydNG5EH8NK4c+izdJlxajIR6GxcUhzsYNRsn6Myep4dsZt0qFCz3rCPnkvgO5FYibDcMqgNHUT+zvjYZw==}
@@ -4608,7 +4608,7 @@ snapshots:
       '@size-limit/file': 12.0.0(size-limit@12.0.0(jiti@2.6.1))
       size-limit: 12.0.0(jiti@2.6.1)
 
-  '@size-limit/time@11.2.0(size-limit@12.0.0(jiti@2.6.1))':
+  '@size-limit/time@12.0.0(size-limit@12.0.0(jiti@2.6.1))':
     dependencies:
       estimo: 3.0.5
       size-limit: 12.0.0(jiti@2.6.1)

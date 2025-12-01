@@ -21,8 +21,8 @@ importers:
         specifier: ^9.39.1
         version: 9.39.1
       '@size-limit/preset-small-lib':
-        specifier: ^11.2.0
-        version: 11.2.0(size-limit@11.2.0)
+        specifier: ^12.0.0
+        version: 12.0.0(size-limit@11.2.0)
       '@size-limit/time':
         specifier: ^11.2.0
         version: 11.2.0(size-limit@11.2.0)
@@ -1102,22 +1102,22 @@ packages:
     resolution: {integrity: sha512-dNZafjM93Y+F+sfwTO5gTpsGXlnc/0Q+c2+62ViqP3gkMWvHEMSKkaEHgVJLcLg3i/g19GSIPziiKpgyne07Bw==}
     engines: {node: '>=8'}
 
-  '@size-limit/esbuild@11.2.0':
-    resolution: {integrity: sha512-vSg9H0WxGQPRzDnBzeDyD9XT0Zdq0L+AI3+77/JhxznbSCMJMMr8ndaWVQRhOsixl97N0oD4pRFw2+R1Lcvi6A==}
-    engines: {node: ^18.0.0 || >=20.0.0}
+  '@size-limit/esbuild@12.0.0':
+    resolution: {integrity: sha512-r9i+HrtunIu7wAPtqD3t4DqfYin3kxPoMAv8cidkzlCS69IYCe3EG2UbQa10AdvQyaHTEK+MPkr9ifUd3W29og==}
+    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
     peerDependencies:
-      size-limit: 11.2.0
+      size-limit: 12.0.0
 
-  '@size-limit/file@11.2.0':
-    resolution: {integrity: sha512-OZHE3putEkQ/fgzz3Tp/0hSmfVo3wyTpOJSRNm6AmcwX4Nm9YtTfbQQ/hZRwbBFR23S7x2Sd9EbqYzngKwbRoA==}
-    engines: {node: ^18.0.0 || >=20.0.0}
+  '@size-limit/file@12.0.0':
+    resolution: {integrity: sha512-OzKYpDzWJ2jo6cAIzVsaPuvzZTmMLDoVCViEvsctmImxpXzwJZcuBEpPohFKKdgVdZuNTU8WstmvywPq55Njdw==}
+    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
     peerDependencies:
-      size-limit: 11.2.0
+      size-limit: 12.0.0
 
-  '@size-limit/preset-small-lib@11.2.0':
-    resolution: {integrity: sha512-RFbbIVfv8/QDgTPyXzjo5NKO6CYyK5Uq5xtNLHLbw5RgSKrgo8WpiB/fNivZuNd/5Wk0s91PtaJ9ThNcnFuI3g==}
+  '@size-limit/preset-small-lib@12.0.0':
+    resolution: {integrity: sha512-HHHVQjZmj+8vg7qsHs1dd3Hmn8ygUsE5O2CfxnbCbHOGyUw7VodZGERh/+5ogVrF2DYza/DIo2PnCJZZETdTRA==}
     peerDependencies:
-      size-limit: 11.2.0
+      size-limit: 12.0.0
 
   '@size-limit/time@11.2.0':
     resolution: {integrity: sha512-bL7EnxL3jivVipnlf1xUYDgbnAOinkl6pbNc3WSFkEOFEwy7i58rqOFs5H4iS3Y0mrCueafakUpIW25HiKZZPA==}
@@ -4587,20 +4587,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@size-limit/esbuild@11.2.0(size-limit@11.2.0)':
+  '@size-limit/esbuild@12.0.0(size-limit@11.2.0)':
     dependencies:
-      esbuild: 0.25.12
+      esbuild: 0.27.0
       nanoid: 5.1.6
       size-limit: 11.2.0
 
-  '@size-limit/file@11.2.0(size-limit@11.2.0)':
+  '@size-limit/file@12.0.0(size-limit@11.2.0)':
     dependencies:
       size-limit: 11.2.0
 
-  '@size-limit/preset-small-lib@11.2.0(size-limit@11.2.0)':
+  '@size-limit/preset-small-lib@12.0.0(size-limit@11.2.0)':
     dependencies:
-      '@size-limit/esbuild': 11.2.0(size-limit@11.2.0)
-      '@size-limit/file': 11.2.0(size-limit@11.2.0)
+      '@size-limit/esbuild': 12.0.0(size-limit@11.2.0)
+      '@size-limit/file': 12.0.0(size-limit@11.2.0)
       size-limit: 11.2.0
 
   '@size-limit/time@11.2.0(size-limit@11.2.0)':

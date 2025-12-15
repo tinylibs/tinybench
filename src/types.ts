@@ -564,8 +564,7 @@ export interface TaskResultAborted {
 /**
  * The task result for aborted tasks, having also statistical data.
  */
-export interface TaskResultAbortedWithStatistics
-  extends TaskResultWithStatistics {
+export interface TaskResultAbortedWithStatistics extends TaskResultWithStatistics {
   /**
    * the task state
    */

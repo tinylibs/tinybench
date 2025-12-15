@@ -113,23 +113,29 @@ functions that return a `Promise` but are actually synchronous.
 ```ts
 const bench = new Bench()
 
-bench.add('asyncTask', async () => {
-}, { async: true })
+bench.add('asyncTask', async () => {}, { async: true })
 
-bench.add('syncTask', () => {
-}, { async: false })
+bench.add('syncTask', () => {}, { async: false })
 
-bench.add('syncTaskReturningPromiseAsAsync', () => {
-  return Promise.resolve()
-}, { async: true })
+bench.add(
+  'syncTaskReturningPromiseAsAsync',
+  () => {
+    return Promise.resolve()
+  },
+  { async: true }
+)
 
-bench.add('syncTaskReturningPromiseAsSync', () => {
-  // for example running sync logic, which blocks the event loop anyway
-  // like fs.writeFileSync
+bench.add(
+  'syncTaskReturningPromiseAsSync',
+  () => {
+    // for example running sync logic, which blocks the event loop anyway
+    // like fs.writeFileSync
 
-  // returns promise maybe for API compatibility
-  return Promise.resolve()
-}, { async: false })
+    // returns promise maybe for API compatibility
+    return Promise.resolve()
+  },
+  { async: false }
+)
 
 await bench.run()
 ```
@@ -165,9 +171,7 @@ import { Bench, type ConsoleTableConverter, formatNumber, mToNs, type Task } fro
  * The default converter function for console.table output.
  * Modify it as needed to customize the table format.
  */
-const defaultConverter: ConsoleTableConverter = (
-  task: Task
-): Record<string, number | string> => {
+const defaultConverter: ConsoleTableConverter = (task: Task): Record<string, number | string> => {
   const state = task.result.state
   return {
     'Task name': task.name,
@@ -221,9 +225,13 @@ You can also enable samples retention by setting the `retainSamples` option to
 `true` when adding a task:
 
 ```ts
-bench.add('task with samples', () => {
-  // Task logic here
-}, { retainSamples: true })
+bench.add(
+  'task with samples',
+  () => {
+    // Task logic here
+  },
+  { retainSamples: true }
+)
 ```
 
 ## Timestamp Providers
@@ -244,7 +252,7 @@ precise available timestamp provider based on the runtime.
 import { Bench } from 'tinybench'
 
 const bench = new Bench({
-  timestampProvider: 'hrtimeNow' // or 'performanceNow', 'bunNanoseconds', 'auto'
+  timestampProvider: 'hrtimeNow', // or 'performanceNow', 'bunNanoseconds', 'auto'
 })
 ```
 
@@ -259,11 +267,11 @@ const dateNowTimestampProvider: TimestampProvider = {
   name: 'dateNow', // name of the provider
   fn: Date.now, // function that returns the current timestamp
   toMs: ts => ts, // convert the timestamp to milliseconds
-  fromMs: ts => ts // convert milliseconds to the format used by fn()
+  fromMs: ts => ts, // convert milliseconds to the format used by fn()
 }
 
 const bench = new Bench({
-  timestampProvider: dateNowTimestampProvider
+  timestampProvider: dateNowTimestampProvider,
 })
 ```
 
@@ -274,7 +282,7 @@ It will be converted to a `TimestampProvider` internally.
 import { Bench } from 'tinybench'
 
 const bench = new Bench({
-  now: Date.now
+  now: Date.now,
 })
 ```
 
@@ -316,9 +324,13 @@ const controller = new AbortController()
 const bench = new Bench()
 
 bench
-  .add('abortable task', () => {
-    // This task can be aborted independently
-  }, { signal: controller.signal })
+  .add(
+    'abortable task',
+    () => {
+      // This task can be aborted independently
+    },
+    { signal: controller.signal }
+  )
   .add('normal task', () => {
     // This task will continue normally
   })
@@ -339,9 +351,13 @@ const controller = new AbortController()
 
 const bench = new Bench({ time: 10000 }) // Long-running benchmark
 
-bench.add('long task', async () => {
-  await new Promise(resolve => setTimeout(resolve, 100))
-}, { signal: controller.signal })
+bench.add(
+  'long task',
+  async () => {
+    await new Promise(resolve => setTimeout(resolve, 100))
+  },
+  { signal: controller.signal }
+)
 
 // Abort after 1 second
 setTimeout(() => controller.abort(), 1000)
@@ -358,9 +374,13 @@ Both `Bench` and `Task` emit `abort` events when aborted:
 const controller = new AbortController()
 const bench = new Bench()
 
-bench.add('task', () => {
-  // Task function
-}, { signal: controller.signal })
+bench.add(
+  'task',
+  () => {
+    // Task function
+  },
+  { signal: controller.signal }
+)
 
 const task = bench.getTask('task')
 

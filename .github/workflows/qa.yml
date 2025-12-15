@@ -80,7 +80,7 @@ jobs:
 
       - name: Type check
         run: pnpm typecheck
-  
+
   qa-bun:
     runs-on: ${{ matrix.os }}
     strategy:

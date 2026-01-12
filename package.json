@@ -47,12 +47,12 @@
   "devDependencies": {
     "@commitlint/cli": "^20.3.1",
     "@commitlint/config-conventional": "^20.3.1",
-    "@cspell/eslint-plugin": "^9.4.0",
+    "@cspell/eslint-plugin": "^9.6.0",
     "@eslint/js": "^9.39.2",
     "@size-limit/preset-small-lib": "^12.0.0",
     "@size-limit/time": "^12.0.0",
     "@types/node": "^24.10.7",
-    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/coverage-v8": "^4.0.17",
     "bumpp": "^10.3.2",
     "changelogithub": "^14.0.0",
     "clean-publish": "^6.0.1",
@@ -64,9 +64,9 @@
     "simple-git-hooks": "^2.13.1",
     "size-limit": "^12.0.0",
     "tsdown": "^0.19.0",
-    "typedoc": "^0.28.15",
+    "typedoc": "^0.28.16",
     "typescript": "~5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.17"
   },
   "keywords": [
     "benchmark",

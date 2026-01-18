@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.28.0",
   "volta": {
-    "node": "24.12.0",
+    "node": "24.13.0",
     "pnpm": "10.28.0"
   },
   "engines": {
@@ -51,13 +51,13 @@
     "@eslint/js": "^9.39.2",
     "@size-limit/preset-small-lib": "^12.0.0",
     "@size-limit/time": "^12.0.0",
-    "@types/node": "^24.10.7",
+    "@types/node": "^24.10.9",
     "@vitest/coverage-v8": "^4.0.17",
-    "bumpp": "^10.3.2",
+    "bumpp": "^10.4.0",
     "changelogithub": "^14.0.0",
     "clean-publish": "^6.0.1",
     "eslint": "^9.39.2",
-    "eslint-plugin-jsdoc": "^62.0.0",
+    "eslint-plugin-jsdoc": "^62.1.0",
     "eslint-plugin-perfectionist": "^5.3.1",
     "nano-staged": "^0.9.0",
     "neostandard": "^0.12.2",

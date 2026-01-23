@@ -7092,6 +7092,15 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
+  '@typescript-eslint/project-service@8.53.0(typescript@5.9.3)':
+    dependencies:
+      '@typescript-eslint/tsconfig-utils': 8.53.1(typescript@5.9.3)
+      '@typescript-eslint/types': 8.53.1
+      debug: 4.4.3
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+
   yoctocolors@2.1.2: {}
 
   zod@3.25.76: {}

@@ -3,10 +3,10 @@
   "version": "6.0.0",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@10.28.1",
+  "packageManager": "pnpm@10.28.2",
   "volta": {
     "node": "24.13.0",
-    "pnpm": "10.28.1"
+    "pnpm": "10.28.2"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.3.1",
     "@commitlint/config-conventional": "^20.3.1",
-    "@cspell/eslint-plugin": "^9.6.0",
+    "@cspell/eslint-plugin": "^9.6.2",
     "@eslint/js": "^9.39.2",
     "@size-limit/preset-small-lib": "^12.0.0",
     "@size-limit/time": "^12.0.0",
@@ -57,7 +57,7 @@
     "changelogithub": "^14.0.0",
     "clean-publish": "^6.0.1",
     "eslint": "^9.39.2",
-    "eslint-plugin-jsdoc": "^62.4.0",
+    "eslint-plugin-jsdoc": "^62.4.1",
     "eslint-plugin-perfectionist": "^5.4.0",
     "nano-staged": "^0.9.0",
     "neostandard": "^0.12.2",

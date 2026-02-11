@@ -3,10 +3,10 @@
   "version": "6.0.0",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@10.29.2",
+  "packageManager": "pnpm@10.29.3",
   "volta": {
-    "node": "24.13.0",
-    "pnpm": "10.29.2"
+    "node": "24.13.1",
+    "pnpm": "10.29.3"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -51,7 +51,7 @@
     "@eslint/js": "^9.39.2",
     "@size-limit/preset-small-lib": "^12.0.0",
     "@size-limit/time": "^12.0.0",
-    "@types/node": "^24.10.12",
+    "@types/node": "^24.10.13",
     "@vitest/coverage-v8": "^4.0.18",
     "bumpp": "^10.4.1",
     "changelogithub": "^14.0.0",

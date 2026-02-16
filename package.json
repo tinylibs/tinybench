@@ -57,7 +57,7 @@
     "changelogithub": "^14.0.0",
     "clean-publish": "^6.0.1",
     "eslint": "^9.39.2",
-    "eslint-plugin-jsdoc": "^62.5.4",
+    "eslint-plugin-jsdoc": "^62.5.5",
     "eslint-plugin-perfectionist": "^5.5.0",
     "nano-staged": "^0.9.0",
     "neostandard": "^0.12.2",

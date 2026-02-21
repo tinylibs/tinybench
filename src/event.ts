@@ -13,8 +13,7 @@ import type {
 class BenchEvent<
   K extends BenchEvents = BenchEvents,
   M extends 'bench' | 'task' = 'bench'
->
-  extends globalThis.Event {
+> extends globalThis.Event {
   declare type: K
 
   /**

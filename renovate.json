@@ -10,9 +10,7 @@
   ],
   "packageRules": [
     {
-      "matchFileNames": [
-        "**/package.json"
-      ],
+      "matchFileNames": ["**/package.json"],
       "matchDepTypes": [
         "dependencies",
         "devDependencies",

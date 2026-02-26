@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  basic-ftp@<5.2.0: '>=5.2.0'
   markdown-it@>=13.0.0 <14.1.1: '>=14.1.1'
   minimatch@<10.2.1: '>=10.2.1'
   tar@<7.5.7: '>=7.5.7'
@@ -1388,8 +1389,8 @@ packages:
   bare-url@2.3.2:
     resolution: {integrity: sha512-ZMq4gd9ngV5aTMa5p9+UfY0b3skwhHELaDkhEHetMdX0LRkW9kzaym4oo/Eh+Ghm0CCDuMTsRIGM/ytUc1ZYmw==}
 
-  basic-ftp@5.1.0:
-    resolution: {integrity: sha512-RkaJzeJKDbaDWTIPiJwubyljaEPwpVWkm9Rt5h9Nd6h7tEXTJ3VB4qxdZBioV7JO5yLUaOKwz7vDOzlncUsegw==}
+  basic-ftp@5.2.0:
+    resolution: {integrity: sha512-VoMINM2rqJwJgfdHq6RiUudKt2BV+FY5ZFezP/ypmwayk68+NzzAQy4XXLlqsGD4MCzq3DrmNFD/uUmBJuGoXw==}
     engines: {node: '>=10.0.0'}
 
   binary-extensions@2.3.0:
@@ -4663,7 +4664,7 @@ snapshots:
       bare-path: 3.0.0
     optional: true
 
-  basic-ftp@5.1.0: {}
+  basic-ftp@5.2.0: {}
 
   binary-extensions@2.3.0: {}
 
@@ -5590,7 +5591,7 @@ snapshots:
 
   get-uri@6.0.5:
     dependencies:
-      basic-ftp: 5.1.0
+      basic-ftp: 5.2.0
       data-uri-to-buffer: 6.0.2
       debug: 4.4.3
     transitivePeerDependencies:

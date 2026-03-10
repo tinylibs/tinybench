@@ -3,10 +3,10 @@
   "version": "6.0.0",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@10.31.0",
+  "packageManager": "pnpm@10.32.0",
   "volta": {
     "node": "24.14.0",
-    "pnpm": "10.31.0"
+    "pnpm": "10.32.0"
   },
   "engines": {
     "node": ">=20.0.0"

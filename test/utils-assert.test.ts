@@ -11,7 +11,7 @@ test('assert - true', () => {
 test('assert - false', () => {
   expect(() => {
     assert(false, 'something went wrong')
-  }).toThrowError(new Error('something went wrong'))
+  }).toThrow(new Error('something went wrong'))
 })
 
 test('assert - false stack trace', () => {

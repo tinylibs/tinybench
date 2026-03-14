@@ -12,7 +12,7 @@ test('concurrency error (sync) - concurrency task', () => {
 
   expect(() => {
     bench.runSync()
-  }).toThrowError('Cannot use `concurrency` option when using `runSync`')
+  }).toThrow('Cannot use `concurrency` option when using `runSync`')
 })
 
 test('concurrency error (sync) - concurrency bench', () => {

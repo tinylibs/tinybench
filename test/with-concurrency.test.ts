@@ -98,7 +98,7 @@ test('throws on error and stops other workers', async () => {
       iterations: 100,
       limit: 10,
     })
-  ).rejects.toThrowError(/Boom/)
+  ).rejects.toThrow(/Boom/)
 
   expect(calls).toBeGreaterThanOrEqual(5)
   expect(calls).toBeLessThan(100)

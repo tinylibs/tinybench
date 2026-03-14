@@ -20,7 +20,7 @@ test('should throw an error if timestampProvider and now are provided as options
           toMs: ts => ts as number,
         },
       })
-  ).toThrowError('Cannot set both `now` and `timestampProvider` options')
+  ).toThrow('Cannot set both `now` and `timestampProvider` options')
 })
 
 test('should convert now function to custom timestampProvider', () => {

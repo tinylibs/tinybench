@@ -11,7 +11,7 @@ test('hrtimeNow - process.hrtime undefined', async () => {
   ).hrtimeNow
 
   expect(typeof hrtimeNow).toBe('function')
-  expect(() => hrtimeNow()).toThrowError(
+  expect(() => hrtimeNow()).toThrow(
     new Error('hrtime.bigint() is not supported in this JS environment')
   )
 })

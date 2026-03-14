@@ -93,25 +93,25 @@ test('throw error when hooks are provided with no functions', () => {
     bench.add('test', () => 1, {
       beforeAll: notAFunction,
     })
-  }).toThrowError(new Error("'beforeAll' must be a function if provided"))
+  }).toThrow(new Error("'beforeAll' must be a function if provided"))
 
   expect(() => {
     bench.add('test', () => 1, {
       beforeEach: notAFunction,
     })
-  }).toThrowError(new Error("'beforeEach' must be a function if provided"))
+  }).toThrow(new Error("'beforeEach' must be a function if provided"))
 
   expect(() => {
     bench.add('test', () => 1, {
       afterAll: notAFunction,
     })
-  }).toThrowError(new Error("'afterAll' must be a function if provided"))
+  }).toThrow(new Error("'afterAll' must be a function if provided"))
 
   expect(() => {
     bench.add('test', () => 1, {
       afterEach: notAFunction,
     })
-  }).toThrowError(new Error("'afterEach' must be a function if provided"))
+  }).toThrow(new Error("'afterEach' must be a function if provided"))
 })
 
 test('hooks error handling (async)', async () => {

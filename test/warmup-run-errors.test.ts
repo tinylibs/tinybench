@@ -86,7 +86,7 @@ test.each(['warmup', 'run'])('%s throws (async)', async mode => {
     task = t
   })
 
-  await expect(bench.run()).rejects.toThrowError(error)
+  await expect(bench.run()).rejects.toThrow(error)
   expect(err).toStrictEqual(error)
 
   expect(task).toBeDefined()
@@ -122,7 +122,7 @@ test.each(['warmup', 'run'])('%s throws (sync)', mode => {
 
   expect(() => {
     bench.runSync()
-  }).toThrowError(error)
+  }).toThrow(error)
   expect(err).toStrictEqual(error)
 
   expect(task).toBeDefined()

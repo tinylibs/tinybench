@@ -45,8 +45,8 @@ importers:
         specifier: ^14.0.0
         version: 14.0.0
       clean-publish:
-        specifier: ^6.0.4
-        version: 6.0.4
+        specifier: ^6.0.5
+        version: 6.0.5
       eslint:
         specifier: ^9.39.4
         version: 9.39.4(jiti@2.6.1)
@@ -69,8 +69,8 @@ importers:
         specifier: ^12.0.1
         version: 12.0.1(jiti@2.6.1)
       tsdown:
-        specifier: ^0.21.6
-        version: 0.21.6(synckit@0.11.12)(typescript@5.9.3)
+        specifier: ^0.21.7
+        version: 0.21.7(synckit@0.11.12)(typescript@5.9.3)
       typedoc:
         specifier: ^0.28.18
         version: 0.28.18(typescript@5.9.3)
@@ -1397,8 +1397,8 @@ packages:
   citty@0.2.1:
     resolution: {integrity: sha512-kEV95lFBhQgtogAPlQfJJ0WGVSokvLr/UEoFPiKKOXF7pl98HfUVUD0ejsuTCld/9xH9vogSywZ5KqHzXrZpqg==}
 
-  clean-publish@6.0.4:
-    resolution: {integrity: sha512-jY4mev6mOjDi76LKPET1/fOXbmBwl4C5Avt/TZDgEjyWNby7vkJ8waIa3lHi5cFRUsR0Yq19YNhjeimh8qsGLQ==}
+  clean-publish@6.0.5:
+    resolution: {integrity: sha512-Iqm/EDPQFLY0I8kktg61Nt8V/5fiXYNkNR5UsHcLKmj4vp7a0a7EGZmNEbN2Hg77frQlHNljT/MruK5Wr/Rtog==}
     engines: {node: '>= 20.0.0'}
     hasBin: true
 
@@ -2840,8 +2840,8 @@ packages:
     engines: {node: '>= 0.4'}
     hasBin: true
 
-  rolldown-plugin-dts@0.23.1:
-    resolution: {integrity: sha512-VTnvu5cksnumMMOiL7FUvACGpdGtCVNGbeVc6/6KffImIrA0DZOp7/0lBIt0qI6Nu3/K/lL/Dy7piuVGt9ZeGw==}
+  rolldown-plugin-dts@0.23.2:
+    resolution: {integrity: sha512-PbSqLawLgZBGcOGT3yqWBGn4cX+wh2nt5FuBGdcMHyOhoukmjbhYAl8NT9sE4U38Cm9tqLOIQeOrvzeayM0DLQ==}
     engines: {node: '>=20.19.0'}
     peerDependencies:
       '@ts-macro/tsc': ^0.3.6
@@ -3115,14 +3115,14 @@ packages:
     peerDependencies:
       typescript: '>=4.0.0'
 
-  tsdown@0.21.6:
-    resolution: {integrity: sha512-YsgPuWczqxPkXiJwMPrv3eOiqx4KPhOdksqubVCDhS7lChK3RYlWsEGhZixc0+lqN3fmBYEnETaujEWDpMPZmA==}
+  tsdown@0.21.7:
+    resolution: {integrity: sha512-ukKIxKQzngkWvOYJAyptudclkm4VQqbjq+9HF5K5qDO8GJsYtMh8gIRwicbnZEnvFPr6mquFwYAVZ8JKt3rY2g==}
     engines: {node: '>=20.19.0'}
     hasBin: true
     peerDependencies:
       '@arethetypeswrong/core': ^0.18.1
-      '@tsdown/css': 0.21.6
-      '@tsdown/exe': 0.21.6
+      '@tsdown/css': 0.21.7
+      '@tsdown/exe': 0.21.7
       '@vitejs/devtools': '*'
       publint: ^0.3.0
       typescript: ^5.0.0 || ^6.0.0
@@ -4715,10 +4715,10 @@ snapshots:
 
   citty@0.2.1: {}
 
-  clean-publish@6.0.4:
+  clean-publish@6.0.5:
     dependencies:
       lilconfig: 3.1.3
-      picomatch: 4.0.3
+      picomatch: 4.0.4
       tinyexec: 1.0.4
       tinyglobby: 0.2.15
 
@@ -6327,7 +6327,7 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  rolldown-plugin-dts@0.23.1(rolldown@1.0.0-rc.12)(typescript@5.9.3):
+  rolldown-plugin-dts@0.23.2(rolldown@1.0.0-rc.12)(typescript@5.9.3):
     dependencies:
       '@babel/generator': 8.0.0-rc.3
       '@babel/helper-validator-identifier': 8.0.0-rc.3
@@ -6338,6 +6338,7 @@ snapshots:
       dts-resolver: 2.1.3
       get-tsconfig: 4.13.7
       obug: 2.1.1
+      picomatch: 4.0.4
       rolldown: 1.0.0-rc.12
     optionalDependencies:
       typescript: 5.9.3
@@ -6685,7 +6686,7 @@ snapshots:
       picomatch: 4.0.4
       typescript: 5.9.3
 
-  tsdown@0.21.6(synckit@0.11.12)(typescript@5.9.3):
+  tsdown@0.21.7(synckit@0.11.12)(typescript@5.9.3):
     dependencies:
       ansis: 4.2.0
       cac: 7.0.0
@@ -6696,7 +6697,7 @@ snapshots:
       obug: 2.1.1
       picomatch: 4.0.4
       rolldown: 1.0.0-rc.12
-      rolldown-plugin-dts: 0.23.1(rolldown@1.0.0-rc.12)(typescript@5.9.3)
+      rolldown-plugin-dts: 0.23.2(rolldown@1.0.0-rc.12)(typescript@5.9.3)
       semver: 7.7.4
       tinyexec: 1.0.4
       tinyglobby: 0.2.15

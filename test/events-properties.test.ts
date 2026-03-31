@@ -22,84 +22,84 @@ test('events properties', () => {
   // Task events
 
   fooTask.addEventListener('abort', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   fooTask.addEventListener('complete', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   fooTask.addEventListener('cycle', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   fooTask.addEventListener('error', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<Error>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   fooTask.addEventListener('reset', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   fooTask.addEventListener('start', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   fooTask.addEventListener('warmup', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   // Bench events
 
   bench.addEventListener('abort', evt => {
     expectAssignable<Task | undefined>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.error)
   })
 
   bench.addEventListener('add', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   bench.addEventListener('complete', evt => {
-    expectAssignable<undefined>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   bench.addEventListener('cycle', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   bench.addEventListener('error', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<Error>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   bench.addEventListener('remove', evt => {
-    expectAssignable<Task>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   bench.addEventListener('reset', evt => {
-    expectAssignable<undefined>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   bench.addEventListener('start', evt => {
-    expectAssignable<undefined>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 
   bench.addEventListener('warmup', evt => {
-    expectAssignable<undefined>(evt.task)
-    expectAssignable<undefined>(evt.error)
+    expectAssignable(evt.task)
+    expectAssignable(evt.error)
   })
 })

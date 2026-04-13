@@ -157,7 +157,6 @@ jobs:
           - macos-latest
           - windows-latest
         node-version:
-          - 20
           - 22
           - 24
           - latest
@@ -201,7 +200,6 @@ jobs:
           - macos-latest
           - windows-latest
         node-version:
-          - 20
           - 22
           - 24
           - latest

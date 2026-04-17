@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "volta": {
-    "node": "24.14.1",
+    "node": "24.15.0",
     "pnpm": "10.33.0"
   },
   "engines": {
@@ -63,9 +63,9 @@
     "neostandard": "^0.13.0",
     "simple-git-hooks": "^2.13.1",
     "size-limit": "^12.1.0",
-    "tsdown": "^0.21.8",
+    "tsdown": "^0.21.9",
     "typedoc": "^0.28.19",
-    "typescript": "~6.0.2",
+    "typescript": "~6.0.3",
     "vitest": "^4.1.4"
   },
   "keywords": [

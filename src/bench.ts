@@ -93,7 +93,7 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * An AbortSignal to cancel the benchmark.
    */
-  readonly signal: AbortSignal | undefined
+  readonly signal?: AbortSignal
 
   /**
    * A teardown function that runs after each task execution.

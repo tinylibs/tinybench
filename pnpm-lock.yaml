@@ -45,8 +45,8 @@ importers:
         specifier: ^14.0.0
         version: 14.0.0
       clean-publish:
-        specifier: ^6.0.5
-        version: 6.0.5
+        specifier: ^7.0.1
+        version: 7.0.1
       eslint:
         specifier: ^9.39.4
         version: 9.39.4(jiti@2.6.1)
@@ -1459,9 +1459,9 @@ packages:
   citty@0.1.6:
     resolution: {integrity: sha512-tskPPKEs8D2KPafUypv2gxwJP8h/OaJmC82QQGGDQcHvXX43xF2VDACcJVmZ0EuSxkpO9Kc4MlrA3q0+FG58AQ==}
 
-  clean-publish@6.0.5:
-    resolution: {integrity: sha512-Iqm/EDPQFLY0I8kktg61Nt8V/5fiXYNkNR5UsHcLKmj4vp7a0a7EGZmNEbN2Hg77frQlHNljT/MruK5Wr/Rtog==}
-    engines: {node: '>= 20.0.0'}
+  clean-publish@7.0.1:
+    resolution: {integrity: sha512-Fr4c1dg6kEG4juBo2IMbft0w8inX0QTsbkRWIy5R0jZGWswQIpgOW0yfqV7bmyxn1F1eQtm9VBy5VDyB3go8WQ==}
+    engines: {node: '>= 22.0.0'}
     hasBin: true
 
   cliui@8.0.1:
@@ -4777,7 +4777,7 @@ snapshots:
     dependencies:
       consola: 3.4.2
 
-  clean-publish@6.0.5:
+  clean-publish@7.0.1:
     dependencies:
       lilconfig: 3.1.3
       picomatch: 4.0.4

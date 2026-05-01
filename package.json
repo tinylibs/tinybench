@@ -55,7 +55,7 @@
     "@vitest/coverage-v8": "^4.1.5",
     "bumpp": "^11.0.1",
     "changelogithub": "^14.0.0",
-    "clean-publish": "^6.0.5",
+    "clean-publish": "^7.0.1",
     "eslint": "^9.39.4",
     "eslint-plugin-jsdoc": "^62.9.0",
     "eslint-plugin-perfectionist": "^5.9.0",

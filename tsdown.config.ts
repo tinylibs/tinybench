@@ -8,4 +8,7 @@ export default defineConfig({
       js: '.js',
     }
   },
+  outputOptions: {
+    comments: false,
+  },
 })

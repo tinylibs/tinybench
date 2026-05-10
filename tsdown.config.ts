@@ -3,7 +3,6 @@ import { defineConfig } from 'tsdown/config'
 export default defineConfig({
   entry: ['src/index.ts'],
   minify: {
-    // eslint-disable-next-line @cspell/spellchecker
     codegen: {
       removeWhitespace: false,
     },

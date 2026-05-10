@@ -1,6 +1,10 @@
 packages:
   - examples
 
+allowBuilds:
+  esbuild: false
+  simple-git-hooks: true
+
 overrides:
   basic-ftp@<5.2.0: '>=5.2.0'
   markdown-it@>=13.0.0 <14.1.1: '>=14.1.1'

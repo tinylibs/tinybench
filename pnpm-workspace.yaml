@@ -5,8 +5,18 @@ allowBuilds:
   esbuild: false
   simple-git-hooks: false
 
+minimumReleaseAgeExclude:
+  - tar@7.5.7
+  - tar@7.5.3
+  - tar@7.5.8
+  - tar@7.5.10
+  - tar@7.5.11
+  - tar@7.5.4
+
 overrides:
-  basic-ftp@<5.2.0: '>=5.2.0'
-  markdown-it@>=13.0.0 <14.1.1: '>=14.1.1'
-  minimatch@>=10.0.0 <10.2.3: '>=10.2.3'
-  tar@<7.5.7: '>=7.5.7'
+  tar@<7.5.7: ^7.5.7
+  tar@<7.5.8: ^7.5.8
+  tar@<=7.5.10: ^7.5.11
+  tar@<=7.5.2: ^7.5.3
+  tar@<=7.5.3: ^7.5.4
+  tar@<=7.5.9: ^7.5.10

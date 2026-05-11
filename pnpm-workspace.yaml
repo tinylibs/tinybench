@@ -3,7 +3,7 @@ packages:
 
 allowBuilds:
   esbuild: false
-  simple-git-hooks: true
+  simple-git-hooks: false
 
 overrides:
   basic-ftp@<5.2.0: '>=5.2.0'

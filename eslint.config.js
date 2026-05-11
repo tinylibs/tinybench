@@ -37,7 +37,19 @@ export default defineConfig([
     },
   },
   js.configs.recommended,
+  plugins.promise.configs['flat/recommended'],
   jsdoc.configs['flat/recommended-typescript'],
+  {
+    rules: {
+      'jsdoc/check-tag-names': [
+        'warn',
+        {
+          definedTags: ['defaultValue', 'experimental', 'typeParam'],
+          typed: true,
+        },
+      ],
+    },
+  },
   ...plugins['typescript-eslint'].config(
     {
       extends: [

@@ -3,10 +3,10 @@
   "version": "6.0.1",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@11.1.0",
+  "packageManager": "pnpm@11.1.1",
   "volta": {
     "node": "24.15.0",
-    "pnpm": "11.1.0"
+    "pnpm": "11.1.1"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -45,8 +45,8 @@
   "repository": "tinylibs/tinybench",
   "license": "MIT",
   "devDependencies": {
-    "@commitlint/cli": "^21.0.0",
-    "@commitlint/config-conventional": "^21.0.0",
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
     "@cspell/eslint-plugin": "^10.0.0",
     "@eslint/js": "^9.39.4",
     "@size-limit/preset-small-lib": "^12.1.0",

@@ -63,14 +63,14 @@ jobs:
           cache: pnpm
 
       - run: npm install -g npm@~11.10.0 # Work-around for https://github.com/npm/cli/issues/9151#issuecomment-4131466208
-      - run: npm install -g npm@latest
+      - run: npm install -g npm@11.15.0
 
       - name: Install dependencies
         run: pnpm install --ignore-scripts --frozen-lockfile
 
       - name: Read package.json version
         id: package-version
-        uses: jaywcjlove/github-action-package@main
+        uses: jaywcjlove/github-action-package@80422aa6ff92d94694afcec1f9ddda84f41ed160 # v2.1.0
 
       - name: Publish release
         run: npm stage publish --no-git-checks

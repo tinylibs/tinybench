@@ -15,16 +15,18 @@ import type {
   TimestampProvider,
   TimestampValue,
 } from './types'
+import type { TimerSaturationReason } from './types'
 
 import { BenchEvent } from './event'
 import {
   assert,
+  classifyTimerSaturation,
   computeStatistics,
-  detectTimerSaturation,
   estimateResolution,
   isFnAsyncResource,
   isPromiseLike,
   isValidSamples,
+  medianAbsoluteDeviation,
   sortSamples,
   toError,
   withConcurrency,
@@ -75,9 +77,11 @@ export class Task extends EventTarget {
   /**
    * The estimated effective timer resolution observed during the last run,
    * computed as the smallest strictly positive latency sample that appears
-   * at least twice in the sample set.
-   * @returns The resolution in milliseconds, or `undefined` when no run has
-   *   produced a strictly positive sample
+   * at least twice among the timer-measured samples (samples supplied via
+   * `overriddenDuration` are excluded).
+   * @returns The resolution in milliseconds, or `undefined` when no
+   *   timer-measured strictly positive sample was observed (e.g. every
+   *   sample was supplied via `overriddenDuration`)
    */
   get detectedResolution (): number | undefined {
     return this.#detectedResolution
@@ -368,8 +372,7 @@ export class Task extends EventTarget {
 
       let totalTime = 0 // ms
       const samples: number[] = []
-      const isOverridden: boolean[] | undefined =
-        this.#bench.timerOverhead !== undefined ? [] : undefined
+      const isOverridden: boolean[] = []
 
       const benchmarkTask = async () => {
         if (this.#aborted) {
@@ -385,7 +388,7 @@ export class Task extends EventTarget {
             : this.#measureSync()
 
           samples.push(taskTime)
-          isOverridden?.push(overridden)
+          isOverridden.push(overridden)
           totalTime += taskTime
         } finally {
           if (this.#fnOpts.afterEach != null) {
@@ -448,8 +451,7 @@ export class Task extends EventTarget {
 
       let totalTime = 0
       const samples: number[] = []
-      const isOverridden: boolean[] | undefined =
-        this.#bench.timerOverhead !== undefined ? [] : undefined
+      const isOverridden: boolean[] = []
 
       const benchmarkTask = () => {
         if (this.#aborted) {
@@ -467,7 +469,7 @@ export class Task extends EventTarget {
           const { overridden, taskTime } = this.#measureSync()
 
           samples.push(taskTime)
-          isOverridden?.push(overridden)
+          isOverridden.push(overridden)
           totalTime += taskTime
         } finally {
           if (this.#fnOpts.afterEach) {
@@ -592,14 +594,15 @@ export class Task extends EventTarget {
    *    matches `isOverridden[i]` because no sort has been performed yet).
    *    Samples whose duration was supplied via `overriddenDuration` are skipped.
    * 2. Build a measured-only view (excluding `overriddenDuration` samples) used
-   *    for timer-saturation detection. Constant `overriddenDuration` values would
-   *    otherwise trigger a spurious low-distinct-count warning.
-   * 3. Sort the working array for the final statistics and diagnostics.
-   * 4. Compute `detectedResolution` from the sorted samples.
+   *    for both `detectedResolution` and timer-saturation detection. Constant
+   *    `overriddenDuration` values would otherwise be reported as the timer
+   *    grain or trigger a spurious low-distinct-count warning.
+   * 3. Compute `detectedResolution` from the measured-only subset.
+   * 4. Sort the working array for the final statistics.
    * 5. Compute the final statistics on the (possibly corrected) sorted samples.
-   * 6. Run timer-saturation detection on the measured-only subset.
-   * 7. Dispatch `'cycle'` and `'complete'` events; dispatch `'warning'` if
-   *    timer saturation was detected.
+   * 6. Classify timer saturation on the measured-only subset.
+   * 7. Dispatch `'cycle'` and `'complete'` events; dispatch `'warning'` (carrying
+   *    the {@link TimerSaturationReason}) if a saturation criterion fired.
    * @param options - An object containing the run results
    * @param options.error - The error that occurred during the run, if any
    * @param options.isOverridden - Parallel boolean array (collection order) indicating
@@ -641,11 +644,16 @@ export class Task extends EventTarget {
         ? latencySamples.filter((_, i) => isOverridden![i] !== true)
         : latencySamples
 
-      // Phase 3 — Single sort of the working array.
-      sortSamples(latencySamples)
+      // Phase 3 — Resolution diagnostic on the measured-only subset.
+      // Excluding `overriddenDuration` samples prevents a constant user
+      // value from being reported as the timer grain. `estimateResolution`
+      // is sort-invariant, so it can run before the working-array sort.
+      this.#detectedResolution = isValidSamples(measuredOnly)
+        ? estimateResolution(measuredOnly)
+        : undefined
 
-      // Phase 4 — Resolution diagnostic on sorted samples.
-      this.#detectedResolution = estimateResolution(latencySamples)
+      // Phase 4 — Single sort of the working array.
+      sortSamples(latencySamples)
 
       // Phase 5 — Final statistics on (possibly corrected) sorted samples.
       const latencyStatistics = computeStatistics(
@@ -653,14 +661,19 @@ export class Task extends EventTarget {
         this.#retainSamples
       )
 
-      // Phase 6 — Saturation detection on measured-only samples.
-      let saturated = false
+      // Phase 6 — Saturation classification on the measured-only subset.
+      let saturationReason: TimerSaturationReason | undefined
       if (measuredOnly === latencySamples) {
-        saturated = detectTimerSaturation(latencySamples, latencyStatistics.mad)
+        saturationReason = classifyTimerSaturation(
+          latencySamples,
+          latencyStatistics.mad
+        )
       } else if (isValidSamples(measuredOnly)) {
         sortSamples(measuredOnly)
-        const measuredStats = computeStatistics(measuredOnly, false)
-        saturated = detectTimerSaturation(measuredOnly, measuredStats.mad)
+        saturationReason = classifyTimerSaturation(
+          measuredOnly,
+          medianAbsoluteDeviation(measuredOnly)
+        )
       }
 
       const latencyStatisticsMean = latencyStatistics.mean
@@ -695,8 +708,8 @@ export class Task extends EventTarget {
       }
       /* eslint-enable perfectionist/sort-objects */
 
-      if (saturated) {
-        const warningEv = new BenchEvent('warning', this)
+      if (saturationReason !== undefined) {
+        const warningEv = new BenchEvent('warning', this, saturationReason)
         this.dispatchEvent(warningEv)
         this.#bench.dispatchEvent(warningEv)
       }

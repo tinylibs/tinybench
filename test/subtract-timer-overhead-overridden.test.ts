@@ -49,7 +49,7 @@ test('warning event is not dispatched for fully-overridden constant duration (is
   expect(warningCount).toBe(0)
 })
 
-test('detectedResolution is not affected by subtractTimerOverhead correction', async () => {
+test('detectedResolution is undefined when every sample is overridden', async () => {
   const benchA = new Bench({
     iterations: 64,
     subtractTimerOverhead: false,
@@ -75,6 +75,6 @@ test('detectedResolution is not affected by subtractTimerOverhead correction', a
 
   const taskA = benchA.getTask('regex')
   const taskB = benchB.getTask('regex')
-  expect(taskA?.detectedResolution).toBe(0.001)
-  expect(taskB?.detectedResolution).toBe(0.001)
+  expect(taskA?.detectedResolution).toBeUndefined()
+  expect(taskB?.detectedResolution).toBeUndefined()
 })

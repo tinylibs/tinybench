@@ -6,11 +6,14 @@
     ":configMigration",
     "group:allNonMajor",
     "schedule:daily",
-    ":maintainLockFilesWeekly"
+    ":maintainLockFilesWeekly",
+    "security:minimumReleaseAgeNpm"
   ],
   "packageRules": [
     {
-      "matchFileNames": ["**/package.json"],
+      "matchFileNames": [
+        "**/package.json"
+      ],
       "matchDepTypes": [
         "dependencies",
         "devDependencies",

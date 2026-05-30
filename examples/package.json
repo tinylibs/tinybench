@@ -2,10 +2,10 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@11.1.3",
+  "packageManager": "pnpm@11.3.0",
   "volta": {
-    "node": "24.15.0",
-    "pnpm": "11.1.3"
+    "node": "24.16.0",
+    "pnpm": "11.3.0"
   },
   "scripts": {
     "all": "run-s example:*",
@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "npm-run-all2": "^8.0.4",
+    "npm-run-all2": "^9.0.1",
     "tsx": "^4.22.3"
   }
 }

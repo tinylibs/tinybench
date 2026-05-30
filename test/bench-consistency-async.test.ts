@@ -19,6 +19,20 @@ test('bench task runs and time consistency (async)', async () => {
   if (fooTask.result.state !== 'completed') return
 
   expect(fooTask.runs).toBeGreaterThanOrEqual(bench.iterations)
+  expect(fooTask.runs).toBe(fooTask.result.latency.samplesCount)
 
   expect(fooTask.result.totalTime).toBeGreaterThanOrEqual(bench.time)
+
+  expect(fooTask.result.latency.min).toBeLessThanOrEqual(
+    fooTask.result.latency.mean
+  )
+  expect(fooTask.result.latency.mean).toBeLessThanOrEqual(
+    fooTask.result.latency.max
+  )
+  expect(fooTask.result.latency.min).toBeLessThanOrEqual(
+    fooTask.result.latency.p50
+  )
+  expect(fooTask.result.latency.p50).toBeLessThanOrEqual(
+    fooTask.result.latency.max
+  )
 })

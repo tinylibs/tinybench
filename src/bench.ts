@@ -99,6 +99,9 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * Whether to subtract an estimated timestamp provider call overhead from
    * each raw latency sample.
+   *
+   * Incompatible with `concurrency: 'task'`; the constraint is enforced
+   * at construction and at the start of {@link Bench.run}.
    * @default false
    */
   readonly subtractTimerOverhead: boolean
@@ -212,10 +215,10 @@ export class Bench extends EventTarget implements BenchLike {
     this.throws = restOptions.throws ?? false
     this.signal = restOptions.signal
     this.retainSamples = restOptions.retainSamples === true
-    this.subtractTimerOverhead = restOptions.subtractTimerOverhead ?? false
+    this.subtractTimerOverhead = restOptions.subtractTimerOverhead === true
     assert(
       !(this.subtractTimerOverhead && this.concurrency === 'task'),
-      '`subtractTimerOverhead` is incompatible with `concurrency: "task"` — overhead is calibrated sequentially and does not reflect concurrent execution cost'
+      '`subtractTimerOverhead` cannot be used with `concurrency: "task"` — set `concurrency` to `null` or `"bench"`, or disable `subtractTimerOverhead`'
     )
     this.timerOverhead = this.subtractTimerOverhead
       ? calibrateTimerOverhead(this.timestampProvider)
@@ -289,6 +292,10 @@ export class Bench extends EventTarget implements BenchLike {
    * @returns the tasks array
    */
   async run (): Promise<Task[]> {
+    assert(
+      !(this.subtractTimerOverhead && this.concurrency === 'task'),
+      '`subtractTimerOverhead` cannot be used with `concurrency: "task"` — set `concurrency` to `null` or `"bench"`, or disable `subtractTimerOverhead`'
+    )
     if (this.warmup) {
       await this.#warmupTasks()
     }

@@ -87,6 +87,12 @@ Both the `Task` and `Bench` classes extend the `EventTarget` object. So you can 
 bench.addEventListener('cycle', (evt) => {
   const task = evt.task!;
 });
+
+// runs when timer saturation is detected for a task's measured samples
+bench.addEventListener('warning', (evt) => {
+  const task = evt.task!;
+  const reason = evt.reason; // 'zero-dominated' | 'low-distinct' | 'zero-mad'
+});
 ```
 
 #### [`TaskEvents`](https://tinylibs.github.io/tinybench/types/TaskEvents.html)
@@ -285,6 +291,96 @@ const bench = new Bench({
   now: Date.now,
 })
 ```
+
+## Timer Overhead Correction
+
+Each timer call (`performance.now()`, `process.hrtime.bigint()`, …) has a
+non-zero call cost `C`. For a task whose true duration `X` is comparable
+to `C`, the raw measured sample `X + C` is dominated by the timer rather
+than the task.
+
+When `subtractTimerOverhead: true` is set, an estimate `Ĉ` is computed
+once at construction time via [`calibrateTimerOverhead`](https://tinylibs.github.io/tinybench/functions/calibrateTimerOverhead.html),
+and `Math.max(0, raw_sample - Ĉ)` is used as each non-overridden sample
+before statistics are computed.
+
+```ts
+const bench = new Bench({ subtractTimerOverhead: true })
+console.log(bench.timerOverhead) // calibrated Ĉ in ms (or undefined)
+```
+
+The calibration helper is also exported for direct use, with a
+configurable estimator strategy (`'median'` default, or `'min'` / `'p05'`):
+
+```ts
+import { calibrateTimerOverhead, hrtimeNowTimestampProvider } from 'tinybench'
+
+const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
+  estimator: 'p05',
+  samples: 1024,
+  warmupSamples: 64,
+})
+```
+
+**Caveats.**
+
+- Incompatible with `concurrency: 'task'` — overhead is calibrated
+  sequentially and does not reflect concurrent execution cost.
+  Construction (and `run()`) throws if both are set.
+- For sub-overhead measurements (`X ≈ Ĉ`) the `max(0, …)` clamp
+  truncates the lower tail and biases statistics; prefer
+  `overriddenDuration` (see below).
+- On runtimes with a coarse timer (resolution >= 1 ms) the calibration
+  returns `0` and the option becomes a no-op.
+
+## Per-Sample Override (`overriddenDuration`)
+
+A task function may return an object containing `overriddenDuration`
+(in ms). That value replaces the timer-measured sample directly,
+bypassing both the timer and any overhead correction. Useful for
+externally-timed work or sub-overhead measurements that the timer
+cannot resolve.
+
+```ts
+bench.add('externally-timed', () => {
+  const start = process.hrtime.bigint()
+  doWork()
+  const elapsedMs = Number(process.hrtime.bigint() - start) / 1e6
+  return { overriddenDuration: elapsedMs }
+})
+```
+
+Overridden samples are excluded from `Task.detectedResolution` and
+from timer-saturation detection.
+
+## Timer Diagnostics
+
+After `bench.run()` (or `runSync()`), each task exposes
+`detectedResolution` — the smallest reproducibly observed positive
+sample (in ms) among the timer-measured samples, or `undefined` when no
+positive timer measurement was seen (e.g. every sample was overridden).
+
+```ts
+const task = bench.getTask('foo')
+console.log(task?.detectedResolution) // e.g. 0.000041 (≈ 41 ns)
+```
+
+When the timer's resolution dominates a task's measured distribution
+(more than half zero samples, fewer than `max(3, min(10, ⌊n / 1000⌋))`
+distinct values, or zero MAD with `n > 100`), tinybench dispatches a
+`'warning'` event on both the task and the bench, carrying the matching
+[`TimerSaturationReason`](https://tinylibs.github.io/tinybench/types/TimerSaturationReason.html):
+
+```ts
+bench.addEventListener('warning', evt => {
+  console.warn(`timer-saturated: ${evt.task?.name} — ${evt.reason}`)
+})
+```
+
+The same heuristic and estimator are exposed as standalone helpers for
+custom analysis: [`detectTimerSaturation`](https://tinylibs.github.io/tinybench/functions/detectTimerSaturation.html),
+[`classifyTimerSaturation`](https://tinylibs.github.io/tinybench/functions/classifyTimerSaturation.html),
+and [`estimateResolution`](https://tinylibs.github.io/tinybench/functions/estimateResolution.html).
 
 ## Aborting Benchmarks
 

@@ -198,12 +198,32 @@ export interface BenchOptions {
    * timestamp provider call cost `C`. When this option is `true`, an
    * estimate `Ĉ` is computed once at construction time via
    * {@link calibrateTimerOverhead}, and `max(0, raw_sample - Ĉ)` is used
-   * instead. Only location statistics (mean, percentiles) are corrected;
-   * variance, standard deviation and relative margin of error are not, since
-   * subtracting a constant does not reduce dispersion.
+   * in place of each non-overridden sample before statistics are computed.
    *
-   * Samples returned by the task function via `overriddenDuration` are
-   * intentional user values and are never modified by the correction.
+   * **Statistics after correction.** All statistics (mean, percentiles,
+   * variance, sd, sem, moe, rme) are computed on the clamped corrected
+   * samples, not on the original distribution. When raw samples comfortably
+   * exceed `Ĉ` (`X >> Ĉ`), the clamp `max(0, …)` rarely triggers and the
+   * correction approximates a clean shift: location statistics improve and
+   * dispersion statistics are largely unaffected. When raw samples are
+   * comparable to the overhead (`X ≈ Ĉ`, typical for nano-scale
+   * operations), the clamp truncates the lower tail of the distribution,
+   * which introduces a small positive bias on the corrected mean and
+   * contracts variance/sd/sem/moe while potentially inflating rme. For
+   * sub-overhead measurements, prefer `overriddenDuration` instead.
+   *
+   * **Caveat — `concurrency: "task"`.** The overhead is calibrated once at
+   * construction time with sequential timer calls. When
+   * `concurrency: "task"` is set, the constructor throws because the
+   * sequentially-calibrated estimate would not reflect the per-iteration
+   * timer call cost under concurrent execution.
+   *
+   * **Caveat — `overriddenDuration`.** Samples returned by the task
+   * function via `overriddenDuration` are intentional user values and are
+   * never modified by the correction. They are also excluded from
+   * timer-saturation detection so that a deterministic synthetic
+   * `overriddenDuration` does not produce a spurious `'warning'` event via
+   * the low-distinct-count criterion.
    *
    * On runtimes with a coarse timer (resolution >= 1 ms), the calibration
    * returns `0` and this option becomes a no-op.
@@ -413,7 +433,6 @@ export type JSRuntime =
   | 'v8'
   | 'workerd'
 
-/**
 /**
  * A function that returns the current timestamp.
  */

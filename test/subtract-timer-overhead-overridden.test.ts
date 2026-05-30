@@ -26,8 +26,13 @@ test('subtractTimerOverhead does not modify samples returned via overriddenDurat
   expect(task.result.latency.max).toBeCloseTo(target, 5)
 })
 
-test('warning event is not dispatched for constant overriddenDuration when no real timer saturation', async () => {
-  const bench = new Bench({ iterations: 32, time: 0, warmup: false })
+test('warning event is not dispatched for fully-overridden constant duration (issue #10)', async () => {
+  const bench = new Bench({
+    iterations: 32,
+    subtractTimerOverhead: true,
+    time: 0,
+    warmup: false,
+  })
   let warningCount = 0
   bench.addEventListener('warning', () => {
     warningCount++
@@ -37,14 +42,11 @@ test('warning event is not dispatched for constant overriddenDuration when no re
   })
   await bench.run()
 
-  // 32 samples is below the n < 10 guard? No — 32 >= 10, so saturation
-  // detection runs. distinctCount=1 < 3 triggers criterion B → a warning is
-  // expected for a constant-duration task. The semantics is: any task whose
-  // measured distribution has < 3 distinct values is flagged as
-  // timer-saturated, including legitimate deterministic functions.
-  // This test documents that current behavior; if the project later filters
-  // overridden samples at the call site, it should be updated to expect 0.
-  expect(warningCount).toBeGreaterThanOrEqual(0)
+  // All 32 samples are overridden → measuredOnly is empty → no saturation
+  // detection runs → no warning. This is the issue #10 fix in action: the
+  // saturation heuristic only sees timer-measured samples, never user-supplied
+  // overriddenDuration values.
+  expect(warningCount).toBe(0)
 })
 
 test('detectedResolution is not affected by subtractTimerOverhead correction', async () => {

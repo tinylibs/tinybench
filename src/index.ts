@@ -43,6 +43,7 @@ export type {
 } from './utils'
 export {
   calibrateTimerOverhead,
+  detectTimerSaturation,
   estimateResolution,
   formatNumber,
   hrtimeNow,

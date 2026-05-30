@@ -587,23 +587,23 @@ export class Task extends EventTarget {
    * Calculates statistics from the collected samples and dispatches appropriate events.
    *
    * Ordering:
-   * 1. Sort raw samples in place.
-   * 2. Compute the raw timer-resolution diagnostic ({@link estimateResolution}).
-   * 3. If overhead correction is enabled: compute raw statistics for an
-   *    accurate `mad`, evaluate timer-saturation against the **raw** sample
-   *    set, then subtract the calibrated overhead from each sample whose
-   *    duration was measured by the timer (skipping samples supplied via
-   *    `overriddenDuration`). Re-sort only when overridden samples were
-   *    skipped, since correction otherwise preserves the ascending order.
-   * 4. Compute the final (possibly corrected) statistics.
-   * 5. When no correction was applied, evaluate timer-saturation against the
-   *    final samples (raw == final in this case).
-   * 6. Dispatch `'cycle'` and `'complete'` events; dispatch `'warning'` if
+   * 1. Apply overhead correction in-place on the collection-order sample array
+   *    (alignment with `isOverridden` preserved — `latencySamples[i]` still
+   *    matches `isOverridden[i]` because no sort has been performed yet).
+   *    Samples whose duration was supplied via `overriddenDuration` are skipped.
+   * 2. Build a measured-only view (excluding `overriddenDuration` samples) used
+   *    for timer-saturation detection. Constant `overriddenDuration` values would
+   *    otherwise trigger a spurious low-distinct-count warning.
+   * 3. Sort the working array for the final statistics and diagnostics.
+   * 4. Compute `detectedResolution` from the sorted samples.
+   * 5. Compute the final statistics on the (possibly corrected) sorted samples.
+   * 6. Run timer-saturation detection on the measured-only subset.
+   * 7. Dispatch `'cycle'` and `'complete'` events; dispatch `'warning'` if
    *    timer saturation was detected.
    * @param options - An object containing the run results
    * @param options.error - The error that occurred during the run, if any
-   * @param options.isOverridden - Parallel boolean array indicating which
-   *   samples were supplied by the task function via `overriddenDuration`,
+   * @param options.isOverridden - Parallel boolean array (collection order) indicating
+   *   which samples were supplied by the task function via `overriddenDuration`,
    *   or `undefined` when overhead correction is disabled
    * @param options.latencySamples - The array of latency samples collected during the run
    */
@@ -619,37 +619,48 @@ export class Task extends EventTarget {
     if (isValidSamples(latencySamples)) {
       this.#runs = latencySamples.length
 
-      sortSamples(latencySamples)
-
-      this.#detectedResolution = estimateResolution(latencySamples)
-
       const overhead = this.#bench.timerOverhead
       const hasOverhead = overhead !== undefined && overhead > 0
-      let saturated = false
 
+      // Phase 1 — Subtract overhead while isOverridden[i] is still aligned with
+      // latencySamples[i] (both in collection order, pre-sort).
       if (hasOverhead) {
-        const rawStatistics = computeStatistics(latencySamples, false)
-        saturated = detectTimerSaturation(latencySamples, rawStatistics.mad)
-
-        let needsResort = false
         for (let i = 0; i < latencySamples.length; i++) {
-          if (isOverridden?.[i] === true) {
-            needsResort = true
-          } else {
+          if (isOverridden?.[i] !== true) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             latencySamples[i] = Math.max(0, latencySamples[i]! - overhead)
           }
         }
-        if (needsResort) sortSamples(latencySamples)
       }
 
+      // Phase 2 — Capture measured-only samples (alignment with isOverridden
+      // is still valid since the array has not been sorted yet).
+      const hasAnyOverridden = isOverridden?.some(v => v) ?? false
+      const measuredOnly: number[] = hasAnyOverridden
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        ? latencySamples.filter((_, i) => isOverridden![i] !== true)
+        : latencySamples
+
+      // Phase 3 — Single sort of the working array.
+      sortSamples(latencySamples)
+
+      // Phase 4 — Resolution diagnostic on sorted samples.
+      this.#detectedResolution = estimateResolution(latencySamples)
+
+      // Phase 5 — Final statistics on (possibly corrected) sorted samples.
       const latencyStatistics = computeStatistics(
         latencySamples,
         this.#retainSamples
       )
 
-      if (!hasOverhead) {
+      // Phase 6 — Saturation detection on measured-only samples.
+      let saturated = false
+      if (measuredOnly === latencySamples) {
         saturated = detectTimerSaturation(latencySamples, latencyStatistics.mad)
+      } else if (isValidSamples(measuredOnly)) {
+        sortSamples(measuredOnly)
+        const measuredStats = computeStatistics(measuredOnly, false)
+        saturated = detectTimerSaturation(measuredOnly, measuredStats.mad)
       }
 
       const latencyStatisticsMean = latencyStatistics.mean

@@ -212,7 +212,11 @@ export class Bench extends EventTarget implements BenchLike {
     this.throws = restOptions.throws ?? false
     this.signal = restOptions.signal
     this.retainSamples = restOptions.retainSamples === true
-    this.subtractTimerOverhead = restOptions.subtractTimerOverhead === true
+    this.subtractTimerOverhead = restOptions.subtractTimerOverhead ?? false
+    assert(
+      !(this.subtractTimerOverhead && this.concurrency === 'task'),
+      '`subtractTimerOverhead` is incompatible with `concurrency: "task"` — overhead is calibrated sequentially and does not reflect concurrent execution cost'
+    )
     this.timerOverhead = this.subtractTimerOverhead
       ? calibrateTimerOverhead(this.timestampProvider)
       : undefined

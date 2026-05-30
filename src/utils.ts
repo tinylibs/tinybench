@@ -250,6 +250,22 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 }
 
 /**
+ * Estimates the effective timer resolution from a latency sample set as the
+ * smallest strictly positive sample observed.
+ * @param samples - the latency samples (sorted or unsorted)
+ * @returns the estimated resolution in milliseconds, or `undefined` when all samples are zero
+ */
+export const estimateResolution = (
+  samples: Samples
+): number | undefined => {
+  let min = Number.POSITIVE_INFINITY
+  for (const s of samples) {
+    if (s > 0 && s < min) min = s
+  }
+  return min === Number.POSITIVE_INFINITY ? undefined : min
+}
+
+/**
  * Checks if a value is a Samples type.
  * @param value - value to check
  * @returns if the value is a Samples type, meaning a non-empty array of numbers

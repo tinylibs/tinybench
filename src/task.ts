@@ -20,6 +20,7 @@ import { BenchEvent } from './event'
 import {
   assert,
   computeStatistics,
+  estimateResolution,
   isFnAsyncResource,
   isPromiseLike,
   isValidSamples,
@@ -71,6 +72,16 @@ export class Task extends EventTarget {
   ) => void
 
   /**
+   * The estimated effective timer resolution observed during the last run,
+   * computed as the smallest strictly positive latency sample.
+   * @returns The resolution in milliseconds, or `undefined` when no run
+   *   has produced a strictly positive sample
+   */
+  get detectedResolution (): number | undefined {
+    return this.#detectedResolution
+  }
+
+  /**
    * The name of the task.
    * @returns The task name as a string
    */
@@ -115,6 +126,11 @@ export class Task extends EventTarget {
    * The Bench instance reference
    */
   readonly #bench: BenchLike
+
+  /**
+   * The estimated effective timer resolution from the last run.
+   */
+  #detectedResolution: number | undefined = undefined
 
   /**
    * The task function
@@ -217,6 +233,7 @@ export class Task extends EventTarget {
    */
   reset (emit = true): void {
     this.#runs = 0
+    this.#detectedResolution = undefined
     this.#result = this.#aborted ? abortedTaskResult : notStartedTaskResult
 
     if (emit) this.dispatchEvent(new BenchEvent('reset', this))
@@ -570,6 +587,8 @@ export class Task extends EventTarget {
       this.#runs = latencySamples.length
 
       sortSamples(latencySamples)
+
+      this.#detectedResolution = estimateResolution(latencySamples)
 
       const latencyStatistics = computeStatistics(
         latencySamples,

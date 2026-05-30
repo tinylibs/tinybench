@@ -37,4 +37,10 @@ export type {
   TimestampProvider,
   TimestampValue,
 } from './types'
-export { formatNumber, hrtimeNow, performanceNow as now, nToMs } from './utils'
+export {
+  estimateResolution,
+  formatNumber,
+  hrtimeNow,
+  performanceNow as now,
+  nToMs,
+} from './utils'

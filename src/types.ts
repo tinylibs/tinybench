@@ -122,10 +122,12 @@ export interface BenchLike extends EventTarget {
    */
   time: number
   /**
-   * The estimated cost of one timestamp provider call in milliseconds, or
-   * `undefined` when timer overhead subtraction is disabled.
+   * The estimated cost of one timestamp provider call in milliseconds.
+   *
+   * Calibrated once at construction; `undefined` (or omitted) when timer
+   * overhead subtraction is disabled or unsupported by the implementation.
    */
-  timerOverhead: number | undefined
+  readonly timerOverhead?: number
   /**
    * The timestamp provider used by the benchmark.
    */

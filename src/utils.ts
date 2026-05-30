@@ -275,7 +275,7 @@ export const isValidSamples = (
  * the threshold is reached.
  * @param samples - the latency samples, sorted ascending
  * @param mad - the median absolute deviation (e.g. from
- *   {@link medianAbsoluteDeviation} or {@link computeStatistics})
+ *   {@link medianAbsoluteDeviation} or `computeStatistics`)
  * @returns the saturation reason, or `undefined` when no criterion fires
  */
 export const classifyTimerSaturation = (
@@ -617,8 +617,8 @@ export function absoluteDeviationMedian (
  * Computes the median absolute deviation (MAD) of a sorted sample set.
  *
  * Convenience wrapper that derives the median from the sorted input and
- * forwards to {@link absoluteDeviationMedian}. Use when only `mad` is
- * required and the cost of a full {@link computeStatistics} pass is
+ * forwards to `absoluteDeviationMedian`. Use when only `mad` is
+ * required and the cost of a full `computeStatistics` pass is
  * unjustified (e.g. inside {@link classifyTimerSaturation}).
  * @param samples - the sorted sample, length ≥ 1
  * @returns the median absolute deviation

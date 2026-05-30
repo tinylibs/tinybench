@@ -202,33 +202,50 @@ export interface BenchOptions {
    * {@link calibrateTimerOverhead}, and `max(0, raw_sample - Ĉ)` is used
    * in place of each non-overridden sample before statistics are computed.
    *
-   * **Statistics after correction.** All statistics (mean, percentiles,
-   * variance, sd, sem, moe, rme) are computed on the clamped corrected
-   * samples, not on the original distribution. When raw samples comfortably
-   * exceed `Ĉ` (`X >> Ĉ`), the clamp `max(0, …)` rarely triggers and the
-   * correction approximates a clean shift: location statistics improve and
-   * dispersion statistics are largely unaffected. When raw samples are
-   * comparable to the overhead (`X ≈ Ĉ`, typical for nano-scale
-   * operations), the clamp truncates the lower tail of the distribution,
-   * which introduces a small positive bias on the corrected mean and
-   * contracts variance/sd/sem/moe while potentially inflating rme. For
-   * sub-overhead measurements, prefer `overriddenDuration` instead.
+   * **Statistics after correction.** All fields of {@link Statistics} are
+   * derived from the clamped corrected samples, not from the raw
+   * distribution. With `M` denoting the raw-sample mean:
    *
-   * **Caveat — `concurrency: "task"`.** The overhead is calibrated once at
-   * construction time with sequential timer calls. When
-   * `concurrency: "task"` is set, the constructor throws because the
+   * - **Clean-shift regime (`X >> Ĉ`).** The clamp `max(0, …)` rarely
+   *   triggers, so the correction acts as a translation by `Ĉ`. Location
+   *   statistics (`mean`, `min`, `max`, all percentiles) decrease by `Ĉ`;
+   *   absolute-unit dispersion (`vr`, `sd`, `sem`, `moe`, `mad`, `aad`)
+   *   is essentially unchanged. Because `rme = moe / mean`, it inflates
+   *   by the deterministic factor `M / (M − Ĉ)` whenever `Ĉ > 0`.
+   * - **Sub-overhead regime (`X ≈ Ĉ`).** A non-trivial fraction of
+   *   samples clamp to `0`, biasing the corrected mean upward,
+   *   contracting `vr`/`sd`/`sem`/`moe`/`aad`, and compounding the
+   *   `M / (M − Ĉ)` factor in `rme`. Once the cumulative mass of raw
+   *   samples at or below `Ĉ` reaches a given quantile, that percentile
+   *   collapses to `0`; in particular `p50` collapses once at least half
+   *   of the raw samples satisfy `raw_sample ≤ Ĉ`, which then forces
+   *   `mad` and `aad` toward `0`. Prefer `overriddenDuration` for
+   *   sub-overhead measurements.
+   *
+   * **Three observable consequences of the clamp.**
+   *
+   * 1. `latency.min` may be exactly `0` even when no zero-duration sample
+   *    was actually observed.
+   * 2. The throughput estimator substitutes `1000 / latency.mean` (or `0`
+   *    when `mean === 0`) for every clamped sample.
+   * 3. {@link detectTimerSaturation} criterion `'zero-dominated'` cannot
+   *    distinguish clamped samples from genuine zero-duration timer
+   *    reads, so a `'warning'` event may be dispatched in the
+   *    sub-overhead regime even when the timer itself is not saturated.
+   *
+   * **Caveat — `concurrency: "task"`.** The overhead is calibrated once
+   * at construction time with sequential timer calls. Setting both
+   * options causes the constructor (and `run()`) to throw, since the
    * sequentially-calibrated estimate would not reflect the per-iteration
    * timer call cost under concurrent execution.
    *
    * **Caveat — `overriddenDuration`.** Samples returned by the task
-   * function via `overriddenDuration` are intentional user values and are
-   * never modified by the correction. They are also excluded from
-   * timer-saturation detection so that a deterministic synthetic
-   * `overriddenDuration` does not produce a spurious `'warning'` event via
-   * the low-distinct-count criterion.
+   * function via `overriddenDuration` are intentional user values and
+   * are never modified by the correction. They are also excluded from
+   * {@link Task.detectedResolution} and from timer-saturation detection.
    *
-   * On runtimes with a coarse timer (resolution >= 1 ms), the calibration
-   * returns `0` and this option becomes a no-op.
+   * On runtimes with a coarse timer (resolution >= 1 ms), the
+   * calibration returns `0` and this option becomes a no-op.
    * @default false
    */
   subtractTimerOverhead?: boolean

@@ -62,9 +62,6 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - run: npm install -g npm@~11.10.0 # Work-around for https://github.com/npm/cli/issues/9151#issuecomment-4131466208
-      - run: npm install -g npm@11.15.0
-
       - name: Install dependencies
         run: pnpm install --ignore-scripts --frozen-lockfile
 
@@ -73,20 +70,20 @@ jobs:
         uses: jaywcjlove/github-action-package@80422aa6ff92d94694afcec1f9ddda84f41ed160 # v2.1.0
 
       - name: Publish release
-        run: npm stage publish --no-git-checks
+        run: pnpm stage publish --no-git-checks
         if: ${{ contains(steps.package-version.outputs.version, '-') == false }}
 
       - name: Publish release candidate
         if: ${{ contains(steps.package-version.outputs.version, '-rc') == true }}
-        run: npm stage publish --no-git-checks --tag next
+        run: pnpm stage publish --no-git-checks --tag next
 
       - name: Publish beta release
         if: ${{ contains(steps.package-version.outputs.version, '-beta') == true }}
-        run: npm stage publish --no-git-checks --tag beta
+        run: pnpm stage publish --no-git-checks --tag beta
 
       - name: Publish alpha release
         if: ${{ contains(steps.package-version.outputs.version, '-alpha') == true }}
-        run: npm stage publish --no-git-checks --tag alpha
+        run: pnpm stage publish --no-git-checks --tag alpha
   changelog:
     runs-on: ubuntu-latest
     needs: publish-npm

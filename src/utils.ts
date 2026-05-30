@@ -10,6 +10,7 @@ import type {
   Samples,
   SortedSamples,
   Statistics,
+  TimerSaturationReason,
   TimestampProvider,
   TimestampValue,
 } from './types'
@@ -259,20 +260,6 @@ export const isValidSamples = (
 ): value is Samples => {
   return Array.isArray(value) && value.length !== 0
 }
-
-/**
- * Reason a sample set is classified as timer-saturated.
- *
- * - `'zero-dominated'` — more than half of the samples are exactly zero.
- * - `'low-distinct'` — distinct sample count is below
- *   `max(3, min(10, ⌊n / 1000⌋))`.
- * - `'zero-mad'` — median absolute deviation is zero with more than 100
- *   samples.
- */
-export type TimerSaturationReason =
-  | 'low-distinct'
-  | 'zero-dominated'
-  | 'zero-mad'
 
 /**
  * Classifies timer saturation in a latency sample set.

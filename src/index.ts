@@ -32,6 +32,7 @@ export type {
   TaskResultStarted,
   TaskResultTimestampProviderInfo,
   TaskResultWithStatistics,
+  TimerSaturationReason,
   TimestampFn,
   TimestampFns,
   TimestampProvider,
@@ -40,7 +41,6 @@ export type {
 export type {
   CalibrateTimerOverheadOptions,
   TimerOverheadEstimatorKind,
-  TimerSaturationReason,
 } from './utils'
 export {
   calibrateTimerOverhead,

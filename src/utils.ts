@@ -250,6 +250,39 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 }
 
 /**
+ * Detects timer saturation in a latency sample set.
+ *
+ * Saturation is reported when the timer resolution dominates the
+ * measurement, i.e. when at least one of the following holds:
+ * - more than half of the samples are zero
+ * - the number of distinct sample values is below `max(3, min(10, n / 1000))`
+ * - the median absolute deviation is zero with more than 100 samples
+ * @param samples - the latency samples
+ * @param mad - the median absolute deviation, as computed by computeStatistics
+ * @returns true when the timer resolution dominates the measurement
+ */
+export const detectTimerSaturation = (
+  samples: Samples,
+  mad: number
+): boolean => {
+  const n = samples.length
+
+  let zeroCount = 0
+  for (const s of samples) {
+    if (s === 0) zeroCount++
+  }
+  if (zeroCount * 2 > n) return true
+
+  const distinctCount = new Set(samples).size
+  const distinctThreshold = Math.max(3, Math.min(10, Math.floor(n / 1000)))
+  if (distinctCount < distinctThreshold) return true
+
+  if (n > 100 && mad === 0) return true
+
+  return false
+}
+
+/**
  * Checks if a value is a Samples type.
  * @param value - value to check
  * @returns if the value is a Samples type, meaning a non-empty array of numbers

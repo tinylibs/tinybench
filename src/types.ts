@@ -23,6 +23,7 @@ export type BenchEvents =
   | 'reset' // when the reset method gets called
   | 'start' // when running the benchmarks gets started
   | 'warmup' // when the benchmarks start getting warmed up
+  | 'warning' // when timer saturation is detected for a task's latency samples
 
 /**
  * Bench events that may have an associated Task
@@ -41,7 +42,7 @@ export type BenchEventsWithError = Extract<BenchEvents, 'error'>
  */
 export type BenchEventsWithTask = Extract<
   BenchEvents,
-  'add' | 'cycle' | 'error' | 'remove'
+  'add' | 'cycle' | 'error' | 'remove' | 'warning'
 >
 
 /**
@@ -538,6 +539,7 @@ export type TaskEvents = Extract<
   | 'reset' // when the reset method gets called
   | 'start' // when running the task gets started
   | 'warmup' // when the task start getting warmed up
+  | 'warning' // when timer saturation is detected for the task's latency samples
 >
 
 /**

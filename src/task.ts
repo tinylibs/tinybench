@@ -20,6 +20,7 @@ import { BenchEvent } from './event'
 import {
   assert,
   computeStatistics,
+  detectTimerSaturation,
   isFnAsyncResource,
   isPromiseLike,
   isValidSamples,
@@ -606,6 +607,12 @@ export class Task extends EventTarget {
         totalTime,
       }
       /* eslint-enable perfectionist/sort-objects */
+
+      if (detectTimerSaturation(latencySamples, latencyStatistics.mad)) {
+        const warningEv = new BenchEvent('warning', this)
+        this.dispatchEvent(warningEv)
+        this.#bench.dispatchEvent(warningEv)
+      }
     } else if (this.#aborted) {
       // If aborted with no samples, still set the aborted flag
       this.#result = abortedTaskResult

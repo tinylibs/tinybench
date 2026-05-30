@@ -24,6 +24,7 @@ import { BenchEvent } from './event'
 import { Task } from './task'
 import {
   assert,
+  calibrateTimerOverhead,
   defaultConvertTaskResultForConsoleTable,
   getTimestampProvider,
   runtime,
@@ -96,6 +97,13 @@ export class Bench extends EventTarget implements BenchLike {
   readonly signal?: AbortSignal
 
   /**
+   * Whether to subtract an estimated timestamp provider call overhead from
+   * each raw latency sample.
+   * @default false
+   */
+  readonly subtractTimerOverhead: boolean
+
+  /**
    * A teardown function that runs after each task execution.
    */
   readonly teardown: (
@@ -119,6 +127,15 @@ export class Bench extends EventTarget implements BenchLike {
    * The amount of time to run each task.
    */
   readonly time: number
+
+  /**
+   * The estimated cost of one timestamp provider call in milliseconds.
+   *
+   * `undefined` when {@link subtractTimerOverhead} is `false`.
+   * Otherwise calibrated once at construction time via
+   * {@link calibrateTimerOverhead}.
+   */
+  readonly timerOverhead: number | undefined
 
   /**
    * A timestamp provider and its related functions.
@@ -195,6 +212,10 @@ export class Bench extends EventTarget implements BenchLike {
     this.throws = restOptions.throws ?? false
     this.signal = restOptions.signal
     this.retainSamples = restOptions.retainSamples === true
+    this.subtractTimerOverhead = restOptions.subtractTimerOverhead === true
+    this.timerOverhead = this.subtractTimerOverhead
+      ? calibrateTimerOverhead(this.timestampProvider)
+      : undefined
 
     if (this.signal) {
       this.signal.addEventListener(

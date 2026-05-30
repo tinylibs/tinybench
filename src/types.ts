@@ -121,6 +121,11 @@ export interface BenchLike extends EventTarget {
    */
   time: number
   /**
+   * The estimated cost of one timestamp provider call in milliseconds, or
+   * `undefined` when timer overhead subtraction is disabled.
+   */
+  timerOverhead: number | undefined
+  /**
    * The timestamp provider used by the benchmark.
    */
   timestampProvider: TimestampProvider
@@ -182,6 +187,25 @@ export interface BenchOptions {
    * An AbortSignal for aborting the benchmark.
    */
   signal?: AbortSignal
+
+  /**
+   * Whether to subtract an estimated timestamp provider call overhead from
+   * each raw latency sample.
+   *
+   * Each sample is measured as `t1 - t0` around a single call to the task
+   * function, so every raw sample is inflated by approximately one
+   * timestamp provider call cost `C`. When this option is `true`, an
+   * estimate `Ĉ` is computed once at construction time via
+   * {@link calibrateTimerOverhead}, and `max(0, raw_sample - Ĉ)` is used
+   * instead. Only location statistics (mean, percentiles) are corrected;
+   * variance, standard deviation and relative margin of error are not, since
+   * subtracting a constant does not reduce dispersion.
+   *
+   * On runtimes with a coarse timer (resolution >= 1 ms), the calibration
+   * returns `0` and this option becomes a no-op.
+   * @default false
+   */
+  subtractTimerOverhead?: boolean
 
   /**
    * Teardown function to run after each benchmark task (cycle).
@@ -403,6 +427,7 @@ export interface ResolvedBenchOptions extends BenchOptions {
   iterations: NonNullable<BenchOptions['iterations']>
   now: NonNullable<BenchOptions['now']>
   setup: NonNullable<BenchOptions['setup']>
+  subtractTimerOverhead: NonNullable<BenchOptions['subtractTimerOverhead']>
   teardown: NonNullable<BenchOptions['teardown']>
   throws: NonNullable<BenchOptions['throws']>
   time: NonNullable<BenchOptions['time']>

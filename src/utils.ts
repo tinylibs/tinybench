@@ -333,6 +333,47 @@ const quantileSorted = (
 export const sortFn = (a: number, b: number) => a - b
 
 /**
+ * Estimates the cost of a single timestamp provider call by repeatedly
+ * measuring back-to-back calls and returning the median of the strictly
+ * positive deltas, in milliseconds.
+ *
+ * Returns `0` when no positive delta is observed, which happens when the
+ * timer resolution exceeds the cost of a call (e.g. `Date.now()` with a 1 ms
+ * grain).
+ * @param provider - the timestamp provider to calibrate
+ * @param samples - the number of back-to-back call pairs to measure
+ * @returns the estimated overhead in milliseconds, never negative
+ */
+export const calibrateTimerOverhead = (
+  provider: TimestampProvider,
+  samples = 1024
+): number => {
+  const { fn, toMs } = provider
+  const deltas: number[] = []
+
+  for (let i = 0; i < samples; i++) {
+    const a = fn()
+    const b = fn()
+    const delta = toMs(b) - toMs(a)
+    if (delta > 0) {
+      deltas.push(delta)
+    }
+  }
+
+  if (deltas.length === 0) {
+    return 0
+  }
+
+  deltas.sort(sortFn)
+  const mid = deltas.length >> 1
+  return (deltas.length & 1) === 1
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    ? deltas[mid]!
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    : (deltas[mid - 1]! + deltas[mid]!) / 2
+}
+
+/**
  * Computes the average absolute deviation from the mean.
  * @param samples - the sample
  * @param mean - the mean of the sample

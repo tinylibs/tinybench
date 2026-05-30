@@ -569,6 +569,14 @@ export class Task extends EventTarget {
     if (isValidSamples(latencySamples)) {
       this.#runs = latencySamples.length
 
+      const overhead = this.#bench.timerOverhead
+      if (overhead !== undefined && overhead > 0) {
+        for (let i = 0; i < latencySamples.length; i++) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          latencySamples[i] = Math.max(0, latencySamples[i]! - overhead)
+        }
+      }
+
       sortSamples(latencySamples)
 
       const latencyStatistics = computeStatistics(

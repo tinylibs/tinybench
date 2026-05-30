@@ -261,51 +261,79 @@ export const isValidSamples = (
 }
 
 /**
- * Detects timer saturation in a latency sample set.
+ * Reason a sample set is classified as timer-saturated.
  *
- * Saturation is reported when the timer resolution dominates the
- * measurement, i.e. when at least one of the following holds:
- * - more than half of the samples are zero
- * - the number of distinct sample values is below `max(3, min(10, n / 1000))`
- * - the median absolute deviation is zero with more than 100 samples
+ * - `'zero-dominated'` — more than half of the samples are exactly zero.
+ * - `'low-distinct'` — distinct sample count is below
+ *   `max(3, min(10, ⌊n / 1000⌋))`.
+ * - `'zero-mad'` — median absolute deviation is zero with more than 100
+ *   samples.
+ */
+export type TimerSaturationReason =
+  | 'low-distinct'
+  | 'zero-dominated'
+  | 'zero-mad'
+
+/**
+ * Classifies timer saturation in a latency sample set.
  *
- * Fewer than 10 samples are never flagged as saturated: with so few
- * measurements the criteria cannot reliably distinguish a deterministic
- * fast function (e.g. `iterations: 1`) from one truly limited by the timer
- * grain.
+ * Criteria are evaluated in the fixed order `'zero-dominated'` →
+ * `'low-distinct'` → `'zero-mad'`; the first match wins. Fewer than 10
+ * samples are never classified — with so few measurements the criteria
+ * cannot reliably distinguish a deterministic fast function from one truly
+ * limited by the timer grain.
  *
  * The distinct-value count is computed in O(n) by exploiting the
- * sorted-ascending invariant of `samples` (`Task#processRunResult` calls
- * `sortSamples` before this function).
+ * sorted-ascending invariant of `samples` and short-circuits as soon as
+ * the threshold is reached.
  * @param samples - the latency samples, sorted ascending
- * @param mad - the median absolute deviation, as computed by computeStatistics
- * @returns true when the timer resolution dominates the measurement
+ * @param mad - the median absolute deviation (e.g. from
+ *   {@link medianAbsoluteDeviation} or {@link computeStatistics})
+ * @returns the saturation reason, or `undefined` when no criterion fires
  */
-export const detectTimerSaturation = (
-  samples: Samples,
+export const classifyTimerSaturation = (
+  samples: SortedSamples,
   mad: number
-): boolean => {
+): TimerSaturationReason | undefined => {
   const n = samples.length
-  if (n < 10) return false
+  if (n < 10) return undefined
 
   let zeroCount = 0
   for (const s of samples) {
     if (s === 0) zeroCount++
   }
-  if (zeroCount * 2 > n) return true
+  if (zeroCount * 2 > n) return 'zero-dominated'
 
+  const distinctThreshold = Math.max(3, Math.min(10, Math.floor(n / 1000)))
   let distinctCount = 1
   for (let i = 1; i < n; i++) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (samples[i]! !== samples[i - 1]!) distinctCount++
+    if (samples[i]! !== samples[i - 1]!) {
+      distinctCount++
+      if (distinctCount >= distinctThreshold) break
+    }
   }
-  const distinctThreshold = Math.max(3, Math.min(10, Math.floor(n / 1000)))
-  if (distinctCount < distinctThreshold) return true
+  if (distinctCount < distinctThreshold) return 'low-distinct'
 
-  if (n > 100 && mad === 0) return true
+  if (n > 100 && mad === 0) return 'zero-mad'
 
-  return false
+  return undefined
 }
+
+/**
+ * Detects timer saturation in a latency sample set.
+ *
+ * Boolean wrapper around {@link classifyTimerSaturation}; prefer the
+ * classifier when the specific reason is needed (e.g. to surface it on a
+ * `'warning'` event).
+ * @param samples - the latency samples, sorted ascending
+ * @param mad - the median absolute deviation
+ * @returns `true` when a saturation criterion fires, `false` otherwise
+ */
+export const detectTimerSaturation = (
+  samples: SortedSamples,
+  mad: number
+): boolean => classifyTimerSaturation(samples, mad) !== undefined
 
 /**
  * Estimates the effective timer resolution from a latency sample set.
@@ -425,7 +453,7 @@ export interface CalibrateTimerOverheadOptions {
    * back-to-back call deltas to a single overhead value.
    * @default 'median'
    */
-  estimator?: TimerOverheadEstimator
+  estimator?: TimerOverheadEstimatorKind
   /**
    * Number of back-to-back call pairs to measure during the collection phase.
    * @default 1024
@@ -451,7 +479,7 @@ export interface CalibrateTimerOverheadOptions {
  * - `'p05'` — 5th percentile of strictly-positive deltas. A compromise
  *   between robustness and tightness.
  */
-export type TimerOverheadEstimator = 'median' | 'min' | 'p05'
+export type TimerOverheadEstimatorKind = 'median' | 'min' | 'p05'
 
 /**
  * Estimates the cost of a single `provider.fn()` call by repeatedly measuring
@@ -484,16 +512,20 @@ export const calibrateTimerOverhead = (
   const { estimator = 'median', samples = 1024, warmupSamples = 64 } = options
   const { fn, toMs } = provider
 
+  // `fn` returns TimestampValue (`bigint | number`); both operands always
+  // share a runtime type. Casting both to `bigint` lets the operator
+  // typecheck without a type predicate; at runtime the `-` operator is
+  // polymorphic for both numeric branches and `toMs` accepts either.
   for (let i = 0; i < warmupSamples; i++) {
-    const a = fn() as unknown as number
-    const b = fn() as unknown as number
+    const a = fn() as bigint
+    const b = fn() as bigint
     toMs(b - a)
   }
 
   const deltas: number[] = []
   for (let i = 0; i < samples; i++) {
-    const a = fn() as unknown as number
-    const b = fn() as unknown as number
+    const a = fn() as bigint
+    const b = fn() as bigint
     const delta = toMs(b - a)
     if (delta > 0) deltas.push(delta)
   }
@@ -593,6 +625,19 @@ export function absoluteDeviationMedian (
   }
   return 0 // should never reach here
 }
+
+/**
+ * Computes the median absolute deviation (MAD) of a sorted sample set.
+ *
+ * Convenience wrapper that derives the median from the sorted input and
+ * forwards to {@link absoluteDeviationMedian}. Use when only `mad` is
+ * required and the cost of a full {@link computeStatistics} pass is
+ * unjustified (e.g. inside {@link classifyTimerSaturation}).
+ * @param samples - the sorted sample, length ≥ 1
+ * @returns the median absolute deviation
+ */
+export const medianAbsoluteDeviation = (samples: SortedSamples): number =>
+  absoluteDeviationMedian(samples, quantileSorted(samples, 0.5))
 
 /**
  * Computes the statistics of a sample.

@@ -39,14 +39,17 @@ export type {
 } from './types'
 export type {
   CalibrateTimerOverheadOptions,
-  TimerOverheadEstimator,
+  TimerOverheadEstimatorKind,
+  TimerSaturationReason,
 } from './utils'
 export {
   calibrateTimerOverhead,
+  classifyTimerSaturation,
   detectTimerSaturation,
   estimateResolution,
   formatNumber,
   hrtimeNow,
+  medianAbsoluteDeviation,
   performanceNow as now,
   nToMs,
 } from './utils'

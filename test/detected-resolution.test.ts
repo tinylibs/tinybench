@@ -52,11 +52,10 @@ test('Task.detectedResolution is populated after a successful run', () => {
   if (fooTask.result.state !== 'completed') return
 
   const resolution = fooTask.detectedResolution
-  if (resolution !== undefined) {
-    expect(resolution).toBeTypeOf('number')
-    expect(resolution).toBeGreaterThan(0)
-    expect(Number.isFinite(resolution)).toBe(true)
-  }
+  expect(resolution).toBeDefined()
+  expect(resolution).toBeTypeOf('number')
+  expect(resolution).toBeGreaterThan(0)
+  expect(Number.isFinite(resolution)).toBe(true)
 })
 
 test('Task.detectedResolution is reset to undefined by reset()', () => {

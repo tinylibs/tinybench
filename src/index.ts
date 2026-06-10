@@ -32,9 +32,24 @@ export type {
   TaskResultStarted,
   TaskResultTimestampProviderInfo,
   TaskResultWithStatistics,
+  TimerSaturationReason,
   TimestampFn,
   TimestampFns,
   TimestampProvider,
   TimestampValue,
 } from './types'
-export { formatNumber, hrtimeNow, performanceNow as now, nToMs } from './utils'
+export type {
+  CalibrateTimerOverheadOptions,
+  TimerOverheadEstimatorKind,
+} from './utils'
+export {
+  calibrateTimerOverhead,
+  classifyTimerSaturation,
+  detectTimerSaturation,
+  estimateResolution,
+  formatNumber,
+  hrtimeNow,
+  medianAbsoluteDeviation,
+  performanceNow as now,
+  nToMs,
+} from './utils'

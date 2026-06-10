@@ -43,6 +43,10 @@
     "dist/**"
   ],
   "repository": "tinylibs/tinybench",
+  "homepage": "https://github.com/tinylibs/tinybench#readme",
+  "bugs": {
+    "url": "https://github.com/tinylibs/tinybench/issues"
+  },
   "license": "MIT",
   "devDependencies": {
     "@commitlint/cli": "^21.0.2",

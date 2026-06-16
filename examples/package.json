@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "npm-run-all2": "^9.0.1",
+    "npm-run-all2": "^9.0.2",
     "tsx": "^4.22.4"
   }
 }

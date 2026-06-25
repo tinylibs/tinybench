@@ -50,6 +50,7 @@ export {
   formatNumber,
   hrtimeNow,
   medianAbsoluteDeviation,
+  mToNs,
   performanceNow as now,
   nToMs,
 } from './utils'

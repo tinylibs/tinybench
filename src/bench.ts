@@ -24,6 +24,7 @@ import { BenchEvent } from './event'
 import { Task } from './task'
 import {
   assert,
+  calibrateTimerOverhead,
   defaultConvertTaskResultForConsoleTable,
   getTimestampProvider,
   runtime,
@@ -96,6 +97,16 @@ export class Bench extends EventTarget implements BenchLike {
   readonly signal?: AbortSignal
 
   /**
+   * Whether to subtract an estimated timestamp provider call overhead from
+   * each raw latency sample.
+   *
+   * Incompatible with `concurrency: 'task'`; the constraint is enforced
+   * at construction and at the start of {@link Bench.run}.
+   * @default false
+   */
+  readonly subtractTimerOverhead: boolean
+
+  /**
    * A teardown function that runs after each task execution.
    */
   readonly teardown: (
@@ -119,6 +130,15 @@ export class Bench extends EventTarget implements BenchLike {
    * The amount of time to run each task.
    */
   readonly time: number
+
+  /**
+   * The estimated cost of one timestamp provider call in milliseconds.
+   *
+   * `undefined` when {@link subtractTimerOverhead} is `false`.
+   * Otherwise calibrated once at construction time via
+   * {@link calibrateTimerOverhead}.
+   */
+  readonly timerOverhead: number | undefined
 
   /**
    * A timestamp provider and its related functions.
@@ -195,6 +215,14 @@ export class Bench extends EventTarget implements BenchLike {
     this.throws = restOptions.throws ?? false
     this.signal = restOptions.signal
     this.retainSamples = restOptions.retainSamples === true
+    this.subtractTimerOverhead = restOptions.subtractTimerOverhead === true
+    assert(
+      !(this.subtractTimerOverhead && this.concurrency === 'task'),
+      '`subtractTimerOverhead` cannot be used with `concurrency: "task"` — set `concurrency` to `null` or `"bench"`, or disable `subtractTimerOverhead`'
+    )
+    this.timerOverhead = this.subtractTimerOverhead
+      ? calibrateTimerOverhead(this.timestampProvider)
+      : undefined
 
     if (this.signal) {
       this.signal.addEventListener(
@@ -264,6 +292,10 @@ export class Bench extends EventTarget implements BenchLike {
    * @returns the tasks array
    */
   async run (): Promise<Task[]> {
+    assert(
+      !(this.subtractTimerOverhead && this.concurrency === 'task'),
+      '`subtractTimerOverhead` cannot be used with `concurrency: "task"` — set `concurrency` to `null` or `"bench"`, or disable `subtractTimerOverhead`'
+    )
     if (this.warmup) {
       await this.#warmupTasks()
     }

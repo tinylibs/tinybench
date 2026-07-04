@@ -17,10 +17,10 @@ importers:
   .:
     devDependencies:
       '@commitlint/cli':
-        specifier: ^21.1.0
+        specifier: ^21.2.0
         version: 21.2.0(@types/node@24.13.2)(typescript@6.0.3)
       '@commitlint/config-conventional':
-        specifier: ^21.1.0
+        specifier: ^21.2.0
         version: 21.2.0
       '@cspell/eslint-plugin':
         specifier: ^10.0.1

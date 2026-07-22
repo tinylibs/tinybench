@@ -518,7 +518,7 @@ export interface Statistics {
   df: number
 
   /**
-   * median absolute deviation
+   * median absolute deviation, not scaled by the 1.4826 normal-consistency factor
    */
   mad: number
 

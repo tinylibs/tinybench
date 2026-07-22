@@ -1,8 +1,11 @@
 import type { BenchEvent } from '../src/event'
 import type { Task } from '../src/task'
-import type { JSRuntime } from './utils'
+
 export type { BenchEvent } from '../src/event'
 
+/**
+ * Options for adding an event listener
+ */
 export type AddEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.addEventListener
 >[2]
@@ -20,37 +23,126 @@ export type BenchEvents =
   | 'reset' // when the reset method gets called
   | 'start' // when running the benchmarks gets started
   | 'warmup' // when the benchmarks start getting warmed up
+  | 'warning' // when timer saturation is detected for a task's latency samples
 
-export type BenchEventsOptionalTask = Omit<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+/**
+ * Bench events that may have an associated Task
+ */
+export type BenchEventsOptionalTask = Omit<
+  BenchEvents,
+  'add' | 'cycle' | 'error' | 'remove'
+>
+
+/**
+ * Bench events that have an associated error
+ */
 export type BenchEventsWithError = Extract<BenchEvents, 'error'>
-export type BenchEventsWithTask = Extract<BenchEvents, 'add' | 'cycle' | 'error' | 'remove'>
+/**
+ * Bench events that have an associated Task
+ */
+export type BenchEventsWithTask = Extract<
+  BenchEvents,
+  'add' | 'cycle' | 'error' | 'remove' | 'warning'
+>
 
+/**
+ * Used to decouple Bench and Task
+ */
 export interface BenchLike extends EventTarget {
+  /**
+   * Adds a listener for the specified event type.
+   */
   addEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: AddEventListenerOptionsArgument
   ) => void
-
+  /**
+   * Executes tasks concurrently based on the specified concurrency mode, if set.
+   *
+   * - When `mode` is set to `null` (default), concurrency is disabled.
+   * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
+   * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
+   */
   concurrency: Concurrency
-
+  /**
+   * The amount of executions per task.
+   */
   iterations: number
+  /**
+   * A function to get a timestamp.
+   */
   now: NowFn
+
+  /**
+   * Removes a previously registered event listener.
+   */
   removeEventListener: <K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: RemoveEventListenerOptionsArgument
   ) => void
+
+  /**
+   * Should samples be retained for further custom processing
+   */
+  retainSamples: boolean
+
+  /**
+   * The JavaScript runtime environment.
+   */
   runtime: JSRuntime
+
+  /**
+   * The JavaScript runtime version.
+   */
   runtimeVersion: string
+  /**
+   * A setup function that runs before each task execution.
+   */
   setup: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  /**
+   * An AbortSignal to cancel the benchmark
+   */
   signal?: AbortSignal
+  /**
+   * A teardown function that runs after each task execution.
+   */
   teardown: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  /**
+   * The maximum number of concurrent tasks to run
+   */
   threshold: number
+  /**
+   * Whether to throw an error if a task function throws
+   */
   throws: boolean
+  /**
+   * The amount of time to run each task.
+   */
   time: number
+  /**
+   * The estimated cost of one timestamp provider call in milliseconds.
+   *
+   * Calibrated once at construction; `undefined` (or omitted) when timer
+   * overhead subtraction is disabled or unsupported by the implementation.
+   */
+  readonly timerOverhead?: number
+  /**
+   * The timestamp provider used by the benchmark.
+   */
+  timestampProvider: TimestampProvider
+  /**
+   * Whether to warmup the tasks before running them
+   */
   warmup: boolean
+  /**
+   * The amount of warmup iterations per task.
+   */
   warmupIterations: number
+  /**
+   * The amount of time to warmup each task.
+   */
   warmupTime: number
 }
 
@@ -68,73 +160,154 @@ export interface BenchOptions {
   concurrency?: Concurrency
 
   /**
-   * number of times that a task should run if even the time option is finished
+   * The number of times that a task should run if even the time option is finished.
    * @default 64
    */
   iterations?: number
 
   /**
-   * benchmark name
+   * Benchmark name.
    */
   name?: string
 
   /**
-   * function to get the current timestamp in milliseconds
+   * Function to get the current timestamp in milliseconds.
    */
   now?: NowFn
 
   /**
-   * setup function to run before each benchmark task (cycle)
+   * Keep samples for statistics calculation
+   * @default false
+   */
+  retainSamples?: boolean
+
+  /**
+   * Setup function to run before each benchmark task (cycle)
    */
   setup?: Hook
 
   /**
-   * An AbortSignal for aborting the benchmark
+   * An AbortSignal for aborting the benchmark.
    */
   signal?: AbortSignal
 
   /**
-   * teardown function to run after each benchmark task (cycle)
+   * Whether to subtract an estimated timestamp provider call overhead from
+   * each raw latency sample.
+   *
+   * Each sample is measured as `t1 - t0` around a single call to the task
+   * function, so every raw sample is inflated by approximately one
+   * timestamp provider call cost `C`. When this option is `true`, an
+   * estimate `Ĉ` is computed once at construction time via
+   * {@link calibrateTimerOverhead}, and `max(0, raw_sample - Ĉ)` is used
+   * in place of each non-overridden sample before statistics are computed.
+   *
+   * **Statistics after correction.** All fields of {@link Statistics} are
+   * derived from the clamped corrected samples, not from the raw
+   * distribution. With `M` denoting the raw-sample mean:
+   *
+   * - **Clean-shift regime (`X >> Ĉ`).** The clamp `max(0, …)` rarely
+   *   triggers, so the correction acts as a translation by `Ĉ`. Location
+   *   statistics (`mean`, `min`, `max`, all percentiles) decrease by `Ĉ`;
+   *   absolute-unit dispersion (`vr`, `sd`, `sem`, `moe`, `mad`, `aad`)
+   *   is essentially unchanged. Because `rme = moe / mean`, it inflates
+   *   by the deterministic factor `M / (M − Ĉ)` whenever `Ĉ > 0`.
+   * - **Sub-overhead regime (`X ≈ Ĉ`).** A non-trivial fraction of
+   *   samples clamp to `0`, biasing the corrected mean upward,
+   *   contracting `vr`/`sd`/`sem`/`moe`/`aad`, and compounding the
+   *   `M / (M − Ĉ)` factor in `rme`. Once the cumulative mass of raw
+   *   samples at or below `Ĉ` reaches a given quantile, that percentile
+   *   collapses to `0`; in particular `p50` collapses once at least half
+   *   of the raw samples satisfy `raw_sample ≤ Ĉ`, which then forces
+   *   `mad` and `aad` toward `0`. Prefer `overriddenDuration` for
+   *   sub-overhead measurements.
+   *
+   * **Three observable consequences of the clamp.**
+   *
+   * 1. `latency.min` may be exactly `0` even when no zero-duration sample
+   *    was actually observed.
+   * 2. The throughput estimator substitutes `1000 / latency.mean` (or `0`
+   *    when `mean === 0`) for every clamped sample.
+   * 3. {@link detectTimerSaturation} criterion `'zero-dominated'` cannot
+   *    distinguish clamped samples from genuine zero-duration timer
+   *    reads, so a `'warning'` event may be dispatched in the
+   *    sub-overhead regime even when the timer itself is not saturated.
+   *
+   * **Caveat — `concurrency: "task"`.** The overhead is calibrated once
+   * at construction time with sequential timer calls. Setting both
+   * options causes the constructor (and `run()`) to throw, since the
+   * sequentially-calibrated estimate would not reflect the per-iteration
+   * timer call cost under concurrent execution.
+   *
+   * **Caveat — `overriddenDuration`.** Samples returned by the task
+   * function via `overriddenDuration` are intentional user values and
+   * are never modified by the correction. They are also excluded from
+   * {@link Task.detectedResolution} and from timer-saturation detection.
+   *
+   * On runtimes with a coarse timer (resolution >= 1 ms), the
+   * calibration returns `0` and this option becomes a no-op.
+   * @default false
+   */
+  subtractTimerOverhead?: boolean
+
+  /**
+   * Teardown function to run after each benchmark task (cycle).
    */
   teardown?: Hook
 
   /**
    * The maximum number of concurrent tasks to run
-   * @default Infinity
+   * @default Number.POSITIVE_INFINITY
    */
   threshold?: number
 
   /**
-   * Throws if a task fails
+   * Throws if a task fails.
    * @default false
    */
   throws?: boolean
 
   /**
-   * time needed for running a benchmark task (milliseconds)
+   * Time needed for running a benchmark task in milliseconds.
    * @default 1000
    */
   time?: number
 
   /**
-   * warmup benchmark
+   * The timestamp provider used by the benchmark. By default 'performance.now'
+   * will be used.
+   */
+  timestampProvider?: TimestampFns | TimestampProvider
+
+  /**
+   * Warmup benchmark.
    * @default true
    */
   warmup?: boolean
 
   /**
-   * warmup iterations
+   * Warmup iterations.
    * @default 16
    */
   warmupIterations?: number
 
   /**
-   * warmup time (milliseconds)
+   * Warmup time in milliseconds.
    * @default 250
    */
   warmupTime?: number
 }
 
+/**
+ * - When `mode` is set to `null` (default), concurrency is disabled.
+ * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
+ * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
+ */
+export type Concurrency = 'bench' | 'task' | null
+
+/**
+ * Converts a Task to a console.table friendly object
+ */
 export type ConsoleTableConverter = (
   task: Task
 ) => Record<string, number | string>
@@ -142,7 +315,10 @@ export type ConsoleTableConverter = (
 /**
  * Event listener
  */
-export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> = (evt: BenchEvent<E, M>) => void
+export type EventListener<
+  E extends BenchEvents,
+  M extends 'bench' | 'task' = 'bench'
+> = (evt: BenchEvent<E, M>) => void
 
 /**
  * Both the `Task` and `Bench` objects extend the `EventTarget` object.
@@ -150,7 +326,13 @@ export type EventListener<E extends BenchEvents, M extends 'bench' | 'task' = 'b
  * using the universal `addEventListener` and `removeEventListener` methods.
  */
 
-export interface EventListenerObject<E extends BenchEvents, M extends 'bench' | 'task' = 'bench'> {
+export interface EventListenerObject<
+  E extends BenchEvents,
+  M extends 'bench' | 'task' = 'bench'
+> {
+  /**
+   * A method called when the event is dispatched.
+   */
   handleEvent(evt: BenchEvent<E, M>): void
 }
 
@@ -210,6 +392,11 @@ export interface FnOptions {
   beforeEach?: FnHook
 
   /**
+   * Retain samples for this task, overriding the bench-level retainSamples option
+   */
+  retainSamples?: boolean
+
+  /**
    * An AbortSignal for aborting this specific task
    *
    * If not provided, falls back to {@link BenchOptions.signal}
@@ -249,7 +436,29 @@ export type Hook = (
   mode?: 'run' | 'warmup'
 ) => Promise<void> | void
 
-export type Machine = (Lowercase<string> & Record<never, never>) | (
+/**
+ * The JavaScript runtime environment.
+ * @see https://runtime-keys.proposal.wintercg.org/
+ */
+export type JSRuntime =
+  | 'browser'
+  | 'bun'
+  | 'deno'
+  | 'edge-light'
+  | 'fastly'
+  | 'hermes'
+  | 'jsc'
+  | 'lagon'
+  | 'moddable'
+  | 'netlify'
+  | 'node'
+  | 'quickjs-ng'
+  | 'spidermonkey'
+  | 'unknown'
+  | 'v8'
+  | 'workerd'
+
+export type Machine = (
   | 'arm64'
   | 'arm'
   | 'i686'
@@ -260,9 +469,14 @@ export type Machine = (Lowercase<string> & Record<never, never>) | (
   | 'ppc64'
   | 'riscv64'
   | 's390x'
-  | 'x86_64')
+  | 'x86_64') | (Lowercase<string> & Record<never, never>)
 
-export type OS = (Lowercase<string> & Record<never, never>) | (
+/**
+ * A function that returns the current timestamp.
+ */
+export type NowFn = () => number
+
+export type OS = (
   | 'aix'
   | 'android'
   | 'cygwin'
@@ -273,7 +487,7 @@ export type OS = (Lowercase<string> & Record<never, never>) | (
   | 'netbsd'
   | 'openbsd'
   | 'sunos'
-  | 'win32')
+  | 'win32') | (Lowercase<string> & Record<never, never>)
 
 export type PlatformMetrics = PlatformMetricsBase | PlatformMetricsBrowser | PlatformMetricsNodeLike
 
@@ -282,16 +496,35 @@ export type RemoveEventListenerOptionsArgument = Parameters<
   typeof EventTarget.prototype.removeEventListener
 >[2]
 
+/**
+ * The resolved benchmark options
+ */
 export interface ResolvedBenchOptions extends BenchOptions {
   iterations: NonNullable<BenchOptions['iterations']>
   now: NonNullable<BenchOptions['now']>
   setup: NonNullable<BenchOptions['setup']>
+  subtractTimerOverhead: NonNullable<BenchOptions['subtractTimerOverhead']>
   teardown: NonNullable<BenchOptions['teardown']>
   throws: NonNullable<BenchOptions['throws']>
   time: NonNullable<BenchOptions['time']>
   warmup: NonNullable<BenchOptions['warmup']>
   warmupIterations: NonNullable<BenchOptions['warmupIterations']>
   warmupTime: NonNullable<BenchOptions['warmupTime']>
+}
+
+/**
+ * A type representing a samples-array with at least one number.
+ */
+export type Samples = [number, ...number[]]
+
+/**
+ * A type representing a sorted samples-array with at least one number.
+ */
+export type SortedSamples = Samples & {
+  /**
+   * A unique symbol to identify sorted samples
+   */
+  readonly __sorted__: unique symbol
 }
 
 /**
@@ -369,9 +602,14 @@ export interface Statistics {
   rme: number
 
   /**
-   * samples
+   * samples used to calculate the statistics
    */
-  samples: number[]
+  samples: SortedSamples | undefined
+
+  /**
+   * samples count
+   */
+  samplesCount: number
 
   /**
    * standard deviation
@@ -392,18 +630,20 @@ export interface Statistics {
 /**
  * Task events
  */
-export type TaskEvents = Extract<BenchEvents,
+export type TaskEvents = Extract<
+  BenchEvents,
   | 'abort' // when a signal aborts
   | 'complete' // when running a task finishes
-  | 'cycle'// when running a task gets done
+  | 'cycle' // when running a task gets done
   | 'error' // when the task throws
   | 'reset' // when the reset method gets called
-  | 'start'// when running the task gets started
+  | 'start' // when running the task gets started
   | 'warmup' // when the task start getting warmed up
+  | 'warning' // when timer saturation is detected for the task's latency samples
 >
 
 /**
- * The task result object
+ * The task result
  */
 export type TaskResult =
   | TaskResultAborted
@@ -413,37 +653,70 @@ export type TaskResult =
   | TaskResultNotStarted
   | TaskResultStarted
 
+/**
+ * The task result for aborted tasks.
+ */
 export interface TaskResultAborted {
+  /**
+   * the task state
+   */
   state: 'aborted'
 }
 
+/**
+ * The task result for aborted tasks, having also statistical data.
+ */
 export interface TaskResultAbortedWithStatistics
   extends TaskResultWithStatistics {
+  /**
+   * the task state
+   */
   state: 'aborted-with-statistics'
 }
 
+/**
+ * The task result for completed tasks with statistical data.
+ */
 export interface TaskResultCompleted extends TaskResultWithStatistics {
   /**
    * how long each operation takes (ms)
    */
   period: number
 
+  /**
+   * the task state
+   */
   state: 'completed'
 }
 
+/**
+ * The task result for errored tasks
+ */
 export interface TaskResultErrored {
   /**
    * the error that caused the task to fail
    */
   error: Error
 
+  /**
+   * the task state
+   */
   state: 'errored'
 }
 
+/**
+ * The task result for not started tasks
+ */
 export interface TaskResultNotStarted {
+  /**
+   * the task state
+   */
   state: 'not-started'
 }
 
+/**
+ * The additional runtime information for task results
+ */
 export interface TaskResultRuntimeInfo {
   /**
    * the JavaScript runtime environment
@@ -456,10 +729,29 @@ export interface TaskResultRuntimeInfo {
   runtimeVersion: string
 }
 
+/**
+ * The task result for started tasks
+ */
 export interface TaskResultStarted {
+  /**
+   * the task state
+   */
   state: 'started'
 }
 
+/**
+ * The timestamp provider information for task results
+ */
+export interface TaskResultTimestampProviderInfo {
+  /**
+   * the name of the timestamp provider used during the benchmark
+   */
+  timestampProviderName: (string & {}) | TimestampFns
+}
+
+/**
+ * The statistical data for task results
+ */
 export interface TaskResultWithStatistics {
   /**
    * the task latency statistics
@@ -482,9 +774,69 @@ export interface TaskResultWithStatistics {
   totalTime: number
 }
 
-type Concurrency = 'bench' | 'task' | null
+/**
+ * Reason a sample set is classified as timer-saturated.
+ *
+ * - `'zero-dominated'` — more than half of the samples are exactly zero.
+ * - `'low-distinct'` — distinct sample count is below
+ *   `max(3, min(10, ⌊n / 1000⌋))`.
+ * - `'zero-mad'` — median absolute deviation is zero with more than 100
+ *   samples.
+ */
+export type TimerSaturationReason =
+  | 'low-distinct'
+  | 'zero-dominated'
+  | 'zero-mad'
 
-type NowFn = () => number
+/**
+ * A timestamp function that returns either a number or bigint.
+ */
+export type TimestampFn = () => TimestampValue
+
+/**
+ * Possible timestamp provider names.
+ * 'custom' is used when a custom timestamp function is provided.
+ */
+export type TimestampFns =
+  | 'auto'
+  | 'bunNanoseconds'
+  | 'custom'
+  | 'hrtimeNow'
+  | 'performanceNow'
+
+/**
+ * A timestamp provider and its related functions.
+ */
+export interface TimestampProvider {
+  /**
+   * The actual function of the timestamp provider.
+   * @returns the timestamp value
+   */
+  fn: TimestampFn
+  /**
+   * Converts milliseconds to the timestamp value.
+   * @param value - the milliseconds value
+   * @returns the timestamp value
+   */
+  fromMs: (value: number) => TimestampValue
+  /**
+   * The name of the timestamp provider.
+   */
+  name: (string & {}) | TimestampFns
+  /**
+   * Converts the timestamp value to milliseconds.
+   * @param value - the timestamp value
+   * @returns the milliseconds
+   */
+  toMs: (value: TimestampValue) => number
+}
+
+/**
+ * A timestamp value, either number or bigint. Internally timestamps can use
+ * either representation depending on the environment and the chosen timestamp
+ * function.
+ */
+export type TimestampValue = bigint | number
 
 interface PlatformMetricsBase {
   cpuMachine: Machine;

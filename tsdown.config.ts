@@ -3,6 +3,9 @@ import { defineConfig } from 'tsdown/config'
 export default defineConfig({
   entry: ['src/index.ts'],
   minify: {
+    codegen: {
+      removeWhitespace: false,
+    },
     compress: true,
     mangle: true,
   },
@@ -11,5 +14,8 @@ export default defineConfig({
       dts: '.d.ts',
       js: '.js',
     }
+  },
+  outputOptions: {
+    comments: false,
   },
 })

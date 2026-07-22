@@ -1,8 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  formatNumber,
-} from '../src/utils'
+import { formatNumber } from '../src/utils'
 
 test('formatting integers', () => {
   expect(formatNumber(123456, 5, 2)).toBe('123456')
@@ -16,8 +14,8 @@ test('formatting integers', () => {
 })
 
 test('formatting floats', () => {
-  expect(formatNumber(-Infinity, 5, 2)).toBe('-∞')
-  expect(formatNumber(Infinity, 5, 2)).toBe('+∞')
+  expect(formatNumber(Number.NEGATIVE_INFINITY, 5, 2)).toBe('-∞')
+  expect(formatNumber(Number.POSITIVE_INFINITY, 5, 2)).toBe('+∞')
   expect(formatNumber(Number.NaN, 5, 2)).toBe('NaN')
   expect(formatNumber(123456.789, 5, 2)).toBe('123457')
   expect(formatNumber(12345.6789, 5, 2)).toBe('12346')

@@ -11,5 +11,5 @@ test('task add duplicate error', () => {
     bench.add('foo', () => {
       /* noop */
     })
-  ).toThrowError('Task "foo" already exists')
+  ).toThrow('Task "foo" already exists')
 })

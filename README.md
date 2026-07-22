@@ -87,6 +87,12 @@ Both the `Task` and `Bench` classes extend the `EventTarget` object. So you can 
 bench.addEventListener('cycle', (evt) => {
   const task = evt.task!;
 });
+
+// runs when timer saturation is detected for a task's measured samples
+bench.addEventListener('warning', (evt) => {
+  const task = evt.task!;
+  const reason = evt.reason; // 'zero-dominated' | 'low-distinct' | 'zero-mad'
+});
 ```
 
 #### [`TaskEvents`](https://tinylibs.github.io/tinybench/types/TaskEvents.html)
@@ -99,17 +105,6 @@ task.addEventListener('cycle', (evt) => {
 ```
 
 ### [`BenchEvent`](https://tinylibs.github.io/tinybench/types/BenchEvent.html)
-
-## `process.hrtime`
-
-if you want more accurate results for nodejs with `process.hrtime`, then import
-the `hrtimeNow` function from the library and pass it to the `Bench` options.
-
-```ts
-import { hrtimeNow } from 'tinybench'
-```
-
-It may make your benchmarks slower.
 
 ## Async Detection
 
@@ -124,23 +119,29 @@ functions that return a `Promise` but are actually synchronous.
 ```ts
 const bench = new Bench()
 
-bench.add('asyncTask', async () => {
-}, { async: true })
+bench.add('asyncTask', async () => {}, { async: true })
 
-bench.add('syncTask', () => {
-}, { async: false })
+bench.add('syncTask', () => {}, { async: false })
 
-bench.add('syncTaskReturningPromiseAsAsync', () => {
-  return Promise.resolve()
-}, { async: true })
+bench.add(
+  'syncTaskReturningPromiseAsAsync',
+  () => {
+    return Promise.resolve()
+  },
+  { async: true }
+)
 
-bench.add('syncTaskReturningPromiseAsSync', () => {
-  // for example running sync logic, which blocks the event loop anyway
-  // like fs.writeFileSync
+bench.add(
+  'syncTaskReturningPromiseAsSync',
+  () => {
+    // for example running sync logic, which blocks the event loop anyway
+    // like fs.writeFileSync
 
-  // returns promise maybe for API compatibility
-  return Promise.resolve()
-}, { async: false })
+    // returns promise maybe for API compatibility
+    return Promise.resolve()
+  },
+  { async: false }
+)
 
 await bench.run()
 ```
@@ -152,10 +153,239 @@ await bench.run()
 - When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
 
 ```ts
-bench.threshold = 10 // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
-bench.concurrency = 'task' // The concurrency mode to determine how tasks are run.
+const bench = new Bench({
+  concurrency: 'task', // The concurrency mode to determine how tasks are run.
+  threshold: 10, // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
+})
 await bench.run()
 ```
+
+## Convert task results for `console.table()`
+
+You can convert the benchmark results to a table format suitable for
+`console.table()` using the `bench.table()` method.
+
+```ts
+const table = bench.table()
+console.table(table)
+```
+
+You can also customize the table output by providing a convert-function to the `table` method.
+
+```ts
+import { Bench, type ConsoleTableConverter, formatNumber, mToNs, type Task } from 'tinybench'
+
+/**
+ * The default converter function for console.table output.
+ * Modify it as needed to customize the table format.
+ */
+const defaultConverter: ConsoleTableConverter = (task: Task): Record<string, number | string> => {
+  const state = task.result.state
+  return {
+    'Task name': task.name,
+    ...(state === 'aborted-with-statistics' || state === 'completed'
+      ? {
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50))} \xb1 ${formatNumber(mToNs(task.result.latency.mad))}`,
+          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+          'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
+          Samples: task.result.latency.samplesCount,
+        }
+      : state !== 'errored'
+        ? {
+            'Latency avg (ns)': 'N/A',
+            'Latency med (ns)': 'N/A',
+            'Throughput avg (ops/s)': 'N/A',
+            'Throughput med (ops/s)': 'N/A',
+            Samples: 'N/A',
+            Remarks: state,
+          }
+        : {
+            Error: task.result.error.message,
+            Stack: task.result.error.stack ?? 'N/A',
+          }),
+    ...(state === 'aborted-with-statistics' && {
+      Remarks: state,
+    }),
+  }
+}
+
+const bench = new Bench({ name: 'custom table benchmark', time: 100 })
+// add tasks...
+
+console.table(bench.table(defaultConverter))
+```
+
+## Retaining Samples
+
+By default Tinybench does not keep the samples for `latency` and `throughput` to
+minimize memory usage. Enable sample retention if you need the raw samples for
+plotting, custom analysis, or exporting results.
+
+You can enable samples retention at the bench level by setting the
+`retainSamples` option to `true` when creating a `Bench` instance:
+
+```ts
+const bench = new Bench({ retainSamples: true })
+```
+
+You can also enable samples retention by setting the `retainSamples` option to
+`true` when adding a task:
+
+```ts
+bench.add(
+  'task with samples',
+  () => {
+    // Task logic here
+  },
+  { retainSamples: true }
+)
+```
+
+## Timestamp Providers
+
+Tinybench can utilize different timestamp providers for measuring time intervals.
+By default it uses `performance.now()`.
+
+The `timestampProvider` option can be set when creating a `Bench` instance. It
+accepts either a `TimestampProvider` object or shorthands for the common
+providers `hrtimeNow` and `performanceNow`.
+
+If you use `bun` runtime, you can also use `bunNanoseconds` shorthand.
+
+You can set the `timestampProvider` to `auto` to let Tinybench choose the most
+precise available timestamp provider based on the runtime.
+
+```ts
+import { Bench } from 'tinybench'
+
+const bench = new Bench({
+  timestampProvider: 'hrtimeNow', // or 'performanceNow', 'bunNanoseconds', 'auto'
+})
+```
+
+If you want to provide a custom timestamp provider, you can create an object that implements
+the `TimestampProvider` interface:
+
+```ts
+import { Bench, TimestampProvider } from 'tinybench'
+
+// Custom timestamp provider using Date.now()
+const dateNowTimestampProvider: TimestampProvider = {
+  name: 'dateNow', // name of the provider
+  fn: Date.now, // function that returns the current timestamp
+  toMs: ts => ts, // convert the timestamp to milliseconds
+  fromMs: ts => ts, // convert milliseconds to the format used by fn()
+}
+
+const bench = new Bench({
+  timestampProvider: dateNowTimestampProvider,
+})
+```
+
+You can also set the `now` option to a function that returns the current timestamp.
+It will be converted to a `TimestampProvider` internally.
+
+```ts
+import { Bench } from 'tinybench'
+
+const bench = new Bench({
+  now: Date.now,
+})
+```
+
+## Timer Overhead Correction
+
+Each timer call (`performance.now()`, `process.hrtime.bigint()`, …) has a
+non-zero call cost `C`. For a task whose true duration `X` is comparable
+to `C`, the raw measured sample `X + C` is dominated by the timer rather
+than the task.
+
+When `subtractTimerOverhead: true` is set, an estimate `Ĉ` is computed
+once at construction time via [`calibrateTimerOverhead`](https://tinylibs.github.io/tinybench/functions/calibrateTimerOverhead.html),
+and `Math.max(0, raw_sample - Ĉ)` is used as each non-overridden sample
+before statistics are computed.
+
+```ts
+const bench = new Bench({ subtractTimerOverhead: true })
+console.log(bench.timerOverhead) // calibrated Ĉ in ms (or undefined)
+```
+
+The calibration helper is also exported for direct use, with a
+configurable estimator strategy (`'median'` default, or `'min'` / `'p05'`):
+
+```ts
+import { calibrateTimerOverhead, hrtimeNowTimestampProvider } from 'tinybench'
+
+const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
+  estimator: 'p05',
+  pairs: 1024,
+  warmupPairs: 64,
+})
+```
+
+**Caveats.**
+
+- Incompatible with `concurrency: 'task'` — overhead is calibrated
+  sequentially and does not reflect concurrent execution cost.
+  Construction (and `run()`) throws if both are set.
+- For sub-overhead measurements (`X ≈ Ĉ`) the `max(0, …)` clamp
+  truncates the lower tail and biases statistics; prefer
+  `overriddenDuration` (see below).
+- When the timer is too coarse to resolve the call cost — fewer than half
+  of the calibration pairs produce a positive delta (call cost `C < R / 2`,
+  e.g. a `Date.now`-class timer with `>= 1 ms` resolution) — the calibration
+  returns `0` and the option becomes a no-op.
+
+## Per-Sample Override (`overriddenDuration`)
+
+A task function may return an object containing `overriddenDuration`
+(in ms). That value is recorded in place of the timer-measured sample:
+the timer still brackets the task function, but its measurement is
+discarded and overhead correction is not applied to the substituted
+value. Useful for externally-timed work or sub-overhead measurements
+that the timer cannot resolve.
+
+```ts
+bench.add('externally-timed', () => {
+  const start = process.hrtime.bigint()
+  doWork()
+  const elapsedMs = Number(process.hrtime.bigint() - start) / 1e6
+  return { overriddenDuration: elapsedMs }
+})
+```
+
+Overridden samples are excluded from `Task.detectedResolution` and
+from timer-saturation detection.
+
+## Timer Diagnostics
+
+After `bench.run()` (or `runSync()`), each task exposes
+`detectedResolution` — the smallest reproducibly observed positive
+sample (in ms) among the timer-measured samples, or `undefined` when no
+positive timer measurement was seen (e.g. every sample was overridden).
+
+```ts
+const task = bench.getTask('foo')
+console.log(task?.detectedResolution) // e.g. 0.000041 (≈ 41 ns)
+```
+
+When the timer's resolution dominates a task's measured distribution
+(more than half zero samples, fewer than `max(3, min(10, ⌊n / 1000⌋))`
+distinct values, or zero MAD with `n > 100`), tinybench dispatches a
+`'warning'` event on both the task and the bench, carrying the matching
+[`TimerSaturationReason`](https://tinylibs.github.io/tinybench/types/TimerSaturationReason.html):
+
+```ts
+bench.addEventListener('warning', evt => {
+  console.warn(`timer-saturated: ${evt.task?.name} — ${evt.reason}`)
+})
+```
+
+The same heuristic and estimator are exposed as standalone helpers for
+custom analysis: [`detectTimerSaturation`](https://tinylibs.github.io/tinybench/functions/detectTimerSaturation.html),
+[`classifyTimerSaturation`](https://tinylibs.github.io/tinybench/functions/classifyTimerSaturation.html),
+and [`estimateResolution`](https://tinylibs.github.io/tinybench/functions/estimateResolution.html).
 
 ## Aborting Benchmarks
 
@@ -195,9 +425,13 @@ const controller = new AbortController()
 const bench = new Bench()
 
 bench
-  .add('abortable task', () => {
-    // This task can be aborted independently
-  }, { signal: controller.signal })
+  .add(
+    'abortable task',
+    () => {
+      // This task can be aborted independently
+    },
+    { signal: controller.signal }
+  )
   .add('normal task', () => {
     // This task will continue normally
   })
@@ -218,9 +452,13 @@ const controller = new AbortController()
 
 const bench = new Bench({ time: 10000 }) // Long-running benchmark
 
-bench.add('long task', async () => {
-  await new Promise(resolve => setTimeout(resolve, 100))
-}, { signal: controller.signal })
+bench.add(
+  'long task',
+  async () => {
+    await new Promise(resolve => setTimeout(resolve, 100))
+  },
+  { signal: controller.signal }
+)
 
 // Abort after 1 second
 setTimeout(() => controller.abort(), 1000)
@@ -237,9 +475,13 @@ Both `Bench` and `Task` emit `abort` events when aborted:
 const controller = new AbortController()
 const bench = new Bench()
 
-bench.add('task', () => {
-  // Task function
-}, { signal: controller.signal })
+bench.add(
+  'task',
+  () => {
+    // Task function
+  },
+  { signal: controller.signal }
+)
 
 const task = bench.getTask('task')
 

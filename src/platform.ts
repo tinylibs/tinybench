@@ -1,5 +1,5 @@
-import { GetPlatformMetricsOptions, Machine, OS, PlatformMetrics } from './types.js'
-import { runtime as jsRuntime, type JSRuntime } from './utils.js'
+import { GetPlatformMetricsOptions, type JSRuntime, Machine, OS, PlatformMetrics } from './types.js'
+import { runtime as jsRuntime } from './utils.js'
 
 const loadNodeOS = async (jsRuntime: JSRuntime, g: typeof globalThis = globalThis) => {
   return ['bun', 'deno', 'node'].includes(jsRuntime)
@@ -17,13 +17,13 @@ const loadNodeOS = async (jsRuntime: JSRuntime, g: typeof globalThis = globalThi
           : () => ([]),
         freemem: () => -1,
         getPriority: () => -1,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-deprecated
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         machine: typeof g.navigator?.platform === 'string'
-          ? () => normalizeMachine(g.navigator.platform.split(' ')[1]) // eslint-disable-line @typescript-eslint/no-deprecated
+          ? () => normalizeMachine(g.navigator.platform.split(' ')[1])
           : () => 'unknown',
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-deprecated
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         platform: typeof g.navigator?.platform === 'string'
-          ? () => normalizeMachine(g.navigator.platform.split(' ')[0]) // eslint-disable-line @typescript-eslint/no-deprecated
+          ? () => normalizeMachine(g.navigator.platform.split(' ')[0])
           : () => 'unknown',
         release: () => 'unknown',
         totalmem: typeof (g as unknown as { navigator?: { deviceMemory: number } }).navigator?.deviceMemory === 'number'

@@ -18,17 +18,18 @@ export default defineConfig([
           autoFix: true,
           cspell: {
             words: [
-              'loong',
-              'riscv',
+              'codegen',
               'evanwashere',
               'fastly',
               'IsHTMLDDA',
               'lagon',
               'lockdown',
+              'loong',
               'moddable',
               'neostandard',
               'quickjs',
               'Quii',
+              'riscv',
               'spidermonkey',
               'workerd',
             ],
@@ -38,7 +39,19 @@ export default defineConfig([
     },
   },
   js.configs.recommended,
+  plugins.promise.configs['flat/recommended'],
   jsdoc.configs['flat/recommended-typescript'],
+  {
+    rules: {
+      'jsdoc/check-tag-names': [
+        'warn',
+        {
+          definedTags: ['defaultValue', 'experimental', 'typeParam'],
+          typed: true,
+        },
+      ],
+    },
+  },
   ...plugins['typescript-eslint'].config(
     {
       extends: [

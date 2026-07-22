@@ -1,8 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  isValidSamples
-} from '../src/utils'
+import { isValidSamples } from '../src/utils'
 
 test('isValidSamples', () => {
   // @ts-expect-error the argument can be of any type, despite the type definition

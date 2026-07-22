@@ -20,7 +20,13 @@
     "noStrictGenericChecks": false,
     "useUnknownInCatchVariables": true
   },
-  "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts", "vitest.pretest.config.ts"],
+  "include": [
+    "src",
+    "test",
+    "tsdown.config.ts",
+    "vitest.config.ts",
+    "vitest.pretest.config.ts"
+  ],
   "exclude": ["node_modules", "dist"],
   "removeComments": true,
   "newLine": "lf"

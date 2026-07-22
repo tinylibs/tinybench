@@ -1,9 +1,7 @@
 import { expect, test } from 'vitest'
 
 import { emptyFunction } from '../src/constants'
-import {
-  isPromiseLike
-} from '../src/utils'
+import { isPromiseLike } from '../src/utils'
 
 test('isPromiseLike', () => {
   expect(isPromiseLike(new Promise(emptyFunction))).toBe(true)

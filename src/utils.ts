@@ -5,36 +5,22 @@ import type { Task } from './task'
 import type {
   ConsoleTableConverter,
   Fn,
+  JSRuntime,
+  NowFn,
+  Samples,
+  SortedSamples,
   Statistics,
+  TimerSaturationReason,
+  TimestampProvider,
+  TimestampValue,
 } from './types'
 
 import { emptyFunction, tTable } from './constants'
 
 /**
- * The JavaScript runtime environment.
- * @see https://runtime-keys.proposal.wintercg.org/
- */
-export type JSRuntime =
-  | 'browser'
-  | 'bun'
-  | 'deno'
-  | 'edge-light'
-  | 'fastly'
-  | 'hermes'
-  | 'jsc'
-  | 'lagon'
-  | 'moddable'
-  | 'netlify'
-  | 'node'
-  | 'quickjs-ng'
-  | 'spidermonkey'
-  | 'unknown'
-  | 'v8'
-  | 'workerd'
-
-/**
- * @param g GlobalThis object
- * @returns Detected runtime and its version
+ * Detects the current JavaScript runtime environment and its version.
+ * @param g - the global object
+ * @returns the detected runtime and its version
  */
 export function detectRuntime (g = globalThis as Record<string, unknown>): {
   runtime: JSRuntime
@@ -116,8 +102,9 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
 }
 
 /**
- * @param g GlobalThis object
- * @returns Whether the global object has a navigator with userAgent
+ * Checks whether the global object has a navigator with userAgent.
+ * @param g - the global object
+ * @returns whether the global object has a navigator with userAgent
  */
 function hasNavigatorWithUserAgent (
   g = globalThis as Record<string, unknown>
@@ -136,29 +123,51 @@ export const { runtime, version: runtimeVersion } = detectRuntime()
  * @param ns - the nanoseconds to convert
  * @returns the milliseconds
  */
-export const nToMs = (ns: number) => ns / 1e6
+export const nToMs = (ns: TimestampValue) => Number(ns) / 1e6
 
 /**
  * Converts milliseconds to nanoseconds.
  * @param ms - the milliseconds to convert
  * @returns the nanoseconds
  */
-export const mToNs = (ms: number) => ms * 1e6
+export const mToNs = (ms: bigint | number) => Number(ms) * 1e6
 
 /**
- * @param value number to format
- * @param significantDigits number of significant digits in the output to aim for
- * @param maxFractionDigits hard limit for the number of digits after the decimal dot
- * @returns formatted number
+ * Just a passthrough function for milliseconds.
+ * @param ms - the milliseconds
+ * @returns the milliseconds
+ */
+export const mToMs = <T, R extends T = T>(ms: T): R => ms as R // eslint-disable-line @typescript-eslint/no-unnecessary-type-parameters
+
+/**
+ * Converts nanoseconds to milliseconds. Expects bigint input.
+ * @param ns - the nanoseconds
+ * @returns the milliseconds
+ */
+export const nBigintToMs = (ns: bigint) => Number(ns) / 1e6
+
+/**
+ * Converts milliseconds to nanoseconds as bigint.
+ * @param ms - milliseconds
+ * @returns nanoseconds as bigint
+ */
+export const mToNsBigint = (ms: number) => BigInt(ms) * 1_000_000n
+
+/**
+ * Formats a number with the specified significant digits and maximum fraction digits.
+ * @param value - the number to format
+ * @param significantDigits - the number of significant digits in the output to aim for
+ * @param maxFractionDigits - hard limit for the number of digits after the decimal dot
+ * @returns the formatted number
  */
 export const formatNumber = (
   value: number,
   significantDigits = 5,
   maxFractionDigits = 2
 ): string => {
-  if (value === Infinity) return '+∞'
-  if (value === -Infinity) return '-∞'
-  if (Number.isNaN(value)) return 'NaN'
+  if (value === Number.POSITIVE_INFINITY) return '+∞'
+  if (value === Number.NEGATIVE_INFINITY) return '-∞'
+  if (value !== value) return 'NaN' // eslint-disable-line no-self-compare
 
   const absValue = Math.abs(value)
 
@@ -175,35 +184,18 @@ export const formatNumber = (
   }
 
   // Avoid scientific notation
-  const decimals = Math.min(Math.max(0, significantDigits - (Math.floor(Math.log10(absValue)) + 1)), maxFractionDigits)
+  const decimals = Math.min(
+    Math.max(0, significantDigits - (Math.floor(Math.log10(absValue)) + 1)),
+    maxFractionDigits
+  )
 
   return value.toFixed(decimals)
 }
 
-const hrtimeBigint: () => bigint = typeof (globalThis as { process?: { hrtime?: { bigint: () => bigint } } })
-  .process?.hrtime?.bigint === 'function'
-  ? (
-      globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } }
-    ).process.hrtime.bigint.bind(
-      (globalThis as unknown as { process: { hrtime: { bigint: () => bigint } } })
-        .process.hrtime
-    )
-  : () => {
-      throw new Error('hrtime.bigint() is not supported in this JS environment')
-    }
-
 /**
- * Returns the current high resolution timestamp in milliseconds using `process.hrtime.bigint()`.
- * @returns the current high resolution timestamp in milliseconds
- */
-export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
-
-export const performanceNow = performance.now.bind(performance)
-
-/**
- * Checks if a value is a promise-like object.
+ * Checks whether a value is a promise-like object.
  * @param maybePromiseLike - the value to check
- * @returns true if the value is a promise-like object
+ * @returns whether the value is a promise-like object
  */
 export const isPromiseLike = <T>(
   maybePromiseLike: unknown
@@ -215,13 +207,14 @@ export const isPromiseLike = <T>(
 
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
-const AsyncFunctionConstructor = (async () => { /* no op */ })
-  .constructor as FunctionConstructor
+const AsyncFunctionConstructor = (async () => {
+  /* no op */
+}).constructor as FunctionConstructor
 
 /**
- * An async function check helper only considering runtime support async syntax
+ * Checks whether a function is an async function, only considering runtime support for async syntax.
  * @param fn - the function to check
- * @returns true if the function is an async function
+ * @returns whether the function is an async function
  */
 const isAsyncFunction = (
   fn: Fn | null | undefined
@@ -229,9 +222,9 @@ const isAsyncFunction = (
   typeof fn === 'function' && fn.constructor === AsyncFunctionConstructor
 
 /**
- * An async function check helper considering runtime support async syntax and promise return
+ * Checks whether a function is an async function or returns a promise, considering runtime support for async syntax and promise return.
  * @param fn - the function to check
- * @returns true if the function is an async function or returns a promise
+ * @returns whether the function is an async function or returns a promise
  */
 export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
   if (fn == null) {
@@ -258,13 +251,6 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
 }
 
 /**
- * A type representing a samples-array with at least one number.
- */
-export type Samples = [number, ...number[]]
-
-export type SortedSamples = Samples & { readonly __sorted__: unique symbol }
-
-/**
  * Checks if a value is a Samples type.
  * @param value - value to check
  * @returns if the value is a Samples type, meaning a non-empty array of numbers
@@ -273,6 +259,103 @@ export const isValidSamples = (
   value: number[] | undefined
 ): value is Samples => {
   return Array.isArray(value) && value.length !== 0
+}
+
+/**
+ * Classifies timer saturation in a latency sample set.
+ *
+ * Criteria are evaluated in the fixed order `'zero-dominated'` →
+ * `'low-distinct'` → `'zero-mad'`; the first match wins. Fewer than 10
+ * samples are never classified — with so few measurements the criteria
+ * cannot reliably distinguish a deterministic fast function from one truly
+ * limited by the timer grain.
+ *
+ * The distinct-value count is computed in O(n) by exploiting the
+ * sorted-ascending invariant of `samples` and short-circuits as soon as
+ * the threshold is reached.
+ * @param samples - the latency samples, sorted ascending
+ * @param mad - the median absolute deviation (e.g. from
+ *   {@link medianAbsoluteDeviation} or `computeStatistics`)
+ * @returns the saturation reason, or `undefined` when no criterion fires
+ */
+export const classifyTimerSaturation = (
+  samples: SortedSamples,
+  mad: number
+): TimerSaturationReason | undefined => {
+  const n = samples.length
+  if (n < 10) return undefined
+
+  let zeroCount = 0
+  for (const s of samples) {
+    if (s === 0) zeroCount++
+  }
+  if (zeroCount * 2 > n) return 'zero-dominated'
+
+  const distinctThreshold = Math.max(3, Math.min(10, Math.floor(n / 1000)))
+  let distinctCount = 1
+  for (let i = 1; i < n; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (samples[i]! !== samples[i - 1]!) {
+      distinctCount++
+      if (distinctCount >= distinctThreshold) break
+    }
+  }
+  if (distinctCount < distinctThreshold) return 'low-distinct'
+
+  if (n > 100 && mad === 0) return 'zero-mad'
+
+  return undefined
+}
+
+/**
+ * Detects timer saturation in a latency sample set.
+ *
+ * Boolean wrapper around {@link classifyTimerSaturation}; prefer the
+ * classifier when the specific reason is needed (e.g. to surface it on a
+ * `'warning'` event).
+ * @param samples - the latency samples, sorted ascending
+ * @param mad - the median absolute deviation
+ * @returns `true` when a saturation criterion fires, `false` otherwise
+ */
+export const detectTimerSaturation = (
+  samples: SortedSamples,
+  mad: number
+): boolean => classifyTimerSaturation(samples, mad) !== undefined
+
+/**
+ * Estimates the effective timer resolution from a latency sample set.
+ *
+ * The estimator returns the smallest strictly positive sample value that
+ * appears at least twice (the smallest reproducibly observed increment).
+ * Requiring two occurrences gives a 2/n breakdown point and avoids being
+ * pulled to an artificially low value by a single anomalous sample (cold
+ * cache, GC pause, hardware quirk).
+ *
+ * When no positive value appears more than once (e.g. a continuous
+ * sub-microsecond timer with all unique samples), falls back to the strict
+ * minimum of the positive values, which is the best available lower bound
+ * in that case.
+ *
+ * Exploits the sorted-ascending invariant: equal values are contiguous, so
+ * the first strictly-positive value with an equal successor is the smallest
+ * reproduced value, and the first strictly-positive value is the fallback
+ * minimum. Runs in O(1) extra space with an early exit.
+ * @param samples - the latency samples, sorted ascending
+ * @returns the estimated resolution in milliseconds, or `undefined` when no
+ *   strictly positive sample is observed
+ */
+export const estimateResolution = (
+  samples: SortedSamples
+): number | undefined => {
+  let fallbackMin: number | undefined
+  for (let i = 0; i < samples.length; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const v = samples[i]!
+    if (v <= 0) continue
+    fallbackMin ??= v
+    if (samples[i + 1] === v) return v
+  }
+  return fallbackMin
 }
 
 /**
@@ -285,7 +368,14 @@ export function sortSamples (
   samples.sort(sortFn)
 }
 
-export const meanAndVariance = (samples: Samples): { mean: number; vr: number } => {
+/**
+ * Computes the mean and variance of a sample.
+ * @param samples - the sample
+ * @returns an object containing the mean and variance
+ */
+export const meanAndVariance = (
+  samples: Samples
+): { mean: number; vr: number } => {
   const len = samples.length
   if (len === 1) {
     return { mean: samples[0], vr: 0 }
@@ -306,11 +396,9 @@ export const meanAndVariance = (samples: Samples): { mean: number; vr: number } 
 
   return {
     mean,
-    vr: m / (len - 1)
+    vr: m / (len - 1),
   }
 }
-
-type Quantile = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
 
 /**
  * Computes the q-quantile of a sorted sample.
@@ -318,15 +406,18 @@ type Quantile = 0.5 | 0.75 | 0.99 | 0.995 | 0.999
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  */
-const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
+const quantileSorted = (
+  samples: SortedSamples,
+  q: 0.5 | 0.75 | 0.99 | 0.995 | 0.999
+): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
 
   return baseIndex + 1 < samples.length
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ? samples[baseIndex]! +
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     : samples[baseIndex]!
 }
@@ -340,12 +431,130 @@ const quantileSorted = (samples: SortedSamples, q: Quantile): number => {
 export const sortFn = (a: number, b: number) => a - b
 
 /**
+ * Options for {@link calibrateTimerOverhead}.
+ */
+export interface CalibrateTimerOverheadOptions {
+  /**
+   * Estimator used to reduce the distribution of strictly-positive
+   * back-to-back call deltas to a single overhead value.
+   * @default 'median'
+   */
+  estimator?: TimerOverheadEstimatorKind
+  /**
+   * Number of back-to-back call pairs to measure during the collection phase.
+   * @default 1024
+   */
+  pairs?: number
+  /**
+   * Number of discarded warm-up pairs executed before the collection phase,
+   * allowing the JIT to reach a steady compilation tier for both
+   * `provider.fn` and `provider.toMs`.
+   * @default 64
+   */
+  warmupPairs?: number
+}
+
+/**
+ * Estimator strategy for {@link calibrateTimerOverhead}.
+ *
+ * - `'median'` — median of strictly-positive deltas (default). Robust to
+ *   occasional OS-scheduling jitter and GC spikes at the cost of a slight
+ *   upward bias on noisy hosts.
+ * - `'min'` — minimum of strictly-positive deltas. Captures the lowest
+ *   observed call cost.
+ * - `'p05'` — 5th percentile of strictly-positive deltas. A compromise
+ *   between robustness and tightness.
+ */
+export type TimerOverheadEstimatorKind = 'median' | 'min' | 'p05'
+
+/**
+ * Estimates the cost of a single `provider.fn()` call by repeatedly measuring
+ * back-to-back pairs and reducing the strictly-positive deltas to a single
+ * value via the chosen estimator.
+ *
+ * **Coarse-timer detection.** When the timer resolution `R` exceeds the call
+ * cost `C` (`C < R / 2`), the probability that any pair crosses a tick
+ * boundary is `C / R < 1 / 2`, so most pairs return a delta of zero. The
+ * positive deltas that do occur each equal exactly one tick `R`, not the
+ * call cost. To prevent catastrophic over-correction, the function returns
+ * `0` whenever fewer than half of the pairs produce a positive delta.
+ *
+ * **Bigint precision.** The subtraction is performed in the provider's
+ * native type before conversion to milliseconds (`toMs(b - a)`). For
+ * `hrtimeNow`, this preserves precision when absolute timestamps exceed
+ * `Number.MAX_SAFE_INTEGER` ns (≈ 104 days uptime).
+ *
+ * **JIT warmup.** A discarded warmup phase ensures `fn` and `toMs` are
+ * JIT-compiled to their steady-state tier before measurements begin.
+ * @param provider - the timestamp provider to calibrate
+ * @param options - calibration options
+ * @returns the estimated overhead in milliseconds, never negative; `0` when
+ *   the timer resolution dominates or no positive delta is observed
+ */
+export const calibrateTimerOverhead = (
+  provider: TimestampProvider,
+  options: CalibrateTimerOverheadOptions = {}
+): number => {
+  const { estimator = 'median', pairs = 1024, warmupPairs = 64 } = options
+  const { fn, toMs } = provider
+
+  // Degenerate or non-finite input: `Number.isInteger` also rejects
+  // Infinity/NaN/non-integer counts that would otherwise hang the loop.
+  if (!Number.isInteger(pairs) || pairs <= 0) return 0
+
+  // `fn` returns TimestampValue (`bigint | number`); both operands always
+  // share a runtime type. Casting both to `bigint` lets the operator
+  // typecheck without a type predicate; at runtime the `-` operator is
+  // polymorphic for both numeric branches and `toMs` accepts either.
+  if (Number.isInteger(warmupPairs) && warmupPairs > 0) {
+    for (let i = 0; i < warmupPairs; i++) {
+      const a = fn() as bigint
+      const b = fn() as bigint
+      toMs(b - a)
+    }
+  }
+
+  const deltas: number[] = []
+  for (let i = 0; i < pairs; i++) {
+    const a = fn() as bigint
+    const b = fn() as bigint
+    const delta = toMs(b - a)
+    if (delta > 0) deltas.push(delta)
+  }
+
+  if (deltas.length * 2 < pairs) return 0
+
+  deltas.sort(sortFn)
+
+  if (estimator === 'min') {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return deltas[0]!
+  }
+  if (estimator === 'p05') {
+    // Nearest-rank: returns an actually observed delta, deliberately not the
+    // interpolated `quantileSorted` (whose `q` union excludes 0.05 anyway).
+    const idx = Math.max(0, Math.ceil(deltas.length * 0.05) - 1)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return deltas[idx]!
+  }
+  const mid = deltas.length >> 1
+  return (deltas.length & 1) === 1
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    ? deltas[mid]!
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    : (deltas[mid - 1]! + deltas[mid]!) / 2
+}
+
+/**
  * Computes the average absolute deviation from the mean.
  * @param samples - the sample
  * @param mean - the mean of the sample
  * @returns the average absolute deviation
  */
-export const absoluteDeviationMean = (samples: Samples, mean: number): number => {
+export const absoluteDeviationMean = (
+  samples: Samples,
+  mean: number
+): number => {
   let result = 0
   const len = samples.length
 
@@ -364,7 +573,10 @@ export const absoluteDeviationMean = (samples: Samples, mean: number): number =>
  * @param median - the median of the sample
  * @returns the median absolute deviation
  */
-export function absoluteDeviationMedian (samples: SortedSamples, median: number): number {
+export function absoluteDeviationMedian (
+  samples: SortedSamples,
+  median: number
+): number {
   const len = samples.length
   if (len === 1) return 0
 
@@ -380,15 +592,17 @@ export function absoluteDeviationMedian (samples: SortedSamples, median: number)
     c2 = halfLen - c1
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    l1 = c1 === 0 ? -Infinity : median - samples[mid - c1]!
+    l1 = c1 === 0 ? Number.NEGATIVE_INFINITY : median - samples[mid - c1]!
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    r1 = c1 === mid ? Infinity : median - samples[mid - c1 - 1]!
+    r1 = c1 === mid ? Number.POSITIVE_INFINITY : median - samples[mid - c1 - 1]!
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    l2 = c2 === 0 ? -Infinity : samples[mid + c2 - 1]! - median
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    r2 = c2 === len - mid ? Infinity : samples[mid + c2]! - median
+    l2 = c2 === 0 ? Number.NEGATIVE_INFINITY : samples[mid + c2 - 1]! - median
+
+    r2 =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      c2 === len - mid ? Number.POSITIVE_INFINITY : samples[mid + c2]! - median
 
     if (l1 <= r2 && l2 <= r1) {
       return len & 1 // check for odd length
@@ -406,20 +620,37 @@ export function absoluteDeviationMedian (samples: SortedSamples, median: number)
 }
 
 /**
+ * Computes the median absolute deviation (MAD) of a sorted sample set.
+ *
+ * Convenience wrapper that derives the median from the sorted input and
+ * forwards to `absoluteDeviationMedian`. Use when only `mad` is
+ * required and the cost of a full `computeStatistics` pass is
+ * unjustified (e.g. inside {@link classifyTimerSaturation}).
+ * @param samples - the sorted sample, length ≥ 1
+ * @returns the median absolute deviation
+ */
+export const medianAbsoluteDeviation = (samples: SortedSamples): number =>
+  absoluteDeviationMedian(samples, quantileSorted(samples, 0.5))
+
+/**
  * Computes the statistics of a sample.
  * The sample must be sorted.
  * @param samples - the sorted sample
+ * @param retainSamples - whether to keep the samples in the statistics
  * @returns the statistics of the sample
  */
-export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
+export function computeStatistics (
+  samples: SortedSamples,
+  retainSamples = false
+): Statistics {
   const { mean, vr } = meanAndVariance(samples)
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)
   const df = samples.length - 1
   const critical = tTable[df || 1] ?? tTable[0]
   const moe = sem * critical
-  const absMean = Math.abs(mean)
-  const rme = absMean === 0 ? Infinity : (moe / absMean) * 100
+  const rme =
+    mean === 0 ? Number.POSITIVE_INFINITY : (moe / Math.abs(mean)) * 100
   const p50 = quantileSorted(samples, 0.5)
 
   return {
@@ -438,16 +669,32 @@ export const getStatisticsSorted = (samples: SortedSamples): Statistics => {
     p995: quantileSorted(samples, 0.995),
     p999: quantileSorted(samples, 0.999),
     rme,
-    samples,
+    samples: retainSamples ? samples : undefined,
+    samplesCount: samples.length,
     sd,
     sem,
     variance: vr,
   }
 }
 
-export const invariant = (condition: boolean, message: string): void => {
+/**
+ * Throws an error if the condition is false.
+ * @param condition - the condition to check
+ * @param message - the error message to throw if the condition is false
+ * @throws {Error} if the condition is false
+ */
+export const assert = (condition: boolean, message: string): void => {
   if (!condition) {
-    throw new Error(message)
+    const stackTraceLimit = Error.stackTraceLimit
+    try {
+      Error.stackTraceLimit = 0
+      const error = new Error(message)
+      Error.stackTraceLimit = stackTraceLimit
+      stackTraceLimit !== 0 && Error.captureStackTrace(error, assert)
+      throw error
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit
+    }
   }
 }
 
@@ -464,7 +711,7 @@ export const toError = (value: unknown): Error => {
       if (value !== null) {
         return value instanceof Error
           ? value
-          : new Error((value as { message?: string; }).message ?? '')
+          : new Error((value as { message?: string }).message ?? '')
       }
     // eslint-disable-next-line no-fallthrough
     case 'undefined':
@@ -485,11 +732,11 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
-          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean), 5, 2)} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
-          'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50), 5, 2)} \xb1 ${formatNumber(mToNs(task.result.latency.mad), 5, 2)}`,
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50))} \xb1 ${formatNumber(mToNs(task.result.latency.mad))}`,
           'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
           'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
-          Samples: task.result.latency.samples.length,
+          Samples: task.result.latency.samplesCount,
         }
       : state !== 'errored'
         ? {
@@ -512,12 +759,32 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
 }
 
 interface WithConcurrencyOptions<R> {
+  /**
+   * The function to execute concurrently.
+   */
   fn: () => Promise<R>
+  /**
+   * The number of iterations to execute. If 0, runs until time limit is reached.
+   */
   iterations: number
+  /**
+   * The maximum number of concurrent executions.
+   */
   limit: number
-  now?: () => number
+  /**
+   * An optional AbortSignal to cancel the execution.
+   */
   signal?: AbortSignal
+  /**
+   * The maximum amount of time to run the executions in milliseconds. If 0,
+   * runs until iterations are completed.
+   */
   time?: number
+  /**
+   * The high-resolution timestamp function to use.
+   * @returns a timestamp
+   */
+  timestampProvider?: TimestampProvider
 }
 
 /**
@@ -527,10 +794,20 @@ interface WithConcurrencyOptions<R> {
  * @throws {Error} if a single error occurs during execution
  * @throws {AggregateError} if multiple errors occur during execution
  */
-export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Promise<R[]> => {
-  const { fn, iterations, limit, now = performanceNow, signal, time = 0 } = options
+export const withConcurrency = async <R>(
+  options: WithConcurrencyOptions<R>
+): Promise<R[]> => {
+  const {
+    fn,
+    iterations,
+    limit,
+    signal,
+    time = 0,
+    timestampProvider = performanceNowTimestampProvider,
+  } = options
 
-  const maxWorkers = iterations === 0 ? limit : Math.max(0, Math.min(limit, iterations))
+  const maxWorkers =
+    iterations === 0 ? limit : Math.max(0, Math.min(limit, iterations))
 
   const errors: Error[] = []
   const results: R[] = []
@@ -540,19 +817,28 @@ export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Pr
 
   const hasTimeLimit = Number.isFinite(time) && time > 0
   const hasIterationsLimit = iterations > 0
-  let targetTime = 0
+  let targetTime: TimestampValue = 0
+
+  const timestampFn = timestampProvider.fn
 
   // Reduce checks based on provided limits to avoid tainting the benchmark results
   const doNext: () => boolean = hasIterationsLimit
     ? hasTimeLimit
-      ? () => isRunning && (nextIndex++ < iterations) && ((now() < targetTime) || (isRunning = false))
-      : () => isRunning && (nextIndex++ < iterations)
+      ? () =>
+          isRunning &&
+          nextIndex++ < iterations &&
+          (timestampFn() < targetTime || (isRunning = false))
+      : () => isRunning && nextIndex++ < iterations
     : hasTimeLimit
-      ? () => isRunning && ((now() < targetTime) || (isRunning = false))
+      ? () => isRunning && (timestampFn() < targetTime || (isRunning = false))
       : () => isRunning
 
-  const pushResult = (r: R) => { isRunning && results.push(r) }
-  const pushError = (e: unknown) => { errors.push(toError(e)) }
+  const pushResult = (r: R) => {
+    isRunning && results.push(r)
+  }
+  const pushError = (e: unknown) => {
+    errors.push(toError(e))
+  }
 
   const onAbort = () => (isRunning = false)
 
@@ -573,11 +859,163 @@ export const withConcurrency = async <R>(options: WithConcurrencyOptions<R>): Pr
     }
   }
 
-  if (hasTimeLimit) targetTime = now() + time
+  if (hasTimeLimit) {
+    targetTime =
+      (timestampFn() as number) + (timestampProvider.fromMs(time) as number)
+  }
   const promises = Array.from({ length: maxWorkers }, () => worker())
   await Promise.allSettled(promises)
 
   if (errors.length === 0) return results
-  if (errors.length === 1) throw toError(errors[0])
-  throw new AggregateError(errors, 'Multiple errors occurred during concurrent execution')
+  if (errors.length === 1) throw errors[0] // eslint-disable-line @typescript-eslint/only-throw-error
+  throw new AggregateError(
+    errors,
+    'Multiple errors occurred during concurrent execution'
+  )
+}
+
+/**
+ * Returns the current timestamp in milliseconds using `performance.now()`.
+ * @returns the current timestamp in milliseconds
+ */
+export const performanceNow = globalThis.performance.now.bind(
+  globalThis.performance
+)
+
+/**
+ * The performance.now() based TimestampProvider.
+ */
+export const performanceNowTimestampProvider: TimestampProvider = {
+  fn: performanceNow,
+  fromMs: mToMs,
+  name: 'performanceNow',
+  toMs: mToMs,
+}
+
+/* eslint-disable jsdoc/require-returns-check */
+/**
+ * Returns the current timestamp in nanoseconds using `process.hrtime.bigint()`.
+ * @returns the current timestamp in nanoseconds
+ */
+const hrtimeBigint =
+  globalThis.process?.hrtime?.bigint.bind(globalThis.process?.hrtime) ?? // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  (() => {
+    throw new Error('hrtime.bigint() is not supported in this JS environment')
+  })
+/* eslint-enable jsdoc/require-returns-check */
+
+/**
+ * Returns the current timestamp in milliseconds using `process.hrtime.bigint()`.
+ * @returns the current timestamp in milliseconds
+ */
+export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
+
+/**
+ * The hrtime.bigint() based TimestampProvider.
+ */
+export const hrtimeNowTimestampProvider: TimestampProvider = {
+  fn: hrtimeBigint,
+  fromMs: mToNsBigint,
+  name: 'hrtimeNow',
+  toMs: nBigintToMs as (ts: TimestampValue) => number,
+}
+
+/**
+ * Returns the current timestamp in nanoseconds using `Bun.nanoseconds()`.
+ * @returns the current timestamp in nanoseconds
+ */
+export const bunNanoseconds = (globalThis as { Bun?: { nanoseconds: NowFn } })
+  .Bun?.nanoseconds
+
+/**
+ * The Bun.nanoseconds() based TimestampProvider, or undefined if Bun is not available.
+ */
+export const bunNanosecondsTimestampProvider: TimestampProvider | undefined =
+  bunNanoseconds
+    ? {
+        fn: bunNanoseconds,
+        fromMs: mToNs,
+        name: 'bunNanoseconds',
+        toMs: nToMs,
+      }
+    : undefined
+
+/**
+ * Creates a custom TimestampProvider.
+ *
+ * Expects the provided function to return time in milliseconds.
+ * @param fn - the function to create a TimestampProvider for
+ * @returns the created TimestampProvider
+ */
+export function createCustomTimestampProvider (fn: NowFn): TimestampProvider {
+  return {
+    fn,
+    fromMs: mToMs,
+    name: 'custom',
+    toMs: mToMs,
+  }
+}
+
+export const getTimestampProviderByJSRuntime = (
+  jsRuntime: JSRuntime = runtime
+): TimestampProvider => {
+  if (jsRuntime === 'bun') {
+    return bunNanosecondsTimestampProvider! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  }
+  if (jsRuntime === 'deno') {
+    return performanceNowTimestampProvider
+  }
+  if (jsRuntime === 'node') {
+    return hrtimeNowTimestampProvider
+  }
+  return performanceNowTimestampProvider
+}
+
+export const getTimestampProvider = (value: unknown): TimestampProvider => {
+  switch (typeof value) {
+    case 'function':
+      return createCustomTimestampProvider(value as NowFn)
+    case 'string':
+      switch (value) {
+        case 'auto':
+          return getTimestampProviderByJSRuntime()
+        case 'bunNanoseconds':
+          return (
+            bunNanosecondsTimestampProvider ?? performanceNowTimestampProvider
+          )
+        case 'hrtimeNow':
+          return hrtimeNowTimestampProvider
+        default:
+          return performanceNowTimestampProvider
+      }
+    case 'object':
+      if (value === null) {
+        return performanceNowTimestampProvider
+      }
+      assert(
+        isValidTimestampProvider(value),
+        'Invalid Timestamp Provider object'
+      )
+      return value as TimestampProvider
+    case 'undefined':
+      return performanceNowTimestampProvider
+    default:
+      throw new Error("Invalid value for 'timestampProvider' or 'now'")
+  }
+}
+
+/**
+ * Checks whether a value is a valid TimestampProvider.
+ * @param value - value to check
+ * @returns whether the value is a valid TimestampProvider
+ */
+function isValidTimestampProvider (value: unknown): value is TimestampProvider {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    typeof (value as TimestampProvider).fn === 'function' &&
+    typeof (value as TimestampProvider).name === 'string' &&
+    typeof (value as TimestampProvider).toMs === 'function' &&
+    typeof (value as TimestampProvider).fromMs === 'function'
+  )
 }

@@ -2,7 +2,7 @@
  * Student t-distribution two-tailed critical values for 95% confidence level.
  */
 export const tTable = [
-  1.96, // df = Infinity
+  1.96, // df = Number.POSITIVE_INFINITY
   12.706204736432102,
   4.3026527299112765,
   3.182446305284264,
@@ -1029,12 +1029,29 @@ export const tTable = [
   1.962283349789597,
 ] as const satisfies readonly number[]
 
+/**
+ * The default minimum time in milliseconds for running each benchmark task.
+ */
 export const defaultMinimumTime = 1000
 
+/**
+ * The default minimum number of iterations for each benchmark task.
+ */
 export const defaultMinimumIterations = 64
 
+/**
+ * The default minimum warmup time in milliseconds.
+ */
 export const defaultMinimumWarmupTime = 250
 
+/**
+ * The default minimum number of warmup iterations.
+ */
 export const defaultMinimumWarmupIterations = 16
 
-export const emptyFunction = Object.freeze(() => { /* no op */ })
+/**
+ * An empty function used as a default no-op callback.
+ */
+export const emptyFunction = Object.freeze(() => {
+  /* no op */
+})

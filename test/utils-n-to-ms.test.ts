@@ -1,8 +1,6 @@
 import { expect, test } from 'vitest'
 
-import {
-  nToMs,
-} from '../src/utils'
+import { nToMs } from '../src/utils'
 
 test('nToMs', () => {
   expect(nToMs(1)).toBe(0.000001)

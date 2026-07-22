@@ -4,9 +4,10 @@
 
 If a task runs faster than the resolution of the timer your runtime provides,
 individual samples can measure as zero duration, which skews the reported
-latency. Tinybench surfaces this directly: every run exposes the observed
-`detectedResolution` on the task, and when a task's samples are dominated by the
-timer resolution it also dispatches a `'warning'` event (see the README
+latency. Tinybench surfaces this directly: after each run the task exposes the
+observed `detectedResolution` (or `undefined` when no positive timer sample was
+measured), and when a task's samples are dominated by the timer resolution it
+also dispatches a `'warning'` event (see the README
 [Timer Diagnostics](./README.md#timer-diagnostics) section). The resolution of
 the default timer varies by runtime and platform.
 

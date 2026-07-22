@@ -330,7 +330,9 @@ const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
 - For sub-overhead measurements (`X ≈ Ĉ`) the `max(0, …)` clamp
   truncates the lower tail and biases statistics; prefer
   `overriddenDuration` (see below).
-- On runtimes with a coarse timer (resolution >= 1 ms) the calibration
+- When the timer is too coarse to resolve the call cost — fewer than half
+  of the calibration pairs produce a positive delta (call cost `C < R / 2`,
+  e.g. a `Date.now`-class timer with `>= 1 ms` resolution) — the calibration
   returns `0` and the option becomes a no-op.
 
 ## Per-Sample Override (`overriddenDuration`)

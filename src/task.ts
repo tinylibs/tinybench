@@ -660,7 +660,7 @@ export class Task extends EventTarget {
       // prevents a constant user value from being reported as the timer grain
       // or triggering a spurious low-distinct-count warning.
       let saturationReason: TimerSaturationReason | undefined
-      if (measuredOnly === latencySamples) {
+      if (!hasAnyOverridden) {
         this.#detectedResolution = estimateResolution(latencySamples)
         saturationReason = classifyTimerSaturation(
           latencySamples,

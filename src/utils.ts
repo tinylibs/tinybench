@@ -498,8 +498,8 @@ export const calibrateTimerOverhead = (
   const { estimator = 'median', pairs = 1024, warmupPairs = 64 } = options
   const { fn, toMs } = provider
 
-  // Degenerate input: no pairs to measure ⇒ no overhead estimate.
-  if (pairs === 0) return 0
+  // Degenerate input: no positive pairs to measure ⇒ no overhead estimate.
+  if (pairs <= 0) return 0
 
   // `fn` returns TimestampValue (`bigint | number`); both operands always
   // share a runtime type. Casting both to `bigint` lets the operator

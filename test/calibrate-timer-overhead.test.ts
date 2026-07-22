@@ -66,6 +66,20 @@ test('calibrateTimerOverhead returns 0 for a coarse 1 ms timer provider', () => 
   expect(calibrateTimerOverhead(coarseProvider, { pairs: 1024 })).toBe(0)
 })
 
+test('calibrateTimerOverhead returns 0 for non-positive pairs', () => {
+  for (const pairs of [0, -1, -1024]) {
+    for (const estimator of ['median', 'min', 'p05'] as const) {
+      expect(
+        calibrateTimerOverhead(makeAscendingPairProvider(), {
+          estimator,
+          pairs,
+          warmupPairs: 0,
+        })
+      ).toBe(0)
+    }
+  }
+})
+
 test('calibrateTimerOverhead estimators are ordered min ≤ p05 ≤ median', () => {
   const min = calibrateTimerOverhead(makeAscendingPairProvider(), {
     estimator: 'min',

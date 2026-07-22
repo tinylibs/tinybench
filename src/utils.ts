@@ -444,14 +444,14 @@ export interface CalibrateTimerOverheadOptions {
    * Number of back-to-back call pairs to measure during the collection phase.
    * @default 1024
    */
-  samples?: number
+  pairs?: number
   /**
    * Number of discarded warm-up pairs executed before the collection phase,
    * allowing the JIT to reach a steady compilation tier for both
    * `provider.fn` and `provider.toMs`.
    * @default 64
    */
-  warmupSamples?: number
+  warmupPairs?: number
 }
 
 /**
@@ -495,28 +495,28 @@ export const calibrateTimerOverhead = (
   provider: TimestampProvider,
   options: CalibrateTimerOverheadOptions = {}
 ): number => {
-  const { estimator = 'median', samples = 1024, warmupSamples = 64 } = options
+  const { estimator = 'median', pairs = 1024, warmupPairs = 64 } = options
   const { fn, toMs } = provider
 
   // `fn` returns TimestampValue (`bigint | number`); both operands always
   // share a runtime type. Casting both to `bigint` lets the operator
   // typecheck without a type predicate; at runtime the `-` operator is
   // polymorphic for both numeric branches and `toMs` accepts either.
-  for (let i = 0; i < warmupSamples; i++) {
+  for (let i = 0; i < warmupPairs; i++) {
     const a = fn() as bigint
     const b = fn() as bigint
     toMs(b - a)
   }
 
   const deltas: number[] = []
-  for (let i = 0; i < samples; i++) {
+  for (let i = 0; i < pairs; i++) {
     const a = fn() as bigint
     const b = fn() as bigint
     const delta = toMs(b - a)
     if (delta > 0) deltas.push(delta)
   }
 
-  if (deltas.length * 2 < samples) return 0
+  if (deltas.length * 2 < pairs) return 0
   if (deltas.length === 0) return 0
 
   deltas.sort(sortFn)
@@ -526,6 +526,8 @@ export const calibrateTimerOverhead = (
     return deltas[0]!
   }
   if (estimator === 'p05') {
+    // Nearest-rank: returns an actually observed delta, deliberately not the
+    // interpolated `quantileSorted` (whose `q` union excludes 0.05 anyway).
     const idx = Math.max(0, Math.ceil(deltas.length * 0.05) - 1)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return deltas[idx]!

@@ -317,8 +317,8 @@ import { calibrateTimerOverhead, hrtimeNowTimestampProvider } from 'tinybench'
 
 const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
   estimator: 'p05',
-  samples: 1024,
-  warmupSamples: 64,
+  pairs: 1024,
+  warmupPairs: 64,
 })
 ```
 

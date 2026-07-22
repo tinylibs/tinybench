@@ -52,7 +52,7 @@ test('calibrateTimerOverhead returns 0 for a fixed-value provider', () => {
     name: 'fixed',
     toMs: mToMs,
   }
-  expect(calibrateTimerOverhead(fixedProvider, { samples: 256 })).toBe(0)
+  expect(calibrateTimerOverhead(fixedProvider, { pairs: 256 })).toBe(0)
 })
 
 test('calibrateTimerOverhead returns 0 for a coarse 1 ms timer provider', () => {
@@ -63,24 +63,24 @@ test('calibrateTimerOverhead returns 0 for a coarse 1 ms timer provider', () => 
     name: 'coarse',
     toMs: mToMs,
   }
-  expect(calibrateTimerOverhead(coarseProvider, { samples: 1024 })).toBe(0)
+  expect(calibrateTimerOverhead(coarseProvider, { pairs: 1024 })).toBe(0)
 })
 
 test('calibrateTimerOverhead estimators are ordered min ≤ p05 ≤ median', () => {
   const min = calibrateTimerOverhead(makeAscendingPairProvider(), {
     estimator: 'min',
-    samples: 100,
-    warmupSamples: 0,
+    pairs: 100,
+    warmupPairs: 0,
   })
   const p05 = calibrateTimerOverhead(makeAscendingPairProvider(), {
     estimator: 'p05',
-    samples: 100,
-    warmupSamples: 0,
+    pairs: 100,
+    warmupPairs: 0,
   })
   const median = calibrateTimerOverhead(makeAscendingPairProvider(), {
     estimator: 'median',
-    samples: 100,
-    warmupSamples: 0,
+    pairs: 100,
+    warmupPairs: 0,
   })
   expect(min).toBe(1e-6)
   expect(p05).toBe(5e-6)
@@ -91,22 +91,22 @@ test("calibrateTimerOverhead 'p05' selects the index ⌈n·0.05⌉ − 1 delta",
   expect(
     calibrateTimerOverhead(makeAscendingPairProvider(), {
       estimator: 'p05',
-      samples: 20,
-      warmupSamples: 0,
+      pairs: 20,
+      warmupPairs: 0,
     })
   ).toBe(1e-6)
   expect(
     calibrateTimerOverhead(makeAscendingPairProvider(), {
       estimator: 'p05',
-      samples: 21,
-      warmupSamples: 0,
+      pairs: 21,
+      warmupPairs: 0,
     })
   ).toBe(2e-6)
   expect(
     calibrateTimerOverhead(makeAscendingPairProvider(), {
       estimator: 'p05',
-      samples: 200,
-      warmupSamples: 0,
+      pairs: 200,
+      warmupPairs: 0,
     })
   ).toBe(10e-6)
 })
@@ -114,7 +114,7 @@ test("calibrateTimerOverhead 'p05' selects the index ⌈n·0.05⌉ − 1 delta",
 test('calibrateTimerOverhead with hrtimeNow returns a plausible overhead under 10 microseconds', () => {
   const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
     estimator: 'median',
-    samples: 1024,
+    pairs: 1024,
   })
   if (overhead > 0) {
     expect(overhead).toBeLessThan(0.01)

@@ -31,6 +31,9 @@ import {
   runtimeVersion,
 } from './utils'
 
+const subtractTimerOverheadConcurrencyError =
+  '`subtractTimerOverhead` cannot be used with `concurrency: "task"` — set `concurrency` to `null` or `"bench"`, or disable `subtractTimerOverhead`'
+
 /**
  * The Bench class keeps track of the benchmark tasks and controls them.
  */
@@ -218,7 +221,7 @@ export class Bench extends EventTarget implements BenchLike {
     this.subtractTimerOverhead = restOptions.subtractTimerOverhead === true
     assert(
       !(this.subtractTimerOverhead && this.concurrency === 'task'),
-      '`subtractTimerOverhead` cannot be used with `concurrency: "task"` — set `concurrency` to `null` or `"bench"`, or disable `subtractTimerOverhead`'
+      subtractTimerOverheadConcurrencyError
     )
     this.timerOverhead = this.subtractTimerOverhead
       ? calibrateTimerOverhead(this.timestampProvider)
@@ -294,7 +297,7 @@ export class Bench extends EventTarget implements BenchLike {
   async run (): Promise<Task[]> {
     assert(
       !(this.subtractTimerOverhead && this.concurrency === 'task'),
-      '`subtractTimerOverhead` cannot be used with `concurrency: "task"` — set `concurrency` to `null` or `"bench"`, or disable `subtractTimerOverhead`'
+      subtractTimerOverheadConcurrencyError
     )
     if (this.warmup) {
       await this.#warmupTasks()

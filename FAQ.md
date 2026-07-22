@@ -4,9 +4,9 @@
 
 If a task runs faster than the resolution of the timer your runtime provides,
 individual samples can measure as zero duration, which skews the reported
-latency. Tinybench flags this directly: when a task's samples are dominated by
-the timer resolution it dispatches a `'warning'` event and exposes the observed
-`detectedResolution` on the task (see the README
+latency. Tinybench surfaces this directly: every run exposes the observed
+`detectedResolution` on the task, and when a task's samples are dominated by the
+timer resolution it also dispatches a `'warning'` event (see the README
 [Timer Diagnostics](./README.md#timer-diagnostics) section). The resolution of
 the default timer varies by runtime and platform.
 
@@ -25,12 +25,17 @@ const bench = new Bench({
 ```
 
 See the README [Timestamp Providers](./README.md#timestamp-providers) section
-for the full list and custom-provider setup.
+for the full list and custom-provider setup. To supply a plain millisecond
+clock without building a `TimestampProvider`, set the `now` option instead; it
+is converted to a provider internally and cannot be combined with
+`timestampProvider`.
 
 Beyond picking a higher-resolution provider, you can increase the benchmark
-`time` so more samples are collected (improving statistical confidence), and
-inspect the reported relative margin of error (`rme`) — a very high `rme` often
-signals that the task executes faster than the timer can measure accurately.
+`time` so more samples are collected (improving statistical confidence). The
+most reliable saturation signal is the `'warning'` event and
+`detectedResolution` (see [Timer Diagnostics](./README.md#timer-diagnostics));
+the relative margin of error (`rme`) is only a soft hint — a saturated task
+can report either a very high or a very low `rme`, so do not rely on it alone.
 Manually looping a fast function to "amplify" its duration can lift a sample
 above the timer resolution, but it adds loop overhead and changes what you
 measure; a more precise timestamp provider is usually the cleaner fix.
@@ -45,9 +50,10 @@ on the engine). During benchmarking this can show up as sudden latency spikes.
 
 Common causes include type instability (argument types changing between
 iterations) and dynamic property access or function reassignment that prevents
-inlining, and — in browsers — having DevTools open, which can degrade JIT
-performance. Garbage-collection pauses are a separate source of latency spikes
-(not a deopt) that can likewise inflate variance.
+inlining. Garbage-collection pauses are a separate source of latency spikes
+(not a deopt) that can likewise inflate variance, and — in browsers — having
+DevTools open adds overhead and can disable some JIT optimizations rather than
+being a deopt itself.
 
 Tinybench reports statistical indicators (standard deviation, variance,
 percentiles, margin of error) that help you spot outliers caused by deopts. If

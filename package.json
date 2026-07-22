@@ -3,10 +3,10 @@
   "version": "6.0.3",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@11.13.1",
+  "packageManager": "pnpm@11.15.0",
   "volta": {
     "node": "24.18.0",
-    "pnpm": "11.13.1"
+    "pnpm": "11.15.0"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -61,13 +61,13 @@
     "changelogithub": "^14.0.0",
     "clean-publish": "^7.1.0",
     "eslint": "^9.39.5",
-    "eslint-plugin-jsdoc": "^63.0.13",
+    "eslint-plugin-jsdoc": "^63.1.0",
     "eslint-plugin-perfectionist": "^5.10.0",
     "nano-staged": "^1.0.2",
     "neostandard": "^0.13.0",
     "simple-git-hooks": "^2.13.1",
     "size-limit": "^12.1.0",
-    "tsdown": "^0.22.8",
+    "tsdown": "^0.22.9",
     "typedoc": "^0.28.20",
     "typescript": "~6.0.3",
     "vitest": "^4.1.10"

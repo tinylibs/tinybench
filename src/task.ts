@@ -76,9 +76,11 @@ export class Task extends EventTarget {
 
   /**
    * The estimated effective timer resolution observed during the last run,
-   * computed as the smallest strictly positive latency sample that appears
-   * at least twice among the timer-measured samples (samples supplied via
-   * `overriddenDuration` are excluded).
+   * computed as the smallest strictly positive latency sample that repeats
+   * among the timer-measured samples, or the smallest strictly positive
+   * sample when none repeats (samples supplied via `overriddenDuration` are
+   * excluded). When `subtractTimerOverhead` is enabled the value is derived
+   * from the overhead-corrected samples rather than the raw timer grain.
    * @returns The resolution in milliseconds, or `undefined` when no
    *   timer-measured strictly positive sample was observed (e.g. every
    *   sample was supplied via `overriddenDuration`)
@@ -597,12 +599,12 @@ export class Task extends EventTarget {
    *    for both `detectedResolution` and timer-saturation detection. Constant
    *    `overriddenDuration` values would otherwise be reported as the timer
    *    grain or trigger a spurious low-distinct-count warning.
-   * 3. Compute `detectedResolution` from the measured-only subset.
-   * 4. Sort the working array for the final statistics.
-   * 5. Compute the final statistics on the (possibly corrected) sorted samples.
-   * 6. Classify timer saturation on the measured-only subset.
-   * 7. Dispatch `'cycle'` and `'complete'` events; dispatch `'warning'` (carrying
-   *    the {@link TimerSaturationReason}) if a saturation criterion fired.
+   * 3. Sort the working array for the final statistics.
+   * 4. Compute the final statistics on the (possibly corrected) sorted samples.
+   * 5. Compute `detectedResolution` and classify timer saturation on the
+   *    (sorted) measured-only subset.
+   * 6. Dispatch `'warning'` (carrying the {@link TimerSaturationReason}) if a
+   *    saturation criterion fired, then `'cycle'` and `'complete'`.
    * @param options - An object containing the run results
    * @param options.error - The error that occurred during the run, if any
    * @param options.isOverridden - Parallel boolean array (collection order) indicating
@@ -644,36 +646,35 @@ export class Task extends EventTarget {
         ? latencySamples.filter((_, i) => isOverridden![i] !== true)
         : latencySamples
 
-      // Phase 3 — Resolution diagnostic on the measured-only subset.
-      // Excluding `overriddenDuration` samples prevents a constant user
-      // value from being reported as the timer grain. `estimateResolution`
-      // is sort-invariant, so it can run before the working-array sort.
-      this.#detectedResolution = isValidSamples(measuredOnly)
-        ? estimateResolution(measuredOnly)
-        : undefined
-
-      // Phase 4 — Single sort of the working array.
+      // Phase 3 — Single sort of the working array.
       sortSamples(latencySamples)
 
-      // Phase 5 — Final statistics on (possibly corrected) sorted samples.
+      // Phase 4 — Final statistics on (possibly corrected) sorted samples.
       const latencyStatistics = computeStatistics(
         latencySamples,
         this.#retainSamples
       )
 
-      // Phase 6 — Saturation classification on the measured-only subset.
+      // Phase 5 — Resolution diagnostic and saturation classification on the
+      // measured-only subset (sorted). Excluding `overriddenDuration` samples
+      // prevents a constant user value from being reported as the timer grain
+      // or triggering a spurious low-distinct-count warning.
       let saturationReason: TimerSaturationReason | undefined
       if (measuredOnly === latencySamples) {
+        this.#detectedResolution = estimateResolution(latencySamples)
         saturationReason = classifyTimerSaturation(
           latencySamples,
           latencyStatistics.mad
         )
       } else if (isValidSamples(measuredOnly)) {
         sortSamples(measuredOnly)
+        this.#detectedResolution = estimateResolution(measuredOnly)
         saturationReason = classifyTimerSaturation(
           measuredOnly,
           medianAbsoluteDeviation(measuredOnly)
         )
+      } else {
+        this.#detectedResolution = undefined
       }
 
       const latencyStatisticsMean = latencyStatistics.mean

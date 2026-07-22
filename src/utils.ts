@@ -335,28 +335,27 @@ export const detectTimerSaturation = (
  * sub-microsecond timer with all unique samples), falls back to the strict
  * minimum of the positive values, which is the best available lower bound
  * in that case.
- * @param samples - the latency samples (sorted or unsorted)
+ *
+ * Exploits the sorted-ascending invariant: equal values are contiguous, so
+ * the first strictly-positive value with an equal successor is the smallest
+ * reproduced value, and the first strictly-positive value is the fallback
+ * minimum. Runs in O(1) extra space with an early exit.
+ * @param samples - the latency samples, sorted ascending
  * @returns the estimated resolution in milliseconds, or `undefined` when no
  *   strictly positive sample is observed
  */
 export const estimateResolution = (
-  samples: Samples
+  samples: SortedSamples
 ): number | undefined => {
-  const counts = new Map<number, number>()
-  let fallbackMin = Number.POSITIVE_INFINITY
-  for (const s of samples) {
-    if (s > 0) {
-      counts.set(s, (counts.get(s) ?? 0) + 1)
-      if (s < fallbackMin) fallbackMin = s
-    }
+  let fallbackMin: number | undefined
+  for (let i = 0; i < samples.length; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const v = samples[i]!
+    if (v <= 0) continue
+    fallbackMin ??= v
+    if (samples[i + 1] === v) return v
   }
-  if (fallbackMin === Number.POSITIVE_INFINITY) return undefined
-
-  let robustMin = Number.POSITIVE_INFINITY
-  for (const [v, c] of counts) {
-    if (c >= 2 && v < robustMin) robustMin = v
-  }
-  return robustMin === Number.POSITIVE_INFINITY ? fallbackMin : robustMin
+  return fallbackMin
 }
 
 /**

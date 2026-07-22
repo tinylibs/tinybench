@@ -420,9 +420,9 @@ export interface FnReturnedObject {
 }
 
 export interface GetPlatformMetricsOptions {
-  g?: typeof globalThis;
-  runtime?: JSRuntime;
-  useCache?: boolean;
+  g?: typeof globalThis
+  runtime?: JSRuntime
+  useCache?: boolean
 }
 
 /**
@@ -461,15 +461,14 @@ export type JSRuntime =
 export type Machine = (
   | 'arm64'
   | 'arm'
-  | 'i686'
   | 'ia32'
   | 'loong64'
-  | 'mips64'
   | 'mips'
+  | 'mipsel'
   | 'ppc64'
   | 'riscv64'
   | 's390x'
-  | 'x86_64') | (Lowercase<string> & Record<never, never>)
+  | 'x64') | (Lowercase<string> & Record<never, never>)
 
 /**
  * A function that returns the current timestamp.
@@ -489,7 +488,19 @@ export type OS = (
   | 'sunos'
   | 'win32') | (Lowercase<string> & Record<never, never>)
 
-export type PlatformMetrics = PlatformMetricsBase | PlatformMetricsBrowser | PlatformMetricsNodeLike
+export interface PlatformMetrics {
+  cpuCores: number
+  cpuMachine: Machine
+  cpuModel: string
+  cpuSpeed: number
+  memoryFree: number
+  memoryTotal: number
+  osKernel: string
+  osType: OS
+  priority: null | number
+  runtime: JSRuntime
+  userAgent: string
+}
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
@@ -837,34 +848,3 @@ export interface TimestampProvider {
  * function.
  */
 export type TimestampValue = bigint | number
-
-interface PlatformMetricsBase {
-  cpuMachine: Machine;
-  memoryFree: number;
-  memoryTotal: number;
-  osType: OS;
-  runtime: Omit<JSRuntime, 'browser' | 'bun' | 'deno' | 'node'>;
-  userAgent: string;
-}
-
-interface PlatformMetricsBrowser {
-  cpuMachine: Machine;
-  memoryFree: number;
-  memoryTotal: number;
-  osType: OS;
-  runtime: Extract<JSRuntime, 'browser'>;
-  userAgent: string;
-}
-
-interface PlatformMetricsNodeLike {
-  cpuCores: number;
-  cpuMachine: Machine;
-  cpuModel: string;
-  cpuSpeed: number;
-  memoryFree: number;
-  memoryTotal: number;
-  osKernel: string;
-  osType: OS;
-  priority: null | number;
-  runtime: Extract<JSRuntime, 'bun' | 'deno' | 'node'>
-}

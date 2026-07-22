@@ -1,4 +1,5 @@
 export { Bench } from './bench'
+export { getPlatformMetrics, normalizeMachine, normalizeOSType } from './platform'
 export { Task } from './task'
 export type {
   BenchEvent,
@@ -14,9 +15,13 @@ export type {
   FnHook,
   FnOptions,
   FnReturnedObject,
+  GetPlatformMetricsOptions,
   Hook,
   JSRuntime,
+  Machine,
   NowFn,
+  OS,
+  PlatformMetrics,
   ResolvedBenchOptions,
   Samples,
   SortedSamples,

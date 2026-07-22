@@ -153,8 +153,10 @@ await bench.run()
 - When `mode` is set to 'bench', different tasks within the bench run concurrently. Concurrent cycles.
 
 ```ts
-bench.threshold = 10 // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
-bench.concurrency = 'task' // The concurrency mode to determine how tasks are run.
+const bench = new Bench({
+  concurrency: 'task', // The concurrency mode to determine how tasks are run.
+  threshold: 10, // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
+})
 await bench.run()
 ```
 

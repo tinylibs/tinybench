@@ -103,8 +103,10 @@ export class Bench extends EventTarget implements BenchLike {
    * Whether to subtract an estimated timestamp provider call overhead from
    * each raw latency sample.
    *
-   * Incompatible with `concurrency: 'task'`; the constraint is enforced
-   * at construction and at the start of {@link Bench.run}.
+   * Incompatible with `concurrency: 'task'`. Enforced at construction and
+   * re-checked at the start of {@link Bench.run} to guard against untyped
+   * (JS-side) mutation of the `readonly` `concurrency` field after
+   * construction.
    * @default false
    */
   readonly subtractTimerOverhead: boolean

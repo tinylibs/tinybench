@@ -3,14 +3,18 @@
 ## How do I deal with measurement precision issues?
 
 If a task runs faster than the resolution of the timer your runtime provides,
-individual samples can measure as zero duration, which produces unreliable
-results (high margin of error, skewed latency). The resolution of the default
-timer varies by runtime and platform.
+individual samples can measure as zero duration, which skews the reported
+latency. Tinybench flags this directly: when a task's samples are dominated by
+the timer resolution it dispatches a `'warning'` event and exposes the observed
+`detectedResolution` on the task (see the README
+[Timer Diagnostics](./README.md#timer-diagnostics) section). The resolution of
+the default timer varies by runtime and platform.
 
 Tinybench lets you choose a timestamp provider via the `timestampProvider`
 option, which accepts a `TimestampProvider` object or the shorthands
 `hrtimeNow`, `performanceNow`, `bunNanoseconds` (when running on Bun), or `auto`
-(to let Tinybench pick the best available provider for the current runtime):
+(to let Tinybench pick the most precise available provider for the current
+runtime):
 
 ```ts
 import { Bench } from 'tinybench'

@@ -95,3 +95,29 @@ test('classifyTimerSaturation returns undefined for healthy spread samples', () 
   arr.sort((a, b) => a - b)
   expect(classifyTimerSaturation(asSorted(arr), 1.5)).toBeUndefined()
 })
+
+const zeroMadSamples = (medianRepeats: number): number[] => {
+  const arr: number[] = new Array<number>(medianRepeats).fill(5)
+  for (let i = 0; i < 40; i++) arr.push(100 + i)
+  return arr.sort((a, b) => a - b)
+}
+
+test("classifyTimerSaturation withholds 'zero-mad' at the n = 100 boundary", () => {
+  expect(classifyTimerSaturation(asSorted(zeroMadSamples(60)), 0)).toBeUndefined()
+})
+
+test("classifyTimerSaturation fires 'zero-mad' just past the boundary (n = 101)", () => {
+  expect(classifyTimerSaturation(asSorted(zeroMadSamples(61)), 0)).toBe('zero-mad')
+})
+
+test('classifyTimerSaturation applies the distinct threshold ceiling of 10 at n = 10000', () => {
+  const nineDistinct = Array.from({ length: 10000 }, (_, i) => (i % 9) + 1).sort(
+    (a, b) => a - b
+  )
+  expect(classifyTimerSaturation(asSorted(nineDistinct), 1)).toBe('low-distinct')
+
+  const tenDistinct = Array.from({ length: 10000 }, (_, i) => (i % 10) + 1).sort(
+    (a, b) => a - b
+  )
+  expect(classifyTimerSaturation(asSorted(tenDistinct), 1)).toBeUndefined()
+})

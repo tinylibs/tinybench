@@ -596,8 +596,8 @@ export class Task extends EventTarget {
    *
    * Ordering:
    * 1. Apply overhead correction in-place on the collection-order sample array
-   *    (alignment with `isOverridden` preserved — `latencySamples[i]` still
-   *    matches `isOverridden[i]` because no sort has been performed yet).
+   *    (alignment with `overriddenIndices` preserved — index `i` still refers
+   *    to the same sample because no sort has been performed yet).
    *    Samples whose duration was supplied via `overriddenDuration` are skipped.
    * 2. Build a measured-only view (excluding `overriddenDuration` samples) used
    *    for both `detectedResolution` and timer-saturation detection. Constant

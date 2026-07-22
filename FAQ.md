@@ -15,18 +15,9 @@ Tinybench lets you choose a timestamp provider via the `timestampProvider`
 option, which accepts a `TimestampProvider` object or the shorthands
 `hrtimeNow`, `performanceNow`, `bunNanoseconds` (when running on Bun), or `auto`
 (to let Tinybench pick the most precise available provider for the current
-runtime):
-
-```ts
-import { Bench } from 'tinybench'
-
-const bench = new Bench({
-  timestampProvider: 'hrtimeNow', // or 'performanceNow', 'bunNanoseconds', 'auto'
-})
-```
-
-See the README [Timestamp Providers](./README.md#timestamp-providers) section
-for the full list and custom-provider setup. To supply a plain millisecond
+runtime). See the README
+[Timestamp Providers](./README.md#timestamp-providers) section for the full
+list, an example, and custom-provider setup. To supply a plain millisecond
 clock without building a `TimestampProvider`, set the `now` option instead; it
 is converted to a provider internally and cannot be combined with
 `timestampProvider`.

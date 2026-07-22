@@ -7,7 +7,7 @@ import {
 } from '../../src'
 
 // A custom converter for `bench.table()` that renders a compact,
-// latency-only view — omitting the throughput columns (and, for errored
+// latency-focused view — omitting the throughput columns (and, for errored
 // tasks, the stack trace) the default converter includes. Pass any function
 // with the `ConsoleTableConverter` signature to `bench.table()` to customize
 // the rows `console.table` prints.

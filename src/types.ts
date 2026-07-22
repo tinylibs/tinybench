@@ -23,6 +23,7 @@ export type BenchEvents =
   | 'reset' // when the reset method gets called
   | 'start' // when running the benchmarks gets started
   | 'warmup' // when the benchmarks start getting warmed up
+  | 'warning' // when timer saturation is detected for a task's latency samples
 
 /**
  * Bench events that may have an associated Task
@@ -41,7 +42,7 @@ export type BenchEventsWithError = Extract<BenchEvents, 'error'>
  */
 export type BenchEventsWithTask = Extract<
   BenchEvents,
-  'add' | 'cycle' | 'error' | 'remove'
+  'add' | 'cycle' | 'error' | 'remove' | 'warning'
 >
 
 /**
@@ -121,6 +122,13 @@ export interface BenchLike extends EventTarget {
    */
   time: number
   /**
+   * The estimated cost of one timestamp provider call in milliseconds.
+   *
+   * Calibrated once at construction; `undefined` (or omitted) when timer
+   * overhead subtraction is disabled or unsupported by the implementation.
+   */
+  readonly timerOverhead?: number
+  /**
    * The timestamp provider used by the benchmark.
    */
   timestampProvider: TimestampProvider
@@ -182,6 +190,65 @@ export interface BenchOptions {
    * An AbortSignal for aborting the benchmark.
    */
   signal?: AbortSignal
+
+  /**
+   * Whether to subtract an estimated timestamp provider call overhead from
+   * each raw latency sample.
+   *
+   * Each sample is measured as `t1 - t0` around a single call to the task
+   * function, so every raw sample is inflated by approximately one
+   * timestamp provider call cost `C`. When this option is `true`, an
+   * estimate `Ĉ` is computed once at construction time via
+   * {@link calibrateTimerOverhead}, and `max(0, raw_sample - Ĉ)` is used
+   * in place of each non-overridden sample before statistics are computed.
+   *
+   * **Statistics after correction.** All fields of {@link Statistics} are
+   * derived from the clamped corrected samples, not from the raw
+   * distribution. With `M` denoting the raw-sample mean:
+   *
+   * - **Clean-shift regime (`X >> Ĉ`).** The clamp `max(0, …)` rarely
+   *   triggers, so the correction acts as a translation by `Ĉ`. Location
+   *   statistics (`mean`, `min`, `max`, all percentiles) decrease by `Ĉ`;
+   *   absolute-unit dispersion (`vr`, `sd`, `sem`, `moe`, `mad`, `aad`)
+   *   is essentially unchanged. Because `rme = moe / mean`, it inflates
+   *   by the deterministic factor `M / (M − Ĉ)` whenever `Ĉ > 0`.
+   * - **Sub-overhead regime (`X ≈ Ĉ`).** A non-trivial fraction of
+   *   samples clamp to `0`, biasing the corrected mean upward,
+   *   contracting `vr`/`sd`/`sem`/`moe`/`aad`, and compounding the
+   *   `M / (M − Ĉ)` factor in `rme`. Once the cumulative mass of raw
+   *   samples at or below `Ĉ` reaches a given quantile, that percentile
+   *   collapses to `0`; in particular `p50` collapses once at least half
+   *   of the raw samples satisfy `raw_sample ≤ Ĉ`, which then forces
+   *   `mad` and `aad` toward `0`. Prefer `overriddenDuration` for
+   *   sub-overhead measurements.
+   *
+   * **Three observable consequences of the clamp.**
+   *
+   * 1. `latency.min` may be exactly `0` even when no zero-duration sample
+   *    was actually observed.
+   * 2. The throughput estimator substitutes `1000 / latency.mean` (or `0`
+   *    when `mean === 0`) for every clamped sample.
+   * 3. {@link detectTimerSaturation} criterion `'zero-dominated'` cannot
+   *    distinguish clamped samples from genuine zero-duration timer
+   *    reads, so a `'warning'` event may be dispatched in the
+   *    sub-overhead regime even when the timer itself is not saturated.
+   *
+   * **Caveat — `concurrency: "task"`.** The overhead is calibrated once
+   * at construction time with sequential timer calls. Setting both
+   * options causes the constructor (and `run()`) to throw, since the
+   * sequentially-calibrated estimate would not reflect the per-iteration
+   * timer call cost under concurrent execution.
+   *
+   * **Caveat — `overriddenDuration`.** Samples returned by the task
+   * function via `overriddenDuration` are intentional user values and
+   * are never modified by the correction. They are also excluded from
+   * {@link Task.detectedResolution} and from timer-saturation detection.
+   *
+   * On runtimes with a coarse timer (resolution >= 1 ms), the
+   * calibration returns `0` and this option becomes a no-op.
+   * @default false
+   */
+  subtractTimerOverhead?: boolean
 
   /**
    * Teardown function to run after each benchmark task (cycle).
@@ -386,7 +453,6 @@ export type JSRuntime =
   | 'workerd'
 
 /**
-/**
  * A function that returns the current timestamp.
  */
 export type NowFn = () => number
@@ -403,6 +469,7 @@ export interface ResolvedBenchOptions extends BenchOptions {
   iterations: NonNullable<BenchOptions['iterations']>
   now: NonNullable<BenchOptions['now']>
   setup: NonNullable<BenchOptions['setup']>
+  subtractTimerOverhead: NonNullable<BenchOptions['subtractTimerOverhead']>
   teardown: NonNullable<BenchOptions['teardown']>
   throws: NonNullable<BenchOptions['throws']>
   time: NonNullable<BenchOptions['time']>
@@ -538,6 +605,7 @@ export type TaskEvents = Extract<
   | 'reset' // when the reset method gets called
   | 'start' // when running the task gets started
   | 'warmup' // when the task start getting warmed up
+  | 'warning' // when timer saturation is detected for the task's latency samples
 >
 
 /**
@@ -671,6 +739,20 @@ export interface TaskResultWithStatistics {
    */
   totalTime: number
 }
+
+/**
+ * Reason a sample set is classified as timer-saturated.
+ *
+ * - `'zero-dominated'` — more than half of the samples are exactly zero.
+ * - `'low-distinct'` — distinct sample count is below
+ *   `max(3, min(10, ⌊n / 1000⌋))`.
+ * - `'zero-mad'` — median absolute deviation is zero with more than 100
+ *   samples.
+ */
+export type TimerSaturationReason =
+  | 'low-distinct'
+  | 'zero-dominated'
+  | 'zero-mad'
 
 /**
  * A timestamp function that returns either a number or bigint.

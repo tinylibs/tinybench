@@ -7,11 +7,13 @@ import {
 } from '../../src'
 
 // A custom converter for `bench.table()` that renders a compact,
-// latency-only view — omitting the throughput columns the default converter
-// includes. Pass any function with the `ConsoleTableConverter` signature to
-// `bench.table()` to customize the rows `console.table` prints.
+// latency-only view — omitting the throughput columns (and, for errored
+// tasks, the stack trace) the default converter includes. Pass any function
+// with the `ConsoleTableConverter` signature to `bench.table()` to customize
+// the rows `console.table` prints.
 const compactConverter: ConsoleTableConverter = (task: Task): Record<string, number | string> => {
   const state = task.result.state
+  /* eslint-disable perfectionist/sort-objects */
   return {
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
@@ -30,7 +32,11 @@ const compactConverter: ConsoleTableConverter = (task: Task): Record<string, num
         : {
             Error: task.result.error.message,
           }),
+    ...(state === 'aborted-with-statistics' && {
+      Remarks: state,
+    }),
   }
+  /* eslint-enable perfectionist/sort-objects */
 }
 
 const bench = new Bench({ name: 'compact table benchmark', time: 100 })
@@ -48,3 +54,12 @@ await bench.run()
 
 console.log(bench.name)
 console.table(bench.table(compactConverter))
+
+// Output:
+// compact table benchmark
+// ┌─────────┬───────────────┬───────────────────┬────────────────────┬─────────┐
+// │ (index) │ Task name     │ Latency avg (ns)  │ Latency med (ns)   │ Samples │
+// ├─────────┼───────────────┼───────────────────┼────────────────────┼─────────┤
+// │ 0       │ 'faster task' │ '1050.9 ± 0.57%'  │ '958.00 ± 208.00'  │ 95158   │
+// │ 1       │ 'slower task' │ '1156202 ± 3.19%' │ '1158875 ± 4750.0' │ 87      │
+// └─────────┴───────────────┴───────────────────┴────────────────────┴─────────┘

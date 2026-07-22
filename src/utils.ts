@@ -498,6 +498,9 @@ export const calibrateTimerOverhead = (
   const { estimator = 'median', pairs = 1024, warmupPairs = 64 } = options
   const { fn, toMs } = provider
 
+  // Degenerate input: no pairs to measure ⇒ no overhead estimate.
+  if (pairs === 0) return 0
+
   // `fn` returns TimestampValue (`bigint | number`); both operands always
   // share a runtime type. Casting both to `bigint` lets the operator
   // typecheck without a type predicate; at runtime the `-` operator is
@@ -517,7 +520,6 @@ export const calibrateTimerOverhead = (
   }
 
   if (deltas.length * 2 < pairs) return 0
-  if (deltas.length === 0) return 0
 
   deltas.sort(sortFn)
 

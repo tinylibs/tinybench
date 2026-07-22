@@ -24,11 +24,15 @@ import { BenchEvent } from './event'
 import { Task } from './task'
 import {
   assert,
+  calibrateTimerOverhead,
   defaultConvertTaskResultForConsoleTable,
   getTimestampProvider,
   runtime,
   runtimeVersion,
 } from './utils'
+
+const subtractTimerOverheadConcurrencyError =
+  '`subtractTimerOverhead` cannot be used with `concurrency: "task"` — set `concurrency` to `null` or `"bench"`, or disable `subtractTimerOverhead`'
 
 /**
  * The Bench class keeps track of the benchmark tasks and controls them.
@@ -96,6 +100,18 @@ export class Bench extends EventTarget implements BenchLike {
   readonly signal?: AbortSignal
 
   /**
+   * Whether to subtract an estimated timestamp provider call overhead from
+   * each raw latency sample.
+   *
+   * Incompatible with `concurrency: 'task'`. Enforced at construction and
+   * re-checked at the start of {@link Bench.run} to guard against untyped
+   * (JS-side) mutation of the `readonly` `concurrency` field after
+   * construction.
+   * @default false
+   */
+  readonly subtractTimerOverhead: boolean
+
+  /**
    * A teardown function that runs after each task execution.
    */
   readonly teardown: (
@@ -119,6 +135,15 @@ export class Bench extends EventTarget implements BenchLike {
    * The amount of time to run each task.
    */
   readonly time: number
+
+  /**
+   * The estimated cost of one timestamp provider call in milliseconds.
+   *
+   * `undefined` when {@link subtractTimerOverhead} is `false`.
+   * Otherwise calibrated once at construction time via
+   * {@link calibrateTimerOverhead}.
+   */
+  readonly timerOverhead: number | undefined
 
   /**
    * A timestamp provider and its related functions.
@@ -195,6 +220,14 @@ export class Bench extends EventTarget implements BenchLike {
     this.throws = restOptions.throws ?? false
     this.signal = restOptions.signal
     this.retainSamples = restOptions.retainSamples === true
+    this.subtractTimerOverhead = restOptions.subtractTimerOverhead === true
+    assert(
+      !(this.subtractTimerOverhead && this.concurrency === 'task'),
+      subtractTimerOverheadConcurrencyError
+    )
+    this.timerOverhead = this.subtractTimerOverhead
+      ? calibrateTimerOverhead(this.timestampProvider)
+      : undefined
 
     if (this.signal) {
       this.signal.addEventListener(
@@ -264,6 +297,10 @@ export class Bench extends EventTarget implements BenchLike {
    * @returns the tasks array
    */
   async run (): Promise<Task[]> {
+    assert(
+      !(this.subtractTimerOverhead && this.concurrency === 'task'),
+      subtractTimerOverheadConcurrencyError
+    )
     if (this.warmup) {
       await this.#warmupTasks()
     }

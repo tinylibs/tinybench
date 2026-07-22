@@ -260,12 +260,12 @@ export class Task extends EventTarget {
     await this.#bench.setup(this, 'run')
     const {
       error,
-      isOverridden,
+      overriddenIndices,
       samples: latencySamples,
     } = await this.#benchmark('run', this.#bench.time, this.#bench.iterations)
     await this.#bench.teardown(this, 'run')
 
-    this.#processRunResult({ error, isOverridden, latencySamples })
+    this.#processRunResult({ error, latencySamples, overriddenIndices })
 
     return this
   }
@@ -294,7 +294,7 @@ export class Task extends EventTarget {
 
     const {
       error,
-      isOverridden,
+      overriddenIndices,
       samples: latencySamples,
     } = this.#benchmarkSync('run', this.#bench.time, this.#bench.iterations)
 
@@ -304,7 +304,7 @@ export class Task extends EventTarget {
       '`teardown` function must be sync when using `runSync()`'
     )
 
-    this.#processRunResult({ error, isOverridden, latencySamples })
+    this.#processRunResult({ error, latencySamples, overriddenIndices })
 
     return this
   }
@@ -364,8 +364,8 @@ export class Task extends EventTarget {
     time: number,
     iterations: number
   ): Promise<
-    | { error: Error; isOverridden?: never; samples?: never }
-    | { error?: never; isOverridden?: boolean[]; samples?: Samples }
+    | { error: Error; overriddenIndices?: never; samples?: never }
+    | { error?: never; overriddenIndices?: Set<number>; samples?: Samples }
   > {
     try {
       if (this.#fnOpts.beforeAll) {
@@ -374,7 +374,7 @@ export class Task extends EventTarget {
 
       let totalTime = 0 // ms
       const samples: number[] = []
-      const isOverridden: boolean[] = []
+      const overriddenIndices = new Set<number>()
 
       const benchmarkTask = async () => {
         if (this.#aborted) {
@@ -389,8 +389,8 @@ export class Task extends EventTarget {
             ? await this.#measure()
             : this.#measureSync()
 
-          samples.push(taskTime)
-          isOverridden.push(overridden)
+          const idx = samples.push(taskTime) - 1
+          if (overridden) overriddenIndices.add(idx)
           totalTime += taskTime
         } finally {
           if (this.#fnOpts.afterEach != null) {
@@ -423,7 +423,7 @@ export class Task extends EventTarget {
         await this.#fnOpts.afterAll.call(this, mode)
       }
 
-      return isValidSamples(samples) ? { isOverridden, samples } : {}
+      return isValidSamples(samples) ? { overriddenIndices, samples } : {}
     } catch (error) {
       return { error: toError(error) }
     }
@@ -440,8 +440,8 @@ export class Task extends EventTarget {
     time: number,
     iterations: number
   ):
-    | { error: Error; isOverridden?: never; samples?: never }
-    | { error?: never; isOverridden?: boolean[]; samples?: Samples } {
+    | { error: Error; overriddenIndices?: never; samples?: never }
+    | { error?: never; overriddenIndices?: Set<number>; samples?: Samples } {
     try {
       if (this.#fnOpts.beforeAll) {
         const beforeAllResult = this.#fnOpts.beforeAll.call(this, mode)
@@ -453,7 +453,7 @@ export class Task extends EventTarget {
 
       let totalTime = 0
       const samples: number[] = []
-      const isOverridden: boolean[] = []
+      const overriddenIndices = new Set<number>()
 
       const benchmarkTask = () => {
         if (this.#aborted) {
@@ -470,8 +470,8 @@ export class Task extends EventTarget {
 
           const { overridden, taskTime } = this.#measureSync()
 
-          samples.push(taskTime)
-          isOverridden.push(overridden)
+          const idx = samples.push(taskTime) - 1
+          if (overridden) overriddenIndices.add(idx)
           totalTime += taskTime
         } finally {
           if (this.#fnOpts.afterEach) {
@@ -499,7 +499,7 @@ export class Task extends EventTarget {
           '`afterAll` function must be sync when using `runSync()`'
         )
       }
-      return isValidSamples(samples) ? { isOverridden, samples } : {}
+      return isValidSamples(samples) ? { overriddenIndices, samples } : {}
     } catch (error) {
       return { error: toError(error) }
     }
@@ -607,19 +607,19 @@ export class Task extends EventTarget {
    *    saturation criterion fired, then `'cycle'` and `'complete'`.
    * @param options - An object containing the run results
    * @param options.error - The error that occurred during the run, if any
-   * @param options.isOverridden - Parallel boolean array (collection order) indicating
-   *   which samples were supplied by the task function via `overriddenDuration`,
-   *   or `undefined` on the error / no-valid-samples path
    * @param options.latencySamples - The array of latency samples collected during the run
+   * @param options.overriddenIndices - Set of collection-order indices whose
+   *   samples were supplied by the task function via `overriddenDuration`,
+   *   or `undefined` on the error / no-valid-samples path
    */
   #processRunResult ({
     error,
-    isOverridden,
     latencySamples,
+    overriddenIndices,
   }: {
     error?: Error
-    isOverridden?: boolean[]
     latencySamples?: number[]
+    overriddenIndices?: Set<number>
   }): void {
     if (isValidSamples(latencySamples)) {
       this.#runs = latencySamples.length
@@ -627,22 +627,23 @@ export class Task extends EventTarget {
       const overhead = this.#bench.timerOverhead
       const hasOverhead = overhead !== undefined && overhead > 0
 
-      // Phase 1 — Subtract overhead while isOverridden[i] is still aligned with
-      // latencySamples[i] (both in collection order, pre-sort).
+      // Phase 1 — Subtract overhead while overriddenIndices is still aligned
+      // with latencySamples[i] (collection order, pre-sort).
       if (hasOverhead) {
         for (let i = 0; i < latencySamples.length; i++) {
-          if (isOverridden?.[i] !== true) {
+          if (!overriddenIndices?.has(i)) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             latencySamples[i] = Math.max(0, latencySamples[i]! - overhead)
           }
         }
       }
 
-      // Phase 2 — Capture measured-only samples (alignment with isOverridden
-      // is still valid since the array has not been sorted yet).
-      const hasAnyOverridden = isOverridden?.some(v => v) ?? false
+      // Phase 2 — Capture measured-only samples (alignment with
+      // overriddenIndices is still valid since the array has not been sorted
+      // yet).
+      const hasAnyOverridden = (overriddenIndices?.size ?? 0) > 0
       const measuredOnly: number[] = hasAnyOverridden
-        ? latencySamples.filter((_, i) => isOverridden?.[i] !== true)
+        ? latencySamples.filter((_, i) => !overriddenIndices?.has(i))
         : latencySamples
 
       // Phase 3 — Single sort of the working array.

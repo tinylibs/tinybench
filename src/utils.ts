@@ -498,17 +498,20 @@ export const calibrateTimerOverhead = (
   const { estimator = 'median', pairs = 1024, warmupPairs = 64 } = options
   const { fn, toMs } = provider
 
-  // Degenerate input: no positive pairs to measure ⇒ no overhead estimate.
-  if (pairs <= 0) return 0
+  // Degenerate or non-finite input: `Number.isInteger` also rejects
+  // Infinity/NaN/non-integer counts that would otherwise hang the loop.
+  if (!Number.isInteger(pairs) || pairs <= 0) return 0
 
   // `fn` returns TimestampValue (`bigint | number`); both operands always
   // share a runtime type. Casting both to `bigint` lets the operator
   // typecheck without a type predicate; at runtime the `-` operator is
   // polymorphic for both numeric branches and `toMs` accepts either.
-  for (let i = 0; i < warmupPairs; i++) {
-    const a = fn() as bigint
-    const b = fn() as bigint
-    toMs(b - a)
+  if (Number.isInteger(warmupPairs) && warmupPairs > 0) {
+    for (let i = 0; i < warmupPairs; i++) {
+      const a = fn() as bigint
+      const b = fn() as bigint
+      toMs(b - a)
+    }
   }
 
   const deltas: number[] = []

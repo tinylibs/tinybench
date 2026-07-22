@@ -80,6 +80,24 @@ test('calibrateTimerOverhead returns 0 for non-positive pairs', () => {
   }
 })
 
+test('calibrateTimerOverhead returns 0 for non-finite or non-integer pairs', () => {
+  for (const pairs of [Infinity, -Infinity, NaN, 1.5]) {
+    expect(calibrateTimerOverhead(makeAscendingPairProvider(), { pairs })).toBe(
+      0
+    )
+  }
+})
+
+test('calibrateTimerOverhead does not hang on non-finite warmupPairs', () => {
+  for (const warmupPairs of [Infinity, NaN, -1, 2.5]) {
+    const overhead = calibrateTimerOverhead(makeAscendingPairProvider(), {
+      pairs: 100,
+      warmupPairs,
+    })
+    expect(Number.isFinite(overhead)).toBe(true)
+  }
+})
+
 test('calibrateTimerOverhead estimators are ordered min ≤ p05 ≤ median', () => {
   const min = calibrateTimerOverhead(makeAscendingPairProvider(), {
     estimator: 'min',

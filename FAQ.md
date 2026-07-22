@@ -20,30 +20,37 @@ const bench = new Bench({
 })
 ```
 
+See the README [Timestamp Providers](./README.md#timestamp-providers) section
+for the full list and custom-provider setup.
+
 Beyond picking a higher-resolution provider, you can increase the benchmark
 `time` so more samples are collected (improving statistical confidence), and
-inspect the reported margin of error (`rme`) — a very high `rme` often signals
-that the task executes faster than the timer can measure accurately. Looping a
-fast function to "amplify" its duration does not fix the underlying precision
-problem; prefer a more precise timestamp provider.
+inspect the reported relative margin of error (`rme`) — a very high `rme` often
+signals that the task executes faster than the timer can measure accurately.
+Manually looping a fast function to "amplify" its duration can lift a sample
+above the timer resolution, but it adds loop overhead and changes what you
+measure; a more precise timestamp provider is usually the cleaner fix.
 
 ## What is JS JIT de-optimization?
 
 JavaScript engines (V8, SpiderMonkey, JavaScriptCore) compile hot code paths
 just-in-time (JIT). JIT de-optimization (a "deopt") happens when the engine
-discards an optimized code path and falls back to slower, interpreted
-execution. During benchmarking this can show up as sudden latency spikes.
+discards an optimized code path and falls back to a lower, unoptimized
+execution tier (a bytecode interpreter or a less-optimized JIT tier, depending
+on the engine). During benchmarking this can show up as sudden latency spikes.
 
 Common causes include type instability (argument types changing between
-iterations), garbage-collection pauses interrupting the measured region,
-dynamic property access or function reassignment that prevents inlining, and —
-in browsers — having DevTools open, which disables many JIT optimizations.
+iterations) and dynamic property access or function reassignment that prevents
+inlining, and — in browsers — having DevTools open, which can degrade JIT
+performance. Garbage-collection pauses are a separate source of latency spikes
+(not a deopt) that can likewise inflate variance.
 
 Tinybench reports statistical indicators (standard deviation, variance,
 percentiles, margin of error) that help you spot outliers caused by deopts. If
 you see high variance, try running the benchmark multiple times and comparing
-results, ensuring warmup iterations run before measurement, and (in browsers)
-closing DevTools and running in a production-like configuration.
+results, keeping warmup enabled (the default; tunable via `warmupIterations` /
+`warmupTime`), and (in browsers) closing DevTools and running in a
+production-like configuration.
 
 ## Why do my results differ from another benchmarking tool?
 
@@ -58,8 +65,10 @@ indicate a bug. Common reasons:
   standard deviation, margin of error).
 - **Different statistics.** Tools aggregate differently (arithmetic mean,
   geometric mean, median, …). Tinybench reports both average and median (p50).
-- **Warmup handling.** Some tools include warmup runs in their measurements;
-  the first samples Tinybench collects may include JIT warmup cost.
+- **Warmup handling.** Tools differ in whether they warm up before measuring.
+  Tinybench warms up by default (`warmup`, on by default) in a separate phase
+  excluded from the reported statistics; disabling it (`warmup: false`) lets the
+  first measured samples include JIT warmup cost.
 - **Overhead.** Every tool introduces its own measurement overhead (loop,
   function call, event dispatch). Tinybench is small, but not zero-overhead.
 

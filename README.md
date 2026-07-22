@@ -70,6 +70,8 @@ More usage examples can be found in the [examples](./examples/) directory.
 
 ## Docs
 
+### [FAQ](./FAQ.md)
+
 ### [`Bench`](https://tinylibs.github.io/tinybench/classes/Bench.html)
 
 ### [`Task`](https://tinylibs.github.io/tinybench/classes/Task.html)

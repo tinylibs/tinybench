@@ -43,6 +43,15 @@ const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
 const abortableStates = ['not-started', 'started'] as const
 
 /**
+ * Result of a single `#benchmark` / `#benchmarkSync` run: either an `error`,
+ * or the collected `samples` together with the `overriddenIndices` whose
+ * durations were supplied via `overriddenDuration` (mutually exclusive).
+ */
+type BenchmarkResult =
+  | { error: Error; overriddenIndices?: never; samples?: never }
+  | { error?: never; overriddenIndices?: Set<number>; samples?: Samples }
+
+/**
  * Default task result for tasks that have not yet started.
  */
 const notStartedTaskResult: TaskResult = { state: 'not-started' }
@@ -363,10 +372,7 @@ export class Task extends EventTarget {
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ): Promise<
-    | { error: Error; overriddenIndices?: never; samples?: never }
-    | { error?: never; overriddenIndices?: Set<number>; samples?: Samples }
-  > {
+  ): Promise<BenchmarkResult> {
     try {
       if (this.#fnOpts.beforeAll) {
         await this.#fnOpts.beforeAll.call(this, mode)
@@ -439,9 +445,7 @@ export class Task extends EventTarget {
     mode: 'run' | 'warmup',
     time: number,
     iterations: number
-  ):
-    | { error: Error; overriddenIndices?: never; samples?: never }
-    | { error?: never; overriddenIndices?: Set<number>; samples?: Samples } {
+  ): BenchmarkResult {
     try {
       if (this.#fnOpts.beforeAll) {
         const beforeAllResult = this.#fnOpts.beforeAll.call(this, mode)

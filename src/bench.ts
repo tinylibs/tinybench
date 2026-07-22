@@ -3,11 +3,14 @@ import type {
   BenchEvents,
   BenchLike,
   BenchOptions,
+  Concurrency,
   EventListener,
   EventListenerObject,
   Fn,
   FnOptions,
+  HookMode,
   JSRuntime,
+  NowFn,
   RemoveEventListenerOptionsArgument,
   TaskResult,
   TimestampProvider,
@@ -51,7 +54,7 @@ export class Bench extends EventTarget implements BenchLike {
    * - When `mode` is set to 'task', each task's iterations (calls of a task function) run concurrently.
    * - When `mode` is set to 'bench', different tasks within the bench run concurrently.
    */
-  readonly concurrency: 'bench' | 'task' | null
+  readonly concurrency: Concurrency
 
   /**
    * The amount of executions per task.
@@ -66,7 +69,7 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * A function to get a timestamp.
    */
-  readonly now: () => number
+  readonly now: NowFn
 
   /**
    * Removes a previously registered event listener.
@@ -92,7 +95,7 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * A setup function that runs before each task execution.
    */
-  readonly setup: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  readonly setup: (task: Task, mode: HookMode) => Promise<void> | void
 
   /**
    * An AbortSignal to cancel the benchmark.
@@ -116,7 +119,7 @@ export class Bench extends EventTarget implements BenchLike {
    */
   readonly teardown: (
     task: Task,
-    mode: 'run' | 'warmup'
+    mode: HookMode
   ) => Promise<void> | void
 
   /**

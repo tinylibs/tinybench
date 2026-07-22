@@ -28,7 +28,7 @@ export type BenchEvents =
 /**
  * Bench events that may have an associated Task
  */
-export type BenchEventsOptionalTask = Omit<
+export type BenchEventsOptionalTask = Exclude<
   BenchEvents,
   'add' | 'cycle' | 'error' | 'remove'
 >
@@ -100,7 +100,7 @@ export interface BenchLike extends EventTarget {
   /**
    * A setup function that runs before each task execution.
    */
-  setup: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  setup: (task: Task, mode: HookMode) => Promise<void> | void
   /**
    * An AbortSignal to cancel the benchmark
    */
@@ -108,7 +108,7 @@ export interface BenchLike extends EventTarget {
   /**
    * A teardown function that runs after each task execution.
    */
-  teardown: (task: Task, mode: 'run' | 'warmup') => Promise<void> | void
+  teardown: (task: Task, mode: HookMode) => Promise<void> | void
   /**
    * The maximum number of concurrent tasks to run
    */
@@ -358,7 +358,7 @@ export type Fn = () =>
  */
 export type FnHook = (
   this: Task,
-  mode?: 'run' | 'warmup'
+  mode?: HookMode
 ) => Promise<void> | void
 
 /**
@@ -427,8 +427,13 @@ export interface FnReturnedObject {
  */
 export type Hook = (
   task?: Task,
-  mode?: 'run' | 'warmup'
+  mode?: HookMode
 ) => Promise<void> | void
+
+/**
+ * The mode in which a task hook is invoked ('warmup' or 'run').
+ */
+export type HookMode = 'run' | 'warmup'
 
 /**
  * The JavaScript runtime environment.
@@ -645,11 +650,6 @@ export interface TaskResultAbortedWithStatistics
  */
 export interface TaskResultCompleted extends TaskResultWithStatistics {
   /**
-   * how long each operation takes (ms)
-   */
-  period: number
-
-  /**
    * the task state
    */
   state: 'completed'
@@ -712,7 +712,7 @@ export interface TaskResultTimestampProviderInfo {
   /**
    * the name of the timestamp provider used during the benchmark
    */
-  timestampProviderName: (string & {}) | TimestampFns
+  timestampProviderName: TimestampProviderName
 }
 
 /**
@@ -788,7 +788,7 @@ export interface TimestampProvider {
   /**
    * The name of the timestamp provider.
    */
-  name: (string & {}) | TimestampFns
+  name: TimestampProviderName
   /**
    * Converts the timestamp value to milliseconds.
    * @param value - the timestamp value
@@ -796,6 +796,11 @@ export interface TimestampProvider {
    */
   toMs: (value: TimestampValue) => number
 }
+
+/**
+ * The name of a timestamp provider: a known provider name or any custom string.
+ */
+export type TimestampProviderName = (string & {}) | TimestampFns
 
 /**
  * A timestamp value, either number or bigint. Internally timestamps can use

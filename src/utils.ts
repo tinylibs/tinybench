@@ -151,7 +151,7 @@ export const nBigintToMs = (ns: bigint) => Number(ns) / 1e6
  * @param ms - milliseconds
  * @returns nanoseconds as bigint
  */
-export const mToNsBigint = (ms: number) => BigInt(ms) * 1_000_000n
+export const mToNsBigint = (ms: number) => BigInt(Math.round(ms * 1e6))
 
 /**
  * Formats a number with the specified significant digits and maximum fraction digits.
@@ -906,6 +906,11 @@ const hrtimeBigint =
 
 /**
  * Returns the current timestamp in milliseconds using `process.hrtime.bigint()`.
+ *
+ * Narrows the absolute nanosecond value to a `number`, which loses precision
+ * once it exceeds `Number.MAX_SAFE_INTEGER` (~104 days of uptime). For
+ * benchmarking prefer `hrtimeNowTimestampProvider`, which keeps the bigint
+ * until after the delta is taken.
  * @returns the current timestamp in milliseconds
  */
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))

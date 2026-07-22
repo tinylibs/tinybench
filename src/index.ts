@@ -49,8 +49,10 @@ export {
   estimateResolution,
   formatNumber,
   hrtimeNow,
+  hrtimeNowTimestampProvider,
   medianAbsoluteDeviation,
   mToNs,
   performanceNow as now,
   nToMs,
+  performanceNowTimestampProvider,
 } from './utils'

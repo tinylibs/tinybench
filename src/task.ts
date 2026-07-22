@@ -609,7 +609,7 @@ export class Task extends EventTarget {
    * @param options.error - The error that occurred during the run, if any
    * @param options.isOverridden - Parallel boolean array (collection order) indicating
    *   which samples were supplied by the task function via `overriddenDuration`,
-   *   or `undefined` when overhead correction is disabled
+   *   or `undefined` on the error / no-valid-samples path
    * @param options.latencySamples - The array of latency samples collected during the run
    */
   #processRunResult ({
@@ -642,8 +642,7 @@ export class Task extends EventTarget {
       // is still valid since the array has not been sorted yet).
       const hasAnyOverridden = isOverridden?.some(v => v) ?? false
       const measuredOnly: number[] = hasAnyOverridden
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ? latencySamples.filter((_, i) => isOverridden![i] !== true)
+        ? latencySamples.filter((_, i) => isOverridden?.[i] !== true)
         : latencySamples
 
       // Phase 3 — Single sort of the working array.

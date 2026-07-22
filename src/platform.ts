@@ -24,7 +24,7 @@ const loadNodeOS = async (jsRuntime: JSRuntime, g: typeof globalThis = globalThi
           : () => 'unknown',
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         platform: typeof g.navigator?.platform === 'string'
-          ? () => browserOSType(g.navigator.platform)
+          ? () => browserOSType(g.navigator.platform, g.navigator.userAgent)
           : () => 'unknown',
         release: () => 'unknown',
         totalmem: typeof (g as unknown as { navigator?: { deviceMemory: number } }).navigator?.deviceMemory === 'number'
@@ -38,6 +38,9 @@ const machineLookup: Record<Lowercase<string>, Machine> = {
   __proto__: null,
   aarch64: 'arm64',
   amd64: 'x64',
+  armv6l: 'arm',
+  armv7l: 'arm',
+  armv8l: 'arm',
   i386: 'ia32',
   i686: 'ia32',
   x86: 'ia32',
@@ -87,10 +90,13 @@ export function normalizeOSType (os?: unknown): OS {
  * `navigator.platform` is the only synchronous, broadly-available signal;
  * space-less values (e.g. `'MacIntel'`, `'Win32'`) encode the OS in a prefix,
  * which this resolves. Apple platforms (Mac/iPhone/iPad/iPod) are Darwin-based.
+ * Android is detected from the user agent, since its `navigator.platform`
+ * reports the Linux kernel (e.g. `'Linux armv8l'`) rather than `'Android'`.
  * @param platform - the `navigator.platform` string
+ * @param userAgent - the `navigator.userAgent` string
  * @returns normalized OS
  */
-function browserOSType (platform: string): OS {
+function browserOSType (platform: string, userAgent = ''): OS {
   const value = platform.toLowerCase()
   if (
     value.startsWith('mac') ||
@@ -103,7 +109,7 @@ function browserOSType (platform: string): OS {
   if (value.startsWith('win')) {
     return 'win32'
   }
-  if (value.startsWith('android')) {
+  if (/android/i.test(userAgent) || value.startsWith('android')) {
     return 'android'
   }
   if (value.startsWith('linux')) {

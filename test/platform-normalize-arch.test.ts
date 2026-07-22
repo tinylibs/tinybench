@@ -26,6 +26,9 @@ test('normalizeArch', () => {
 test('normalizeArch canonicalizes uname aliases to process.arch', () => {
   expect(normalizeMachine('aarch64')).toBe('arm64')
   expect(normalizeMachine('amd64')).toBe('x64')
+  expect(normalizeMachine('armv6l')).toBe('arm')
+  expect(normalizeMachine('armv7l')).toBe('arm')
+  expect(normalizeMachine('armv8l')).toBe('arm')
   expect(normalizeMachine('i386')).toBe('ia32')
   expect(normalizeMachine('i686')).toBe('ia32')
   expect(normalizeMachine('x86')).toBe('ia32')

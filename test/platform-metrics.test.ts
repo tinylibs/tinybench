@@ -33,6 +33,32 @@ test('browser macOS platform maps to darwin', async () => {
   expect(metrics.cpuMachine).toBe('unknown')
 })
 
+test('browser Android is detected from the user agent, not navigator.platform', async () => {
+  const g = {
+    navigator: {
+      hardwareConcurrency: 8,
+      platform: 'Linux armv8l',
+      userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8)'
+    }
+  } as unknown as typeof globalThis
+  const metrics = await getPlatformMetrics({ g, runtime: 'browser', useCache: false })
+  expect(metrics.osType).toBe('android')
+  expect(metrics.cpuMachine).toBe('arm')
+})
+
+test('browser desktop Linux stays linux', async () => {
+  const g = {
+    navigator: {
+      hardwareConcurrency: 8,
+      platform: 'Linux armv8l',
+      userAgent: 'Mozilla/5.0 (X11; Linux)'
+    }
+  } as unknown as typeof globalThis
+  const metrics = await getPlatformMetrics({ g, runtime: 'browser', useCache: false })
+  expect(metrics.osType).toBe('linux')
+  expect(metrics.cpuMachine).toBe('arm')
+})
+
 test('custom g/runtime never poison the default cache', async () => {
   const g = {
     navigator: { hardwareConcurrency: 2, platform: 'Win32', userAgent: 'fake' }

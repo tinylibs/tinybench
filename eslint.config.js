@@ -18,6 +18,7 @@ export default defineConfig([
           autoFix: true,
           cspell: {
             words: [
+              'armv',
               'codegen',
               'evanwashere',
               'fastly',

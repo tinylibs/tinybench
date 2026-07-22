@@ -15,6 +15,7 @@ export type {
   FnOptions,
   FnReturnedObject,
   Hook,
+  HookMode,
   JSRuntime,
   NowFn,
   ResolvedBenchOptions,
@@ -36,6 +37,7 @@ export type {
   TimestampFn,
   TimestampFns,
   TimestampProvider,
+  TimestampProviderName,
   TimestampValue,
 } from './types'
 export type {

@@ -26,7 +26,7 @@ const makeStepProvider = (stepNs: number): TimestampProvider => {
   }
 }
 
-test('subtractTimerOverhead aligns isOverridden with samples in mixed runs', async () => {
+test('subtractTimerOverhead aligns overridden samples with measured ones in mixed runs', async () => {
   const iterations = 32
   const K = 100
   const stepNs = 1000

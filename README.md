@@ -340,10 +340,11 @@ const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
 ## Per-Sample Override (`overriddenDuration`)
 
 A task function may return an object containing `overriddenDuration`
-(in ms). That value replaces the timer-measured sample directly,
-bypassing both the timer and any overhead correction. Useful for
-externally-timed work or sub-overhead measurements that the timer
-cannot resolve.
+(in ms). That value is recorded in place of the timer-measured sample:
+the timer still brackets the task function, but its measurement is
+discarded and overhead correction is not applied to the substituted
+value. Useful for externally-timed work or sub-overhead measurements
+that the timer cannot resolve.
 
 ```ts
 bench.add('externally-timed', () => {

@@ -130,7 +130,7 @@ export const nToMs = (ns: TimestampValue) => Number(ns) / 1e6
  * @param ms - the milliseconds to convert
  * @returns the nanoseconds
  */
-export const mToNs = (ms: bigint | number) => Number(ms) * 1e6
+export const mToNs = (ms: TimestampValue) => Number(ms) * 1e6
 
 /**
  * Just a passthrough function for milliseconds.

@@ -69,7 +69,7 @@
     "size-limit": "^12.1.0",
     "tsdown": "^0.22.12",
     "typedoc": "^0.28.20",
-    "typescript": "~6.0.3",
+    "typescript": "~7.0.2",
     "vitest": "^4.1.10"
   },
   "keywords": [

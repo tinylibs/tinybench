@@ -115,8 +115,9 @@ checking if provided function is an `AsyncFunction` or if it returns a
 `Promise`, by calling the provided function once.
 
 You can also explicitly set the `async` option to `true` or `false` when adding
-a task, thus avoiding the detection. This can be useful, for example, for
-functions that return a `Promise` but are actually synchronous.
+a task, thus avoiding the detection. Set `async: false` only for a genuinely
+synchronous task; to measure the synchronous cost of a function that returns a
+`Promise`, record it via `overriddenDuration` instead.
 
 ```ts
 const bench = new Bench()
@@ -131,18 +132,6 @@ bench.add(
     return Promise.resolve()
   },
   { async: true }
-)
-
-bench.add(
-  'syncTaskReturningPromiseAsSync',
-  () => {
-    // for example running sync logic, which blocks the event loop anyway
-    // like fs.writeFileSync
-
-    // returns promise maybe for API compatibility
-    return Promise.resolve()
-  },
-  { async: false }
 )
 
 await bench.run()
@@ -333,7 +322,7 @@ const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
   Construction (and `run()`) throws if both are set.
 - For sub-overhead measurements (`X ≈ Ĉ`) the `max(0, …)` clamp
   truncates the lower tail and biases statistics; prefer
-  `overriddenDuration` (see below).
+  `overriddenDuration`.
 - When the timer is too coarse to resolve the call cost — fewer than half
   of the calibration pairs produce a positive delta (call cost `C < R / 2`,
   e.g. a `Date.now`-class timer with `>= 1 ms` resolution) — the calibration
@@ -346,7 +335,7 @@ const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
 - `Ĉ` does not cover an async task's `await` microtask turn — that overhead is
   inside the measured window but absent from the calibration pairs — so async
   sub-microsecond samples stay over-measured even with `subtractTimerOverhead`.
-  Prefer `async: false` for synchronous work, or `overriddenDuration`.
+  Use `overriddenDuration` for such sub-resolution work.
 
 ## Per-Sample Override (`overriddenDuration`)
 

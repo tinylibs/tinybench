@@ -116,8 +116,8 @@ checking if provided function is an `AsyncFunction` or if it returns a
 
 You can also explicitly set the `async` option to `true` or `false` when adding
 a task, thus avoiding the detection. Set `async: false` only for a genuinely
-synchronous task; to time the synchronous portion of a function that returns a
-`Promise`, return `overriddenDuration` instead.
+synchronous task; to measure the synchronous cost of a function that returns a
+`Promise`, record it via `overriddenDuration` instead.
 
 ```ts
 const bench = new Bench()

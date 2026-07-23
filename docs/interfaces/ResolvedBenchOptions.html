@@ -1,5 +1,5 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ResolvedBenchOptions | tinybench - v6.1.1</title><meta name="description" content="Documentation for tinybench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
-<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">tinybench - v6.1.1</a>
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ResolvedBenchOptions | tinybench - v6.1.2</title><meta name="description" content="Documentation for tinybench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">tinybench - v6.1.2</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
 <div id="tsd-search-status" aria-live="polite" aria-atomic="true">
@@ -14,14 +14,14 @@
 <div class="tsd-comment tsd-typography"><p>The resolved benchmark options</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">ResolvedBenchOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#concurrency">concurrency</a><span class="tsd-signature-symbol">?:</span> <a href="../types/Concurrency.html" class="tsd-signature-type tsd-kind-type-alias">Concurrency</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#iterations">iterations</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#name">name</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#now">now</a><span class="tsd-signature-symbol">:</span> <a href="../types/NowFn.html" class="tsd-signature-type tsd-kind-type-alias">NowFn</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#retainsamples">retainSamples</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#setup">setup</a><span class="tsd-signature-symbol">:</span> <a href="../types/Hook.html" class="tsd-signature-type tsd-kind-type-alias">Hook</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#signal">signal</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AbortSignal</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#subtracttimeroverhead">subtractTimerOverhead</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NonNullable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#teardown">teardown</a><span class="tsd-signature-symbol">:</span> <a href="../types/Hook.html" class="tsd-signature-type tsd-kind-type-alias">Hook</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#threshold">threshold</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#throws">throws</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NonNullable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#time">time</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#timestampprovider">timestampProvider</a><span class="tsd-signature-symbol">?:</span> <a href="TimestampProvider.html" class="tsd-signature-type tsd-kind-interface">TimestampProvider</a> <span class="tsd-signature-symbol">|</span> <a href="../types/TimestampFns.html" class="tsd-signature-type tsd-kind-type-alias">TimestampFns</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#warmup">warmup</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NonNullable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#warmupiterations">warmupIterations</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#warmuptime">warmupTime</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="320">
+<section class="tsd-panel tsd-hierarchy" data-refl="319">
 <h4>Hierarchy (<a href="../hierarchy.html#ResolvedBenchOptions">View Summary</a>)</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="BenchOptions.html" class="tsd-signature-type tsd-kind-interface">BenchOptions</a>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">ResolvedBenchOptions</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L468">src/types.ts:468</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L477">src/types.ts:477</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -61,7 +61,7 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#concurrency">concurrency</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L160">src/types.ts:160</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L160">src/types.ts:160</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="iterations"><span>iterations</span><a href="#iterations" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">iterations</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -75,7 +75,7 @@
 </div></div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#iterations">iterations</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L469">src/types.ts:469</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L478">src/types.ts:478</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="name"><code class="tsd-tag">Optional</code><span>name</span><a href="#name" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">name</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -83,7 +83,7 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#name">name</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L171">src/types.ts:171</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L171">src/types.ts:171</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="now"><span>now</span><a href="#now" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">now</span><span class="tsd-signature-symbol">:</span> <a href="../types/NowFn.html" class="tsd-signature-type tsd-kind-type-alias">NowFn</a></div>
@@ -91,7 +91,7 @@
 </div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#now">now</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L470">src/types.ts:470</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L479">src/types.ts:479</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="retainsamples"><code class="tsd-tag">Optional</code><span>retain<wbr/>Samples</span><a href="#retainsamples" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">retainSamples</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -105,7 +105,7 @@
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#retainsamples">retainSamples</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L182">src/types.ts:182</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L182">src/types.ts:182</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="setup"><span>setup</span><a href="#setup" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">setup</span><span class="tsd-signature-symbol">:</span> <a href="../types/Hook.html" class="tsd-signature-type tsd-kind-type-alias">Hook</a></div>
@@ -113,7 +113,7 @@
 </div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#setup">setup</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L471">src/types.ts:471</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L480">src/types.ts:480</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="signal"><code class="tsd-tag">Optional</code><span>signal</span><a href="#signal" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">signal</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AbortSignal</span></div>
@@ -121,7 +121,7 @@
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#signal">signal</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L192">src/types.ts:192</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L192">src/types.ts:192</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="subtracttimeroverhead"><span>subtract<wbr/>Timer<wbr/>Overhead</span><a href="#subtracttimeroverhead" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">subtractTimerOverhead</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NonNullable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></div>
@@ -184,7 +184,7 @@ calibration returns <code>0</code> and this option becomes a no-op.</p>
 </div></div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#subtracttimeroverhead">subtractTimerOverhead</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L472">src/types.ts:472</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L481">src/types.ts:481</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="teardown"><span>teardown</span><a href="#teardown" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">teardown</span><span class="tsd-signature-symbol">:</span> <a href="../types/Hook.html" class="tsd-signature-type tsd-kind-type-alias">Hook</a></div>
@@ -192,7 +192,7 @@ calibration returns <code>0</code> and this option becomes a no-op.</p>
 </div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#teardown">teardown</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L473">src/types.ts:473</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L482">src/types.ts:482</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="threshold"><code class="tsd-tag">Optional</code><span>threshold</span><a href="#threshold" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">threshold</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
@@ -206,7 +206,7 @@ calibration returns <code>0</code> and this option becomes a no-op.</p>
 </div></div><aside class="tsd-sources">
 <p>Inherited from <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#threshold">threshold</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L262">src/types.ts:262</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L262">src/types.ts:262</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="throws"><span>throws</span><a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">throws</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NonNullable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></div>
@@ -220,7 +220,7 @@ calibration returns <code>0</code> and this option becomes a no-op.</p>
 </div></div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#throws">throws</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L474">src/types.ts:474</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L483">src/types.ts:483</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="time"><span>time</span><a href="#time" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">time</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -234,7 +234,7 @@ calibration returns <code>0</code> and this option becomes a no-op.</p>
 </div></div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#time">time</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L475">src/types.ts:475</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L484">src/types.ts:484</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="timestampprovider"><code class="tsd-tag">Optional</code><span>timestamp<wbr/>Provider</span><a href="#timestampprovider" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">timestampProvider</span><span class="tsd-signature-symbol">?:</span> <a href="TimestampProvider.html" class="tsd-signature-type tsd-kind-interface">TimestampProvider</a> <span class="tsd-signature-symbol">|</span> <a href="../types/TimestampFns.html" class="tsd-signature-type tsd-kind-type-alias">TimestampFns</a></div>
@@ -243,7 +243,7 @@ will be used.</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#timestampprovider">timestampProvider</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L280">src/types.ts:280</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L280">src/types.ts:280</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="warmup"><span>warmup</span><a href="#warmup" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">warmup</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NonNullable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></div>
@@ -257,7 +257,7 @@ will be used.</p>
 </div></div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#warmup">warmup</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L476">src/types.ts:476</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L485">src/types.ts:485</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="warmupiterations"><span>warmup<wbr/>Iterations</span><a href="#warmupiterations" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">warmupIterations</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -271,7 +271,7 @@ will be used.</p>
 </div></div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#warmupiterations">warmupIterations</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L477">src/types.ts:477</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L486">src/types.ts:486</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="warmuptime"><span>warmup<wbr/>Time</span><a href="#warmuptime" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">warmupTime</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
@@ -285,7 +285,7 @@ will be used.</p>
 </div></div><aside class="tsd-sources">
 <p>Overrides <a href="BenchOptions.html">BenchOptions</a>.<a href="BenchOptions.html#warmuptime">warmupTime</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/types.ts#L478">src/types.ts:478</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/3ab743c58cb8794404f4a64a55ebb7eb4ed56c25/src/types.ts#L487">src/types.ts:487</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -304,7 +304,7 @@ will be used.</p>
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
 <div><a href="#concurrency" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>concurrency</span></a><a href="#iterations"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>iterations</span></a><a href="#name" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>name</span></a><a href="#now"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>now</span></a><a href="#retainsamples" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>retain<wbr/>Samples</span></a><a href="#setup"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>setup</span></a><a href="#signal" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>signal</span></a><a href="#subtracttimeroverhead"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>subtract<wbr/>Timer<wbr/>Overhead</span></a><a href="#teardown"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>teardown</span></a><a href="#threshold" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>threshold</span></a><a href="#throws"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>throws</span></a><a href="#time"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>time</span></a><a href="#timestampprovider" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>timestamp<wbr/>Provider</span></a><a href="#warmup"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>warmup</span></a><a href="#warmupiterations"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>warmup<wbr/>Iterations</span></a><a href="#warmuptime"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>warmup<wbr/>Time</span></a></div></details></div></details></div>
 <div class="site-menu">
-<nav class="tsd-navigation"><a href="../index.html">tinybench - v6.1.1</a>
+<nav class="tsd-navigation"><a href="../index.html">tinybench - v6.1.2</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
 <li>Loading...</li></ul></nav></div></div></div><footer>
 <p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>

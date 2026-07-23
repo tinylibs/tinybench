@@ -187,9 +187,9 @@ const defaultConverter: ConsoleTableConverter = (task: Task): Record<string, num
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
-          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${formatNumber(task.result.latency.rme)}%`,
           'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50))} \xb1 ${formatNumber(mToNs(task.result.latency.mad))}`,
-          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${formatNumber(task.result.throughput.rme)}%`,
           'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
           Samples: task.result.latency.samplesCount,
         }

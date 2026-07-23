@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>nToMs | tinybench - v6.1.1</title><meta name="description" content="Documentation for tinybench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>medianAbsoluteDeviation | tinybench - v6.1.1</title><meta name="description" content="Documentation for tinybench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container"><a href="../index.html" class="title">tinybench - v6.1.1</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
@@ -8,25 +8,29 @@
 <div class="col-content">
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb" aria-label="Breadcrumb">
-<li><a href="" aria-current="page">nToMs</a></li></ul>
-<h1>Function nToMs</h1></div>
+<li><a href="" aria-current="page">medianAbsoluteDeviation</a></li></ul>
+<h1>Function medianAbsoluteDeviation</h1></div>
 <section class="tsd-panel">
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="ntoms"><span class="tsd-kind-call-signature">nToMs</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">ns</span><span class="tsd-signature-symbol">:</span> <a href="../types/TimestampValue.html" class="tsd-signature-type tsd-kind-type-alias">TimestampValue</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><a href="#ntoms" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="medianabsolutedeviation"><span class="tsd-kind-call-signature">medianAbsoluteDeviation</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">samples</span><span class="tsd-signature-symbol">:</span> <a href="../types/SortedSamples.html" class="tsd-signature-type tsd-kind-type-alias">SortedSamples</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><a href="#medianabsolutedeviation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Converts nanoseconds to milliseconds.</p>
+<div class="tsd-comment tsd-typography"><p>Computes the median absolute deviation (MAD) of a sorted sample set.</p>
+<p>Convenience wrapper that derives the median from the sorted input and
+forwards to <code>absoluteDeviationMedian</code>. Use when only <code>mad</code> is
+required and the cost of a full <code>computeStatistics</code> pass is
+unjustified (e.g. inside <a href="classifyTimerSaturation.html" class="tsd-kind-function">classifyTimerSaturation</a>).</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">ns</span>: <a href="../types/TimestampValue.html" class="tsd-signature-type tsd-kind-type-alias">TimestampValue</a></span>
-<div class="tsd-comment tsd-typography"><p>the nanoseconds to convert</p>
+<li><span><span class="tsd-kind-parameter">samples</span>: <a href="../types/SortedSamples.html" class="tsd-signature-type tsd-kind-type-alias">SortedSamples</a></span>
+<div class="tsd-comment tsd-typography"><p>the sorted sample, length ≥ 1</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><p>the milliseconds</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><p>the median absolute deviation</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/utils.ts#L126">src/utils.ts:126</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/dc0e2123bff56b7cd13b8e3e6562756a90b6cb73/src/utils.ts#L632">src/utils.ts:632</a></li></ul></aside></div></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

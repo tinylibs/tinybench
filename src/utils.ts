@@ -130,7 +130,7 @@ export const nToMs = (ns: TimestampValue) => Number(ns) / 1e6
  * @param ms - the milliseconds to convert
  * @returns the nanoseconds
  */
-export const mToNs = (ms: bigint | number) => Number(ms) * 1e6
+export const mToNs = (ms: TimestampValue) => Number(ms) * 1e6
 
 /**
  * Just a passthrough function for milliseconds.
@@ -151,7 +151,7 @@ export const nBigintToMs = (ns: bigint) => Number(ns) / 1e6
  * @param ms - milliseconds
  * @returns nanoseconds as bigint
  */
-export const mToNsBigint = (ms: number) => BigInt(ms) * 1_000_000n
+export const mToNsBigint = (ms: number) => BigInt(Math.round(ms * 1e6))
 
 /**
  * Formats a number with the specified significant digits and maximum fraction digits.
@@ -732,9 +732,9 @@ export const defaultConvertTaskResultForConsoleTable: ConsoleTableConverter = (
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
-          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${formatNumber(task.result.latency.rme)}%`,
           'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50))} \xb1 ${formatNumber(mToNs(task.result.latency.mad))}`,
-          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${formatNumber(task.result.throughput.rme)}%`,
           'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
           Samples: task.result.latency.samplesCount,
         }
@@ -906,6 +906,11 @@ const hrtimeBigint =
 
 /**
  * Returns the current timestamp in milliseconds using `process.hrtime.bigint()`.
+ *
+ * Narrows the absolute nanosecond value to a `number`, which loses precision
+ * once it exceeds `Number.MAX_SAFE_INTEGER` (~104 days of uptime). For
+ * benchmarking prefer `hrtimeNowTimestampProvider`, which keeps the bigint
+ * until after the delta is taken.
  * @returns the current timestamp in milliseconds
  */
 export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))

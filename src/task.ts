@@ -5,6 +5,7 @@ import type {
   EventListenerObject,
   Fn,
   FnOptions,
+  HookMode,
   RemoveEventListenerOptionsArgument,
   Samples,
   TaskEvents,
@@ -369,7 +370,7 @@ export class Task extends EventTarget {
   }
 
   async #benchmark (
-    mode: 'run' | 'warmup',
+    mode: HookMode,
     time: number,
     iterations: number
   ): Promise<BenchmarkResult> {
@@ -442,7 +443,7 @@ export class Task extends EventTarget {
    * @returns the error if any, and the samples if any
    */
   #benchmarkSync (
-    mode: 'run' | 'warmup',
+    mode: HookMode,
     time: number,
     iterations: number
   ): BenchmarkResult {

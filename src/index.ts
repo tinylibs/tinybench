@@ -17,6 +17,7 @@ export type {
   FnReturnedObject,
   GetPlatformMetricsOptions,
   Hook,
+  HookMode,
   JSRuntime,
   Machine,
   NowFn,
@@ -41,6 +42,7 @@ export type {
   TimestampFn,
   TimestampFns,
   TimestampProvider,
+  TimestampProviderName,
   TimestampValue,
 } from './types'
 export type {

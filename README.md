@@ -115,8 +115,9 @@ checking if provided function is an `AsyncFunction` or if it returns a
 `Promise`, by calling the provided function once.
 
 You can also explicitly set the `async` option to `true` or `false` when adding
-a task, thus avoiding the detection. This can be useful, for example, for
-functions that return a `Promise` but are actually synchronous.
+a task, thus avoiding the detection. Set `async: false` only for a genuinely
+synchronous task; to measure the synchronous cost of a function that returns a
+`Promise`, record it via `overriddenDuration` instead.
 
 ```ts
 const bench = new Bench()
@@ -131,18 +132,6 @@ bench.add(
     return Promise.resolve()
   },
   { async: true }
-)
-
-bench.add(
-  'syncTaskReturningPromiseAsSync',
-  () => {
-    // for example running sync logic, which blocks the event loop anyway
-    // like fs.writeFileSync
-
-    // returns promise maybe for API compatibility
-    return Promise.resolve()
-  },
-  { async: false }
 )
 
 await bench.run()
@@ -187,9 +176,9 @@ const defaultConverter: ConsoleTableConverter = (task: Task): Record<string, num
     'Task name': task.name,
     ...(state === 'aborted-with-statistics' || state === 'completed'
       ? {
-          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${task.result.latency.rme.toFixed(2)}%`,
+          'Latency avg (ns)': `${formatNumber(mToNs(task.result.latency.mean))} \xb1 ${formatNumber(task.result.latency.rme)}%`,
           'Latency med (ns)': `${formatNumber(mToNs(task.result.latency.p50))} \xb1 ${formatNumber(mToNs(task.result.latency.mad))}`,
-          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${task.result.throughput.rme.toFixed(2)}%`,
+          'Throughput avg (ops/s)': `${Math.round(task.result.throughput.mean).toString()} \xb1 ${formatNumber(task.result.throughput.rme)}%`,
           'Throughput med (ops/s)': `${Math.round(task.result.throughput.p50).toString()} \xb1 ${Math.round(task.result.throughput.mad).toString()}`,
           Samples: task.result.latency.samplesCount,
         }
@@ -333,11 +322,20 @@ const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
   Construction (and `run()`) throws if both are set.
 - For sub-overhead measurements (`X ≈ Ĉ`) the `max(0, …)` clamp
   truncates the lower tail and biases statistics; prefer
-  `overriddenDuration` (see below).
+  `overriddenDuration`.
 - When the timer is too coarse to resolve the call cost — fewer than half
   of the calibration pairs produce a positive delta (call cost `C < R / 2`,
   e.g. a `Date.now`-class timer with `>= 1 ms` resolution) — the calibration
   returns `0` and the option becomes a no-op.
+- Each sample brackets a single task call rather than a batched loop, so the
+  per-sample timer floor `C` is not amortized. This is a deliberate trade-off:
+  it yields a real per-sample distribution (percentiles, MAD, saturation
+  detection) at the cost of a higher sub-`C` noise floor. For work below the
+  timer grain, use `overriddenDuration`.
+- `Ĉ` does not cover an async task's `await` microtask turn — that overhead is
+  inside the measured window but absent from the calibration pairs — so async
+  sub-microsecond samples stay over-measured even with `subtractTimerOverhead`.
+  Use `overriddenDuration` for such sub-resolution work.
 
 ## Per-Sample Override (`overriddenDuration`)
 

@@ -338,6 +338,15 @@ const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
   of the calibration pairs produce a positive delta (call cost `C < R / 2`,
   e.g. a `Date.now`-class timer with `>= 1 ms` resolution) — the calibration
   returns `0` and the option becomes a no-op.
+- Each sample brackets a single task call rather than a batched loop, so the
+  per-sample timer floor `C` is not amortized. This is a deliberate trade-off:
+  it yields a real per-sample distribution (percentiles, MAD, saturation
+  detection) at the cost of a higher sub-`C` noise floor. For work below the
+  timer grain, use `overriddenDuration`.
+- `Ĉ` does not cover an async task's `await` microtask turn — that overhead is
+  inside the measured window but absent from the calibration pairs — so async
+  sub-microsecond samples stay over-measured even with `subtractTimerOverhead`.
+  Prefer `async: false` for synchronous work, or `overriddenDuration`.
 
 ## Per-Sample Override (`overriddenDuration`)
 

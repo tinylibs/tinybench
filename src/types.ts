@@ -378,6 +378,12 @@ export interface FnOptions {
   /**
    * Whether the provided task function is asynchronous, otherwise it is
    * determined automatically.
+   *
+   * Measuring an async task awaits it inside the timed window, so each sample
+   * includes one microtask-turn overhead that `subtractTimerOverhead` does not
+   * remove. For sub-microsecond synchronous work that only returns a promise,
+   * set `async: false`; otherwise prefer `overriddenDuration` for
+   * sub-resolution timings.
    */
   async?: boolean
 

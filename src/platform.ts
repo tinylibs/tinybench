@@ -71,8 +71,8 @@ const osLookup: Record<Lowercase<string>, OS> = {
 }
 
 /**
- * Normalizes a raw OS token (e.g. from `os.platform()` or {@link browserOSType})
- * to a canonical value; `windows` is mapped to `win32`, unknown tokens are
+ * Normalizes a raw OS token (e.g. from `os.platform()` or the browser
+ * platform fallback) to a canonical value; `windows` is mapped to `win32`, unknown tokens are
  * lowercased and returned as-is, and non-string/empty input yields `'unknown'`.
  * @param os - a value to normalize
  * @returns normalized OS

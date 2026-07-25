@@ -57,7 +57,7 @@
     "@size-limit/time": "^12.1.0",
     "@types/node": "^24.13.3",
     "@vitest/coverage-v8": "^4.1.10",
-    "bumpp": "^11.1.0",
+    "bumpp": "^12.0.0",
     "changelogithub": "^14.0.0",
     "clean-publish": "^7.1.0",
     "eslint": "^9.39.5",

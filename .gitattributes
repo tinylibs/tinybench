@@ -1,5 +1,5 @@
 # Auto-detect text files and normalize line endings
-* text=auto
+* text=auto eol=lf
 
 # Images
 *.png binary
@@ -82,11 +82,11 @@
 *.webm binary
 *.wmv binary
 
-# Lockfiles
-package-lock.json binary
-yarn.lock binary
-pnpm-lock.yaml binary
-bun.lock binary
+# Lockfiles — text with forced LF so CRLF is never committed
+package-lock.json text eol=lf
+yarn.lock text eol=lf
+pnpm-lock.yaml text eol=lf
+bun.lock text eol=lf
 
 # Source maps — suppress noisy diffs (Web.gitattributes)
 *.map text -diff

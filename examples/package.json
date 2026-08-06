@@ -20,6 +20,6 @@
   "license": "MIT",
   "devDependencies": {
     "npm-run-all2": "^9.0.3",
-    "tsx": "^4.23.1"
+    "tsx": "^4.23.5"
   }
 }

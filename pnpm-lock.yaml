@@ -41,7 +41,7 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10(vitest@4.1.10)
       bumpp:
-        specifier: ^12.1.1
+        specifier: ^12.2.0
         version: 12.2.0
       changelogithub:
         specifier: ^15.0.4
@@ -90,7 +90,7 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
       tsx:
-        specifier: ^4.23.5
+        specifier: ^4.23.9
         version: 4.23.9
 
 packages:

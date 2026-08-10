@@ -146,7 +146,7 @@ export class Bench extends EventTarget implements BenchLike {
    * Otherwise calibrated once at construction time via
    * {@link calibrateTimerOverhead}.
    */
-  readonly timerOverhead: number | undefined
+  readonly timerOverhead?: number
 
   /**
    * A timestamp provider and its related functions.
@@ -221,16 +221,21 @@ export class Bench extends EventTarget implements BenchLike {
     this.setup = restOptions.setup ?? emptyFunction
     this.teardown = restOptions.teardown ?? emptyFunction
     this.throws = restOptions.throws ?? false
-    this.signal = restOptions.signal
+    if (restOptions.signal != null) {
+      this.signal = restOptions.signal
+    }
     this.retainSamples = restOptions.retainSamples === true
     this.subtractTimerOverhead = restOptions.subtractTimerOverhead === true
     assert(
       !(this.subtractTimerOverhead && this.concurrency === 'task'),
       subtractTimerOverheadConcurrencyError
     )
-    this.timerOverhead = this.subtractTimerOverhead
+    const timerOverhead = this.subtractTimerOverhead
       ? calibrateTimerOverhead(this.timestampProvider)
       : undefined
+    if (timerOverhead != null) {
+      this.timerOverhead = timerOverhead
+    }
 
     if (this.signal) {
       this.signal.addEventListener(

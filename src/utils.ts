@@ -774,7 +774,7 @@ interface WithConcurrencyOptions<R> {
   /**
    * An optional AbortSignal to cancel the execution.
    */
-  signal?: AbortSignal
+  signal?: AbortSignal | undefined
   /**
    * The maximum amount of time to run the executions in milliseconds. If 0,
    * runs until iterations are completed.

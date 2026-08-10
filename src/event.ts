@@ -69,10 +69,12 @@ class BenchEvent<
     errorOrReason?: Error | TimerSaturationReason
   ) {
     super(type)
-    this.#task = task
+    if (task != null) {
+      this.#task = task
+    }
     if (typeof errorOrReason === 'string') {
       this.#reason = errorOrReason
-    } else {
+    } else if (errorOrReason != null) {
       this.#error = errorOrReason
     }
   }

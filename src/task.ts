@@ -622,9 +622,9 @@ export class Task extends EventTarget {
     latencySamples,
     overriddenIndices,
   }: {
-    error?: Error
-    latencySamples?: number[]
-    overriddenIndices?: Set<number>
+    error: Error | undefined
+    latencySamples: number[] | undefined
+    overriddenIndices: Set<number> | undefined
   }): void {
     if (isValidSamples(latencySamples)) {
       this.#runs = latencySamples.length

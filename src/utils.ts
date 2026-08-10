@@ -30,11 +30,9 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
   let version = 'unknown'
 
   if (
-    !!g.Bun ||
-    !!(
-      g.process &&
-      (g.process as { versions?: Record<string, string> }).versions?.bun
-    )
+    g.Bun ||
+    (g.process &&
+      (g.process as { versions?: Record<string, string> }).versions?.bun)
   ) {
     runtime = 'bun'
     version = (g.Bun as { version: string }).version || 'unknown'
@@ -76,7 +74,7 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
     runtime = 'lagon'
   } else if (g.fastly) {
     runtime = 'fastly'
-  } else if (!!g.$262 && !!g.lockdown && !!g.AsyncDisposableStack) {
+  } else if (g.$262 && g.lockdown && g.AsyncDisposableStack) {
     runtime = 'moddable'
   } else if (g.d8) {
     runtime = 'v8'
@@ -85,13 +83,14 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
         ? (g.version as () => string)()
         : 'unknown'
   } else if (
-    !!g.inIon &&
-    !!(g.performance && (g.performance as { mozMemory?: unknown }).mozMemory)
+    g.inIon &&
+    g.performance &&
+    (g.performance as { mozMemory?: unknown }).mozMemory
   ) {
     runtime = 'spidermonkey'
   } else if (typeof g.$ === 'object' && g.$ !== null && 'IsHTMLDDA' in g.$) {
     runtime = 'jsc'
-  } else if (!!g.window && !!g.navigator) {
+  } else if (g.window && g.navigator) {
     runtime = 'browser'
   }
 
@@ -412,14 +411,14 @@ const quantileSorted = (
 ): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
-
-  return baseIndex + 1 < samples.length
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ? samples[baseIndex]! +
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    : samples[baseIndex]!
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const lower = samples[baseIndex]!
+  if (baseIndex + 1 >= samples.length) {
+    return lower
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const upper = samples[baseIndex + 1]!
+  return lower + (base - baseIndex) * (upper - lower)
 }
 
 /**
@@ -538,11 +537,12 @@ export const calibrateTimerOverhead = (
     return deltas[idx]!
   }
   const mid = deltas.length >> 1
-  return (deltas.length & 1) === 1
+  if ((deltas.length & 1) === 1) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ? deltas[mid]!
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    : (deltas[mid - 1]! + deltas[mid]!) / 2
+    return deltas[mid]!
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return (deltas[mid - 1]! + deltas[mid]!) / 2
 }
 
 /**

@@ -11,7 +11,9 @@ import {
 // tasks, the stack trace) the default converter includes. Pass any function
 // with the `ConsoleTableConverter` signature to `bench.table()` to customize
 // the rows `console.table` prints.
-const compactConverter: ConsoleTableConverter = (task: Task): Record<string, number | string> => {
+const compactConverter: ConsoleTableConverter = (
+  task: Task
+): Record<string, number | string> => {
   const state = task.result.state
   /* eslint-disable perfectionist/sort-objects */
   return {

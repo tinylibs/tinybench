@@ -356,10 +356,7 @@ export type Fn = () =>
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
  * @param mode the mode where the hook is being called
  */
-export type FnHook = (
-  this: Task,
-  mode?: HookMode
-) => Promise<void> | void
+export type FnHook = (this: Task, mode?: HookMode) => Promise<void> | void
 
 /**
  * The task function options
@@ -429,10 +426,7 @@ export interface FnReturnedObject {
  * @param task the task instance
  * @param mode the mode where the hook is being called
  */
-export type Hook = (
-  task?: Task,
-  mode?: HookMode
-) => Promise<void> | void
+export type Hook = (task?: Task, mode?: HookMode) => Promise<void> | void
 
 /**
  * The mode in which a task hook is invoked ('warmup' or 'run').

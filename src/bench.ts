@@ -117,10 +117,7 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * A teardown function that runs after each task execution.
    */
-  readonly teardown: (
-    task: Task,
-    mode: HookMode
-  ) => Promise<void> | void
+  readonly teardown: (task: Task, mode: HookMode) => Promise<void> | void
 
   /**
    * The maximum number of concurrent tasks to run

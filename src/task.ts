@@ -12,11 +12,11 @@ import type {
   TaskResult,
   TaskResultRuntimeInfo,
   TaskResultTimestampProviderInfo,
+  TimerSaturationReason,
   TimestampFn,
   TimestampProvider,
   TimestampValue,
 } from './types'
-import type { TimerSaturationReason } from './types'
 
 import { BenchEvent } from './event'
 import {

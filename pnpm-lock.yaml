@@ -23,7 +23,7 @@ importers:
         specifier: ^21.2.2
         version: 21.2.2
       '@cspell/eslint-plugin':
-        specifier: ^10.0.1
+        specifier: ^10.1.0
         version: 10.1.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
       '@eslint/js':
         specifier: ^9.39.5

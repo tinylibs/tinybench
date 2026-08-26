@@ -9,6 +9,7 @@
   },
   "scripts": {
     "all": "run-s example:*",
+    "example:convert-bencher": "tsx src/convert-bencher.ts",
     "example:simple": "tsx src/simple.ts",
     "simple:dev": "tsx --watch src/simple.ts",
     "example:convert-table": "tsx src/convert-table.ts",

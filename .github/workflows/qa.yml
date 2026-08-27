@@ -81,6 +81,9 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      - name: Type check Workerd declarations
+        run: pnpm typecheck:workerd
+
   qa-bun:
     runs-on: ${{ matrix.os }}
     strategy:

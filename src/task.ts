@@ -72,17 +72,17 @@ const startedTaskResult: TaskResult = { state: 'started' }
  * results, name, the task function, the number times the task function has been executed, ...
  */
 export class Task extends EventTarget {
-  declare addEventListener: <K extends TaskEvents>(
+  declare addEventListener: (<K extends TaskEvents>(
     type: K,
     listener: EventListener<K, 'task'> | EventListenerObject<K, 'task'> | null,
     options?: AddEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['addEventListener']
 
-  declare removeEventListener: <K extends TaskEvents>(
+  declare removeEventListener: (<K extends TaskEvents>(
     type: K,
     listener: EventListener<K, 'task'> | EventListenerObject<K, 'task'> | null,
     options?: RemoveEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['removeEventListener']
 
   /**
    * The estimated effective timer resolution observed during the last run,

@@ -52,11 +52,11 @@ export interface BenchLike extends EventTarget {
   /**
    * Adds a listener for the specified event type.
    */
-  addEventListener: <K extends BenchEvents>(
+  addEventListener: (<K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: AddEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['addEventListener']
   /**
    * Executes tasks concurrently based on the specified concurrency mode, if set.
    *
@@ -77,11 +77,11 @@ export interface BenchLike extends EventTarget {
   /**
    * Removes a previously registered event listener.
    */
-  removeEventListener: <K extends BenchEvents>(
+  removeEventListener: (<K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: RemoveEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['removeEventListener']
 
   /**
    * Should samples be retained for further custom processing

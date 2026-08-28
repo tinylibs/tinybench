@@ -41,11 +41,11 @@ const subtractTimerOverheadConcurrencyError =
  * The Bench class keeps track of the benchmark tasks and controls them.
  */
 export class Bench extends EventTarget implements BenchLike {
-  declare addEventListener: <K extends BenchEvents>(
+  declare addEventListener: (<K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: AddEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['addEventListener']
 
   /**
    * Executes tasks concurrently based on the specified concurrency mode.
@@ -74,11 +74,11 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * Removes a previously registered event listener.
    */
-  declare removeEventListener: <K extends BenchEvents>(
+  declare removeEventListener: (<K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: RemoveEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['removeEventListener']
 
   readonly retainSamples: boolean
 

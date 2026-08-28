@@ -21,6 +21,7 @@
     "prepublishOnly": "pnpm build && rm -rf ./package && clean-publish",
     "postpublish": "rm -rf ./package",
     "typecheck": "tsc --noEmit",
+    "typecheck:workerd": "pnpm build && tsc -p type-tests/workerd/tsconfig.json",
     "typedoc": "typedoc",
     "lint": "eslint --cache src test examples eslint.config.js tsdown.config.ts vitest.config.ts vitest.pretest.config.ts",
     "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsdown.config.ts vitest.config.ts vitest.pretest.config.ts",
@@ -49,6 +50,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260823.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@cspell/eslint-plugin": "^10.1.0",

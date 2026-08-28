@@ -57,6 +57,25 @@ benchLike.removeEventListener('custom', event => {
   expectType<IsExact<typeof event, Event>>(true)
 })
 
+bench.addEventListener(
+  'custom',
+  {
+    handleEvent (event) {
+      expectType<IsExact<typeof event, Event>>(true)
+    },
+  },
+  { once: true }
+)
+benchLike.removeEventListener(
+  'custom',
+  {
+    handleEvent (event) {
+      expectType<IsExact<typeof event, Event>>(true)
+    },
+  },
+  { capture: true }
+)
+
 bench.removeEventListener('abort', event => {
   expectType<IsExact<typeof event, BenchEvent<'abort'>>>(true)
 })

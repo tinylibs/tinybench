@@ -7,7 +7,7 @@ export type { BenchEvent } from '../src/event'
  * Options for adding an event listener
  */
 export type AddEventListenerOptionsArgument = Parameters<
-  typeof EventTarget.prototype.addEventListener
+  EventTarget['addEventListener']
 >[2]
 
 /**
@@ -462,7 +462,7 @@ export type NowFn = () => number
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
-  typeof EventTarget.prototype.removeEventListener
+  EventTarget['removeEventListener']
 >[2]
 
 /**

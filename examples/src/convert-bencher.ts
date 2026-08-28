@@ -17,6 +17,8 @@ const toMetric = (
   const value = convert(statistics.mean)
   const marginOfError = convert(statistics.moe)
 
+  // The bounds are Tinybench's two-sided 95% Student's t confidence interval
+  // for the sample mean, not sample dispersion or a Bencher threshold.
   return {
     lower_value: Math.max(0, value - marginOfError),
     upper_value: value + marginOfError,

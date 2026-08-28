@@ -50,10 +50,10 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260823.1",
+    "@cloudflare/workers-types": "^5.20260825.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
-    "@cspell/eslint-plugin": "^10.1.0",
+    "@cspell/eslint-plugin": "^10.1.1",
     "@eslint/js": "^9.39.5",
     "@size-limit/preset-small-lib": "^13.0.3",
     "@size-limit/time": "^13.0.3",

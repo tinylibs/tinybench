@@ -66,6 +66,10 @@ test('events properties', () => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'warmup', 'task'>>()
   })
 
+  fooTask.addEventListener('warning', evt => {
+    expectTypeOf(evt).toEqualTypeOf<BenchEvent<'warning', 'task'>>()
+  })
+
   fooTask.addEventListener('custom', evt => {
     expectTypeOf(evt).not.toBeAny()
     expectTypeOf(evt).toEqualTypeOf<Event>()

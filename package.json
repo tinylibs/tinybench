@@ -50,7 +50,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260825.1",
+    "@cloudflare/workers-types": "^5.20260826.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@cspell/eslint-plugin": "^10.1.1",
@@ -59,7 +59,7 @@
     "@size-limit/time": "^13.0.3",
     "@types/node": "^24.13.3",
     "@vitest/coverage-v8": "^4.1.11",
-    "bumpp": "^12.2.1",
+    "bumpp": "^12.2.2",
     "changelogithub": "^15.0.4",
     "clean-publish": "^7.1.0",
     "eslint": "^9.39.5",

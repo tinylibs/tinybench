@@ -106,7 +106,7 @@ task.addEventListener('cycle', (evt) => {
 });
 ```
 
-### [`BenchEvent`](https://tinylibs.github.io/tinybench/types/BenchEvent.html)
+### [`BenchEvent`](https://tinylibs.github.io/tinybench/interfaces/BenchEvent.html)
 
 ## Async Detection
 

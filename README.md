@@ -76,7 +76,7 @@ More usage examples can be found in the [examples](./examples/) directory.
 
 ### [`Task`](https://tinylibs.github.io/tinybench/classes/Task.html)
 
-### [`TaskResult`](https://tinylibs.github.io/tinybench/interfaces/TaskResult.html)
+### [`TaskResult`](https://tinylibs.github.io/tinybench/types/TaskResult.html)
 
 ### `Events`
 

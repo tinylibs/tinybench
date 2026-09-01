@@ -17,7 +17,7 @@ importers:
   .:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^5.20260828.1
+        specifier: ^5.20260829.1
         version: 5.20260830.1
       '@commitlint/cli':
         specifier: ^21.2.2

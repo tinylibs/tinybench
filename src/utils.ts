@@ -35,7 +35,13 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
       (g.process as { versions?: Record<string, string> }).versions?.bun)
   ) {
     runtime = 'bun'
-    version = (g.Bun as { version: string }).version || 'unknown'
+    // `process.versions.bun` can be set without a `Bun` global, e.g. inside a
+    // `node:vm` context that was handed the host `process` (vitest's vm pools).
+    version =
+      (g.Bun as undefined | { version?: string })?.version ??
+      (g.process as undefined | { versions?: Record<string, string> })
+        ?.versions?.bun ??
+      'unknown'
   } else if (g.Deno) {
     runtime = 'deno'
     version =

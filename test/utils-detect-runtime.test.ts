@@ -29,6 +29,22 @@ test('detect runtime bun with version', () => {
   expect(version).toBe('0.5.0')
 })
 
+test('detect runtime bun with empty versions', () => {
+  const { runtime, version } = detectRuntime({
+    Bun: {
+      version: '',
+    },
+    process: {
+      versions: {
+        bun: '',
+      },
+    },
+  })
+
+  expect(runtime).toBe('bun')
+  expect(version).toBe('unknown')
+})
+
 test('detect runtime bun from process.versions without Bun global', () => {
   const { runtime, version } = detectRuntime({
     process: {

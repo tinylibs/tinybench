@@ -7,6 +7,10 @@ import type {
   TimerSaturationReason,
 } from './types'
 
+// Workerd defines `Event.type` as an accessor, which a subclass cannot narrow
+// with a declared property. Remove it from the base type before restoring `K`.
+const EventBase: new (type: string) => Omit<Event, 'type'> = globalThis.Event
+
 /**
  * The BenchEvent class represents events that occur during the benchmarking
  * process.
@@ -14,7 +18,7 @@ import type {
 class BenchEvent<
   K extends BenchEvents = BenchEvents,
   M extends 'bench' | 'task' = 'bench'
-> extends globalThis.Event {
+> extends EventBase {
   declare type: K
 
   /**

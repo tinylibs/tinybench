@@ -890,7 +890,7 @@ export const withConcurrency = async <R>(
  * Returns the current timestamp in milliseconds using `performance.now()`.
  * @returns the current timestamp in milliseconds
  */
-export const performanceNow = globalThis.performance.now.bind(
+export const performanceNow: NowFn = globalThis.performance.now.bind(
   globalThis.performance
 )
 

@@ -2,13 +2,14 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@11.15.1",
+  "packageManager": "pnpm@11.25.0",
   "volta": {
-    "node": "24.18.0",
-    "pnpm": "11.15.1"
+    "node": "24.20.0",
+    "pnpm": "11.25.0"
   },
   "scripts": {
     "all": "run-s example:*",
+    "example:convert-bencher": "tsx src/convert-bencher.ts",
     "example:simple": "tsx src/simple.ts",
     "simple:dev": "tsx --watch src/simple.ts",
     "example:convert-table": "tsx src/convert-table.ts",
@@ -19,7 +20,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "npm-run-all2": "^9.0.2",
-    "tsx": "^4.23.1"
+    "npm-run-all2": "^9.0.3",
+    "tsx": "^4.23.13"
   }
 }

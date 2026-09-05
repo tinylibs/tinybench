@@ -170,7 +170,7 @@ test('defaultConvertTaskResultForConsoleTable - errored - with stack', () => {
 
 test('defaultConvertTaskResultForConsoleTable - errored - without stack', () => {
   const error = new Error('Sample error')
-  error.stack = undefined
+  delete error.stack
   expect(
     defaultConvertTaskResultForConsoleTable({
       name: 'Sample Task',

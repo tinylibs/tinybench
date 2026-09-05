@@ -11,6 +11,7 @@
     "erasableSyntaxOnly": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
+    "exactOptionalPropertyTypes": true,
     "noImplicitThis": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,

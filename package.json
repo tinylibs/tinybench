@@ -1,12 +1,12 @@
 {
   "name": "tinybench",
-  "version": "6.1.2",
+  "version": "6.1.6",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@11.15.1",
+  "packageManager": "pnpm@11.25.0",
   "volta": {
-    "node": "24.18.0",
-    "pnpm": "11.15.1"
+    "node": "24.20.0",
+    "pnpm": "11.25.0"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -21,6 +21,7 @@
     "prepublishOnly": "pnpm build && rm -rf ./package && clean-publish",
     "postpublish": "rm -rf ./package",
     "typecheck": "tsc --noEmit",
+    "typecheck:workerd": "pnpm build && tsc -p type-tests/workerd/tsconfig.json",
     "typedoc": "typedoc",
     "lint": "eslint --cache src test examples eslint.config.js tsdown.config.ts vitest.config.ts vitest.pretest.config.ts",
     "lint:fix": "eslint --cache --fix src test examples eslint.config.js tsdown.config.ts vitest.config.ts vitest.pretest.config.ts",
@@ -49,28 +50,29 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@commitlint/cli": "^21.2.1",
-    "@commitlint/config-conventional": "^21.2.0",
-    "@cspell/eslint-plugin": "^10.0.1",
+    "@cloudflare/workers-types": "^5.20260902.1",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
+    "@cspell/eslint-plugin": "^10.2.0",
     "@eslint/js": "^9.39.5",
-    "@size-limit/preset-small-lib": "^12.1.0",
-    "@size-limit/time": "^12.1.0",
+    "@size-limit/preset-small-lib": "^13.0.3",
+    "@size-limit/time": "^13.0.3",
     "@types/node": "^24.13.3",
-    "@vitest/coverage-v8": "^4.1.10",
-    "bumpp": "^11.1.0",
-    "changelogithub": "^14.0.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "bumpp": "^12.2.2",
+    "changelogithub": "^15.0.5",
     "clean-publish": "^7.1.0",
     "eslint": "^9.39.5",
-    "eslint-plugin-jsdoc": "^63.2.0",
-    "eslint-plugin-perfectionist": "^5.10.0",
+    "eslint-plugin-jsdoc": "^64.3.4",
+    "eslint-plugin-perfectionist": "^5.11.0",
     "nano-staged": "^1.0.2",
     "neostandard": "^0.13.0",
-    "simple-git-hooks": "^2.13.1",
-    "size-limit": "^12.1.0",
-    "tsdown": "^0.22.12",
+    "simple-git-hooks": "^2.14.0",
+    "size-limit": "^13.0.3",
+    "tsdown": "^0.22.14",
     "typedoc": "^0.28.20",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "keywords": [
     "benchmark",

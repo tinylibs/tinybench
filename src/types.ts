@@ -7,7 +7,7 @@ export type { BenchEvent } from '../src/event'
  * Options for adding an event listener
  */
 export type AddEventListenerOptionsArgument = Parameters<
-  typeof EventTarget.prototype.addEventListener
+  EventTarget['addEventListener']
 >[2]
 
 /**
@@ -52,11 +52,11 @@ export interface BenchLike extends EventTarget {
   /**
    * Adds a listener for the specified event type.
    */
-  addEventListener: <K extends BenchEvents>(
+  addEventListener: (<K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: AddEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['addEventListener']
   /**
    * Executes tasks concurrently based on the specified concurrency mode, if set.
    *
@@ -77,11 +77,11 @@ export interface BenchLike extends EventTarget {
   /**
    * Removes a previously registered event listener.
    */
-  removeEventListener: <K extends BenchEvents>(
+  removeEventListener: (<K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: RemoveEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['removeEventListener']
 
   /**
    * Should samples be retained for further custom processing
@@ -356,10 +356,7 @@ export type Fn = () =>
  * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
  * @param mode the mode where the hook is being called
  */
-export type FnHook = (
-  this: Task,
-  mode?: HookMode
-) => Promise<void> | void
+export type FnHook = (this: Task, mode?: HookMode) => Promise<void> | void
 
 /**
  * The task function options
@@ -435,10 +432,7 @@ export interface GetPlatformMetricsOptions {
  * @param task the task instance
  * @param mode the mode where the hook is being called
  */
-export type Hook = (
-  task?: Task,
-  mode?: HookMode
-) => Promise<void> | void
+export type Hook = (task?: Task, mode?: HookMode) => Promise<void> | void
 
 /**
  * The mode in which a task hook is invoked ('warmup' or 'run').
@@ -513,7 +507,7 @@ export interface PlatformMetrics {
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<
-  typeof EventTarget.prototype.removeEventListener
+  EventTarget['removeEventListener']
 >[2]
 
 /**

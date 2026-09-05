@@ -30,14 +30,24 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
   let version = 'unknown'
 
   if (
-    !!g.Bun ||
-    !!(
-      g.process &&
-      (g.process as { versions?: Record<string, string> }).versions?.bun
-    )
+    g.Bun ||
+    (g.process &&
+      (g.process as { versions?: Record<string, string> }).versions?.bun)
   ) {
     runtime = 'bun'
-    version = (g.Bun as { version: string }).version || 'unknown'
+    // `process.versions.bun` can be set without a `Bun` global, e.g. inside a
+    // `node:vm` context that was handed the host `process` (vitest's vm pools).
+    const bunVersion = (g.Bun as undefined | { version?: string })?.version
+    if (bunVersion) {
+      version = bunVersion
+    } else {
+      const processBunVersion = (
+        g.process as undefined | { versions?: Record<string, string> }
+      )?.versions?.bun
+      if (processBunVersion) {
+        version = processBunVersion
+      }
+    }
   } else if (g.Deno) {
     runtime = 'deno'
     version =
@@ -76,7 +86,7 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
     runtime = 'lagon'
   } else if (g.fastly) {
     runtime = 'fastly'
-  } else if (!!g.$262 && !!g.lockdown && !!g.AsyncDisposableStack) {
+  } else if (g.$262 && g.lockdown && g.AsyncDisposableStack) {
     runtime = 'moddable'
   } else if (g.d8) {
     runtime = 'v8'
@@ -85,13 +95,14 @@ export function detectRuntime (g = globalThis as Record<string, unknown>): {
         ? (g.version as () => string)()
         : 'unknown'
   } else if (
-    !!g.inIon &&
-    !!(g.performance && (g.performance as { mozMemory?: unknown }).mozMemory)
+    g.inIon &&
+    g.performance &&
+    (g.performance as { mozMemory?: unknown }).mozMemory
   ) {
     runtime = 'spidermonkey'
   } else if (typeof g.$ === 'object' && g.$ !== null && 'IsHTMLDDA' in g.$) {
     runtime = 'jsc'
-  } else if (!!g.window && !!g.navigator) {
+  } else if (g.window && g.navigator) {
     runtime = 'browser'
   }
 
@@ -412,14 +423,14 @@ const quantileSorted = (
 ): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)
-
-  return baseIndex + 1 < samples.length
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ? samples[baseIndex]! +
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (base - baseIndex) * (samples[baseIndex + 1]! - samples[baseIndex]!)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    : samples[baseIndex]!
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const lower = samples[baseIndex]!
+  if (baseIndex + 1 >= samples.length) {
+    return lower
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const upper = samples[baseIndex + 1]!
+  return lower + (base - baseIndex) * (upper - lower)
 }
 
 /**
@@ -538,11 +549,12 @@ export const calibrateTimerOverhead = (
     return deltas[idx]!
   }
   const mid = deltas.length >> 1
-  return (deltas.length & 1) === 1
+  if ((deltas.length & 1) === 1) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ? deltas[mid]!
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    : (deltas[mid - 1]! + deltas[mid]!) / 2
+    return deltas[mid]!
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return (deltas[mid - 1]! + deltas[mid]!) / 2
 }
 
 /**
@@ -774,7 +786,7 @@ interface WithConcurrencyOptions<R> {
   /**
    * An optional AbortSignal to cancel the execution.
    */
-  signal?: AbortSignal
+  signal?: AbortSignal | undefined
   /**
    * The maximum amount of time to run the executions in milliseconds. If 0,
    * runs until iterations are completed.
@@ -878,7 +890,7 @@ export const withConcurrency = async <R>(
  * Returns the current timestamp in milliseconds using `performance.now()`.
  * @returns the current timestamp in milliseconds
  */
-export const performanceNow = globalThis.performance.now.bind(
+export const performanceNow: NowFn = globalThis.performance.now.bind(
   globalThis.performance
 )
 

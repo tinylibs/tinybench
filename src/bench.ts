@@ -41,11 +41,11 @@ const subtractTimerOverheadConcurrencyError =
  * The Bench class keeps track of the benchmark tasks and controls them.
  */
 export class Bench extends EventTarget implements BenchLike {
-  declare addEventListener: <K extends BenchEvents>(
+  declare addEventListener: (<K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: AddEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['addEventListener']
 
   /**
    * Executes tasks concurrently based on the specified concurrency mode.
@@ -74,11 +74,11 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * Removes a previously registered event listener.
    */
-  declare removeEventListener: <K extends BenchEvents>(
+  declare removeEventListener: (<K extends BenchEvents>(
     type: K,
     listener: EventListener<K> | EventListenerObject<K> | null,
     options?: RemoveEventListenerOptionsArgument
-  ) => void
+  ) => void) & EventTarget['removeEventListener']
 
   readonly retainSamples: boolean
 
@@ -117,10 +117,7 @@ export class Bench extends EventTarget implements BenchLike {
   /**
    * A teardown function that runs after each task execution.
    */
-  readonly teardown: (
-    task: Task,
-    mode: HookMode
-  ) => Promise<void> | void
+  readonly teardown: (task: Task, mode: HookMode) => Promise<void> | void
 
   /**
    * The maximum number of concurrent tasks to run
@@ -146,7 +143,7 @@ export class Bench extends EventTarget implements BenchLike {
    * Otherwise calibrated once at construction time via
    * {@link calibrateTimerOverhead}.
    */
-  readonly timerOverhead: number | undefined
+  readonly timerOverhead?: number
 
   /**
    * A timestamp provider and its related functions.
@@ -221,16 +218,21 @@ export class Bench extends EventTarget implements BenchLike {
     this.setup = restOptions.setup ?? emptyFunction
     this.teardown = restOptions.teardown ?? emptyFunction
     this.throws = restOptions.throws ?? false
-    this.signal = restOptions.signal
+    if (restOptions.signal != null) {
+      this.signal = restOptions.signal
+    }
     this.retainSamples = restOptions.retainSamples === true
     this.subtractTimerOverhead = restOptions.subtractTimerOverhead === true
     assert(
       !(this.subtractTimerOverhead && this.concurrency === 'task'),
       subtractTimerOverheadConcurrencyError
     )
-    this.timerOverhead = this.subtractTimerOverhead
+    const timerOverhead = this.subtractTimerOverhead
       ? calibrateTimerOverhead(this.timestampProvider)
       : undefined
+    if (timerOverhead != null) {
+      this.timerOverhead = timerOverhead
+    }
 
     if (this.signal) {
       this.signal.addEventListener(

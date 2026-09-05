@@ -7,7 +7,7 @@ import neostandard, { plugins } from 'neostandard'
 
 export default defineConfig([
   {
-    ignores: ['docs/**', 'package/**'],
+    ignores: ['docs/**', 'package/**', 'type-tests/workerd/**'],
   },
   cspellConfigs.recommended,
   {

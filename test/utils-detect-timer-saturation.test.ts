@@ -2,19 +2,16 @@ import { expect, test } from 'vitest'
 
 import type { SortedSamples } from '../src/types'
 
-import {
-  classifyTimerSaturation,
-  detectTimerSaturation,
-} from '../src/utils'
+import { classifyTimerSaturation, detectTimerSaturation } from '../src/utils'
 
 const asSorted = (arr: number[]): SortedSamples =>
   arr as unknown as SortedSamples
 
 test('detectTimerSaturation returns false for n below the minimum threshold', () => {
   expect(detectTimerSaturation(asSorted([1]), 0)).toBe(false)
-  expect(
-    detectTimerSaturation(asSorted([1, 1, 1, 1, 1, 1, 1, 1, 1]), 0)
-  ).toBe(false)
+  expect(detectTimerSaturation(asSorted([1, 1, 1, 1, 1, 1, 1, 1, 1]), 0)).toBe(
+    false
+  )
 })
 
 test('detectTimerSaturation flags more than half zero samples (criterion A)', () => {
@@ -103,21 +100,29 @@ const zeroMadSamples = (medianRepeats: number): number[] => {
 }
 
 test("classifyTimerSaturation withholds 'zero-mad' at the n = 100 boundary", () => {
-  expect(classifyTimerSaturation(asSorted(zeroMadSamples(60)), 0)).toBeUndefined()
+  expect(
+    classifyTimerSaturation(asSorted(zeroMadSamples(60)), 0)
+  ).toBeUndefined()
 })
 
 test("classifyTimerSaturation fires 'zero-mad' just past the boundary (n = 101)", () => {
-  expect(classifyTimerSaturation(asSorted(zeroMadSamples(61)), 0)).toBe('zero-mad')
+  expect(classifyTimerSaturation(asSorted(zeroMadSamples(61)), 0)).toBe(
+    'zero-mad'
+  )
 })
 
 test('classifyTimerSaturation applies the distinct threshold ceiling of 10 at n = 10000', () => {
-  const nineDistinct = Array.from({ length: 10000 }, (_, i) => (i % 9) + 1).sort(
-    (a, b) => a - b
+  const nineDistinct = Array.from(
+    { length: 10000 },
+    (_, i) => (i % 9) + 1
+  ).sort((a, b) => a - b)
+  expect(classifyTimerSaturation(asSorted(nineDistinct), 1)).toBe(
+    'low-distinct'
   )
-  expect(classifyTimerSaturation(asSorted(nineDistinct), 1)).toBe('low-distinct')
 
-  const tenDistinct = Array.from({ length: 10000 }, (_, i) => (i % 10) + 1).sort(
-    (a, b) => a - b
-  )
+  const tenDistinct = Array.from(
+    { length: 10000 },
+    (_, i) => (i % 10) + 1
+  ).sort((a, b) => a - b)
   expect(classifyTimerSaturation(asSorted(tenDistinct), 1)).toBeUndefined()
 })

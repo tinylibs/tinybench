@@ -17,7 +17,7 @@ importers:
   .:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^5.20260901.1
+        specifier: ^5.20260902.1
         version: 5.20260903.1
       '@commitlint/cli':
         specifier: ^21.2.2
@@ -56,7 +56,7 @@ importers:
         specifier: ^9.39.5
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       eslint-plugin-jsdoc:
-        specifier: ^64.3.3
+        specifier: ^64.3.4
         version: 64.3.4(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint-plugin-perfectionist:
         specifier: ^5.11.0
@@ -3776,7 +3776,7 @@ snapshots:
   '@es-joy/jsdoccomment@0.95.1':
     dependencies:
       '@types/estree': 1.0.9
-      '@typescript-eslint/types': 8.67.0
+      '@typescript-eslint/types': 8.69.0
       comment-parser: 1.4.8
       esquery: 1.7.0
       jsdoc-type-pratt-parser: 9.1.2
@@ -4151,7 +4151,7 @@ snapshots:
   '@typescript-eslint/project-service@8.67.0(supports-color@7.2.0)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.67.0(typescript@6.0.3)
-      '@typescript-eslint/types': 8.67.0
+      '@typescript-eslint/types': 8.69.0
       debug: 4.4.3(supports-color@7.2.0)
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -6735,7 +6735,7 @@ snapshots:
   vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.33.0
-      picomatch: 4.0.5
+      picomatch: 4.0.7
       postcss: 8.5.26
       rolldown: 1.2.5
       tinyglobby: 0.2.17

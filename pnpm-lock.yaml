@@ -17,7 +17,7 @@ importers:
   .:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^5.20260902.1
+        specifier: ^5.20260903.1
         version: 5.20260904.1
       '@commitlint/cli':
         specifier: ^21.2.2
@@ -44,7 +44,7 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11(vitest@4.1.11)
       bumpp:
-        specifier: ^12.2.2
+        specifier: ^12.3.0
         version: 12.3.0
       changelogithub:
         specifier: ^15.0.5

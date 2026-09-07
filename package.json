@@ -3,10 +3,10 @@
   "version": "6.1.6",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@12.3.1",
+  "packageManager": "pnpm@12.3.3",
   "volta": {
     "node": "24.20.0",
-    "pnpm": "12.3.1"
+    "pnpm": "12.3.3"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -50,10 +50,10 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260903.1",
+    "@cloudflare/workers-types": "^5.20260904.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
-    "@cspell/eslint-plugin": "^10.2.0",
+    "@cspell/eslint-plugin": "^10.2.2",
     "@eslint/js": "^9.39.5",
     "@size-limit/preset-small-lib": "^13.0.3",
     "@size-limit/time": "^13.0.3",
@@ -63,13 +63,13 @@
     "changelogithub": "^15.0.5",
     "clean-publish": "^7.1.0",
     "eslint": "^9.39.5",
-    "eslint-plugin-jsdoc": "^64.3.4",
+    "eslint-plugin-jsdoc": "^64.3.5",
     "eslint-plugin-perfectionist": "^5.11.0",
     "nano-staged": "^1.0.2",
     "neostandard": "^0.13.0",
     "simple-git-hooks": "^2.14.0",
     "size-limit": "^13.0.3",
-    "tsdown": "^0.22.14",
+    "tsdown": "^0.23.0",
     "typedoc": "^0.28.20",
     "typescript": "~6.0.3",
     "vitest": "^4.1.11"

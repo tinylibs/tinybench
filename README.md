@@ -117,7 +117,8 @@ checking if provided function is an `AsyncFunction` or if it returns a
 You can also explicitly set the `async` option to `true` or `false` when adding
 a task, thus avoiding the detection. Set `async: false` only for a genuinely
 synchronous task; to measure the synchronous cost of a function that returns a
-`Promise`, record it via `overriddenDuration` instead.
+`Promise`, record it via `overriddenDuration` instead (see
+[Task-Supplied Measurements](#task-supplied-measurements)).
 
 ```ts
 const bench = new Bench()
@@ -337,7 +338,9 @@ const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
   sub-microsecond samples stay over-measured even with `subtractTimerOverhead`.
   Use `overriddenDuration` for such sub-resolution work.
 
-## Per-Sample Override (`overriddenDuration`)
+## Task-Supplied Measurements
+
+### Per-sample duration (`overriddenDuration`)
 
 A task function may return an object containing `overriddenDuration`
 (in ms). That value is recorded in place of the timer-measured sample:
@@ -357,6 +360,58 @@ bench.add('externally-timed', () => {
 
 Overridden samples are excluded from `Task.detectedResolution` and
 from timer-saturation detection.
+
+### Iteration cost (`overriddenIterationCost`)
+
+When one iteration batches several inner calls, the per-call value you
+want in the statistics differs from what the iteration actually costs
+the `time` / `warmupTime` budget. Return `overriddenIterationCost`
+(in ms) to declare the whole iteration's wall-clock cost:
+
+```ts
+bench.add('batched', () => {
+  const innerCalls = 100
+  const start = process.hrtime.bigint()
+  for (let i = 0; i < innerCalls; i++) parse(input)
+  const elapsedMs = Number(process.hrtime.bigint() - start) / 1e6
+  return {
+    overriddenDuration: elapsedMs / innerCalls, // per-call statistic
+    overriddenIterationCost: elapsedMs, // budget cost of the iteration
+  }
+})
+```
+
+Semantics:
+
+- `overriddenDuration` always drives the statistical sample;
+  `overriddenIterationCost` never does. When only one of them is
+  returned, the other side falls back to `overriddenDuration` when
+  present, otherwise to the timer-measured duration (returning only
+  `overriddenDuration` therefore keeps the historical behavior, where
+  it drives both the sample and the budget).
+- `overriddenIterationCost` is ignored with `concurrency: 'task'`, where the
+  budget is driven by the real clock. It still applies per task with
+  `concurrency: 'bench'`, whose iterations stay sequential.
+- Both fields are validated the same way (finite number ≥ 0, `-0`
+  included); an invalid value is treated as absent.
+- `overriddenIterationCost` never enters the samples: it is out of
+  scope of the timer-overhead correction, `Task.detectedResolution`
+  and timer-saturation detection. Note that `result.totalTime` and
+  `period` are computed from the samples, not from the declared costs.
+- Migrating from `overriddenDuration`-only to `overriddenIterationCost`-only
+  makes the samples timer-measured again, so timer-saturation warnings may
+  reappear; keep returning `overriddenDuration` to suppress them.
+- The declared cost is not verified against reality: an iteration whose real
+  wall-clock cost is `C` but declared as `O` stretches the run to about
+  `time × C / O` when `O < C`, and shortens it when `O > C`.
+- **Warning.** A declared cost of `0` (or `-0`) never advances the
+  budget: the sequential run hangs. An external `AbortSignal` can only
+  interrupt it if the task function yields to the event loop (`await`
+  I/O); in `runSync()` an external abort is never honored mid-run
+  (only a synchronous `signal.abort()` call from inside the task
+  function is). The same hazard already exists with
+  `overriddenDuration: 0`. Tiny or denormal costs (e.g. `1e-300`)
+  effectively freeze the budget too.
 
 ## Timer Diagnostics
 

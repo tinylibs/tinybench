@@ -342,7 +342,9 @@ export interface EventListenerObject<
  * If you need to provide a custom duration for the task (e.g.: because
  * you want to measure a specific part of its execution), you can return an
  * object with a `overriddenDuration` field. You should still use
- * `bench.opts.now()` to measure that duration.
+ * `bench.now()` to measure that duration. When the task function batches
+ * several inner calls, also return `overriddenIterationCost` so the `time`
+ * budget reflects the whole iteration while statistics stay per call.
  */
 export type Fn = () =>
   | FnReturnedObject
@@ -418,6 +420,26 @@ export interface FnReturnedObject {
    * hard to execute independently.
    */
   overriddenDuration?: number
+
+  /**
+   * The declared wall-clock duration (in milliseconds) of the whole task
+   * function call, consumed by the `time` and `warmupTime` budgets on the
+   * sequential paths. Ignored with `concurrency: 'task'` (that budget is
+   * driven by the real clock); it still applies per task with
+   * `concurrency: 'bench'`. Validated like `overriddenDuration` (finite
+   * number ≥ 0, `-0` included); an invalid value is treated as absent.
+   *
+   * This field NEVER replaces the statistical sample value; use
+   * `overriddenDuration` for that. It never enters the samples, so it is out
+   * of scope of the timer-overhead correction, `detectedResolution` and
+   * timer-saturation detection.
+   *
+   * Useful when one iteration batches several inner calls: return
+   * `overriddenDuration: wall / innerCalls` for per-call statistics and
+   * `overriddenIterationCost: wall` so the benchmark still runs for about
+   * `time` milliseconds of wall clock.
+   */
+  overriddenIterationCost?: number
 }
 
 /**

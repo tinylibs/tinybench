@@ -392,13 +392,13 @@ export class Task extends EventTarget {
             await this.#fnOpts.beforeEach.call(this, mode)
           }
 
-          const { overridden, taskTime } = this.#async
+          const { iterationCost, overridden, taskTime } = this.#async
             ? await this.#measure()
             : this.#measureSync()
 
           const idx = samples.push(taskTime) - 1
           if (overridden) overriddenIndices.add(idx)
-          totalTime += taskTime
+          totalTime += iterationCost ?? taskTime
         } finally {
           if (this.#fnOpts.afterEach != null) {
             await this.#fnOpts.afterEach.call(this, mode)
@@ -473,11 +473,11 @@ export class Task extends EventTarget {
             )
           }
 
-          const { overridden, taskTime } = this.#measureSync()
+          const { iterationCost, overridden, taskTime } = this.#measureSync()
 
           const idx = samples.push(taskTime) - 1
           if (overridden) overriddenIndices.add(idx)
-          totalTime += taskTime
+          totalTime += iterationCost ?? taskTime
         } finally {
           if (this.#fnOpts.afterEach) {
             const afterEachResult = this.#fnOpts.afterEach.call(this, mode)
@@ -512,10 +512,16 @@ export class Task extends EventTarget {
 
   /**
    * Measures a single execution of the task function asynchronously.
-   * @returns The measured execution time and whether it was supplied by the
-   *   task function via `overriddenDuration`
+   * @returns The measured execution time (`taskTime`, the statistical sample),
+   *   whether it was supplied by the task function via `overriddenDuration`,
+   *   and the declared iteration cost (`iterationCost`, the budget cost) when
+   *   supplied via `overriddenIterationCost`
    */
-  async #measure (): Promise<{ overridden: boolean; taskTime: number }> {
+  async #measure (): Promise<{
+    iterationCost: number | undefined
+    overridden: boolean
+    taskTime: number
+  }> {
     const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
@@ -523,19 +529,32 @@ export class Task extends EventTarget {
       (this.#timestampFn() as unknown as number) - taskStart
     )
 
-    const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
+    const iterationCost = getOverriddenNumberFromFnResult(
+      fnResult,
+      'overriddenIterationCost'
+    )
+    const overriddenDuration = getOverriddenNumberFromFnResult(
+      fnResult,
+      'overriddenDuration'
+    )
     if (overriddenDuration !== undefined) {
-      return { overridden: true, taskTime: overriddenDuration }
+      return { iterationCost, overridden: true, taskTime: overriddenDuration }
     }
-    return { overridden: false, taskTime }
+    return { iterationCost, overridden: false, taskTime }
   }
 
   /**
    * Measures a single execution of the task function synchronously.
-   * @returns The measured execution time and whether it was supplied by the
-   *   task function via `overriddenDuration`
+   * @returns The measured execution time (`taskTime`, the statistical sample),
+   *   whether it was supplied by the task function via `overriddenDuration`,
+   *   and the declared iteration cost (`iterationCost`, the budget cost) when
+   *   supplied via `overriddenIterationCost`
    */
-  #measureSync (): { overridden: boolean; taskTime: number } {
+  #measureSync (): {
+    iterationCost: number | undefined
+    overridden: boolean
+    taskTime: number
+  } {
     const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
@@ -547,11 +566,18 @@ export class Task extends EventTarget {
       !isPromiseLike(fnResult),
       'task function must be sync when using `runSync()`'
     )
-    const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
+    const iterationCost = getOverriddenNumberFromFnResult(
+      fnResult,
+      'overriddenIterationCost'
+    )
+    const overriddenDuration = getOverriddenNumberFromFnResult(
+      fnResult,
+      'overriddenDuration'
+    )
     if (overriddenDuration !== undefined) {
-      return { overridden: true, taskTime: overriddenDuration }
+      return { iterationCost, overridden: true, taskTime: overriddenDuration }
     }
-    return { overridden: false, taskTime }
+    return { iterationCost, overridden: false, taskTime }
   }
 
   /**
@@ -748,19 +774,26 @@ export class Task extends EventTarget {
 }
 
 /**
- * Extracts the overridden duration from a task function result if present.
+ * Extracts a declared number field from a task function result if present and
+ * valid (finite number ≥ 0, `-0` included); invalid values are treated as
+ * absent. Never throws.
  * @param fnResult - The result of the task function
- * @returns The overridden duration in milliseconds if defined by the function, otherwise undefined
+ * @param key - The field name to extract
+ * @returns The declared value in milliseconds, otherwise undefined
  */
-function getOverriddenDurationFromFnResult (
-  fnResult: ReturnType<Fn>
+function getOverriddenNumberFromFnResult (
+  fnResult: unknown,
+  key: 'overriddenDuration' | 'overriddenIterationCost'
 ): number | undefined {
-  return fnResult != null &&
-    typeof fnResult === 'object' &&
-    'overriddenDuration' in fnResult &&
-    typeof fnResult.overriddenDuration === 'number' &&
-    Number.isFinite(fnResult.overriddenDuration) &&
-    fnResult.overriddenDuration >= 0
-    ? fnResult.overriddenDuration
+  if (fnResult == null || typeof fnResult !== 'object') {
+    return undefined
+  }
+  const record = fnResult as Record<string, unknown>
+  if (!(key in record)) {
+    return undefined
+  }
+  const value = record[key]
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0
+    ? value
     : undefined
 }

@@ -529,14 +529,8 @@ export class Task extends EventTarget {
       (this.#timestampFn() as unknown as number) - taskStart
     )
 
-    const iterationCost = getOverriddenNumberFromFnResult(
-      fnResult,
-      'overriddenIterationCost'
-    )
-    const overriddenDuration = getOverriddenNumberFromFnResult(
-      fnResult,
-      'overriddenDuration'
-    )
+    const iterationCost = getOverriddenIterationCostFromFnResult(fnResult)
+    const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
       return { iterationCost, overridden: true, taskTime: overriddenDuration }
     }
@@ -566,14 +560,8 @@ export class Task extends EventTarget {
       !isPromiseLike(fnResult),
       'task function must be sync when using `runSync()`'
     )
-    const iterationCost = getOverriddenNumberFromFnResult(
-      fnResult,
-      'overriddenIterationCost'
-    )
-    const overriddenDuration = getOverriddenNumberFromFnResult(
-      fnResult,
-      'overriddenDuration'
-    )
+    const iterationCost = getOverriddenIterationCostFromFnResult(fnResult)
+    const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
       return { iterationCost, overridden: true, taskTime: overriddenDuration }
     }
@@ -774,26 +762,57 @@ export class Task extends EventTarget {
 }
 
 /**
- * Extracts a declared number field from a task function result if present and
- * valid (finite number ≥ 0, `-0` included); invalid values are treated as
- * absent. Never throws.
+ * Extracts the declared `overriddenDuration` from a task function result if
+ * present and valid (finite number ≥ 0, `-0` included); invalid values are
+ * treated as absent.
+ *
+ * This mirrors the historical probe exactly (`in` followed by the read), so
+ * proxies whose traps throw for `overriddenDuration` propagate that error
+ * like they did before `overriddenIterationCost` existed.
  * @param fnResult - The result of the task function
- * @param key - The field name to extract
- * @returns The declared value in milliseconds, otherwise undefined
+ * @returns The declared duration in milliseconds, otherwise undefined
  */
-function getOverriddenNumberFromFnResult (
-  fnResult: unknown,
-  key: 'overriddenDuration' | 'overriddenIterationCost'
+function getOverriddenDurationFromFnResult (
+  fnResult: unknown
 ): number | undefined {
   if (fnResult == null || typeof fnResult !== 'object') {
     return undefined
   }
   const record = fnResult as Record<string, unknown>
-  if (!(key in record)) {
+  if (!('overriddenDuration' in record)) {
     return undefined
   }
-  const value = record[key]
+  const value = record.overriddenDuration
   return typeof value === 'number' && Number.isFinite(value) && value >= 0
     ? value
     : undefined
+}
+
+/**
+ * Extracts the declared `overriddenIterationCost` from a task function result
+ * if present and valid (finite number ≥ 0, `-0` included); invalid values are
+ * treated as absent. Never throws.
+ *
+ * The probe is defensive on purpose: unlike `overriddenDuration`, this field
+ * has no historical behavior to preserve, and proxies whose `has` or `get`
+ * traps reject unknown keys must keep working with their valid
+ * `overriddenDuration` instead of erroring the run.
+ * @param fnResult - The result of the task function
+ * @returns The declared cost in milliseconds, otherwise undefined
+ */
+function getOverriddenIterationCostFromFnResult (
+  fnResult: unknown
+): number | undefined {
+  if (fnResult == null || typeof fnResult !== 'object') {
+    return undefined
+  }
+  const record = fnResult as Record<string, unknown>
+  try {
+    const value = record.overriddenIterationCost
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0
+      ? value
+      : undefined
+  } catch {
+    return undefined
+  }
 }

@@ -367,7 +367,10 @@ test('override field lookup tolerates rejecting proxies', async () => {
       throw new Error(`unknown property: ${String(key)}`)
     },
     has (target, key) {
-      return key in target
+      if (key in target) {
+        return true
+      }
+      throw new Error(`unknown property: ${String(key)}`)
     },
   })
 

@@ -1,6 +1,3 @@
-// Portions copyright evanwashere. 2024. All Rights Reserved.
-// Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
-
 /**
  * Throws an error if the condition is false.
  * @param condition - the condition to check

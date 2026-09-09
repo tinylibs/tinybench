@@ -1,6 +1,3 @@
-// Portions copyright evanwashere. 2024. All Rights Reserved.
-// Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
-
 import type { JSRuntime, NowFn, TimestampProvider, TimestampValue } from './types'
 
 import { mToMs, mToNs, mToNsBigint, nBigintToMs, nToMs } from './conversions'

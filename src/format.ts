@@ -1,6 +1,3 @@
-// Portions copyright evanwashere. 2024. All Rights Reserved.
-// Portions copyright QuiiBz. 2023-2024. All Rights Reserved.
-
 /**
  * Formats a number with the specified significant digits and maximum fraction digits.
  * @param value - the number to format

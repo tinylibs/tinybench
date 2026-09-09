@@ -92,6 +92,18 @@ benchLike.removeEventListener('abort', event => {
   expectType<IsExact<typeof event.task, Task | undefined>>(true)
 })
 
+for (const kind of ['start', 'complete', 'warmup', 'reset'] as const) {
+  bench.addEventListener(kind, event => {
+    expectType<IsExact<typeof event.task, undefined>>(true)
+  })
+  benchLike.removeEventListener(kind, event => {
+    expectType<IsExact<typeof event.task, undefined>>(true)
+  })
+  task.addEventListener(kind, event => {
+    expectType<IsExact<typeof event.task, Task>>(true)
+  })
+}
+
 task.addEventListener(
   'abort',
   event => {

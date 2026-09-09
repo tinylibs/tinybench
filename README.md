@@ -403,8 +403,9 @@ Semantics:
   otherwise the sample before timer-overhead correction. Returning only
   `overriddenDuration` therefore keeps the historical behavior.
 - Task-concurrent `run()` and `warmup()` use the real clock for their budgets
-  and ignore `overriddenIterationCost`. The cost applies per task with
-  `concurrency: 'bench'` and in `Task.warmupSync()` regardless of concurrency.
+  and do not inspect `overriddenIterationCost` (neither presence nor value).
+  The cost applies per task with `concurrency: 'bench'` and in
+  `Task.warmupSync()` regardless of concurrency.
 - Both fields are validated the same way (finite number ≥ 0, `-0`
   included); an invalid value is treated as absent.
 - The cost field must be reported as present by the `in` operator (own or

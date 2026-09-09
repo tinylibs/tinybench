@@ -381,6 +381,7 @@ export class Task extends EventTarget {
         await this.#fnOpts.beforeAll.call(this, mode)
       }
 
+      const sequential = this.#bench.concurrency !== 'task'
       let totalTime = 0 // ms
       const samples: number[] = []
       const overriddenIndices = new Set<number>()
@@ -395,12 +396,12 @@ export class Task extends EventTarget {
           }
 
           const { iterationCost, overridden, taskTime } = this.#async
-            ? await this.#measure()
-            : this.#measureSync()
+            ? await this.#measure(sequential)
+            : this.#measureSync(sequential)
 
           const idx = samples.push(taskTime) - 1
           if (overridden) overriddenIndices.add(idx)
-          totalTime += iterationCost ?? taskTime
+          if (sequential) totalTime += iterationCost ?? taskTime
         } finally {
           if (this.#fnOpts.afterEach != null) {
             await this.#fnOpts.afterEach.call(this, mode)
@@ -408,7 +409,7 @@ export class Task extends EventTarget {
         }
       }
 
-      if (this.#bench.concurrency === 'task') {
+      if (!sequential) {
         await withConcurrency({
           fn: benchmarkTask,
           iterations,
@@ -475,7 +476,7 @@ export class Task extends EventTarget {
             )
           }
 
-          const { iterationCost, overridden, taskTime } = this.#measureSync()
+          const { iterationCost, overridden, taskTime } = this.#measureSync(true)
 
           const idx = samples.push(taskTime) - 1
           if (overridden) overriddenIndices.add(idx)
@@ -514,12 +515,13 @@ export class Task extends EventTarget {
 
   /**
    * Measures a single execution of the task function asynchronously.
+   * @param collectIterationCost - Whether to extract cost for a sequential budget
    * @returns The measured execution time (`taskTime`, the statistical sample),
    *   whether it was supplied by the task function via `overriddenDuration`,
    *   and the declared iteration cost (`iterationCost`, the budget cost) when
-   *   supplied via `overriddenIterationCost`
+   *   requested and supplied via `overriddenIterationCost`
    */
-  async #measure (): Promise<{
+  async #measure (collectIterationCost: boolean): Promise<{
     iterationCost: number | undefined
     overridden: boolean
     taskTime: number
@@ -531,7 +533,9 @@ export class Task extends EventTarget {
       (this.#timestampFn() as unknown as number) - taskStart
     )
 
-    const iterationCost = getOverriddenIterationCostFromFnResult(fnResult)
+    const iterationCost = collectIterationCost
+      ? getOverriddenIterationCostFromFnResult(fnResult)
+      : undefined
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
       return { iterationCost, overridden: true, taskTime: overriddenDuration }
@@ -541,12 +545,13 @@ export class Task extends EventTarget {
 
   /**
    * Measures a single execution of the task function synchronously.
+   * @param collectIterationCost - Whether to extract cost for a sequential budget
    * @returns The measured execution time (`taskTime`, the statistical sample),
    *   whether it was supplied by the task function via `overriddenDuration`,
    *   and the declared iteration cost (`iterationCost`, the budget cost) when
-   *   supplied via `overriddenIterationCost`
+   *   requested and supplied via `overriddenIterationCost`
    */
-  #measureSync (): {
+  #measureSync (collectIterationCost: boolean): {
     iterationCost: number | undefined
     overridden: boolean
     taskTime: number
@@ -562,7 +567,9 @@ export class Task extends EventTarget {
       !isPromiseLike(fnResult),
       'task function must be sync when using `runSync()`'
     )
-    const iterationCost = getOverriddenIterationCostFromFnResult(fnResult)
+    const iterationCost = collectIterationCost
+      ? getOverriddenIterationCostFromFnResult(fnResult)
+      : undefined
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
       return { iterationCost, overridden: true, taskTime: overriddenDuration }

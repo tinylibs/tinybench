@@ -437,9 +437,10 @@ export interface FnReturnedObject {
    * as absence. Repeated zero costs cannot satisfy a positive time budget.
    *
    * Applies per task with `concurrency: 'bench'` and in
-   * {@link Task.warmupSync} regardless of concurrency. Ignored by task-concurrent
-   * `run()` and `warmup()`, whose budgets use the clock. Does not affect samples,
-   * timer-overhead correction or timer diagnostics.
+   * {@link Task.warmupSync} regardless of concurrency. Task-concurrent `run()`
+   * and `warmup()` use the clock and do not inspect this field: neither its
+   * presence nor its value is read. Does not affect samples, timer-overhead
+   * correction or timer diagnostics.
    */
   overriddenIterationCost?: number
 }

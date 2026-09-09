@@ -96,6 +96,7 @@ test('events properties', () => {
 
   bench.addEventListener('complete', evt => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'complete'>>()
+    expectTypeOf(evt.task).toEqualTypeOf<undefined>()
   })
 
   bench.addEventListener('cycle', evt => {
@@ -112,10 +113,12 @@ test('events properties', () => {
 
   bench.addEventListener('reset', evt => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'reset'>>()
+    expectTypeOf(evt.task).toEqualTypeOf<undefined>()
   })
 
   bench.addEventListener('start', evt => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'start'>>()
+    expectTypeOf(evt.task).toEqualTypeOf<undefined>()
   })
 
   bench.addEventListener('warning', evt => {
@@ -124,6 +127,7 @@ test('events properties', () => {
 
   bench.addEventListener('warmup', evt => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'warmup'>>()
+    expectTypeOf(evt.task).toEqualTypeOf<undefined>()
   })
 
   bench.addEventListener('custom', evt => {

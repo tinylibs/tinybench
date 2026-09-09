@@ -534,3 +534,80 @@ test.each(['sync', 'async'])('duration access errors reach the consumer (%s)', a
   if (mode === 'async') await expect(bench.run()).rejects.toBe(error)
   else expect(() => bench.runSync()).toThrow(error)
 })
+
+test.each([false, true])('task-concurrent run and warmup do not inspect cost (async: %s)', async asyncTask => {
+  let clock = 0
+  let calls = 0
+  let presenceChecks = 0
+  let reads = 0
+  const result = new Proxy({
+    overriddenDuration: 1,
+    get overriddenIterationCost () {
+      reads++
+      clock += 100
+      return 0
+    },
+  }, {
+    has (target, key) {
+      if (key === 'overriddenIterationCost') {
+        presenceChecks++
+        clock += 100
+      }
+      return Reflect.has(target, key)
+    },
+  })
+  const fn = () => {
+    if (++calls > 10) throw new Error('iteration bound exceeded')
+    clock++
+    return result
+  }
+  const bench = new Bench({
+    concurrency: 'task',
+    iterations: 5,
+    now: () => clock,
+    threshold: 1,
+    throws: true,
+    time: 3,
+    warmup: false,
+    warmupIterations: 5,
+    warmupTime: 3,
+  }).add('concurrent', asyncTask
+    ? async () => {
+      await Promise.resolve()
+      return fn()
+    }
+    : fn, { async: asyncTask })
+  const task = bench.getTask('concurrent')
+  if (!task) return expect.unreachable()
+
+  await task.warmup()
+  expect(calls).toBe(3)
+  expect(presenceChecks).toBe(0)
+  expect(reads).toBe(0)
+  clock = 0
+  calls = 0
+  await task.run()
+  expect(calls).toBe(3)
+  expect(task.result.state).toBe('completed')
+  expect(task.runs).toBe(3)
+  expect(presenceChecks).toBe(0)
+  expect(reads).toBe(0)
+})
+
+test('warmupSync consumes cost even with task concurrency configured', () => {
+  let calls = 0
+  const bench = new Bench({
+    concurrency: 'task',
+    now: () => 0,
+    throws: true,
+    warmupIterations: 1,
+    warmupTime: 10,
+  }).add('sync warmup', () => {
+    if (++calls > 20) throw new Error('iteration bound exceeded')
+    return { overriddenDuration: 1, overriddenIterationCost: 5 }
+  }, { async: false })
+  const task = bench.getTask('sync warmup')
+  if (!task) return expect.unreachable()
+  task.warmupSync()
+  expect(calls).toBe(2)
+})

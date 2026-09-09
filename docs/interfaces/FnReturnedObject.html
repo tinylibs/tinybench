@@ -1,5 +1,5 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>FnReturnedObject | tinybench - v6.1.6</title><meta name="description" content="Documentation for tinybench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
-<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">tinybench - v6.1.6</a>
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>FnReturnedObject | tinybench - v6.2.0</title><meta name="description" content="Documentation for tinybench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">tinybench - v6.2.0</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
 <div id="tsd-search-status" aria-live="polite" aria-atomic="true">
@@ -12,11 +12,15 @@
 <h1>Interface FnReturnedObject</h1></div>
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>A possible object returned by task functions to override default behaviors,
-like the duration of the function itself.</p>
+like the duration of the function itself.
+Annotate a callback return as this type (<code>Promise&lt;FnReturnedObject&gt;</code> for
+async callbacks), or use <code>satisfies FnReturnedObject</code> on the returned object
+to check measurement fields. Annotating the callback as <a href="../types/Fn.html" class="tsd-kind-type-alias">Fn</a> alone
+does not check them. Numeric values are still validated at runtime.</p>
 </div></section>
-<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">FnReturnedObject</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#overriddenduration">overriddenDuration</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">FnReturnedObject</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#overriddenduration">overriddenDuration</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#overriddeniterationcost">overriddenIterationCost</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/aa0b4812a4ddf04fe643a35e82ab45bb08e59808/src/types.ts#L412">src/types.ts:412</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/f947421678811bfec545aadcd5cdf947e03c2836/src/types.ts#L423">src/types.ts:423</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -25,6 +29,7 @@ like the duration of the function itself.</p>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#overriddenduration" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>overridden<wbr/>Duration?</span></a>
+<a href="#overriddeniterationcost" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>overridden<wbr/>Iteration<wbr/>Cost?</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
@@ -38,7 +43,24 @@ duration measured by tinybench when running the benchmark.</p>
 hard to execute independently.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/aa0b4812a4ddf04fe643a35e82ab45bb08e59808/src/types.ts#L420">src/types.ts:420</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/f947421678811bfec545aadcd5cdf947e03c2836/src/types.ts#L431">src/types.ts:431</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="overriddeniterationcost"><code class="tsd-tag">Optional</code><span>overridden<wbr/>Iteration<wbr/>Cost</span><a href="#overriddeniterationcost" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">overriddenIterationCost</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>The declared duration of the whole task function call, in milliseconds,
+consumed by the sequential <code>time</code> and <code>warmupTime</code> budgets. If absent or
+invalid, the budget uses the sample before timer-overhead correction.</p>
+<p>Must be finite and non-negative (<code>0</code> and <code>-0</code> included). Own and inherited
+properties are supported; presence-check and access errors are treated
+as absence. Repeated zero costs cannot satisfy a positive time budget.</p>
+<p>Applies per task with <code>concurrency: 'bench'</code> and in
+<a href="../classes/Task.html#warmupsync" class="tsd-kind-method">Task.warmupSync</a> regardless of concurrency. Task-concurrent <code>run()</code>
+and <code>warmup()</code> use the clock and do not inspect this field: neither its
+presence nor its value is read. Does not affect samples, timer-overhead
+correction or timer diagnostics.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/f947421678811bfec545aadcd5cdf947e03c2836/src/types.ts#L448">src/types.ts:448</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -55,9 +77,9 @@ hard to execute independently.</p>
 <h3>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#overriddenduration"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>overridden<wbr/>Duration</span></a></div></details></div></details></div>
+<div><a href="#overriddenduration"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>overridden<wbr/>Duration</span></a><a href="#overriddeniterationcost"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>overridden<wbr/>Iteration<wbr/>Cost</span></a></div></details></div></details></div>
 <div class="site-menu">
-<nav class="tsd-navigation"><a href="../index.html">tinybench - v6.1.6</a>
+<nav class="tsd-navigation"><a href="../index.html">tinybench - v6.2.0</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
 <li>Loading...</li></ul></nav></div></div></div><footer>
 <p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>

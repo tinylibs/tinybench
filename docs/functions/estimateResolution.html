@@ -1,5 +1,5 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>estimateResolution | tinybench - v6.1.6</title><meta name="description" content="Documentation for tinybench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
-<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">tinybench - v6.1.6</a>
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>estimateResolution | tinybench - v6.2.0</title><meta name="description" content="Documentation for tinybench"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">tinybench - v6.2.0</a>
 <div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
 <ul role="listbox" id="tsd-search-results"></ul>
 <div id="tsd-search-status" aria-live="polite" aria-atomic="true">
@@ -15,16 +15,11 @@
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="estimateresolution"><span class="tsd-kind-call-signature">estimateResolution</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">samples</span><span class="tsd-signature-symbol">:</span> <a href="../types/SortedSamples.html" class="tsd-signature-type tsd-kind-type-alias">SortedSamples</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><a href="#estimateresolution" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Estimates the effective timer resolution from a latency sample set.</p>
-<p>The estimator returns the smallest strictly positive sample value that
-appears at least twice (the smallest reproducibly observed increment).
-Requiring two occurrences gives a 2/n breakdown point and avoids being
-pulled to an artificially low value by a single anomalous sample (cold
-cache, GC pause, hardware quirk).</p>
-<p>When no positive value appears more than once (e.g. a continuous
-sub-microsecond timer with all unique samples), falls back to the strict
-minimum of the positive values, which is the best available lower bound
-in that case.</p>
+<div class="tsd-comment tsd-typography"><p>Estimates timer resolution heuristically from a latency sample set.</p>
+<p>Returns the smallest positive sample occurring at least twice, or the
+smallest positive sample if none repeats. The repeated-value branch ignores
+a single isolated low sample; the fallback does not offer that protection.
+This is an observed task duration, not a guaranteed bound on timer resolution.</p>
 <p>Exploits the sorted-ascending invariant: equal values are contiguous, so
 the first strictly-positive value with an equal successor is the smallest
 reproduced value, and the first strictly-positive value is the fallback
@@ -40,7 +35,7 @@ minimum. Runs in O(1) extra space with an early exit.</p>
 strictly positive sample is observed</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/aa0b4812a4ddf04fe643a35e82ab45bb08e59808/src/utils.ts#L358">src/utils.ts:358</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in <a href="https://github.com/tinylibs/tinybench/blob/f947421678811bfec545aadcd5cdf947e03c2836/src/timer-diagnostics.ts#L82">src/timer-diagnostics.ts:82</a></li></ul></aside></div></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -54,7 +49,7 @@ strictly positive sample is observed</p>
 <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
 <div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div></div>
 <div class="site-menu">
-<nav class="tsd-navigation"><a href="../index.html">tinybench - v6.1.6</a>
+<nav class="tsd-navigation"><a href="../index.html">tinybench - v6.2.0</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
 <li>Loading...</li></ul></nav></div></div></div><footer>
 <p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>

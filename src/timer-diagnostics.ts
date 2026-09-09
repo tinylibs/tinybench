@@ -199,14 +199,5 @@ export const calibrateTimerOverhead = (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return deltas[0]!
   }
-  if (estimator === 'p05') {
-    return quantileSorted(deltas as SortedSamples, 0.05)
-  }
-  const mid = deltas.length >> 1
-  if ((deltas.length & 1) === 1) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return deltas[mid]!
-  }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return (deltas[mid - 1]! + deltas[mid]!) / 2
+  return quantileSorted(deltas as SortedSamples, estimator === 'p05' ? 0.05 : 0.5)
 }

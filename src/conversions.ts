@@ -22,13 +22,6 @@ export const mToNs = (ms: TimestampValue) => Number(ms) * 1e6
 export const mToMs = <T, R extends T = T>(ms: T): R => ms as R // eslint-disable-line @typescript-eslint/no-unnecessary-type-parameters
 
 /**
- * Converts nanoseconds to milliseconds. Expects bigint input.
- * @param ns - the nanoseconds
- * @returns the milliseconds
- */
-export const nBigintToMs = (ns: bigint) => Number(ns) / 1e6
-
-/**
  * Converts milliseconds to nanoseconds as bigint.
  * @param ms - milliseconds
  * @returns nanoseconds as bigint

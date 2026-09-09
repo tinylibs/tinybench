@@ -69,12 +69,19 @@ export const quantileSorted = (
   const baseIndex = Math.floor(base)
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const lower = samples[baseIndex]!
-  if (baseIndex + 1 >= samples.length) {
+  if (base === baseIndex) {
     return lower
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const upper = samples[baseIndex + 1]!
-  return lower + (base - baseIndex) * (upper - lower)
+  if (lower === upper) return lower
+  const weight = base - baseIndex
+  if (weight === 0.5) {
+    // Preserve subnormal rounding; halve first only when the sum overflows.
+    const sum = lower + upper
+    return Number.isFinite(sum) ? sum / 2 : lower / 2 + upper / 2
+  }
+  return lower + weight * (upper - lower)
 }
 
 /**

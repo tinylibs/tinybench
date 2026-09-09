@@ -1,6 +1,6 @@
-import type { JSRuntime, NowFn, TimestampProvider, TimestampValue } from './types'
+import type { JSRuntime, NowFn, TimestampProvider } from './types'
 
-import { mToMs, mToNs, mToNsBigint, nBigintToMs, nToMs } from './conversions'
+import { mToMs, mToNs, mToNsBigint, nToMs } from './conversions'
 import { assert } from './error'
 import { runtime } from './runtime'
 
@@ -43,7 +43,7 @@ const hrtimeBigint =
  * until after the delta is taken.
  * @returns the current timestamp in milliseconds
  */
-export const hrtimeNow = () => nToMs(Number(hrtimeBigint()))
+export const hrtimeNow = () => nToMs(hrtimeBigint())
 
 /**
  * The hrtime.bigint() based TimestampProvider.
@@ -52,7 +52,7 @@ export const hrtimeNowTimestampProvider: TimestampProvider = {
   fn: hrtimeBigint,
   fromMs: mToNsBigint,
   name: 'hrtimeNow',
-  toMs: nBigintToMs as (ts: TimestampValue) => number,
+  toMs: nToMs,
 }
 
 /**

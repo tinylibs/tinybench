@@ -148,6 +148,48 @@ test("calibrateTimerOverhead 'p05' interpolates between observed deltas", () => 
   ).toBe(1e-6)
 })
 
+test.each([
+  {
+    deltas: [1, 2, Infinity],
+    expected: 2,
+    name: 'selects an exact rank before infinity',
+  },
+  {
+    deltas: [Infinity, Infinity],
+    expected: Infinity,
+    name: 'preserves identical infinite deltas',
+  },
+  {
+    deltas: [Number.MIN_VALUE, 2 * Number.MIN_VALUE],
+    expected: 2 * Number.MIN_VALUE,
+    name: 'rounds a subnormal midpoint to even',
+  },
+  {
+    deltas: [Number.MAX_VALUE / 2, Number.MAX_VALUE],
+    expected: Number.MAX_VALUE * 0.75,
+    name: 'avoids overflow for finite deltas',
+  },
+])('calibrateTimerOverhead median $name', ({ deltas, expected }) => {
+  let callCount = 0
+  const provider: TimestampProvider = {
+    fn: () => {
+      const i = callCount++
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return (i & 1) === 0 ? 0 : deltas[i >> 1]!
+    },
+    fromMs: mToMs,
+    name: 'median-boundaries',
+    toMs: mToMs,
+  }
+  expect(
+    calibrateTimerOverhead(provider, {
+      estimator: 'median',
+      pairs: deltas.length,
+      warmupPairs: 0,
+    })
+  ).toBe(expected)
+})
+
 test('calibrateTimerOverhead with hrtimeNow returns a plausible overhead under 10 microseconds', () => {
   const overhead = calibrateTimerOverhead(hrtimeNowTimestampProvider, {
     estimator: 'median',

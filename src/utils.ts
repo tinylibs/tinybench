@@ -1,7 +1,7 @@
 export { isFnAsyncResource, isPromiseLike } from './async'
 export { withConcurrency } from './concurrency'
 export { defaultConvertTaskResultForConsoleTable } from './console-table'
-export { mToMs, mToNs, mToNsBigint, nBigintToMs, nToMs } from './conversions'
+export { mToMs, mToNs, mToNsBigint, nToMs } from './conversions'
 export { assert, toError } from './error'
 export { formatNumber } from './format'
 export { detectRuntime, runtime, runtimeVersion } from './runtime'

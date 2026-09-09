@@ -115,18 +115,23 @@ test('calibrateTimerOverhead estimators are ordered min ≤ p05 ≤ median', () 
     warmupPairs: 0,
   })
   expect(min).toBe(1e-6)
-  expect(p05).toBeCloseTo(5.95e-6, 12)
+  const expectedP05 = 5.95e-6
+  expect(Math.abs(p05 - expectedP05)).toBeLessThanOrEqual(
+    expectedP05 * Number.EPSILON
+  )
   expect(median).toBe(50.5e-6)
 })
 
 test("calibrateTimerOverhead 'p05' interpolates between observed deltas", () => {
-  expect(
-    calibrateTimerOverhead(makeAscendingPairProvider(), {
-      estimator: 'p05',
-      pairs: 20,
-      warmupPairs: 0,
-    })
-  ).toBeCloseTo(1.95e-6, 12)
+  const p05 = calibrateTimerOverhead(makeAscendingPairProvider(), {
+    estimator: 'p05',
+    pairs: 20,
+    warmupPairs: 0,
+  })
+  const expectedP05 = 1.95e-6
+  expect(Math.abs(p05 - expectedP05)).toBeLessThanOrEqual(
+    expectedP05 * Number.EPSILON
+  )
   expect(
     calibrateTimerOverhead(makeAscendingPairProvider(), {
       estimator: 'p05',

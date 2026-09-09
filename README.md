@@ -390,12 +390,10 @@ dispersion describe these batch means, not the individual calls within a batch.
 
 Semantics:
 
-- `overriddenDuration` always drives the statistical sample;
-  `overriddenIterationCost` never does. When only one of them is
-  returned, the other side falls back to `overriddenDuration` when
-  present, otherwise to the timer-measured duration (returning only
-  `overriddenDuration` therefore keeps the historical behavior, where
-  it drives both the sample and the budget).
+- The sample uses a valid `overriddenDuration`, otherwise the timer-measured
+  duration. The sequential budget uses a valid `overriddenIterationCost`,
+  otherwise the sample before timer-overhead correction. Returning only
+  `overriddenDuration` therefore keeps the historical behavior.
 - `overriddenIterationCost` is ignored with `concurrency: 'task'`, where the
   budget is driven by the real clock. It still applies per task with
   `concurrency: 'bench'`, whose iterations stay sequential.
@@ -404,28 +402,20 @@ Semantics:
 - The cost field must be reported as present by the `in` operator (own or
   inherited). A proxy default for an absent key is not a declared cost. Errors
   while checking or reading this field are treated as an absent cost.
-- `overriddenIterationCost` never enters the samples: it is out of
-  scope of the timer-overhead correction, `Task.detectedResolution`
-  and timer-saturation detection. Note that `result.totalTime` and
-  `period` are computed from the samples, not from the declared costs.
-- Migrating from `overriddenDuration`-only to `overriddenIterationCost`-only
-  makes the samples timer-measured again, so timer-saturation warnings may
-  reappear; keep returning `overriddenDuration` to suppress them.
+- The cost does not affect timer-overhead correction or timer diagnostics;
+  these operate on samples. `result.totalTime` and `period` also remain
+  sample-derived. Returning only the cost leaves samples timer-measured,
+  so timer-saturation warnings may still occur.
 - The declared cost is not verified against reality: an iteration whose real
   wall-clock cost is `C` but declared as `O` stretches the run to about
   `time × C / O` when `O < C`, and shortens it when `O > C`, provided
   the time budget dominates the minimum iteration count.
-- **Warning.** Repeatedly declaring `0` (or `-0`) never advances a positive
-  time budget: without cancellation, the sequential run does not terminate.
-  With `time: 0`, the run can still finish after the minimum iteration count;
-  the same distinction applies to `warmupTime` and `warmupIterations`.
-  A timer-triggered abort requires the task function or a hook to yield to
-  the event loop (for example, by awaiting I/O); awaiting an already-resolved
-  promise is not sufficient. In `runSync()`, a task function or synchronous
-  hook can call `controller.abort()` on the associated `AbortController`,
-  but an external timer cannot interrupt the run. The same non-progress
-  hazard already exists with `overriddenDuration: 0`. Tiny or denormal costs
-  (e.g. `1e-300`) can make a positive budget impractical to reach too.
+- **Warning.** Repeated costs of `0` (or `-0`) cannot satisfy a positive
+  sequential time budget; tiny positive costs can make it impractical to reach.
+  With `time: 0`, the run can finish at the minimum iteration count. The same
+  rules apply to warmup. Cancellation from an external timer requires yielding
+  to the event loop and cannot interrupt `runSync()`; see
+  [Abort During Execution](#abort-during-execution).
 
 ## Timer Diagnostics
 
@@ -535,6 +525,12 @@ setTimeout(() => controller.abort(), 1000)
 await bench.run()
 // Task will stop after ~1 second instead of running for 10 seconds
 ```
+
+Timer-triggered cancellation requires the task or a hook to yield to the
+event loop, for example by awaiting I/O. Awaiting an already-resolved promise
+is not sufficient. In `runSync()`, a task or synchronous hook can call
+`controller.abort()` on the associated controller, but an external timer
+cannot interrupt the run.
 
 ### Abort Events
 

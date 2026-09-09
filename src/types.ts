@@ -346,11 +346,8 @@ export interface EventListenerObject<
  * several inner calls, also return `overriddenIterationCost` so the `time`
  * budget reflects the whole iteration while samples record batch means.
  *
- * Task results are intentionally unrestricted. To check measurement fields
- * statically, annotate the return as {@link FnReturnedObject} (or
- * `Promise<FnReturnedObject>` for an async task), or use
- * `satisfies FnReturnedObject` on the returned object. Annotating the function
- * as `Fn` alone does not validate its measurement fields.
+ * Task results are unrestricted. See {@link FnReturnedObject} for explicit
+ * compile-time checks of measurement fields.
  */
 export type Fn = () => unknown
 
@@ -411,9 +408,10 @@ export interface FnOptions {
 /**
  * A possible object returned by task functions to override default behaviors,
  * like the duration of the function itself.
- * Use this type as a return annotation, or with `satisfies` on a measurement
- * object, to check its fields at compile time. The `number` type does not
- * enforce finiteness or non-negativity; values are still validated at runtime.
+ * Annotate a callback return as this type (`Promise<FnReturnedObject>` for
+ * async callbacks), or use `satisfies FnReturnedObject` on the returned object
+ * to check measurement fields. Annotating the callback as {@link Fn} alone
+ * does not check them. Numeric values are still validated at runtime.
  */
 export interface FnReturnedObject {
   /**
@@ -426,24 +424,17 @@ export interface FnReturnedObject {
   overriddenDuration?: number
 
   /**
-   * The declared wall-clock duration (in milliseconds) of the whole task
-   * function call, consumed by the `time` and `warmupTime` budgets on the
-   * sequential paths. Ignored with `concurrency: 'task'` (that budget is
-   * driven by the real clock); it still applies per task with
-   * `concurrency: 'bench'`. Validated like `overriddenDuration` (finite
-   * number ≥ 0, `-0` included); an invalid value is treated as absent.
+   * The declared duration of the whole task function call, in milliseconds,
+   * consumed by the sequential `time` and `warmupTime` budgets. If absent or
+   * invalid, the budget uses the sample before timer-overhead correction.
    *
-   * This field NEVER replaces the statistical sample value; use
-   * `overriddenDuration` for that. It never enters the samples, so it is out
-   * of scope of the timer-overhead correction, `detectedResolution` and
-   * timer-saturation detection.
+   * Must be finite and non-negative (`0` and `-0` included). Own and inherited
+   * properties are supported; presence-check and access errors are treated
+   * as absence. Repeated zero costs cannot satisfy a positive time budget.
    *
-   * Useful when one iteration batches several inner calls: return
-   * `overriddenDuration: wall / innerCalls` for the mean duration per call
-   * in each batch, and `overriddenIterationCost: wall` for its budget cost.
-   * Percentiles and dispersion describe batch means, not individual calls.
-   * The run takes about `time` milliseconds of wall clock when the time
-   * budget dominates the minimum iteration count.
+   * Applies per task with `concurrency: 'bench'`; ignored with
+   * `concurrency: 'task'`, whose budget uses the clock. Does not affect samples,
+   * timer-overhead correction or timer diagnostics.
    */
   overriddenIterationCost?: number
 }

@@ -762,13 +762,9 @@ export class Task extends EventTarget {
 }
 
 /**
- * Extracts the declared `overriddenDuration` from a task function result if
- * present and valid (finite number ≥ 0, `-0` included); invalid values are
- * treated as absent.
- *
- * Preserves the historical presence check and propagation of access errors.
- * The value is read once, rather than repeatedly during validation; stateful
- * getters therefore need not produce the same result as before.
+ * Extracts a finite, non-negative `overriddenDuration`, otherwise undefined.
+ * Checks own and inherited properties, reads the value once and propagates
+ * presence-check and access errors.
  * @param fnResult - The result of the task function
  * @returns The declared duration in milliseconds, otherwise undefined
  */
@@ -789,16 +785,10 @@ function getOverriddenDurationFromFnResult (
 }
 
 /**
- * Extracts the declared `overriddenIterationCost` from a task function result
- * if present and valid (finite number ≥ 0, `-0` included); invalid values are
- * treated as absent. Never throws.
- *
- * The probe is defensive on purpose: unlike `overriddenDuration`, this field
- * has no historical behavior to preserve, and proxies whose `has` or `get`
- * traps reject unknown keys must keep working with their valid
- * `overriddenDuration` instead of erroring the run.
- * Check presence before reading so a proxy default for an absent key is not
- * mistaken for a declared cost. Inherited properties remain supported.
+ * Extracts a finite, non-negative `overriddenIterationCost`, otherwise undefined.
+ * Checks presence before reading so proxy defaults for absent keys are ignored.
+ * Supports inherited properties and treats presence-check or access errors as
+ * absence, allowing a valid `overriddenDuration` to remain usable.
  * @param fnResult - The result of the task function
  * @returns The declared cost in milliseconds, otherwise undefined
  */

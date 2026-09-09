@@ -303,7 +303,11 @@ console.log(bench.timerOverhead) // calibrated Ĉ in ms (or undefined)
 ```
 
 The calibration helper is also exported for direct use, with a
-configurable estimator strategy (`'median'` default, or `'min'` / `'p05'`):
+configurable estimator strategy (`'median'` default, or `'min'` / `'p05'`).
+The `'p05'` estimator uses the same linear quantile interpolation as the
+benchmark statistics: position `(n - 1) × 0.05` in the sorted positive
+deltas. Unlike nearest-rank selection, the estimate can lie between two
+observed deltas.
 
 ```ts
 import { calibrateTimerOverhead, hrtimeNowTimestampProvider } from 'tinybench'

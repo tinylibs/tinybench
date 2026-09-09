@@ -115,18 +115,18 @@ test('calibrateTimerOverhead estimators are ordered min ≤ p05 ≤ median', () 
     warmupPairs: 0,
   })
   expect(min).toBe(1e-6)
-  expect(p05).toBe(5e-6)
+  expect(p05).toBeCloseTo(5.95e-6, 12)
   expect(median).toBe(50.5e-6)
 })
 
-test("calibrateTimerOverhead 'p05' selects the index ⌈n·0.05⌉ − 1 delta", () => {
+test("calibrateTimerOverhead 'p05' interpolates between observed deltas", () => {
   expect(
     calibrateTimerOverhead(makeAscendingPairProvider(), {
       estimator: 'p05',
       pairs: 20,
       warmupPairs: 0,
     })
-  ).toBe(1e-6)
+  ).toBeCloseTo(1.95e-6, 12)
   expect(
     calibrateTimerOverhead(makeAscendingPairProvider(), {
       estimator: 'p05',
@@ -137,10 +137,10 @@ test("calibrateTimerOverhead 'p05' selects the index ⌈n·0.05⌉ − 1 delta",
   expect(
     calibrateTimerOverhead(makeAscendingPairProvider(), {
       estimator: 'p05',
-      pairs: 200,
+      pairs: 1,
       warmupPairs: 0,
     })
-  ).toBe(10e-6)
+  ).toBe(1e-6)
 })
 
 test('calibrateTimerOverhead with hrtimeNow returns a plausible overhead under 10 microseconds', () => {

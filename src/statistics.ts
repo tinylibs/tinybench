@@ -61,9 +61,9 @@ export const meanAndVariance = (
  * @param q - the quantile to compute
  * @returns the q-quantile of the sample
  */
-const quantileSorted = (
+export const quantileSorted = (
   samples: SortedSamples,
-  q: 0.5 | 0.75 | 0.99 | 0.995 | 0.999
+  q: 0.05 | 0.5 | 0.75 | 0.99 | 0.995 | 0.999
 ): number => {
   const base = (samples.length - 1) * q
   const baseIndex = Math.floor(base)

@@ -1,6 +1,6 @@
 import type { SortedSamples, TimerSaturationReason, TimestampProvider } from './types'
 
-import { sortFn } from './statistics'
+import { quantileSorted, sortFn } from './statistics'
 
 /**
  * Classifies timer saturation in a latency sample set.
@@ -131,8 +131,8 @@ export interface CalibrateTimerOverheadOptions {
  *   upward bias on noisy hosts.
  * - `'min'` — minimum of strictly-positive deltas. Captures the lowest
  *   observed call cost.
- * - `'p05'` — 5th percentile of strictly-positive deltas. A compromise
- *   between robustness and tightness.
+ * - `'p05'` — linearly interpolated 5th percentile of strictly-positive
+ *   deltas. A compromise between robustness and tightness.
  */
 export type TimerOverheadEstimatorKind = 'median' | 'min' | 'p05'
 
@@ -200,12 +200,7 @@ export const calibrateTimerOverhead = (
     return deltas[0]!
   }
   if (estimator === 'p05') {
-    // Nearest-rank: returns an actually observed delta, deliberately not an
-    // interpolated quantile (cf. the private `quantileSorted` in
-    // `./statistics`, whose `q` union excludes 0.05 anyway).
-    const idx = Math.max(0, Math.ceil(deltas.length * 0.05) - 1)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return deltas[idx]!
+    return quantileSorted(deltas as SortedSamples, 0.05)
   }
   const mid = deltas.length >> 1
   if ((deltas.length & 1) === 1) {

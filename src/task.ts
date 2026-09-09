@@ -85,15 +85,13 @@ export class Task extends EventTarget {
   ) => void) & EventTarget['removeEventListener']
 
   /**
-   * The estimated effective timer resolution observed during the last run,
-   * computed as the smallest strictly positive latency sample that repeats
-   * among the timer-measured samples, or the smallest strictly positive
-   * sample when none repeats (samples supplied via `overriddenDuration` are
-   * excluded). When `subtractTimerOverhead` is enabled the value is derived
-   * from the overhead-corrected samples rather than the raw timer grain.
-   * @returns The resolution in milliseconds, or `undefined` when no
-   *   timer-measured strictly positive sample was observed (e.g. every
-   *   sample was supplied via `overriddenDuration`)
+   * Sample-based timer-resolution heuristic for the last run. Returns the
+   * smallest positive latency repeated at least twice, otherwise the minimum
+   * positive latency. Uses timer-measured samples after overhead correction;
+   * samples supplied via `overriddenDuration` are excluded. This does not
+   * guarantee a bound on the timer's resolution.
+   * @returns The estimate in milliseconds, or `undefined` when no eligible
+   *   sample remains positive after correction.
    */
   get detectedResolution (): number | undefined {
     return this.#detectedResolution
@@ -123,8 +121,10 @@ export class Task extends EventTarget {
   }
 
   /**
-   * The number of times the task function has been executed.
-   * @returns The total number of executions performed
+   * The recorded sample count from run statistics or task-concurrent execution.
+   * Task-concurrent warmup also updates this counter; other warmup and
+   * async-detection calls do not.
+   * @returns The recorded sample count.
    */
   get runs (): number {
     return this.#runs
@@ -246,7 +246,9 @@ export class Task extends EventTarget {
   }
 
   /**
-   * Resets the task to make the `Task.runs` a zero-value and remove the `Task.result` object property.
+   * Clears the run count, statistics and diagnostics. The result becomes
+   * `not-started`, or stays `aborted` if a signal has aborted. Does not rearm
+   * an aborted signal.
    * @param emit - whether to emit the `reset` event or not
    */
   reset (emit = true): void {

@@ -5,7 +5,7 @@
 [![Discord](https://badgen.net/discord/online-members/c3UUYNcHrU?icon=discord&label=discord&color=green)](https://discord.gg/c3UUYNcHrU)
 [![neostandard Javascript Code Style](<https://badgen.net/static/code style/neostandard/green>)](https://github.com/neostandard/neostandard)
 
-Benchmark your code easily with Tinybench, a simple, tiny and light-weight `10KB` (`2KB` minified and gzipped) benchmarking library!
+Benchmark your code easily with Tinybench, a small, dependency-free benchmarking library!
 You can run your benchmarks in multiple JavaScript runtimes, Tinybench is completely based on the Web APIs with proper timing using
 `process.hrtime` or `performance.now`.
 
@@ -87,12 +87,12 @@ Both the `Task` and `Bench` classes extend the `EventTarget` object. So you can 
 ```js
 // runs on each benchmark task's cycle
 bench.addEventListener('cycle', (evt) => {
-  const task = evt.task!;
+  const task = evt.task;
 });
 
 // runs when timer saturation is detected for a task's measured samples
 bench.addEventListener('warning', (evt) => {
-  const task = evt.task!;
+  const task = evt.task;
   const reason = evt.reason; // 'zero-dominated' | 'low-distinct' | 'zero-mad'
 });
 ```
@@ -102,7 +102,7 @@ bench.addEventListener('warning', (evt) => {
 ```js
 // runs only on this benchmark task's cycle
 task.addEventListener('cycle', (evt) => {
-  const task = evt.task!;
+  const task = evt.task;
 });
 ```
 
@@ -147,10 +147,18 @@ await bench.run()
 ```ts
 const bench = new Bench({
   concurrency: 'task', // The concurrency mode to determine how tasks are run.
-  threshold: 10, // The maximum number of concurrent tasks to run. Defaults to Number.POSITIVE_INFINITY.
+  threshold: 10, // Maximum concurrent iterations within a task. Defaults to Infinity.
 })
 await bench.run()
 ```
+
+With `concurrency: null` or `'bench'`, each task runs until both its time
+budget and minimum iteration count are met. With `concurrency: 'task'`,
+iterations stop being scheduled when either positive limit is reached;
+`threshold` limits concurrent iterations within that task, not concurrent
+benchmark tasks. These rules also apply to `warmupTime` and `warmupIterations`
+in `warmup()`. `Task.warmupSync()` always uses the sequential rules, regardless
+of the configured concurrency.
 
 ## Convert task results for `console.table()`
 
@@ -394,9 +402,9 @@ Semantics:
   duration. The sequential budget uses a valid `overriddenIterationCost`,
   otherwise the sample before timer-overhead correction. Returning only
   `overriddenDuration` therefore keeps the historical behavior.
-- `overriddenIterationCost` is ignored with `concurrency: 'task'`, where the
-  budget is driven by the real clock. It still applies per task with
-  `concurrency: 'bench'`, whose iterations stay sequential.
+- Task-concurrent `run()` and `warmup()` use the real clock for their budgets
+  and ignore `overriddenIterationCost`. The cost applies per task with
+  `concurrency: 'bench'` and in `Task.warmupSync()` regardless of concurrency.
 - Both fields are validated the same way (finite number ≥ 0, `-0`
   included); an invalid value is treated as absent.
 - The cost field must be reported as present by the `in` operator (own or
@@ -420,19 +428,21 @@ Semantics:
 ## Timer Diagnostics
 
 After `bench.run()` (or `runSync()`), each task exposes
-`detectedResolution` — the smallest reproducibly observed positive
-sample (in ms) among the timer-measured samples, or `undefined` when no
-positive timer measurement was seen (e.g. every sample was overridden).
+`detectedResolution`: the smallest positive latency sample occurring at least
+twice, or the smallest positive sample if none repeats. Only timer-measured
+samples after any overhead correction are considered; if none is positive,
+the result is `undefined`. This is a sample-based heuristic, not a guaranteed
+bound on the timer's resolution.
 
 ```ts
 const task = bench.getTask('foo')
 console.log(task?.detectedResolution) // e.g. 0.000041 (≈ 41 ns)
 ```
 
-When the timer's resolution dominates a task's measured distribution
-(more than half zero samples, fewer than `max(3, min(10, ⌊n / 1000⌋))`
-distinct values, or zero MAD with `n > 100`), tinybench dispatches a
-`'warning'` event on both the task and the bench, carrying the matching
+With at least 10 such samples, tinybench dispatches a `'warning'` event on
+both the task and the bench when more than half are zero, fewer than
+`max(3, min(10, ⌊n / 1000⌋))` distinct values occur, or MAD is zero with
+`n > 100`. The event carries the matching
 [`TimerSaturationReason`](https://tinylibs.github.io/tinybench/types/TimerSaturationReason.html):
 
 ```ts
@@ -563,7 +573,9 @@ controller.abort()
 await bench.run()
 ```
 
-**Note:** When a task is aborted, `task.result.aborted` will be `true`, and the task will have completed any iterations that were running when the abort signal was received.
+**Note:** An aborted task has `task.result.state` equal to `'aborted'` or
+`'aborted-with-statistics'`. Iterations already in progress may finish before
+the run returns.
 
 ## Prior art
 

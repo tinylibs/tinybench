@@ -4,12 +4,14 @@
 
 If a task runs faster than the resolution of the timer your runtime provides,
 individual samples can measure as zero duration, which skews the reported
-latency. Tinybench surfaces this directly: after each run the task exposes the
-observed `detectedResolution` (or `undefined` when no positive timer sample was
-measured), and when a task's samples are dominated by the timer resolution it
-also dispatches a `'warning'` event (see the README
-[Timer Diagnostics](./README.md#timer-diagnostics) section). The resolution of
-the default timer varies by runtime and platform.
+latency. After each run, Tinybench exposes `detectedResolution`: the smallest
+positive timer-measured sample occurring at least twice, or the smallest
+positive sample if none repeats. Samples are considered after any overhead
+correction; the result is `undefined` if none is positive. This is a heuristic,
+not a guaranteed timer-resolution bound. With at least 10 such samples, a
+`'warning'` event can indicate timer-dominated results; see
+[Timer Diagnostics](./README.md#timer-diagnostics). Timer resolution varies
+by runtime and platform.
 
 Tinybench lets you choose a timestamp provider via the `timestampProvider`
 option, which accepts a `TimestampProvider` object or the shorthands
@@ -23,11 +25,11 @@ is converted to a provider internally and cannot be combined with
 `timestampProvider`.
 
 Beyond picking a higher-resolution provider, you can increase the benchmark
-`time` so more samples are collected (improving statistical confidence). The
-most reliable saturation signal is the `'warning'` event and
-`detectedResolution` (see [Timer Diagnostics](./README.md#timer-diagnostics));
-the relative margin of error (`rme`) is only a soft hint — a saturated task
-can report either a very high or a very low `rme`, so do not rely on it alone.
+`time` so more samples are collected (improving statistical confidence).
+Use the `'warning'` event and `detectedResolution` as heuristic indicators
+(see [Timer Diagnostics](./README.md#timer-diagnostics)), not proof of a timer
+limitation. The relative margin of error (`rme`) alone is insufficient:
+a saturated task can report either a very high or a very low `rme`.
 Manually looping a fast function to "amplify" its duration can lift a sample
 above the timer resolution, but it adds loop overhead and changes what you
 measure; a more precise timestamp provider is usually the cleaner fix.

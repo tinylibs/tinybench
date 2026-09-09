@@ -81,12 +81,15 @@ benchLike.removeEventListener(
 bench.removeEventListener('abort', event => {
   expectType<IsExact<typeof event, BenchEvent<'abort'>>>(true)
   expectType<IsExact<typeof event.type, 'abort'>>(true)
+  expectType<IsExact<typeof event.task, Task | undefined>>(true)
 })
 task.removeEventListener('abort', event => {
   expectType<IsExact<typeof event, BenchEvent<'abort', 'task'>>>(true)
+  expectType<IsExact<typeof event.task, Task>>(true)
 })
 benchLike.removeEventListener('abort', event => {
   expectType<IsExact<typeof event, BenchEvent<'abort'>>>(true)
+  expectType<IsExact<typeof event.task, Task | undefined>>(true)
 })
 
 task.addEventListener(

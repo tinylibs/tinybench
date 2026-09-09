@@ -1,4 +1,4 @@
-import { expectTypeOf, test } from 'vitest'
+import { expect, expectTypeOf, test } from 'vitest'
 
 import {
   Bench,
@@ -159,4 +159,23 @@ test('events properties', () => {
     expectTypeOf(evt).not.toBeAny()
     expectTypeOf(evt).toEqualTypeOf<Event>()
   })
+})
+
+test('bench abort listeners distinguish global and task aborts', () => {
+  const controller = new AbortController()
+  const bench = new Bench({ signal: controller.signal, warmup: false })
+    .add('abortable', () => undefined, { async: false })
+  const task = bench.getTask('abortable')
+  if (!task) return expect.unreachable()
+  const seen: (string | undefined)[] = []
+  bench.addEventListener('abort', event => {
+    expectTypeOf(event.task).toEqualTypeOf<Task | undefined>()
+    seen.push(event.task?.name)
+  })
+  task.addEventListener('abort', event => {
+    expectTypeOf(event.task).toEqualTypeOf<Task>()
+    expect(event.task).toBe(task)
+  })
+  controller.abort()
+  expect(seen).toEqual([undefined, 'abortable'])
 })

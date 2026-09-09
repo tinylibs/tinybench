@@ -45,18 +45,19 @@ class BenchEvent<
 
   /**
    * The task associated with the event.
-   * @returns The task if the event type is one that includes a task; otherwise, undefined
+   * @returns The task for task-scoped events and bench events that require one;
+   *   otherwise a task when the event is relayed, or `undefined` for a global event.
    */
   get task (): M extends 'task'
     ? Task
     : K extends BenchEventsWithTask
       ? Task
-      : undefined {
+      : Task | undefined {
     return this.#task as M extends 'task'
       ? Task
       : K extends BenchEventsWithTask
         ? Task
-        : undefined
+        : Task | undefined
   }
 
   #error?: Error

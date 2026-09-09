@@ -66,7 +66,7 @@ export interface BenchLike extends EventTarget {
    */
   concurrency: Concurrency
   /**
-   * The amount of executions per task.
+   * The iteration limit per task; see {@link BenchOptions.iterations}.
    */
   iterations: number
   /**
@@ -98,7 +98,7 @@ export interface BenchLike extends EventTarget {
    */
   runtimeVersion: string
   /**
-   * A setup function that runs before each task execution.
+   * A setup function called once per task and phase.
    */
   setup: (task: Task, mode: HookMode) => Promise<void> | void
   /**
@@ -106,11 +106,11 @@ export interface BenchLike extends EventTarget {
    */
   signal?: AbortSignal
   /**
-   * A teardown function that runs after each task execution.
+   * A teardown function called once per task and phase.
    */
   teardown: (task: Task, mode: HookMode) => Promise<void> | void
   /**
-   * The maximum number of concurrent tasks to run
+   * The maximum concurrent iterations within a task; only for `concurrency: 'task'`.
    */
   threshold: number
   /**
@@ -118,7 +118,7 @@ export interface BenchLike extends EventTarget {
    */
   throws: boolean
   /**
-   * The amount of time to run each task.
+   * The time budget per task in milliseconds; see {@link BenchOptions.time}.
    */
   time: number
   /**
@@ -137,11 +137,11 @@ export interface BenchLike extends EventTarget {
    */
   warmup: boolean
   /**
-   * The amount of warmup iterations per task.
+   * The warmup iteration limit per task; see {@link BenchOptions.warmupIterations}.
    */
   warmupIterations: number
   /**
-   * The amount of time to warmup each task.
+   * The warmup time budget in milliseconds; see {@link BenchOptions.warmupTime}.
    */
   warmupTime: number
 }
@@ -160,7 +160,10 @@ export interface BenchOptions {
   concurrency?: Concurrency
 
   /**
-   * The number of times that a task should run if even the time option is finished.
+   * Minimum iterations per task in sequential modes (`null` and `'bench'`).
+   * With `concurrency: 'task'`, a positive value instead caps scheduled
+   * iterations; scheduling stops when either positive iteration or time limit
+   * is reached. Zero disables this limit in that mode.
    * @default 64
    */
   iterations?: number
@@ -202,25 +205,16 @@ export interface BenchOptions {
    * {@link calibrateTimerOverhead}, and `max(0, raw_sample - Ĉ)` is used
    * in place of each non-overridden sample before statistics are computed.
    *
-   * **Statistics after correction.** All fields of {@link Statistics} are
-   * derived from the clamped corrected samples, not from the raw
-   * distribution. With `M` denoting the raw-sample mean:
+   * **Statistics after correction.** Statistics use the final samples, after
+   * correction and any duration overrides. When all latency samples are
+   * timer-measured and exceed `Ĉ`, subtracting the constant shifts location
+   * statistics by `Ĉ` while leaving variance and absolute dispersion unchanged
+   * apart from rounding. Relative error can increase as the mean decreases.
    *
-   * - **Clean-shift regime (`X >> Ĉ`).** The clamp `max(0, …)` rarely
-   *   triggers, so the correction acts as a translation by `Ĉ`. Location
-   *   statistics (`mean`, `min`, `max`, all percentiles) decrease by `Ĉ`;
-   *   absolute-unit dispersion (`vr`, `sd`, `sem`, `moe`, `mad`, `aad`)
-   *   is essentially unchanged. Because `rme = moe / mean`, it inflates
-   *   by the deterministic factor `M / (M − Ĉ)` whenever `Ĉ > 0`.
-   * - **Sub-overhead regime (`X ≈ Ĉ`).** A non-trivial fraction of
-   *   samples clamp to `0`, biasing the corrected mean upward,
-   *   contracting `vr`/`sd`/`sem`/`moe`/`aad`, and compounding the
-   *   `M / (M − Ĉ)` factor in `rme`. Once the cumulative mass of raw
-   *   samples at or below `Ĉ` reaches a given quantile, that percentile
-   *   collapses to `0`; in particular `p50` collapses once at least half
-   *   of the raw samples satisfy `raw_sample ≤ Ĉ`, which then forces
-   *   `mad` and `aad` toward `0`. Prefer `overriddenDuration` for
-   *   sub-overhead measurements.
+   * When samples clamp to zero, these translation rules no longer hold.
+   * Quantiles are interpolated: exactly half zero samples need not give a
+   * zero median, and a zero median does not imply zero mean absolute deviation.
+   * Prefer `overriddenDuration` for sub-overhead measurements.
    *
    * **Three observable consequences of the clamp.**
    *
@@ -244,8 +238,8 @@ export interface BenchOptions {
    * are never modified by the correction. They are also excluded from
    * {@link Task.detectedResolution} and from timer-saturation detection.
    *
-   * On runtimes with a coarse timer (resolution >= 1 ms), the
-   * calibration returns `0` and this option becomes a no-op.
+   * If fewer than half of the calibration pairs have positive deltas, the
+   * estimate is `0` and the correction is a no-op.
    * @default false
    */
   subtractTimerOverhead?: boolean
@@ -256,7 +250,8 @@ export interface BenchOptions {
   teardown?: Hook
 
   /**
-   * The maximum number of concurrent tasks to run
+   * Maximum concurrent iterations within a task. Only applies with
+   * `concurrency: 'task'`; does not limit concurrent benchmark tasks.
    * @default Number.POSITIVE_INFINITY
    */
   threshold?: number
@@ -268,7 +263,10 @@ export interface BenchOptions {
   throws?: boolean
 
   /**
-   * Time needed for running a benchmark task in milliseconds.
+   * Time budget per task in milliseconds. Sequential modes keep running
+   * until both this budget and the minimum iteration count are met. With
+   * `concurrency: 'task'`, a positive finite value instead limits scheduling
+   * by elapsed time; reaching either positive limit stops new iterations.
    * @default 1000
    */
   time?: number
@@ -286,13 +284,17 @@ export interface BenchOptions {
   warmup?: boolean
 
   /**
-   * Warmup iterations.
+   * Warmup iteration limit. {@link Task.warmup} uses the mode-dependent
+   * semantics of {@link iterations}; {@link Task.warmupSync} always treats
+   * this as a minimum.
    * @default 16
    */
   warmupIterations?: number
 
   /**
-   * Warmup time in milliseconds.
+   * Warmup time budget in milliseconds. {@link Task.warmup} uses the
+   * mode-dependent semantics of {@link time}; {@link Task.warmupSync}
+   * always uses the sequential budget.
    * @default 250
    */
   warmupTime?: number
@@ -353,7 +355,9 @@ export type Fn = () => unknown
 
 /**
  * The task hook function signature.
- * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
+ * Hooks apply to both run and warmup phases when warmup is enabled.
+ * `beforeAll`/`afterAll` run once per task and phase; `beforeEach`/`afterEach`
+ * run once per iteration.
  * @param mode the mode where the hook is being called
  */
 export type FnHook = (this: Task, mode?: HookMode) => Promise<void> | void
@@ -363,12 +367,12 @@ export type FnHook = (this: Task, mode?: HookMode) => Promise<void> | void
  */
 export interface FnOptions {
   /**
-   * An optional function that is run after all iterations of this task end
+   * Runs once after all iterations of a task phase (warmup or run).
    */
   afterAll?: FnHook
 
   /**
-   * An optional function that is run after each iteration of this task
+   * Runs after each iteration in both warmup and run phases.
    */
   afterEach?: FnHook
 
@@ -383,12 +387,12 @@ export interface FnOptions {
   async?: boolean
 
   /**
-   * An optional function that is run before iterations of this task begin
+   * Runs once before the iterations of a task phase (warmup or run).
    */
   beforeAll?: FnHook
 
   /**
-   * An optional function that is run before each iteration of this task
+   * Runs before each iteration in both warmup and run phases.
    */
   beforeEach?: FnHook
 
@@ -432,8 +436,9 @@ export interface FnReturnedObject {
    * properties are supported; presence-check and access errors are treated
    * as absence. Repeated zero costs cannot satisfy a positive time budget.
    *
-   * Applies per task with `concurrency: 'bench'`; ignored with
-   * `concurrency: 'task'`, whose budget uses the clock. Does not affect samples,
+   * Applies per task with `concurrency: 'bench'` and in
+   * {@link Task.warmupSync} regardless of concurrency. Ignored by task-concurrent
+   * `run()` and `warmup()`, whose budgets use the clock. Does not affect samples,
    * timer-overhead correction or timer diagnostics.
    */
   overriddenIterationCost?: number
@@ -441,7 +446,7 @@ export interface FnReturnedObject {
 
 /**
  * The hook function signature.
- * If warmup is enabled, the hook will be called twice, once for the warmup and once for the run.
+ * Called once per task and phase: warmup (if enabled), then run.
  * @param task the task instance
  * @param mode the mode where the hook is being called
  */
@@ -516,7 +521,9 @@ export type SortedSamples = Samples & {
 }
 
 /**
- * The statistics object
+ * Location and dispersion statistics use the samples' units (ms for latency,
+ * ops/s for throughput), except variance (squared units). Relative margin of
+ * error is a percentage; counts and critical values are dimensionless.
  */
 export interface Statistics {
   /**
@@ -585,7 +592,8 @@ export interface Statistics {
   p999: number
 
   /**
-   * relative margin of error
+   * Relative margin of error in percent: `100 * moe / abs(mean)`.
+   * Infinity when the mean is zero.
    */
   rme: number
 
@@ -610,7 +618,7 @@ export interface Statistics {
   sem: number
 
   /**
-   * variance
+   * Sample variance, in squared sample units.
    */
   variance: number
 }
@@ -737,28 +745,31 @@ export interface TaskResultTimestampProviderInfo {
  */
 export interface TaskResultWithStatistics {
   /**
-   * the task latency statistics
+   * Statistics of final latency samples in milliseconds.
    */
   latency: Statistics
 
   /**
-   * how long each operation takes (ms)
+   * Mean final latency in milliseconds: `totalTime / runs`.
    */
   period: number
 
   /**
-   * the task throughput statistics
+   * Throughput statistics in operations per second.
    */
   throughput: Statistics
 
   /**
-   * the time to run the task benchmark cycle (ms)
+   * Sum of final latency samples in milliseconds, after overrides and overhead
+   * correction; not elapsed wall time or the consumed iteration-cost budget.
    */
   totalTime: number
 }
 
 /**
  * Reason a sample set is classified as timer-saturated.
+ * Classification requires at least 10 samples. For task diagnostics these are
+ * timer-measured samples after correction; overridden samples are excluded.
  *
  * - `'zero-dominated'` — more than half of the samples are exactly zero.
  * - `'low-distinct'` — distinct sample count is below

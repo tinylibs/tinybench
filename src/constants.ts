@@ -1030,22 +1030,22 @@ export const tTable = [
 ] as const satisfies readonly number[]
 
 /**
- * The default minimum time in milliseconds for running each benchmark task.
+ * The default task time budget in milliseconds; see BenchOptions.time.
  */
 export const defaultMinimumTime = 1000
 
 /**
- * The default minimum number of iterations for each benchmark task.
+ * The default task iteration limit; see BenchOptions.iterations.
  */
 export const defaultMinimumIterations = 64
 
 /**
- * The default minimum warmup time in milliseconds.
+ * The default warmup time budget in milliseconds; see BenchOptions.warmupTime.
  */
 export const defaultMinimumWarmupTime = 250
 
 /**
- * The default minimum number of warmup iterations.
+ * The default warmup iteration limit; see BenchOptions.warmupIterations.
  */
 export const defaultMinimumWarmupIterations = 16
 

@@ -131,8 +131,8 @@ export interface CalibrateTimerOverheadOptions {
  *   upward bias on noisy hosts.
  * - `'min'` — minimum of strictly-positive deltas. Captures the lowest
  *   observed call cost.
- * - `'p05'` — linearly interpolated 5th percentile of strictly-positive
- *   deltas. A compromise between robustness and tightness.
+ * - `'p05'` — 5th percentile of strictly-positive deltas. A compromise
+ *   between robustness and tightness.
  */
 export type TimerOverheadEstimatorKind = 'median' | 'min' | 'p05'
 

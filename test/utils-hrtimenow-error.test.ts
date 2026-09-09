@@ -10,7 +10,7 @@ test('hrtimeNow - process.hrtime undefined', async () => {
 
     // Static import cannot work: `hrtimeBigint` binds its unsupported-
     // environment fallback at module evaluation, so evaluation must happen
-    // AFTER the mutation below. The `?in_test=1` query suffix busts the
+    // AFTER the mutation above. The `?in_test=1` query suffix busts the
     // runtime module cache — required under bun test, which shares its
     // registry across test files (`./timestamp` has held the binding since
     // the utils split) and harmless under vitest's per-file isolation.

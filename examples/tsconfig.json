@@ -3,6 +3,7 @@
   "include": ["./src/*.ts"],
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext"
+    "module": "ESNext",
+    "types": ["node", "bun"]
   }
 }

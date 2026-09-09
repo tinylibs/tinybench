@@ -57,6 +57,11 @@ describe('absoluteDeviationMedian()', () => {
     )
   })
 
+  it('Avoids overflow in the median of finite deviations', () => {
+    const samples = toSortedSamples([-Number.MAX_VALUE, Number.MAX_VALUE])
+    expect(absoluteDeviationMedian(samples, 0)).toBe(Number.MAX_VALUE)
+  })
+
   it('Single element', () => {
     const samples = toSortedSamples([42])
     expect(absoluteDeviationMedian(samples, medianFn(samples))).toBe(

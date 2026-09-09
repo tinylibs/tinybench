@@ -55,6 +55,12 @@ export const meanAndVariance = (
   }
 }
 
+const midpoint = (a: number, b: number): number => {
+  // Preserve subnormal rounding; halve first only when the sum overflows.
+  const sum = a + b
+  return Number.isFinite(sum) ? sum / 2 : a / 2 + b / 2
+}
+
 /**
  * Computes the q-quantile of a sorted sample.
  * @param samples - the sorted sample
@@ -76,11 +82,7 @@ export const quantileSorted = (
   const upper = samples[baseIndex + 1]!
   if (lower === upper) return lower
   const weight = base - baseIndex
-  if (weight === 0.5) {
-    // Preserve subnormal rounding; halve first only when the sum overflows.
-    const sum = lower + upper
-    return Number.isFinite(sum) ? sum / 2 : lower / 2 + upper / 2
-  }
+  if (weight === 0.5) return midpoint(lower, upper)
   return lower + weight * (upper - lower)
 }
 
@@ -154,7 +156,7 @@ export function absoluteDeviationMedian (
     if (l1 <= r2 && l2 <= r1) {
       return len & 1 // check for odd length
         ? Math.max(l1, l2)
-        : (Math.max(l1, l2) + Math.min(r1, r2)) / 2
+        : midpoint(Math.max(l1, l2), Math.min(r1, r2))
     }
 
     if (l1 > r2) {

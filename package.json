@@ -3,10 +3,10 @@
   "version": "6.1.6",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@11.25.0",
+  "packageManager": "pnpm@12.3.4",
   "volta": {
-    "node": "24.20.0",
-    "pnpm": "11.25.0"
+    "node": "24.21.0",
+    "pnpm": "12.3.4"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -50,29 +50,29 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260902.1",
+    "@cloudflare/workers-types": "^5.20260906.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
-    "@cspell/eslint-plugin": "^10.2.0",
+    "@cspell/eslint-plugin": "^10.2.2",
     "@eslint/js": "^9.39.5",
     "@size-limit/preset-small-lib": "^13.0.3",
     "@size-limit/time": "^13.0.3",
     "@types/node": "^24.13.3",
-    "@vitest/coverage-v8": "^4.1.11",
-    "bumpp": "^12.2.2",
+    "@vitest/coverage-v8": "^5.0.0",
+    "bumpp": "^12.3.0",
     "changelogithub": "^15.0.5",
     "clean-publish": "^7.1.0",
     "eslint": "^9.39.5",
-    "eslint-plugin-jsdoc": "^64.3.4",
+    "eslint-plugin-jsdoc": "^64.3.6",
     "eslint-plugin-perfectionist": "^5.11.0",
     "nano-staged": "^1.0.2",
     "neostandard": "^0.13.0",
     "simple-git-hooks": "^2.14.0",
     "size-limit": "^13.0.3",
-    "tsdown": "^0.22.14",
+    "tsdown": "^0.23.0",
     "typedoc": "^0.28.20",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "keywords": [
     "benchmark",

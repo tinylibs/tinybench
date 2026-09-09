@@ -21,9 +21,9 @@ test('subtractTimerOverhead does not modify samples returned via overriddenDurat
   expect(task.result.state).toBe('completed')
   if (task.result.state !== 'completed') return
 
-  expect(task.result.latency.mean).toBeCloseTo(target, 5)
-  expect(task.result.latency.min).toBeCloseTo(target, 5)
-  expect(task.result.latency.max).toBeCloseTo(target, 5)
+  expect(task.result.latency.mean).toBe(target)
+  expect(task.result.latency.min).toBe(target)
+  expect(task.result.latency.max).toBe(target)
 })
 
 test('warning event is not dispatched for fully-overridden constant duration (issue #10)', async () => {

@@ -9,7 +9,8 @@ interface WithConcurrencyOptions<R> {
    */
   fn: () => Promise<R>
   /**
-   * The number of iterations to execute. If 0, runs until time limit is reached.
+   * The number of iterations to execute. Zero disables this limit and requires
+   * a finite `limit`.
    */
   iterations: number
   /**

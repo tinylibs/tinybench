@@ -163,7 +163,8 @@ export interface BenchOptions {
    * Minimum iterations per task in sequential modes (`null` and `'bench'`).
    * With `concurrency: 'task'`, a positive value instead caps scheduled
    * iterations; scheduling stops when either positive iteration or time limit
-   * is reached. Zero disables this limit in that mode.
+   * is reached. Zero disables this limit in that mode and requires a finite
+   * `threshold` (for example, `threshold: 10`), not the default `Infinity`.
    * @default 64
    */
   iterations?: number
@@ -252,6 +253,8 @@ export interface BenchOptions {
   /**
    * Maximum concurrent iterations within a task. Only applies with
    * `concurrency: 'task'`; does not limit concurrent benchmark tasks.
+   * A finite value is required for a task-concurrent cycle with a zero
+   * iteration limit (`iterations` for run or `warmupIterations` for warmup).
    * @default Number.POSITIVE_INFINITY
    */
   threshold?: number

@@ -156,7 +156,9 @@ With `concurrency: null` or `'bench'`, each task runs until both its time
 budget and minimum iteration count are met. With `concurrency: 'task'`,
 iterations stop being scheduled when either positive limit is reached;
 `threshold` limits concurrent iterations within that task, not concurrent
-benchmark tasks. These rules also apply to `warmupTime` and `warmupIterations`
+benchmark tasks. Disabling the iteration limit with `iterations: 0` requires
+a finite `threshold` (for example, `threshold: 10`), not the default
+`Infinity`. These rules also apply to `warmupTime` and `warmupIterations`
 in `warmup()`. `Task.warmupSync()` always uses the sequential rules, regardless
 of the configured concurrency.
 

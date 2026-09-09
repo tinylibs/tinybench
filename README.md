@@ -350,7 +350,9 @@ value. Useful for externally-timed work or sub-overhead measurements
 that the timer cannot resolve.
 
 ```ts
-bench.add('externally-timed', () => {
+import type { FnReturnedObject } from 'tinybench'
+
+bench.add('externally-timed', (): FnReturnedObject => {
   const start = process.hrtime.bigint()
   doWork()
   const elapsedMs = Number(process.hrtime.bigint() - start) / 1e6
@@ -369,6 +371,8 @@ the `time` / `warmupTime` budget. Return `overriddenIterationCost`
 (in ms) to declare the whole iteration's wall-clock cost:
 
 ```ts
+import type { FnReturnedObject } from 'tinybench'
+
 bench.add('batched', () => {
   const innerCalls = 100
   const start = process.hrtime.bigint()
@@ -377,7 +381,7 @@ bench.add('batched', () => {
   return {
     overriddenDuration: elapsedMs / innerCalls, // mean per call in this batch
     overriddenIterationCost: elapsedMs, // budget cost of the iteration
-  }
+  } satisfies FnReturnedObject
 })
 ```
 
@@ -419,6 +423,33 @@ Semantics:
   but an external timer cannot interrupt the run. The same non-progress
   hazard already exists with `overriddenDuration: 0`. Tiny or denormal costs
   (e.g. `1e-300`) can make a positive budget impractical to reach too.
+
+### Checking measurement types in TypeScript
+
+Task functions may return ordinary values, including numbers, business objects
+and promises. `Fn` deliberately returns `unknown`; neither `Bench.add` nor
+`Task` automatically rejects incorrectly typed fields in an unannotated result.
+
+To check measurement fields at compile time, annotate a synchronous callback
+with `: FnReturnedObject`, an async callback with `: Promise<FnReturnedObject>`,
+or use `satisfies FnReturnedObject` on the returned measurement object, as above.
+An annotation of the function as `Fn` alone does not perform this check.
+
+```ts
+import type { FnReturnedObject } from 'tinybench'
+
+bench.add('async-measured', async (): Promise<FnReturnedObject> => {
+  const start = performance.now()
+  await doAsyncWork()
+  return { overriddenDuration: performance.now() - start }
+})
+```
+
+Both fields are optional. With `exactOptionalPropertyTypes` enabled, omit an
+unused field rather than explicitly assigning `undefined`. A `number` type
+does not guarantee a finite, non-negative value: runtime validation still applies.
+Keep the measurement shape visible to TypeScript; `any`, type assertions, or
+an already-widened return type can bypass or erase the static check.
 
 ## Timer Diagnostics
 

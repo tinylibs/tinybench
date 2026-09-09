@@ -344,14 +344,15 @@ export interface EventListenerObject<
  * object with a `overriddenDuration` field. You should still use
  * `bench.now()` to measure that duration. When the task function batches
  * several inner calls, also return `overriddenIterationCost` so the `time`
- * budget reflects the whole iteration while statistics stay per call.
+ * budget reflects the whole iteration while samples record batch means.
+ *
+ * Task results are intentionally unrestricted. To check measurement fields
+ * statically, annotate the return as {@link FnReturnedObject} (or
+ * `Promise<FnReturnedObject>` for an async task), or use
+ * `satisfies FnReturnedObject` on the returned object. Annotating the function
+ * as `Fn` alone does not validate its measurement fields.
  */
-export type Fn = () =>
-  | FnReturnedObject
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  | Promise<FnReturnedObject | unknown>
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  | unknown
+export type Fn = () => unknown
 
 /**
  * The task hook function signature.
@@ -410,6 +411,9 @@ export interface FnOptions {
 /**
  * A possible object returned by task functions to override default behaviors,
  * like the duration of the function itself.
+ * Use this type as a return annotation, or with `satisfies` on a measurement
+ * object, to check its fields at compile time. The `number` type does not
+ * enforce finiteness or non-negativity; values are still validated at runtime.
  */
 export interface FnReturnedObject {
   /**

@@ -16,14 +16,10 @@ describe('meanAndVariance()', () => {
   })
 
   it('computes correct meanAndVariance for small arrays', () => {
-    // Reference: meanAndVariance([1, 2, 3]) = 1
-    expect(meanAndVariance([1, 2, 3]).vr).toBeCloseTo(1, 10)
+    expect(meanAndVariance([1, 2, 3]).vr).toBe(1)
 
-    // Reference: meanAndVariance([2, 4, 4, 4, 5, 5, 7, 9]) = 4.57142857
-    expect(meanAndVariance([2, 4, 4, 4, 5, 5, 7, 9]).vr).toBeCloseTo(
-      4.57142857,
-      8
-    )
+    // Sum of squared deviations is 32; sample variance divides by 7.
+    expect(meanAndVariance([2, 4, 4, 4, 5, 5, 7, 9]).vr).toBe(32 / 7)
   })
 
   it('matches known population vs sample behavior', () => {
@@ -32,12 +28,12 @@ describe('meanAndVariance()', () => {
     const avg = 2.5
     const sumSq = samples.reduce((acc, x) => acc + (x - avg) ** 2, 0)
     const expected = sumSq / (samples.length - 1)
-    expect(meanAndVariance(samples).vr).toBeCloseTo(expected, 12)
+    expect(meanAndVariance(samples).vr).toBe(expected)
   })
 
   it('handles negative and mixed numbers', () => {
-    expect(meanAndVariance([-1, 0, 1]).vr).toBeCloseTo(1, 10)
-    expect(meanAndVariance([-5, -10, 0, 10, 5]).vr).toBeCloseTo(62.5, 10)
+    expect(meanAndVariance([-1, 0, 1]).vr).toBe(1)
+    expect(meanAndVariance([-5, -10, 0, 10, 5]).vr).toBe(62.5)
   })
 
   it('handles floating point numbers accurately', () => {

@@ -103,11 +103,19 @@ test('computeStatistics - big sample [0, 1, 2, 3, ...(n+1)[]]', () => {
   expect(stats.sem, 'sem').toBe(12.913171570144957)
   expect(stats.moe, 'moe').toBe(25.309816277484117)
   expect(stats.rme, 'rme').toBe(2.532247751624224)
-  expect(stats.p50, 'p50').toBeCloseTo(999.5)
-  expect(stats.p75, 'p75').toBeCloseTo(1499.25)
-  expect(stats.p99, 'p99').toBeCloseTo(1979.01)
-  expect(stats.p995, 'p995').toBeCloseTo(1989)
-  expect(stats.p999, 'p999').toBeCloseTo(1997)
+  expect(stats.p50, 'p50').toBe(999.5)
+  expect(stats.p75, 'p75').toBe(1499.25)
+  for (const [quantile, expected] of [
+    ['p99', 1979.01],
+    ['p995', 1989.005],
+    ['p999', 1997.001],
+  ] as const) {
+    expect(Math.abs(stats[quantile] - expected), quantile).toBeLessThanOrEqual(
+      expected * Number.EPSILON
+    )
+  }
   expect(stats.mad, 'mad').toBe(500)
-  expect(stats.aad, 'aad').toBeCloseTo(500)
+  expect(Math.abs(stats.aad - 500), 'aad').toBeLessThanOrEqual(
+    500 * Number.EPSILON
+  )
 })

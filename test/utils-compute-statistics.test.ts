@@ -42,6 +42,16 @@ test('computeStatistics', () => {
   expect(stats.aad, 'aad').toBe(1.7142857142857142)
 })
 
+test('computeStatistics - finite percentile despite overflowing sample range', () => {
+  const stats = computeStatistics(
+    toSortedSamples([-Number.MAX_VALUE, Number.MAX_VALUE])
+  )
+  const expected = Number.MAX_VALUE / 2
+  expect(Math.abs(stats.p75 - expected)).toBeLessThanOrEqual(
+    expected * Number.EPSILON
+  )
+})
+
 test('computeStatistics - sample [0]', () => {
   const stats = computeStatistics(toSortedSamples([0]))
   expect(stats.min, 'min').toBe(0)

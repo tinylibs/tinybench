@@ -83,7 +83,11 @@ export const quantileSorted = (
   if (lower === upper) return lower
   const weight = base - baseIndex
   if (weight === 0.5) return midpoint(lower, upper)
-  return lower + weight * (upper - lower)
+  const delta = upper - lower
+  // Opposite-sign endpoints can overflow the difference, not the quantile.
+  return Number.isFinite(delta)
+    ? lower + weight * delta
+    : (1 - weight) * lower + weight * upper
 }
 
 /**

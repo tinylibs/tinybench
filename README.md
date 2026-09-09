@@ -375,11 +375,14 @@ bench.add('batched', () => {
   for (let i = 0; i < innerCalls; i++) parse(input)
   const elapsedMs = Number(process.hrtime.bigint() - start) / 1e6
   return {
-    overriddenDuration: elapsedMs / innerCalls, // per-call statistic
+    overriddenDuration: elapsedMs / innerCalls, // mean per call in this batch
     overriddenIterationCost: elapsedMs, // budget cost of the iteration
   }
 })
 ```
+
+Each sample is the mean duration per call in one batch. Percentiles and
+dispersion describe these batch means, not the individual calls within a batch.
 
 Semantics:
 
@@ -403,15 +406,19 @@ Semantics:
   reappear; keep returning `overriddenDuration` to suppress them.
 - The declared cost is not verified against reality: an iteration whose real
   wall-clock cost is `C` but declared as `O` stretches the run to about
-  `time × C / O` when `O < C`, and shortens it when `O > C`.
-- **Warning.** A declared cost of `0` (or `-0`) never advances the
-  budget: the sequential run hangs. An external `AbortSignal` can only
-  interrupt it if the task function yields to the event loop (`await`
-  I/O); in `runSync()` an external abort is never honored mid-run
-  (only a synchronous `signal.abort()` call from inside the task
-  function is). The same hazard already exists with
-  `overriddenDuration: 0`. Tiny or denormal costs (e.g. `1e-300`)
-  effectively freeze the budget too.
+  `time × C / O` when `O < C`, and shortens it when `O > C`, provided
+  the time budget dominates the minimum iteration count.
+- **Warning.** Repeatedly declaring `0` (or `-0`) never advances a positive
+  time budget: without cancellation, the sequential run does not terminate.
+  With `time: 0`, the run can still finish after the minimum iteration count;
+  the same distinction applies to `warmupTime` and `warmupIterations`.
+  A timer-triggered abort requires the task function or a hook to yield to
+  the event loop (for example, by awaiting I/O); awaiting an already-resolved
+  promise is not sufficient. In `runSync()`, a task function or synchronous
+  hook can call `controller.abort()` on the associated `AbortController`,
+  but an external timer cannot interrupt the run. The same non-progress
+  hazard already exists with `overriddenDuration: 0`. Tiny or denormal costs
+  (e.g. `1e-300`) can make a positive budget impractical to reach too.
 
 ## Timer Diagnostics
 

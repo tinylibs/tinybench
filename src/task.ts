@@ -766,9 +766,9 @@ export class Task extends EventTarget {
  * present and valid (finite number ≥ 0, `-0` included); invalid values are
  * treated as absent.
  *
- * This mirrors the historical probe exactly (`in` followed by the read), so
- * proxies whose traps throw for `overriddenDuration` propagate that error
- * like they did before `overriddenIterationCost` existed.
+ * Preserves the historical presence check and propagation of access errors.
+ * The value is read once, rather than repeatedly during validation; stateful
+ * getters therefore need not produce the same result as before.
  * @param fnResult - The result of the task function
  * @returns The declared duration in milliseconds, otherwise undefined
  */

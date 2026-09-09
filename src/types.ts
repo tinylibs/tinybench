@@ -435,9 +435,11 @@ export interface FnReturnedObject {
    * timer-saturation detection.
    *
    * Useful when one iteration batches several inner calls: return
-   * `overriddenDuration: wall / innerCalls` for per-call statistics and
-   * `overriddenIterationCost: wall` so the benchmark still runs for about
-   * `time` milliseconds of wall clock.
+   * `overriddenDuration: wall / innerCalls` for the mean duration per call
+   * in each batch, and `overriddenIterationCost: wall` for its budget cost.
+   * Percentiles and dispersion describe batch means, not individual calls.
+   * The run takes about `time` milliseconds of wall clock when the time
+   * budget dominates the minimum iteration count.
    */
   overriddenIterationCost?: number
 }

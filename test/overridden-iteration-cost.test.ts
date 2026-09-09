@@ -3,12 +3,9 @@ import { expect, test } from 'vitest'
 import { Bench } from '../src'
 
 /**
- * Most tests use a constant clock (`now: () => 100`) where the tinybench-measured
- * wall duration of every iteration is exactly `0` ms: any regression that
- * accumulates the measured wall instead of the declared cost into the `time`
- * budget never terminates and fails via the test timeout. The timer-overhead
- * correction and diagnostics tests use step or cycling clocks instead and pin
- * their behavior through exact assertions.
+ * Constant clocks keep measured samples at zero. Callback bounds make budget
+ * regressions fail synchronously instead of starving the test timeout timer.
+ * Step and cycling clocks exercise timer correction and diagnostics.
  */
 
 test('overriddenDuration alone drives the time budget (async)', async () => {
@@ -20,7 +17,10 @@ test('overriddenDuration alone drives the time budget (async)', async () => {
     warmup: false,
   })
 
-  bench.add('foo', () => {
+  let calls = 0
+  bench.add('foo', async () => {
+    if (++calls > 100) throw new Error('iteration bound exceeded')
+    await Promise.resolve()
     return { overriddenDuration: 50 }
   })
 
@@ -42,7 +42,9 @@ test('overriddenDuration alone drives the time budget (sync)', () => {
     warmup: false,
   })
 
+  let calls = 0
   bench.add('foo', () => {
+    if (++calls > 100) throw new Error('iteration bound exceeded')
     return { overriddenDuration: 50 }
   })
 
@@ -64,7 +66,10 @@ test('overriddenIterationCost decouples budget from sample (async)', async () =>
     warmup: false,
   })
 
-  bench.add('batch', () => {
+  let calls = 0
+  bench.add('batch', async () => {
+    if (++calls > 100) throw new Error('iteration bound exceeded')
+    await Promise.resolve()
     return { overriddenDuration: 0.5, overriddenIterationCost: 25 }
   })
 
@@ -89,7 +94,9 @@ test('overriddenIterationCost decouples budget from sample (sync)', () => {
     warmup: false,
   })
 
+  let calls = 0
   bench.add('batch', () => {
+    if (++calls > 100) throw new Error('iteration bound exceeded')
     return { overriddenDuration: 0.5, overriddenIterationCost: 25 }
   })
 
@@ -112,7 +119,10 @@ test('overriddenIterationCost alone keeps timer-measured samples', async () => {
     warmup: false,
   })
 
-  bench.add('oic', () => {
+  let calls = 0
+  bench.add('oic', async () => {
+    if (++calls > 100) throw new Error('iteration bound exceeded')
+    await Promise.resolve()
     return { overriddenIterationCost: 5 }
   })
 
@@ -135,7 +145,9 @@ test('overriddenIterationCost alone keeps timer-measured samples (sync)', () => 
     warmup: false,
   })
 
+  let calls = 0
   bench.add('oic', () => {
+    if (++calls > 100) throw new Error('iteration bound exceeded')
     return { overriddenIterationCost: 5 }
   })
 
@@ -160,7 +172,10 @@ test('invalid overriddenIterationCost is treated as absent (async)', async () =>
       warmup: false,
     })
 
-    bench.add('foo', () => {
+    let calls = 0
+    bench.add('foo', async () => {
+      if (++calls > 100) throw new Error('iteration bound exceeded')
+      await Promise.resolve()
       return { overriddenDuration: 2, overriddenIterationCost: cost }
     })
 
@@ -186,7 +201,9 @@ test('invalid overriddenIterationCost is treated as absent (sync)', () => {
       warmup: false,
     })
 
+    let calls = 0
     bench.add('foo', () => {
+      if (++calls > 100) throw new Error('iteration bound exceeded')
       return { overriddenDuration: 2, overriddenIterationCost: cost }
     })
 
@@ -201,27 +218,33 @@ test('invalid overriddenIterationCost is treated as absent (sync)', () => {
   }
 })
 
-test('overriddenIterationCost is a no-op with task concurrency', async () => {
-  const bench = new Bench({
-    concurrency: 'task',
-    iterations: 7,
-    now: () => 100,
-    throws: true,
-    time: 0,
-    warmup: false,
-  })
+test('overriddenIterationCost does not control the task concurrency budget', async () => {
+  for (const cost of [0, 1000]) {
+    let tick = 0
+    let calls = 0
+    const bench = new Bench({
+      concurrency: 'task',
+      iterations: 0,
+      now: () => ++tick,
+      threshold: 1,
+      throws: true,
+      time: 15,
+      warmup: false,
+    })
 
-  bench.add('concurrent', () => {
-    return { overriddenIterationCost: 1000 }
-  })
+    bench.add('concurrent', async () => {
+      if (++calls > 100) throw new Error('iteration bound exceeded')
+      await Promise.resolve()
+      return { overriddenDuration: 2, overriddenIterationCost: cost }
+    }, { async: true })
 
-  await bench.run()
+    await bench.run()
 
-  const concurrentTask = bench.getTask('concurrent')
-  if (!concurrentTask) return expect.unreachable()
-  expect(concurrentTask.result.state).toBe('completed')
-  if (concurrentTask.result.state !== 'completed') return
-  expect(concurrentTask.runs).toBe(7)
+    const concurrentTask = bench.getTask('concurrent')
+    if (!concurrentTask) return expect.unreachable()
+    expect(concurrentTask.result.state).toBe('completed')
+    expect(concurrentTask.runs).toBe(5)
+  }
 })
 
 test('overriddenIterationCost drives the warmup budget (async)', async () => {
@@ -236,10 +259,11 @@ test('overriddenIterationCost drives the warmup budget (async)', async () => {
   })
 
   let calls = 0
-  bench.add('warm', () => {
-    calls += 1
+  bench.add('warm', async () => {
+    if (++calls > 100) throw new Error('iteration bound exceeded')
+    await Promise.resolve()
     return { overriddenIterationCost: 10 }
-  }, { async: false })
+  }, { async: true })
 
   await bench.run()
 
@@ -259,7 +283,7 @@ test('overriddenIterationCost drives the warmup budget (sync)', () => {
 
   let calls = 0
   bench.add('warm', () => {
-    calls += 1
+    if (++calls > 100) throw new Error('iteration bound exceeded')
     return { overriddenIterationCost: 10 }
   }, { async: false })
 
@@ -374,7 +398,9 @@ test('override field lookup tolerates rejecting proxies', async () => {
     },
   })
 
+  let calls = 0
   bench.add('proxy', () => {
+    if (++calls > 100) throw new Error('iteration bound exceeded')
     return rejectingProxy
   }, { async: false })
 

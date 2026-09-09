@@ -9,7 +9,8 @@ interface WithConcurrencyOptions<R> {
    */
   fn: () => Promise<R>
   /**
-   * The number of iterations to execute. If 0, runs until time limit is reached.
+   * The number of iterations to execute. Zero disables this limit and requires
+   * a finite `limit`.
    */
   iterations: number
   /**
@@ -21,8 +22,9 @@ interface WithConcurrencyOptions<R> {
    */
   signal?: AbortSignal | undefined
   /**
-   * The maximum amount of time to run the executions in milliseconds. If 0,
-   * runs until iterations are completed.
+   * Time budget for starting iterations, in milliseconds. Already-started
+   * calls are awaited without a completion deadline. Zero disables this
+   * time limit; the iteration limit still applies.
    */
   time?: number
   /**

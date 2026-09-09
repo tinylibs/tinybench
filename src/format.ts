@@ -28,7 +28,8 @@ export const formatNumber = (
     return value.toFixed(maxFractionDigits)
   }
 
-  // Avoid scientific notation
+  // Use fixed-point notation for magnitudes below 1e21.
+  // At or above that magnitude, toFixed uses exponent notation.
   const decimals = Math.min(
     Math.max(0, significantDigits - (Math.floor(Math.log10(absValue)) + 1)),
     maxFractionDigits

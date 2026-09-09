@@ -94,7 +94,6 @@ test('events order (async)', async () => {
 
   setTimeout(() => {
     controller.abort()
-    // the abort task takes 1000ms (500ms time || 10 iterations => 10 * 1000)
   }, 900)
   await bench.run()
   bench.reset()

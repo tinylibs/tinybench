@@ -1,4 +1,4 @@
-import { expectTypeOf, test } from 'vitest'
+import { expect, expectTypeOf, test } from 'vitest'
 
 import {
   Bench,
@@ -96,6 +96,7 @@ test('events properties', () => {
 
   bench.addEventListener('complete', evt => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'complete'>>()
+    expectTypeOf(evt.task).toEqualTypeOf<undefined>()
   })
 
   bench.addEventListener('cycle', evt => {
@@ -112,10 +113,12 @@ test('events properties', () => {
 
   bench.addEventListener('reset', evt => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'reset'>>()
+    expectTypeOf(evt.task).toEqualTypeOf<undefined>()
   })
 
   bench.addEventListener('start', evt => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'start'>>()
+    expectTypeOf(evt.task).toEqualTypeOf<undefined>()
   })
 
   bench.addEventListener('warning', evt => {
@@ -124,6 +127,7 @@ test('events properties', () => {
 
   bench.addEventListener('warmup', evt => {
     expectTypeOf(evt).toEqualTypeOf<BenchEvent<'warmup'>>()
+    expectTypeOf(evt.task).toEqualTypeOf<undefined>()
   })
 
   bench.addEventListener('custom', evt => {
@@ -159,4 +163,23 @@ test('events properties', () => {
     expectTypeOf(evt).not.toBeAny()
     expectTypeOf(evt).toEqualTypeOf<Event>()
   })
+})
+
+test('bench abort listeners distinguish global and task aborts', () => {
+  const controller = new AbortController()
+  const bench = new Bench({ signal: controller.signal, warmup: false })
+    .add('abortable', () => undefined, { async: false })
+  const task = bench.getTask('abortable')
+  if (!task) return expect.unreachable()
+  const seen: (string | undefined)[] = []
+  bench.addEventListener('abort', event => {
+    expectTypeOf(event.task).toEqualTypeOf<Task | undefined>()
+    seen.push(event.task?.name)
+  })
+  task.addEventListener('abort', event => {
+    expectTypeOf(event.task).toEqualTypeOf<Task>()
+    expect(event.task).toBe(task)
+  })
+  controller.abort()
+  expect(seen).toEqual([undefined, 'abortable'])
 })

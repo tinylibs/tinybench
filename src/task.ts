@@ -85,15 +85,13 @@ export class Task extends EventTarget {
   ) => void) & EventTarget['removeEventListener']
 
   /**
-   * The estimated effective timer resolution observed during the last run,
-   * computed as the smallest strictly positive latency sample that repeats
-   * among the timer-measured samples, or the smallest strictly positive
-   * sample when none repeats (samples supplied via `overriddenDuration` are
-   * excluded). When `subtractTimerOverhead` is enabled the value is derived
-   * from the overhead-corrected samples rather than the raw timer grain.
-   * @returns The resolution in milliseconds, or `undefined` when no
-   *   timer-measured strictly positive sample was observed (e.g. every
-   *   sample was supplied via `overriddenDuration`)
+   * Sample-based timer-resolution heuristic for the last run. Returns the
+   * smallest positive latency repeated at least twice, otherwise the minimum
+   * positive latency. Uses timer-measured samples after overhead correction;
+   * samples supplied via `overriddenDuration` are excluded. This does not
+   * guarantee a bound on the timer's resolution.
+   * @returns The estimate in milliseconds, or `undefined` when no eligible
+   *   sample remains positive after correction.
    */
   get detectedResolution (): number | undefined {
     return this.#detectedResolution
@@ -123,8 +121,10 @@ export class Task extends EventTarget {
   }
 
   /**
-   * The number of times the task function has been executed.
-   * @returns The total number of executions performed
+   * The recorded sample count from run statistics or task-concurrent execution.
+   * Task-concurrent warmup also updates this counter; other warmup and
+   * async-detection calls do not.
+   * @returns The recorded sample count.
    */
   get runs (): number {
     return this.#runs
@@ -246,7 +246,9 @@ export class Task extends EventTarget {
   }
 
   /**
-   * Resets the task to make the `Task.runs` a zero-value and remove the `Task.result` object property.
+   * Clears the run count, statistics and diagnostics. The result becomes
+   * `not-started`, or stays `aborted` if a signal has aborted. Does not rearm
+   * an aborted signal.
    * @param emit - whether to emit the `reset` event or not
    */
   reset (emit = true): void {
@@ -379,6 +381,7 @@ export class Task extends EventTarget {
         await this.#fnOpts.beforeAll.call(this, mode)
       }
 
+      const sequential = this.#bench.concurrency !== 'task'
       let totalTime = 0 // ms
       const samples: number[] = []
       const overriddenIndices = new Set<number>()
@@ -392,13 +395,13 @@ export class Task extends EventTarget {
             await this.#fnOpts.beforeEach.call(this, mode)
           }
 
-          const { overridden, taskTime } = this.#async
-            ? await this.#measure()
-            : this.#measureSync()
+          const { iterationCost, overridden, taskTime } = this.#async
+            ? await this.#measure(sequential)
+            : this.#measureSync(sequential)
 
           const idx = samples.push(taskTime) - 1
           if (overridden) overriddenIndices.add(idx)
-          totalTime += taskTime
+          if (sequential) totalTime += iterationCost ?? taskTime
         } finally {
           if (this.#fnOpts.afterEach != null) {
             await this.#fnOpts.afterEach.call(this, mode)
@@ -406,7 +409,7 @@ export class Task extends EventTarget {
         }
       }
 
-      if (this.#bench.concurrency === 'task') {
+      if (!sequential) {
         await withConcurrency({
           fn: benchmarkTask,
           iterations,
@@ -473,11 +476,11 @@ export class Task extends EventTarget {
             )
           }
 
-          const { overridden, taskTime } = this.#measureSync()
+          const { iterationCost, overridden, taskTime } = this.#measureSync(true)
 
           const idx = samples.push(taskTime) - 1
           if (overridden) overriddenIndices.add(idx)
-          totalTime += taskTime
+          totalTime += iterationCost ?? taskTime
         } finally {
           if (this.#fnOpts.afterEach) {
             const afterEachResult = this.#fnOpts.afterEach.call(this, mode)
@@ -512,10 +515,17 @@ export class Task extends EventTarget {
 
   /**
    * Measures a single execution of the task function asynchronously.
-   * @returns The measured execution time and whether it was supplied by the
-   *   task function via `overriddenDuration`
+   * @param collectIterationCost - Whether to extract cost for a sequential budget
+   * @returns The measured execution time (`taskTime`, the statistical sample),
+   *   whether it was supplied by the task function via `overriddenDuration`,
+   *   and the declared iteration cost (`iterationCost`, the budget cost) when
+   *   requested and supplied via `overriddenIterationCost`
    */
-  async #measure (): Promise<{ overridden: boolean; taskTime: number }> {
+  async #measure (collectIterationCost: boolean): Promise<{
+    iterationCost: number | undefined
+    overridden: boolean
+    taskTime: number
+  }> {
     const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = await this.#fn.call(this)
@@ -523,19 +533,29 @@ export class Task extends EventTarget {
       (this.#timestampFn() as unknown as number) - taskStart
     )
 
+    const iterationCost = collectIterationCost
+      ? getOverriddenIterationCostFromFnResult(fnResult)
+      : undefined
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
-      return { overridden: true, taskTime: overriddenDuration }
+      return { iterationCost, overridden: true, taskTime: overriddenDuration }
     }
-    return { overridden: false, taskTime }
+    return { iterationCost, overridden: false, taskTime }
   }
 
   /**
    * Measures a single execution of the task function synchronously.
-   * @returns The measured execution time and whether it was supplied by the
-   *   task function via `overriddenDuration`
+   * @param collectIterationCost - Whether to extract cost for a sequential budget
+   * @returns The measured execution time (`taskTime`, the statistical sample),
+   *   whether it was supplied by the task function via `overriddenDuration`,
+   *   and the declared iteration cost (`iterationCost`, the budget cost) when
+   *   requested and supplied via `overriddenIterationCost`
    */
-  #measureSync (): { overridden: boolean; taskTime: number } {
+  #measureSync (collectIterationCost: boolean): {
+    iterationCost: number | undefined
+    overridden: boolean
+    taskTime: number
+  } {
     const taskStart = this.#timestampFn() as unknown as number
     // eslint-disable-next-line no-useless-call
     const fnResult = this.#fn.call(this)
@@ -547,11 +567,14 @@ export class Task extends EventTarget {
       !isPromiseLike(fnResult),
       'task function must be sync when using `runSync()`'
     )
+    const iterationCost = collectIterationCost
+      ? getOverriddenIterationCostFromFnResult(fnResult)
+      : undefined
     const overriddenDuration = getOverriddenDurationFromFnResult(fnResult)
     if (overriddenDuration !== undefined) {
-      return { overridden: true, taskTime: overriddenDuration }
+      return { iterationCost, overridden: true, taskTime: overriddenDuration }
     }
-    return { overridden: false, taskTime }
+    return { iterationCost, overridden: false, taskTime }
   }
 
   /**
@@ -748,19 +771,52 @@ export class Task extends EventTarget {
 }
 
 /**
- * Extracts the overridden duration from a task function result if present.
+ * Extracts a finite, non-negative `overriddenDuration`, otherwise undefined.
+ * Checks own and inherited properties, reads the value once and propagates
+ * presence-check and access errors.
  * @param fnResult - The result of the task function
- * @returns The overridden duration in milliseconds if defined by the function, otherwise undefined
+ * @returns The declared duration in milliseconds, otherwise undefined
  */
 function getOverriddenDurationFromFnResult (
-  fnResult: ReturnType<Fn>
+  fnResult: unknown
 ): number | undefined {
-  return fnResult != null &&
-    typeof fnResult === 'object' &&
-    'overriddenDuration' in fnResult &&
-    typeof fnResult.overriddenDuration === 'number' &&
-    Number.isFinite(fnResult.overriddenDuration) &&
-    fnResult.overriddenDuration >= 0
-    ? fnResult.overriddenDuration
+  if (fnResult == null || typeof fnResult !== 'object') {
+    return undefined
+  }
+  const record = fnResult as Record<string, unknown>
+  if (!('overriddenDuration' in record)) {
+    return undefined
+  }
+  const value = record.overriddenDuration
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0
+    ? value
     : undefined
+}
+
+/**
+ * Extracts a finite, non-negative `overriddenIterationCost`, otherwise undefined.
+ * Checks presence before reading so proxy defaults for absent keys are ignored.
+ * Supports inherited properties and treats presence-check or access errors as
+ * absence, allowing a valid `overriddenDuration` to remain usable.
+ * @param fnResult - The result of the task function
+ * @returns The declared cost in milliseconds, otherwise undefined
+ */
+function getOverriddenIterationCostFromFnResult (
+  fnResult: unknown
+): number | undefined {
+  if (fnResult == null || typeof fnResult !== 'object') {
+    return undefined
+  }
+  const record = fnResult as Record<string, unknown>
+  try {
+    if (!('overriddenIterationCost' in record)) {
+      return undefined
+    }
+    const value = record.overriddenIterationCost
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0
+      ? value
+      : undefined
+  } catch {
+    return undefined
+  }
 }

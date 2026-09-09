@@ -57,7 +57,7 @@ export class Bench extends EventTarget implements BenchLike {
   readonly concurrency: Concurrency
 
   /**
-   * The amount of executions per task.
+   * The iteration limit per task; see {@link BenchOptions.iterations}.
    */
   readonly iterations: number
 
@@ -93,7 +93,7 @@ export class Bench extends EventTarget implements BenchLike {
   readonly runtimeVersion: string
 
   /**
-   * A setup function that runs before each task execution.
+   * A setup function called once per task and phase.
    */
   readonly setup: (task: Task, mode: HookMode) => Promise<void> | void
 
@@ -115,12 +115,12 @@ export class Bench extends EventTarget implements BenchLike {
   readonly subtractTimerOverhead: boolean
 
   /**
-   * A teardown function that runs after each task execution.
+   * A teardown function called once per task and phase.
    */
   readonly teardown: (task: Task, mode: HookMode) => Promise<void> | void
 
   /**
-   * The maximum number of concurrent tasks to run
+   * Maximum concurrent iterations within a task; only for `concurrency: 'task'`.
    * @default Number.POSITIVE_INFINITY
    */
   readonly threshold: number
@@ -132,7 +132,7 @@ export class Bench extends EventTarget implements BenchLike {
   readonly throws: boolean
 
   /**
-   * The amount of time to run each task.
+   * The time budget per task in milliseconds; see {@link BenchOptions.time}.
    */
   readonly time: number
 
@@ -156,12 +156,12 @@ export class Bench extends EventTarget implements BenchLike {
   readonly warmup: boolean
 
   /**
-   * The amount of warmup iterations per task.
+   * The warmup iteration limit; see {@link BenchOptions.warmupIterations}.
    */
   readonly warmupIterations: number
 
   /**
-   * The amount of time to warmup each task.
+   * The warmup time budget in milliseconds; see {@link BenchOptions.warmupTime}.
    */
   readonly warmupTime: number
 
@@ -288,7 +288,8 @@ export class Bench extends EventTarget implements BenchLike {
   }
 
   /**
-   * Resets all tasks and removes their results.
+   * Resets each task's run count, statistics and diagnostics. Results remain
+   * available as `not-started` or `aborted`; aborted signals are not rearmed.
    */
   reset (): void {
     for (const task of this.#tasks.values()) {

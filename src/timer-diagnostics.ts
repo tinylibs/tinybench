@@ -64,18 +64,12 @@ export const detectTimerSaturation = (
 ): boolean => classifyTimerSaturation(samples, mad) !== undefined
 
 /**
- * Estimates the effective timer resolution from a latency sample set.
+ * Estimates timer resolution heuristically from a latency sample set.
  *
- * The estimator returns the smallest strictly positive sample value that
- * appears at least twice (the smallest reproducibly observed increment).
- * Requiring two occurrences gives a 2/n breakdown point and avoids being
- * pulled to an artificially low value by a single anomalous sample (cold
- * cache, GC pause, hardware quirk).
- *
- * When no positive value appears more than once (e.g. a continuous
- * sub-microsecond timer with all unique samples), falls back to the strict
- * minimum of the positive values, which is the best available lower bound
- * in that case.
+ * Returns the smallest positive sample occurring at least twice, or the
+ * smallest positive sample if none repeats. The repeated-value branch ignores
+ * a single isolated low sample; the fallback does not offer that protection.
+ * This is an observed task duration, not a guaranteed bound on timer resolution.
  *
  * Exploits the sorted-ascending invariant: equal values are contiguous, so
  * the first strictly-positive value with an equal successor is the smallest
@@ -153,8 +147,8 @@ export type TimerOverheadEstimatorKind = 'median' | 'min' | 'p05'
  * `hrtimeNow`, this preserves precision when absolute timestamps exceed
  * `Number.MAX_SAFE_INTEGER` ns (≈ 104 days uptime).
  *
- * **JIT warmup.** A discarded warmup phase ensures `fn` and `toMs` are
- * JIT-compiled to their steady-state tier before measurements begin.
+ * **JIT warmup.** Discarded calls aim to reduce startup and JIT effects on
+ * `fn` and `toMs`; they do not guarantee a stable compilation tier or call cost.
  * @param provider - the timestamp provider to calibrate
  * @param options - calibration options
  * @returns the estimated overhead in milliseconds, never negative; `0` when

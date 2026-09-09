@@ -58,7 +58,7 @@
     "@size-limit/preset-small-lib": "^13.0.3",
     "@size-limit/time": "^13.0.3",
     "@types/node": "^24.13.3",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "bumpp": "^12.3.0",
     "changelogithub": "^15.0.5",
     "clean-publish": "^7.1.0",
@@ -72,7 +72,7 @@
     "tsdown": "^0.23.0",
     "typedoc": "^0.28.20",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "keywords": [
     "benchmark",

@@ -458,3 +458,79 @@ test.each(['sync', 'async'])('an absent iteration cost keeps the duration budget
   expect(task.runs).toBe(3)
   expect(task.result.latency.mean).toBe(2)
 })
+
+test.each(['sync', 'async'])('declared zero and negative zero do not advance the sequential budget (%s)', async mode => {
+  const bench = new Bench({ iterations: 1, now: () => 100, throws: true, time: 6, warmup: false })
+  let calls = 0
+  const fn = () => {
+    if (++calls > 10) throw new Error('iteration bound exceeded')
+    return {
+      overriddenDuration: 6,
+      overriddenIterationCost: calls === 1 ? 0 : calls === 2 ? -0 : 3,
+    }
+  }
+  bench.add('zero costs', mode === 'async'
+    ? async () => {
+      await Promise.resolve()
+      return fn()
+    }
+    : fn, { async: mode === 'async' })
+
+  if (mode === 'async') await bench.run()
+  else bench.runSync()
+
+  const task = bench.getTask('zero costs')
+  if (!task) return expect.unreachable()
+  expect(task.result.state).toBe('completed')
+  if (task.result.state !== 'completed') return
+  expect(task.runs).toBe(4)
+  expect(task.result.latency.mean).toBe(6)
+})
+
+test.each(['sync', 'async'])('an inherited iteration cost controls the sequential budget (%s)', async mode => {
+  const bench = new Bench({ iterations: 1, now: () => 100, throws: true, time: 6, warmup: false })
+  const result: unknown = Object.create(
+    { overriddenIterationCost: 3 },
+    { overriddenDuration: { value: 2 } }
+  )
+  let calls = 0
+  const fn = () => {
+    if (++calls > 10) throw new Error('iteration bound exceeded')
+    return result
+  }
+  bench.add('inherited cost', mode === 'async'
+    ? async () => {
+      await Promise.resolve()
+      return fn()
+    }
+    : fn, { async: mode === 'async' })
+
+  if (mode === 'async') await bench.run()
+  else bench.runSync()
+
+  const task = bench.getTask('inherited cost')
+  if (!task) return expect.unreachable()
+  expect(task.result.state).toBe('completed')
+  if (task.result.state !== 'completed') return
+  expect(task.runs).toBe(2)
+  expect(task.result.latency.mean).toBe(2)
+})
+
+test.each(['sync', 'async'])('duration access errors reach the consumer (%s)', async mode => {
+  const bench = new Bench({ iterations: 1, now: () => 100, throws: true, time: 0, warmup: false })
+  const error = new Error('duration getter failed')
+  const result = {
+    get overriddenDuration (): number {
+      throw error
+    },
+  }
+  bench.add('duration error', mode === 'async'
+    ? async () => {
+      await Promise.resolve()
+      return result
+    }
+    : () => result, { async: mode === 'async' })
+
+  if (mode === 'async') await expect(bench.run()).rejects.toBe(error)
+  else expect(() => bench.runSync()).toThrow(error)
+})

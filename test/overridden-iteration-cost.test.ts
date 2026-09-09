@@ -370,7 +370,7 @@ test('overriddenIterationCost never enters samples or diagnostics', async () => 
   expect(warnings).toBe(0)
 })
 
-test('override field lookup tolerates rejecting proxies', async () => {
+test.each(['has', 'get'])('override field lookup tolerates a rejecting %s trap', async trap => {
   const bench = new Bench({
     iterations: 1,
     now: () => 100,
@@ -391,6 +391,9 @@ test('override field lookup tolerates rejecting proxies', async () => {
       throw new Error(`unknown property: ${String(key)}`)
     },
     has (target, key) {
+      if (key === 'overriddenIterationCost' && trap === 'get') {
+        return true
+      }
       if (key in target) {
         return true
       }
@@ -412,4 +415,46 @@ test('override field lookup tolerates rejecting proxies', async () => {
   if (proxyTask.result.state !== 'completed') return
   expect(proxyTask.runs).toBe(3)
   expect(proxyTask.result.latency.mean).toBe(2)
+})
+
+test.each(['sync', 'async'])('an absent iteration cost keeps the duration budget (%s)', async mode => {
+  const bench = new Bench({
+    iterations: 1,
+    now: () => 100,
+    throws: true,
+    time: 6,
+    warmup: false,
+  })
+  const result = new Proxy({ overriddenDuration: 2 }, {
+    get (target, key) {
+      if (key === 'then') return undefined
+      if (key === 'overriddenDuration') return target.overriddenDuration
+      return 0
+    },
+  })
+  let calls = 0
+  const fn = () => {
+    if (++calls > 10) throw new Error('iteration bound exceeded')
+    return result
+  }
+  bench.add(
+    'proxy',
+    mode === 'async'
+      ? async () => {
+        await Promise.resolve()
+        return fn()
+      }
+      : fn,
+    { async: mode === 'async' }
+  )
+
+  if (mode === 'async') await bench.run()
+  else bench.runSync()
+
+  const task = bench.getTask('proxy')
+  if (!task) return expect.unreachable()
+  expect(task.result.state).toBe('completed')
+  if (task.result.state !== 'completed') return
+  expect(task.runs).toBe(3)
+  expect(task.result.latency.mean).toBe(2)
 })

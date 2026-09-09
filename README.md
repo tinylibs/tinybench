@@ -401,6 +401,9 @@ Semantics:
   `concurrency: 'bench'`, whose iterations stay sequential.
 - Both fields are validated the same way (finite number ≥ 0, `-0`
   included); an invalid value is treated as absent.
+- The cost field must be reported as present by the `in` operator (own or
+  inherited). A proxy default for an absent key is not a declared cost. Errors
+  while checking or reading this field are treated as an absent cost.
 - `overriddenIterationCost` never enters the samples: it is out of
   scope of the timer-overhead correction, `Task.detectedResolution`
   and timer-saturation detection. Note that `result.totalTime` and

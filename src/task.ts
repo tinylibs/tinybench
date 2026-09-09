@@ -797,6 +797,8 @@ function getOverriddenDurationFromFnResult (
  * has no historical behavior to preserve, and proxies whose `has` or `get`
  * traps reject unknown keys must keep working with their valid
  * `overriddenDuration` instead of erroring the run.
+ * Check presence before reading so a proxy default for an absent key is not
+ * mistaken for a declared cost. Inherited properties remain supported.
  * @param fnResult - The result of the task function
  * @returns The declared cost in milliseconds, otherwise undefined
  */
@@ -808,6 +810,9 @@ function getOverriddenIterationCostFromFnResult (
   }
   const record = fnResult as Record<string, unknown>
   try {
+    if (!('overriddenIterationCost' in record)) {
+      return undefined
+    }
     const value = record.overriddenIterationCost
     return typeof value === 'number' && Number.isFinite(value) && value >= 0
       ? value

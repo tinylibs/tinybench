@@ -5,7 +5,7 @@
 [![Discord](https://badgen.net/discord/online-members/c3UUYNcHrU?icon=discord&label=discord&color=green)](https://discord.gg/c3UUYNcHrU)
 [![neostandard Javascript Code Style](<https://badgen.net/static/code style/neostandard/green>)](https://github.com/neostandard/neostandard)
 
-Benchmark your code easily with Tinybench, a small, dependency-free benchmarking library!
+A simple, tiny and lightweight benchmarking library!
 You can run your benchmarks in multiple JavaScript runtimes, Tinybench is completely based on the Web APIs with proper timing using
 `process.hrtime` or `performance.now`.
 
@@ -268,13 +268,13 @@ If you want to provide a custom timestamp provider, you can create an object tha
 the `TimestampProvider` interface:
 
 ```ts
-import { Bench, TimestampProvider } from 'tinybench'
+import { Bench, type TimestampProvider } from 'tinybench'
 
 // Custom timestamp provider using Date.now()
 const dateNowTimestampProvider: TimestampProvider = {
   name: 'dateNow', // name of the provider
   fn: Date.now, // function that returns the current timestamp
-  toMs: ts => ts, // convert the timestamp to milliseconds
+  toMs: ts => Number(ts), // convert the timestamp to milliseconds
   fromMs: ts => ts, // convert milliseconds to the format used by fn()
 }
 
@@ -559,6 +559,9 @@ bench.add(
 )
 
 const task = bench.getTask('task')
+if (!task) {
+  throw new Error('Task not found')
+}
 
 // Listen for abort events
 task.addEventListener('abort', () => {

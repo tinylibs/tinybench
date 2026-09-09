@@ -21,8 +21,9 @@ interface WithConcurrencyOptions<R> {
    */
   signal?: AbortSignal | undefined
   /**
-   * The maximum amount of time to run the executions in milliseconds. If 0,
-   * runs until iterations are completed.
+   * Time budget for starting iterations, in milliseconds. Already-started
+   * calls are awaited without a completion deadline. Zero disables this
+   * time limit; the iteration limit still applies.
    */
   time?: number
   /**

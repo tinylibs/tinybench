@@ -147,8 +147,8 @@ export type TimerOverheadEstimatorKind = 'median' | 'min' | 'p05'
  * `hrtimeNow`, this preserves precision when absolute timestamps exceed
  * `Number.MAX_SAFE_INTEGER` ns (≈ 104 days uptime).
  *
- * **JIT warmup.** A discarded warmup phase ensures `fn` and `toMs` are
- * JIT-compiled to their steady-state tier before measurements begin.
+ * **JIT warmup.** Discarded calls aim to reduce startup and JIT effects on
+ * `fn` and `toMs`; they do not guarantee a stable compilation tier or call cost.
  * @param provider - the timestamp provider to calibrate
  * @param options - calibration options
  * @returns the estimated overhead in milliseconds, never negative; `0` when

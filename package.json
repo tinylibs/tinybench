@@ -3,10 +3,10 @@
   "version": "6.2.0",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@12.3.4",
+  "packageManager": "pnpm@12.4.0",
   "volta": {
     "node": "24.21.0",
-    "pnpm": "12.3.4"
+    "pnpm": "12.4.0"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -53,7 +53,7 @@
     "@cloudflare/workers-types": "^5.20260908.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
-    "@cspell/eslint-plugin": "^10.2.2",
+    "@cspell/eslint-plugin": "^10.3.0",
     "@eslint/js": "^9.39.5",
     "@size-limit/preset-small-lib": "^13.0.3",
     "@size-limit/time": "^13.0.3",

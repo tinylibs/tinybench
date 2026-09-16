@@ -38,13 +38,11 @@ export const meanAndVariance = (
 
   let mean = 0
   let m = 0
-  let x = 0
-  let d = 0
   let i = 0
 
   while (i < len) {
-    x = samples[i++]! // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    d = x - mean
+    const x = samples[i++]! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    const d = x - mean
     mean += d / i
     m += d * (x - mean)
   }

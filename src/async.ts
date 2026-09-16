@@ -10,7 +10,7 @@ import { emptyFunction } from './constants'
 export const isPromiseLike = <T>(
   maybePromiseLike: unknown
 ): maybePromiseLike is PromiseLike<T> =>
-    maybePromiseLike !== null &&
+  maybePromiseLike !== null &&
   (typeof maybePromiseLike === 'object' ||
     typeof maybePromiseLike === 'function') &&
   typeof (maybePromiseLike as PromiseLike<T>).then === 'function'

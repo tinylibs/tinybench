@@ -190,11 +190,11 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0)(supports-color@7.2.0))
       '@size-limit/preset-small-lib':
-        specifier: ^13.1.1
-        version: 13.1.1(size-limit@13.1.1)
+        specifier: ^14.0.0
+        version: 14.0.0(size-limit@14.0.0)
       '@size-limit/time':
-        specifier: ^13.1.1
-        version: 13.1.1(size-limit@13.1.1)(supports-color@7.2.0)
+        specifier: ^14.0.0
+        version: 14.0.0(size-limit@14.0.0)(supports-color@7.2.0)
       '@types/node':
         specifier: ^24.13.5
         version: 24.13.5
@@ -229,8 +229,8 @@ importers:
         specifier: ^2.14.0
         version: 2.14.0
       size-limit:
-        specifier: ^13.1.1
-        version: 13.1.1
+        specifier: ^14.0.0
+        version: 14.0.0
       tsdown:
         specifier: ^0.23.0
         version: 0.23.0(tsx@4.23.13)(typescript@6.0.3)
@@ -1007,28 +1007,28 @@ packages:
     resolution: {integrity: sha512-dNZafjM93Y+F+sfwTO5gTpsGXlnc/0Q+c2+62ViqP3gkMWvHEMSKkaEHgVJLcLg3i/g19GSIPziiKpgyne07Bw==}
     engines: {node: '>=8'}
 
-  '@size-limit/esbuild@13.1.1':
-    resolution: {integrity: sha512-+aWz9zUJTtnkc1UejLzrFGBOmM/H6QpYvL39BfgmxUULCeLn6xMb2sQw2w8n1CaF70/DvH9/J9QdNl4kAhdrHA==}
-    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
+  '@size-limit/file@14.0.0':
+    resolution: {integrity: sha512-CzlXGYuzt+vZM70NxPwi5uFyYHhORrdpDCJtcH+G57oeUPrgnqdUhDoP4jRxa6i2HNBM5Htatw5X5TcDZ8uBWQ==}
+    engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     peerDependencies:
-      size-limit: 13.1.1
+      size-limit: 14.0.0
 
-  '@size-limit/file@13.1.1':
-    resolution: {integrity: sha512-hWsrLRKBSh1vVFa86e2WcpBWcTYnwRvvZ54o6wzmPduhYUQPgOCr9eWqNMLCxvqLP5EiJeGCwLQFDjdgusGFSw==}
-    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
+  '@size-limit/preset-small-lib@14.0.0':
+    resolution: {integrity: sha512-Rtq5eNDtCohmWcW9vo/oLQSl8RKX+Fcd2e2JyR7GrxRC/AeJvX6FaL/xYfu1nvi1bBd5M/BF30cJSsmehKjjjA==}
     peerDependencies:
-      size-limit: 13.1.1
+      size-limit: 14.0.0
 
-  '@size-limit/preset-small-lib@13.1.1':
-    resolution: {integrity: sha512-by5zdyqKuIU3umUo3WQFwDyv1/cOJnYR/cE8VEZeW9lPRyfaExiWu1A3jzIn+LA4GGZaYvQ5Z6THHMlGij9Jmw==}
+  '@size-limit/rolldown@14.0.0':
+    resolution: {integrity: sha512-E5TvfZrtnEjzG9esYMi5+BMKda1ZWNKSooZHipuwosoeKWxc9+8uzBT073I2waDObAlHgDkeRJV+/BBF9s1S1A==}
+    engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     peerDependencies:
-      size-limit: 13.1.1
+      size-limit: 14.0.0
 
-  '@size-limit/time@13.1.1':
-    resolution: {integrity: sha512-40ijeasDAeqrZ6pK/5cwspQiUzJ46MNmKAgriwEyXfOTD7BTN4+kNCi4e/ji2UJ3khKsQIl3fCk1RMuaIODS1g==}
-    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
+  '@size-limit/time@14.0.0':
+    resolution: {integrity: sha512-rNA+CZmAXvbVAcepCNH0wEDmP0B4qw8szIrYCEiFuxPT/y84LDqUqRia7g42aA6YQLXD1AhB6TFUufNji7LacQ==}
+    engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     peerDependencies:
-      size-limit: 13.1.1
+      size-limit: 14.0.0
 
   '@stylistic/eslint-plugin@5.10.0':
     resolution: {integrity: sha512-nPK52ZHvot8Ju/0A4ucSX1dcPV2/1clx0kLcH5wDmrE4naKso7TUC/voUyU1O9OTKTrR6MYip6LP0ogEMQ9jPQ==}
@@ -1455,10 +1455,6 @@ packages:
   bundle-name@4.1.0:
     resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
     engines: {node: '>=18'}
-
-  bytes-iec@3.1.1:
-    resolution: {integrity: sha512-fey6+4jDK7TFtFg/klGSvNKJctyU7n2aQdnM+CO0ruLPbqqMOM8Tio0Pc+deqUeVKX1tL5DQep1zQ7+37aTAsA==}
-    engines: {node: '>= 0.8'}
 
   c12@1.11.2:
     resolution: {integrity: sha512-oBs8a4uvSDO9dm8b7OCFW7+dgtVrwmwnrVXYzLm43ta7ep2jCn/0MhoUFygIWtxhyy6+/MG7/agvpY0U1Iemew==}
@@ -2328,11 +2324,6 @@ packages:
     engines: {node: ^18 || >=20}
     hasBin: true
 
-  nanoid@6.0.1:
-    resolution: {integrity: sha512-3wVS3i51pE2pi1k5FFL/95BGfVS0kSsvDVuGXHOtxox/TywUmtgq+3qiTOTbs9J7KfHaXPiN171k/A6dBnaXFw==}
-    engines: {node: ^22 || ^24 || >=26}
-    hasBin: true
-
   nanospinner@1.2.2:
     resolution: {integrity: sha512-Zt/AmG6qRU3e+WnzGGLuMCEAO/dAu45stNbHY223tUxldaDAeE+FxSPsd9Q+j+paejmm0ZbrNVs5Sraqy3dRxA==}
 
@@ -2629,9 +2620,9 @@ packages:
     resolution: {integrity: sha512-kkTORPAuxQz2g1QUuN0J8yGWT28tjGBfPOdJ4xT7Vbeu30veKUZQIoID2qGgCDAakaQn59UeZJJ4cFGB8PVP2A==}
     hasBin: true
 
-  size-limit@13.1.1:
-    resolution: {integrity: sha512-Yl3CuQFSB3TSirrg9jyD/ahEUa6+aoMWj4UuucW36XunEsBfYhRACZRQr7vaUKoLkS88Njw0czdpDQFfbvCc+Q==}
-    engines: {node: ^22.18.0 || ^24.0.0 || >=26.0.0}
+  size-limit@14.0.0:
+    resolution: {integrity: sha512-VqcTCDkYEi+yH6s03bDRWHdC70ipyhI7d8geYiso/rMtUJ5H3uo7bZFYOlUmdrH3N+DCZstBntBJWZBpHp1waQ==}
+    engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     hasBin: true
 
   smart-buffer@4.2.0:
@@ -3716,26 +3707,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@size-limit/esbuild@13.1.1(size-limit@13.1.1)':
+  '@size-limit/file@14.0.0(size-limit@14.0.0)':
     dependencies:
-      esbuild: 0.28.2
-      nanoid: 6.0.1
-      size-limit: 13.1.1
+      size-limit: 14.0.0
 
-  '@size-limit/file@13.1.1(size-limit@13.1.1)':
+  '@size-limit/preset-small-lib@14.0.0(size-limit@14.0.0)':
     dependencies:
-      size-limit: 13.1.1
+      '@size-limit/file': 14.0.0(size-limit@14.0.0)
+      '@size-limit/rolldown': 14.0.0(size-limit@14.0.0)
+      size-limit: 14.0.0
 
-  '@size-limit/preset-small-lib@13.1.1(size-limit@13.1.1)':
+  '@size-limit/rolldown@14.0.0(size-limit@14.0.0)':
     dependencies:
-      '@size-limit/esbuild': 13.1.1(size-limit@13.1.1)
-      '@size-limit/file': 13.1.1(size-limit@13.1.1)
-      size-limit: 13.1.1
+      rolldown: 1.2.8
+      size-limit: 14.0.0
 
-  '@size-limit/time@13.1.1(size-limit@13.1.1)(supports-color@7.2.0)':
+  '@size-limit/time@14.0.0(size-limit@14.0.0)(supports-color@7.2.0)':
     dependencies:
       estimo: 3.0.5(supports-color@7.2.0)
-      size-limit: 13.1.1
+      size-limit: 14.0.0
     transitivePeerDependencies:
       - bare-abort-controller
       - bare-buffer
@@ -3793,7 +3783,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.5
     optional: true
 
   '@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)':
@@ -4119,8 +4109,6 @@ snapshots:
   bundle-name@4.1.0:
     dependencies:
       run-applescript: 7.1.0
-
-  bytes-iec@3.1.1: {}
 
   c12@1.11.2:
     dependencies:
@@ -5021,8 +5009,6 @@ snapshots:
 
   nanoid@5.1.5: {}
 
-  nanoid@6.0.1: {}
-
   nanospinner@1.2.2:
     dependencies:
       picocolors: 1.1.1
@@ -5341,9 +5327,8 @@ snapshots:
 
   simple-git-hooks@2.14.0: {}
 
-  size-limit@13.1.1:
+  size-limit@14.0.0:
     dependencies:
-      bytes-iec: 3.1.1
       lilconfig: 3.1.3
       nanospinner: 1.2.2
 

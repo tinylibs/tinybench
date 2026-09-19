@@ -1,6 +1,7 @@
 [
   {
     "path": "dist/index.js",
-    "limit": "12 kB"
+    "limit": "12 kB",
+    "ignore": ["node:os"]
   }
 ]

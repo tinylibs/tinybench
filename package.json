@@ -3,10 +3,10 @@
   "version": "6.2.0",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@12.5.1",
   "volta": {
     "node": "24.21.0",
-    "pnpm": "12.4.2"
+    "pnpm": "12.5.1"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -50,20 +50,20 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260918.1",
+    "@cloudflare/workers-types": "^5.20260919.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@cspell/eslint-plugin": "^10.3.3",
     "@eslint/js": "^10.0.1",
     "@size-limit/preset-small-lib": "^14.0.0",
     "@size-limit/time": "^14.0.0",
-    "@types/node": "^24.13.5",
+    "@types/node": "^24.13.6",
     "@vitest/coverage-v8": "^5.0.1",
     "bumpp": "^12.3.0",
     "changelogithub": "^15.0.5",
     "clean-publish": "^7.1.0",
-    "eslint": "^10.10.0",
-    "eslint-plugin-jsdoc": "^64.5.2",
+    "eslint": "^10.11.0",
+    "eslint-plugin-jsdoc": "^64.5.4",
     "eslint-plugin-perfectionist": "^5.11.1",
     "nano-staged": "^1.0.2",
     "neostandard": "^0.14.0-next.1",

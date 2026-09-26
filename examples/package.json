@@ -2,10 +2,10 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@12.5.1",
+  "packageManager": "pnpm@12.6.0",
   "volta": {
     "node": "24.21.0",
-    "pnpm": "12.5.1"
+    "pnpm": "12.6.0"
   },
   "scripts": {
     "all": "run-s example:*",
@@ -22,6 +22,6 @@
   "devDependencies": {
     "@types/bun": "^1.4.2",
     "npm-run-all2": "^9.0.3",
-    "tsx": "^4.23.13"
+    "tsx": "^4.23.15"
   }
 }

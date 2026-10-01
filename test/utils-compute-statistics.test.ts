@@ -19,11 +19,11 @@ import { toSortedSamples } from './utils'
  * @param expected - the reference value, correct to the last bit
  * @param label - the assertion label
  */
-function expectClose (
+const expectClose = (
   actual: number,
   expected: number,
   label: string
-): void {
+): void => {
   expect(
     Math.abs(actual - expected),
     label
@@ -46,6 +46,7 @@ test('computeStatistics', () => {
   expect(stats.moe, 'moe').toBe(stats.sem * stats.critical)
   expectClose(stats.moe, 1.9633143069803247, 'moe magnitude')
   expect(stats.rme, 'rme').toBe((stats.moe / stats.mean) * 100)
+  expectClose(stats.rme, 56.09469448515213, 'rme magnitude')
   expect(stats.p50, 'p50').toBe(3.5)
   expect(stats.p75, 'p75').toBe(4.75)
   expect(stats.p99, 'p99').toBe(5.95)
@@ -65,6 +66,7 @@ test('computeStatistics', () => {
   expect(stats.moe, 'moe').toBe(stats.sem * stats.critical)
   expectClose(stats.moe, 1.997895160291401, 'moe magnitude')
   expect(stats.rme, 'rme').toBe((stats.moe / stats.mean) * 100)
+  expectClose(stats.rme, 49.94737900728502, 'rme magnitude')
   expect(stats.p50, 'p50').toBe(4)
   expect(stats.p75, 'p75').toBe(5.5)
   expect(stats.p99, 'p99').toBe(6.9399999999999995)
@@ -148,6 +150,7 @@ test('computeStatistics - big sample [0, 1, 2, 3, ...(n+1)[]]', () => {
   expect(stats.moe, 'moe').toBe(stats.sem * stats.critical)
   expectClose(stats.moe, 25.32468476369591, 'moe magnitude')
   expect(stats.rme, 'rme').toBe((stats.moe / stats.mean) * 100)
+  expectClose(stats.rme, 2.5337353440415984, 'rme magnitude')
   expect(stats.p50, 'p50').toBe(999.5)
   expect(stats.p75, 'p75').toBe(1499.25)
   for (const [quantile, expected] of [

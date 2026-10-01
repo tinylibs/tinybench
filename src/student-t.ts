@@ -2,19 +2,20 @@
  * Two-sided 95% critical value of the Student's t distribution, computed from
  * the exact quantile function instead of a precomputed table.
  *
- * The tail probability satisfies `P(|T| > t) = I_x(df/2, 1/2)` with
- * `x = df / (df + t^2)`, where `I_x` is the regularized incomplete beta
+ * The tail probability satisfies `P(|T| > t) = I_u(df/2, 1/2)` with
+ * `u = df / (df + t^2)`, where `I_u` is the regularized incomplete beta
  * function. The critical value is therefore the root of a monotone decreasing
  * function, located by Newton iterations on the exact gradient of the t
- * density. Solving for `x` instead would be ill conditioned here, since the
+ * density. Solving for `u` instead would be ill conditioned here, since the
  * incomplete beta varies by orders of magnitude per unit step at large `df`.
  *
- * In the code the complement of `x`, `w = t^2 / (df + t^2)`, is the quantity
- * actually computed: forming it directly keeps its full relative precision,
- * whereas `1 - x` would round to 1 once `df` grows and lose three digits.
+ * In the code the complement of `u` is the quantity actually computed, under
+ * the name `complement`: forming it directly as `t^2 / (df + t^2)` keeps its
+ * full relative precision, whereas `1 - u` would round to 1 once `df` grows
+ * and lose three digits.
  */
 
-// Lanczos g=7 coefficients. The first carries no denominator, the rest divide
+// Lanczos coefficients for g=7. The first carries no denominator, the rest divide
 // by z + n for n counting from 0. Held at module scope so the array is not
 // rebuilt on every call.
 const [leading, ...rest] = [
@@ -24,7 +25,10 @@ const [leading, ...rest] = [
 ]
 
 /**
- * Natural logarithm of the gamma function, Lanczos approximation with g=7.
+ * Natural logarithm of the gamma function, Lanczos approximation with g=7,
+ * whose canonical form shifts the argument by `g - 0.5`, hence the 6.5 below;
+ * writing `(z + g) - 0.5` instead is not the same rounding, so it is spelled
+ * as one literal on purpose.
  * Only `z >= 0.5` is needed here, so no reflection branch is required. The
  * single call site passes `df/2` and `df/2 + 0.5`, both at least 0.5, and
  * only while `df < 24`; above that the caller switches to the asymptotic
@@ -150,19 +154,23 @@ export const studentTCritical = (df: number): number => {
   const logDensity0 = logGammaRatio - 0.5 * Math.log(degrees * Math.PI)
   const tail = (t: number): number => {
     const squared = t * t
-    const w = squared / (degrees + squared)
-    const front = Math.exp(
-      logGammaRatio - logGammaHalf + halfDf * Math.log1p(-w) +
-        shapeB * Math.log(w)
+    const complement = squared / (degrees + squared)
+    const prefactor = Math.exp(
+      logGammaRatio - logGammaHalf + halfDf * Math.log1p(-complement) +
+        shapeB * Math.log(complement)
     )
-    // `I_x(a, b)` is `front * fraction(a, b, x) / a` below the switch and
-    // `1 - front * fraction(b, a, 1 - x) / b` above it. With `x = 1 - w` the
-    // switch sits at `w = 0.5`, and both branches then keep their continued
-    // fraction argument at or below 0.5, where Lentz converges fastest.
-    if (w <= 0.5) {
-      return 1 - (front * betaContinuedFraction(shapeB, halfDf, w)) / shapeB
+    // `I_u(a, b)` is `prefactor * fraction(a, b, u) / a` below the switch and
+    // `1 - prefactor * fraction(b, a, 1 - u) / b` above it. With
+    // `u = 1 - complement` the switch sits at `complement = 0.5`, and both
+    // branches then keep their continued fraction argument at or below 0.5,
+    // where Lentz converges fastest.
+    if (complement <= 0.5) {
+      return 1 -
+        (prefactor * betaContinuedFraction(shapeB, halfDf, complement)) /
+          shapeB
     }
-    return (front * betaContinuedFraction(halfDf, shapeB, 1 - w)) / halfDf
+    return (prefactor * betaContinuedFraction(halfDf, shapeB, 1 - complement)) /
+      halfDf
   }
   const logDensity = (t: number): number =>
     logDensity0 - ((degrees + 1) / 2) * Math.log1p((t * t) / degrees)
@@ -184,6 +192,8 @@ export const studentTCritical = (df: number): number => {
     const step = 0.5 * (tail(t) - 0.05) * inverseDensity
     if (!Number.isFinite(step)) break
     const next = t + step
+    // Written as a negation so that it also rejects NaN, which a `<= 0` test
+    // would let through.
     if (!(next > 0)) break
     const magnitude = Math.abs(step)
     t = next

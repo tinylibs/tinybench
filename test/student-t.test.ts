@@ -83,6 +83,18 @@ const oneSidedTail = (t: number, df: number, steps = 20_000): number => {
 // where 20 and 25 alone left 21 to 23 unguarded, and the region above 1024,
 // where the removed table returned a constant and a round-number grid found
 // nothing to check. The worst measured value on this grid is 80 ULP at df=5773.
+/**
+ * Spacing of consecutive doubles at `x`, as a multiple of `x`.
+ *
+ * `Math.ulp` is ES2026 and absent from some supported runtimes. For `x` in
+ * `[2^e, 2^(e+1))` consecutive doubles are `2^(e - 52)` apart, whereas
+ * `|x| * Number.EPSILON` understates by 1.3 to 2.
+ * @param x - the value whose spacing is wanted
+ * @returns the spacing at `x`
+ */
+const ulpOf = (x: number): number =>
+  2 ** (Math.floor(Math.log2(Math.abs(x))) - 52)
+
 const reference = [
   [1, 12.706204736174705],
   [2, 4.302652729749464],
@@ -160,11 +172,6 @@ test('studentTCritical - df=1 has the closed form tan(pi * 0.475)', () => {
 })
 
 test('studentTCritical - tracks the 50-digit reference across the grid', () => {
-  // `Math.ulp` is ES2026 and absent from some supported runtimes, so derive
-  // the spacing: for x in [2^e, 2^(e+1)) consecutive doubles are 2^(e - 52)
-  // apart. Using `|x| * Number.EPSILON` instead would understate by 1.3 to 2.
-  const ulpOf = (x: number): number =>
-    2 ** (Math.floor(Math.log2(Math.abs(x))) - 52)
   // The bound is what is asserted, not the location of the peak. The peak sits
   // at df=15 on Linux and df=10 on the macOS runners, so where it lands is a
   // property of the platform's math library rather than of this code, and
@@ -179,14 +186,12 @@ test('studentTCritical - tracks the 50-digit reference across the grid', () => {
 
 test('studentTCritical - the series switch sits where it is meant to', () => {
   // The error is decided by which side of df=24 the gamma ratio is computed
-  // on, so this checks the two degrees of freedom that sit immediately above
-  // that boundary. Moving the switch to 13 puts 96 ULP at df=25, to 16 puts
-  // 167 ULP at df=31, and to 20 puts 225 ULP at df=36: all three stay under the
-  // 100 ULP global bound and fail here. A blanket bound over the whole series
-  // region would not separate them, since legitimate values reach 80 ULP well
-  // above 1024.
-  const ulpOf = (x: number): number =>
-    2 ** (Math.floor(Math.log2(Math.abs(x))) - 52)
+  // on. Moving the switch to 13 puts 96 ULP at df=25, to 16 puts 167 ULP at
+  // df=31 and to 20 puts 225 ULP at df=36. Only the first stays under the
+  // 100 ULP global bound, so this narrower bound exists for that one case; the
+  // other two are already caught by the global one. A blanket bound over the
+  // whole series region would not separate them, since legitimate values
+  // reach 80 ULP well above 1024.
   for (const [df, expected] of reference) {
     if (df !== 25 && df !== 31) continue
     expect(

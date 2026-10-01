@@ -28,6 +28,7 @@ export default defineConfig([
               'lockdown',
               'moddable',
               'neostandard',
+              'prefactor',
               'quickjs',
               'Quii',
               'spidermonkey',

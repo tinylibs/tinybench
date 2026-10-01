@@ -23,6 +23,8 @@ export default defineConfig([
               'fastly',
               'IsHTMLDDA',
               'lagon',
+              'Lanczos',
+              'Lentz',
               'lockdown',
               'moddable',
               'neostandard',

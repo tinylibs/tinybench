@@ -536,7 +536,9 @@ export interface Statistics {
   aad: number
 
   /**
-   * critical value
+   * Two-sided 95% critical value of Student's t for {@link Statistics.df},
+   * computed rather than tabulated, so it holds for any number of samples and
+   * is at most 12.706205.
    */
   critical: number
 

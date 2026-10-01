@@ -64,6 +64,9 @@ const betaContinuedFraction = (a: number, b: number, x: number): number => {
   const qab = a + b
   const qap = a + 1
   const qam = a - 1
+  // The 1e-300 clamps below keep the reciprocals finite when Lentz runs away.
+  // They are unreachable over the reachable range of `df`: instrumenting them
+  // over df 1..20000 shows the branch is never taken.
   let c = 1
   let d = 1 - (qab * x) / qap
   if (Math.abs(d) < 1e-300) d = 1e-300
@@ -96,9 +99,9 @@ const betaContinuedFraction = (a: number, b: number, x: number): number => {
  * that is the `t` such that `P(|T| > t) = 0.05` for `T` distributed as
  * Student's t with `df` degrees of freedom.
  *
- * `df` is a non-negative integer, which is what a sample count yields. Degrees
- * of freedom of zero, from a single-element sample, are clamped to one so the
- * result stays defined.
+ * `df` is a non-negative integer, which is what a sample count yields. Anything
+ * else is clamped to one degree of freedom, which covers the zero of a
+ * single-element sample and keeps the result defined for anything else.
  *
  * No degree of freedom is tabulated or capped: the result is computed for any
  * `df`, including the arbitrarily large counts a long benchmark reaches.
@@ -106,17 +109,18 @@ const betaContinuedFraction = (a: number, b: number, x: number): number => {
  * Against a 50-digit reference the error stays within 100 ULP, about 2e-14
  * relative, over degrees of freedom from 1 to 6000, on every engine measured:
  * V8 13.6, V8 15.0, JavaScriptCore and SpiderMonkey. The worst value is 80 ULP
- * at 5773 degrees of freedom, where the series branch runs, and 79 ULP at 15
- * over the tabulated range, where the difference branch is used and the
- * cancellation of two large logarithms dominates. Both peaks are the
- * algorithm's own error and measure the same on every engine.
+ * at 5773 degrees of freedom, where the series branch runs. That peak is the
+ * algorithm's own error and measures the same on every engine. Over the
+ * tabulated range the difference branch is used and the cancellation of two
+ * large logarithms dominates, giving 79 ULP at 15 on V8 13.6 and SpiderMonkey
+ * but 64 on V8 15.0 and JavaScriptCore.
  *
  * The value is not bit-reproducible across engines. `Math.exp`, `Math.log` and
  * `Math.log1p` are not required to be correctly rounded by IEEE 754 and differ
- * between engines, the logarithm by up to 9 ULP, which the iterations amplify:
- * two engines can disagree by 81 ULP. Everything derived from it moves with
- * it, so `moe` and `rme` are affected too, and a caller that serializes a
- * result must not compare those fields across machines.
+ * between engines by up to one ULP, which the iterations amplify: two engines
+ * can disagree by 81 ULP. Everything derived from it moves with it, so `moe`
+ * and `rme` are affected too, and a caller that serializes a result must not
+ * compare those fields across machines.
  *
  * The table this replaces is worse further out: 1.9e7 ULP at its own worst
  * near 39 degrees of freedom, and 1.0e13 ULP just above 1024, where it
@@ -139,8 +143,12 @@ export const studentTCritical = (df: number): number => {
   // `a * ln(a)`, so subtracting them loses three significant digits once `a`
   // reaches 1e10. The series is asymptotic and unusable below a = 12, where it
   // overshoots: switching at a = 8 puts its worst truncation, 1.1e-14, exactly
-  // at df = 16. Its coefficients are the exact 1/8, 1/192 and 1/640, followed
-  // by three fitted to the exact ratio to 50 digits.
+  // at df = 16. The first three coefficients are exact, 1/8, 1/192 and 1/640;
+  // the next three are close to the exact 17/14336, -31/18432 and
+  // 3.8341175e-3, but chosen so that the six-term series is three times more
+  // accurate where it matters, at the switch: 3.8e-17 of truncation at a = 12
+  // against 1.2e-16 with the exact values. Substituting the exact ones changes
+  // no result a double can see.
   const logGammaRatio = halfDf < 12
     ? logGamma(halfDf + 0.5) - logGamma(halfDf)
     : 0.5 * Math.log(halfDf) -
@@ -159,10 +167,11 @@ export const studentTCritical = (df: number): number => {
       logGammaRatio - logGammaHalf + halfDf * Math.log1p(-complement) +
         shapeB * Math.log(complement)
     )
-    // `I_u(a, b)` is `prefactor * fraction(a, b, u) / a` below the switch and
-    // `1 - prefactor * fraction(b, a, 1 - u) / b` above it. With
-    // `u = 1 - complement` the switch sits at `complement = 0.5`, and both
-    // branches then keep their continued fraction argument at or below 0.5,
+    // `I_u(a, b)` is `prefactor * fraction(a, b, u) / a` when u is small, and
+    // `1 - prefactor * fraction(b, a, 1 - u) / b` when u is large, the
+    // complement being the better conditioned of the two. With
+    // `u = 1 - complement` the split sits at `complement = 0.5`, and both
+    // branches then pass the continued fraction an argument at or below 0.5,
     // where Lentz converges fastest.
     if (complement <= 0.5) {
       return 1 -

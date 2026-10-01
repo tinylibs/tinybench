@@ -1,0 +1,21 @@
+diff --git a/calc.js b/calc.js
+index c0f6c8d4ee203c9b7a1fa7d4d1184bdafe646f23..9048fe072c0506d5a75c00a963f25b389dc2135e 100644
+--- a/calc.js
++++ b/calc.js
+@@ -4,7 +4,15 @@ function isPluginDisabled(plugin, check) {
+ }
+ 
+ export default async function calc(plugins, config, createSpinner) {
+-  process.setMaxListeners(config.checks.reduce((a, i) => a + i.files.length, 1))
++  const maxListeners = process.getMaxListeners()
++  if (maxListeners !== 0) {
++    process.setMaxListeners(
++      Math.max(
++        maxListeners,
++        config.checks.reduce((a, i) => a + i.files.length, 1)
++      )
++    )
++  }
+ 
+   async function step(number) {
+     for (let plugin of plugins.list) {

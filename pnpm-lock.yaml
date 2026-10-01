@@ -170,6 +170,9 @@ overrides:
   tar@<=7.5.3: ^7.5.4
   tar@<=7.5.9: ^7.5.10
 
+patchedDependencies:
+  size-limit@14.0.1: 7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c
+
 importers:
 
   .:
@@ -191,10 +194,10 @@ importers:
         version: 10.0.1(eslint@10.11.0(jiti@2.7.0))
       '@size-limit/preset-small-lib':
         specifier: ^14.0.1
-        version: 14.0.1(size-limit@14.0.1)
+        version: 14.0.1(size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))
       '@size-limit/time':
         specifier: ^14.0.1
-        version: 14.0.1(size-limit@14.0.1)
+        version: 14.0.1(size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))
       '@types/node':
         specifier: ^24.19.0
         version: 24.19.0
@@ -230,7 +233,7 @@ importers:
         version: 2.14.0
       size-limit:
         specifier: ^14.0.1
-        version: 14.0.1
+        version: 14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
       tsdown:
         specifier: ^0.23.0
         version: 0.23.0(tsx@4.23.15)(typescript@6.0.3)
@@ -3697,25 +3700,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@size-limit/file@14.0.1(size-limit@14.0.1)':
+  '@size-limit/file@14.0.1(size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))':
     dependencies:
-      size-limit: 14.0.1
+      size-limit: 14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
 
-  '@size-limit/preset-small-lib@14.0.1(size-limit@14.0.1)':
+  '@size-limit/preset-small-lib@14.0.1(size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))':
     dependencies:
-      '@size-limit/file': 14.0.1(size-limit@14.0.1)
-      '@size-limit/rolldown': 14.0.1(size-limit@14.0.1)
-      size-limit: 14.0.1
+      '@size-limit/file': 14.0.1(size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))
+      '@size-limit/rolldown': 14.0.1(size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))
+      size-limit: 14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
 
-  '@size-limit/rolldown@14.0.1(size-limit@14.0.1)':
+  '@size-limit/rolldown@14.0.1(size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))':
     dependencies:
       rolldown: 1.2.10
-      size-limit: 14.0.1
+      size-limit: 14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
 
-  '@size-limit/time@14.0.1(size-limit@14.0.1)':
+  '@size-limit/time@14.0.1(size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))':
     dependencies:
       estimo: 3.0.5
-      size-limit: 14.0.1
+      size-limit: 14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
     transitivePeerDependencies:
       - bare-abort-controller
       - bare-buffer
@@ -5313,7 +5316,7 @@ snapshots:
 
   simple-git-hooks@2.14.0: {}
 
-  size-limit@14.0.1:
+  size-limit@14.0.1(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c):
     dependencies:
       lilconfig: 3.1.3
       nanospinner: 1.2.2

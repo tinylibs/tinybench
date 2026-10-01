@@ -100,11 +100,11 @@ const oneSidedTail = (t: number, df: number, steps = 20_000): number => {
 // bound the suite states can be looser than the real one; that is why the
 // bounds below are cut under it rather than at it.
 /**
- * Spacing of consecutive doubles at `x`, as a multiple of `x`.
+ * Spacing of consecutive doubles at `x`.
  *
  * `Math.ulp` is ES2026 and absent from some supported runtimes. For `x` in
- * `[2^e, 2^(e+1))` consecutive doubles are `2^(e - 52)` apart, whereas
- * `|x| * Number.EPSILON` understates by 1.3 to 2.
+ * `[2^e, 2^(e+1))` consecutive doubles are `2^(e - 52)` apart. The ratio
+ * of `|x| * Number.EPSILON` to that spacing lies in `[1, 2)`.
  * @param x - the value whose spacing is wanted
  * @returns the spacing at `x`
  */

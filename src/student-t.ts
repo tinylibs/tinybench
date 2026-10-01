@@ -10,9 +10,9 @@
  * incomplete beta varies by orders of magnitude per unit step at large `df`.
  *
  * In the code the complement of `u` is the quantity actually computed, under
- * the name `complement`: forming it directly as `t^2 / (df + t^2)` keeps its
- * full relative precision, whereas `1 - u` would round to 1 once `df` grows
- * and lose three digits.
+ * the name `complement`: forming it directly as `t^2 / (df + t^2)` preserves
+ * its relative precision. Subtracting `u` from 1 loses precision as `u`
+ * approaches 1; once `u` rounds to 1, `1 - u` becomes zero.
  */
 
 // Lanczos coefficients for g=7. The first carries no denominator, the rest divide
@@ -99,9 +99,9 @@ const betaContinuedFraction = (a: number, b: number, x: number): number => {
  * that is the `t` such that `P(|T| > t) = 0.05` for `T` distributed as
  * Student's t with `df` degrees of freedom.
  *
- * `df` is a non-negative integer, which is what a sample count yields. Anything
- * else is clamped to one degree of freedom, which covers the zero of a
- * single-element sample and keeps the result defined for anything else.
+ * `df` is expected to be a non-negative integer, as supplied by a sample count.
+ * Non-positive values and `NaN` are treated as one degree of freedom, including
+ * zero from a single-element sample.
  *
  * No degree of freedom is tabulated or capped: the result is computed for any
  * `df`, including the arbitrarily large counts a long benchmark reaches.
@@ -147,8 +147,8 @@ export const studentTCritical = (df: number): number => {
   // the next three are close to the exact 17/14336, -31/18432 and
   // 3.8341175e-3, but chosen so that the six-term series is three times more
   // accurate where it matters, at the switch: 3.8e-17 of truncation at a = 12
-  // against 1.2e-16 with the exact values. Substituting the exact ones changes
-  // no result a double can see.
+  // against 1.2e-16 with the exact values. Using the exact coefficients can
+  // change the final quantile's last bits.
   const logGammaRatio = halfDf < 12
     ? logGamma(halfDf + 0.5) - logGamma(halfDf)
     : 0.5 * Math.log(halfDf) -

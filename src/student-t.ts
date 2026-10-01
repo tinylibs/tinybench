@@ -5,9 +5,10 @@
  * The tail probability satisfies `P(|T| > t) = I_u(df/2, 1/2)` with
  * `u = df / (df + t^2)`, where `I_u` is the regularized incomplete beta
  * function. The critical value is therefore the root of a monotone decreasing
- * function, located by Newton iterations on the exact gradient of the t
- * density. Solving for `u` instead would be ill conditioned here, since the
- * incomplete beta varies by orders of magnitude per unit step at large `df`.
+ * function, located by Newton iterations using its analytic derivative,
+ * -2 times the t density. Solving for `u` instead would be ill conditioned
+ * here, since the incomplete beta varies by orders of magnitude per unit step
+ * at large `df`.
  *
  * In the code the complement of `u` is the quantity actually computed, under
  * the name `complement`: forming it directly as `t^2 / (df + t^2)` preserves
@@ -110,10 +111,10 @@ const betaContinuedFraction = (a: number, b: number, x: number): number => {
  * relative, over degrees of freedom from 1 to 6000, on every engine measured:
  * V8 13.6, V8 15.0, JavaScriptCore and SpiderMonkey. The worst value is 80 ULP
  * at 5773 degrees of freedom, where the series branch runs. That peak is the
- * algorithm's own error and measures the same on every engine. Over the
- * tabulated range the difference branch is used and the cancellation of two
- * large logarithms dominates, giving 79 ULP at 15 on V8 13.6 and SpiderMonkey
- * but 64 on V8 15.0 and JavaScriptCore.
+ * algorithm's own error and measures the same on every engine. The difference
+ * branch runs only for df < 24. At df = 15, cancellation of the two
+ * logarithms gives 79 ULP on V8 13.6 and SpiderMonkey, but 64 on V8 15.0
+ * and JavaScriptCore.
  *
  * The value is not bit-reproducible across engines. `Math.exp`, `Math.log` and
  * `Math.log1p` are not required to be correctly rounded by IEEE 754 and differ
@@ -139,9 +140,9 @@ export const studentTCritical = (df: number): number => {
   const shapeB = 0.5
   // `logGamma` depends only on `df`, so it is evaluated once instead of on
   // every Newton step. Taking `logGamma(a + 1/2) - logGamma(a)` from its
-  // series above a >= 12 also avoids a cancellation: each logarithm grows like
-  // `a * ln(a)`, so subtracting them loses three significant digits once `a`
-  // reaches 1e10. The series is asymptotic and unusable below a = 12, where it
+  // series for a >= 12 avoids cancellation: the logarithms grow like
+  // `a * ln(a)`, while their difference grows only like `0.5 * ln(a)`.
+  // The series is asymptotic and unusable below a = 12, where it
   // overshoots: switching at a = 8 puts its worst truncation, 1.1e-14, exactly
   // at df = 16. The first three coefficients are exact, 1/8, 1/192 and 1/640;
   // the next three are close to the exact 17/14336, -31/18432 and

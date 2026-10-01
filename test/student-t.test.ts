@@ -3,12 +3,10 @@ import { expect, test } from 'vitest'
 import { studentTCritical } from '../src/student-t'
 
 /**
- * Independent oracle for the t density.
- *
- * `logGamma` here is the Stirling series after an exact upward shift, not the
- * Lanczos approximation the implementation uses, so a mistake in the Lanczos
- * coefficients, in its argument shift, or in the incomplete beta shows up as a
- * failure instead of cancelling out.
+ * Logarithm of the gamma function, from the Stirling series after an exact
+ * upward shift. Deliberately not the Lanczos approximation the implementation
+ * uses, so that the two are independent in formula and an error in one cannot
+ * cancel out in the other.
  * @param z - the gamma argument, at least 0.5
  * @returns the natural logarithm of gamma at `z`
  */
@@ -57,8 +55,16 @@ const tDensity = (t: number, df: number): number =>
 /**
  * One-sided tail probability `P(T > t)`, obtained by integrating the t density
  * from 0 to t with Simpson's rule: the density integrates to 0.5 over
- * `[0, infinity)`. Validated against 50-digit reference values below, so a
- * wrong integration cannot validate a wrong implementation.
+ * `[0, infinity)`.
+ *
+ * What this oracle is good for is a formula error, not a precision error. Its
+ * own error on the grid below is around 1.3e-12 of 0.025, which is some four
+ * hundred thousand ULP, so it cannot judge the ULP bounds asserted here and
+ * does not try: that is the reference array's job. What it does buy is that a
+ * wrong integration cannot validate a wrong implementation, and that an error
+ * in the exponent, the scaling or the argument shift of the density --
+ * the mistakes that move the tail by more than 5e-12 rather than by a few
+ * digits -- fails here instead of hiding behind a matching reference.
  * @param t - the value above which the tail is measured
  * @param df - the degrees of freedom
  * @param steps - the number of integration intervals, even
@@ -83,6 +89,16 @@ const oneSidedTail = (t: number, df: number, steps = 20_000): number => {
 // where 20 and 25 alone left 21 to 23 unguarded, and the region above 1024,
 // where the removed table returned a constant and a round-number grid found
 // nothing to check. The worst measured value on this grid is 80 ULP at df=5773.
+//
+// Degrees of freedom 7 to 9 and 11 to 14 are here for the same reason: the grid
+// used to step from 6 to 10 and from 10 to 15, and every degree of freedom
+// below 24 goes through the branch that subtracts two Lanczos logarithms.
+//
+// This is a sample of the range the implementation's JSDoc promises, not the
+// range itself. Measured over every df from 1 to 6000 against 50-digit
+// references, none reaches 100 ULP and the worst is 80 at df=5773, so the
+// bound the suite states can be looser than the real one; that is why the
+// bounds below are cut under it rather than at it.
 /**
  * Spacing of consecutive doubles at `x`, as a multiple of `x`.
  *
@@ -102,7 +118,14 @@ const reference = [
   [4, 2.7764451051977943],
   [5, 2.5705818356363155],
   [6, 2.44691185114497],
+  [7, 2.3646242515927853],
+  [8, 2.3060041352041667],
+  [9, 2.2621571627982053],
   [10, 2.228138851986275],
+  [11, 2.2009851600916397],
+  [12, 2.1788128296672289],
+  [13, 2.1603686564627926],
+  [14, 2.1447866879178039],
   [15, 2.1314495455597755],
   [16, 2.1199052992212546],
   [17, 2.109815577833317],
@@ -184,16 +207,72 @@ test('studentTCritical - tracks the 50-digit reference across the grid', () => {
   }
 })
 
-test('studentTCritical - the series switch sits where it is meant to', () => {
-  // The error is decided by which side of df=24 the gamma ratio is computed
-  // on. Moving the switch to 13 puts 96 ULP at df=25, to 16 puts 167 ULP at
-  // df=31 and to 20 puts 225 ULP at df=36. Only the first stays under the
-  // 100 ULP global bound, so this narrower bound exists for that one case; the
-  // other two are already caught by the global one. A blanket bound over the
-  // whole series region would not separate them, since legitimate values
-  // reach 80 ULP well above 1024.
+/**
+ * Bounds tighter than the global one, at the degrees of freedom where the
+ * algorithm is essentially exact.
+ *
+ * The global bound has to absorb the algorithm's own error, which reaches
+ * 80 ULP at df=5773, so on its own it cannot separate a 47 ULP baseline from a
+ * 96 ULP regression: four mutants stay between 88 and 98 ULP at every degree of
+ * freedom from 1 to 6500, on all four engines measured, and pass it. At the
+ * three points below the baseline is small enough that the bound can be cut
+ * well under what the global one already tolerates.
+ *
+ * Measured on Node 24 (V8 13.6), Bun 1.4 (JavaScriptCore) and Deno 2.9
+ * (V8 15.0), taking the worst of the three:
+ *
+ * - df=22, still inside the branch that runs to df=23 on the Lanczos
+ *   `logGamma` rather than on the series, sits at 32 ULP; dropping the factor
+ *   0.5 in front of `log(2 * pi)` puts it at 58 on every one of them, so 45
+ *   separates the two with 1.41x of margin below and 1.29x above. This is the
+ *   tightest of the three, and the first to raise if a platform ever
+ *   disagrees.
+ * - df=40 and df=79 are where the iteration lands on the reference value
+ *   exactly, at 1 ULP on all three engines. A Newton seed of 1.96 gives 19 and
+ *   12 ULP there, so 8 separates them by a factor of 8. Those two are an order
+ *   of magnitude narrower in absolute terms than the global bound is anywhere.
+ *
+ * macOS and Windows are not reachable from here and use a different math library;
+ * peak already moves between platforms, so its height there is unknown. Every
+ * bound here is validated on the three engines above plus the global one.
+ * Re-measure these three before changing the algorithm: they encode what it
+ * costs where it costs least, and a change moves them.
+ */
+const perPoint = new Map<number, number>([
+  [22, 45],
+  [40, 8],
+  [79, 8],
+])
+
+test('studentTCritical - is exact where the algorithm can be exact', () => {
   for (const [df, expected] of reference) {
-    if (df !== 25 && df !== 31) continue
+    const bound = perPoint.get(df)
+    if (bound === undefined) continue
+    expect(
+      Math.abs(studentTCritical(df) - expected) / ulpOf(expected),
+      `df=${String(df)}, where the algorithm is exact`
+    ).toBeLessThan(bound)
+  }
+})
+
+test('studentTCritical - the series switch sits where it is meant to', () => {
+  // The gamma ratio comes from the Lanczos `logGamma` for df < 24 and from the
+  // series above it, so the error is decided by where that switch sits.
+  // Moving it to 13 puts 96 ULP at df=25, to 16 puts 167 ULP at df=31 and to
+  // 20 puts 225 ULP at df=36. Only the first stays under the 100 ULP global
+  // bound, so this narrower one exists for that case alone; the other two are
+  // already caught globally, and a blanket bound over the whole series region
+  // would not separate them, since legitimate values reach 80 ULP well above
+  // 1024.
+  //
+  // Node only. At df=25 the baseline is 12 ULP on Node and this mutant 96, but
+  // Bun and Deno compute it at 9 and 12 whether or not the switch moves, so
+  // neither catches it here. df=25 is the last grid point where the two differ
+  // by more than 3 ULP on any engine. df=31 is left out because it adds
+  // nothing: every switch position that fails on it also fails at df=25 or is
+  // already caught globally.
+  for (const [df, expected] of reference) {
+    if (df !== 25) continue
     expect(
       Math.abs(studentTCritical(df) - expected) / ulpOf(expected),
       `df=${String(df)}, just above the switch`

@@ -3,10 +3,10 @@
   "version": "6.2.0",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
-  "packageManager": "pnpm@12.8.1",
+  "packageManager": "pnpm@12.8.2",
   "volta": {
     "node": "24.21.0",
-    "pnpm": "12.8.1"
+    "pnpm": "12.8.2"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -50,7 +50,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260929.1",
+    "@cloudflare/workers-types": "^5.20261001.1",
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@cspell/eslint-plugin": "^10.3.6",
@@ -58,7 +58,7 @@
     "@size-limit/preset-small-lib": "^14.1.0",
     "@size-limit/time": "^14.1.0",
     "@types/node": "^24.19.0",
-    "@vitest/coverage-v8": "^5.0.2",
+    "@vitest/coverage-v8": "^5.0.3",
     "bumpp": "^12.3.0",
     "changelogithub": "^15.0.5",
     "clean-publish": "^7.1.0",
@@ -72,7 +72,7 @@
     "tsdown": "^0.23.0",
     "typedoc": "^0.28.20",
     "typescript": "~6.0.3",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.3"
   },
   "keywords": [
     "benchmark",

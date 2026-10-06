@@ -1,6 +1,6 @@
 {
   "name": "tinybench",
-  "version": "6.2.0",
+  "version": "6.2.1",
   "description": "🔎 A simple, tiny and lightweight benchmarking library!",
   "type": "module",
   "packageManager": "pnpm@12.9.0",

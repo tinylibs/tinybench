@@ -1,6 +1,6 @@
 import type { Samples, SortedSamples, Statistics } from './types'
 
-import { tTable } from './constants'
+import { studentTCritical } from './student-t'
 
 /**
  * Checks if a value is a Samples type.
@@ -38,13 +38,11 @@ export const meanAndVariance = (
 
   let mean = 0
   let m = 0
-  let x = 0
-  let d = 0
   let i = 0
 
   while (i < len) {
-    x = samples[i++]! // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    d = x - mean
+    const x = samples[i++]! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    const d = x - mean
     mean += d / i
     m += d * (x - mean)
   }
@@ -200,7 +198,7 @@ export function computeStatistics (
   const sd = Math.sqrt(vr)
   const sem = sd / Math.sqrt(samples.length)
   const df = samples.length - 1
-  const critical = tTable[df || 1] ?? tTable[0]
+  const critical = studentTCritical(df)
   const moe = sem * critical
   const rme =
     mean === 0 ? Number.POSITIVE_INFINITY : (moe / Math.abs(mean)) * 100

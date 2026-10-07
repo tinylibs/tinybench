@@ -581,7 +581,8 @@ export interface Statistics {
   aad: number
 
   /**
-   * critical value
+   * two-sided 95% critical value of Student's t for {@link Statistics.df},
+   * approached from above as {@link Statistics.df} grows
    */
   critical: number
 

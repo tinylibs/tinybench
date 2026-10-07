@@ -32,3 +32,13 @@ yarn-error.log*
 # misc
 .DS_Store
 .orig
+
+# local mise configuration
+mise.local.toml
+mise.*.local.toml
+.mise.local.toml
+.mise.*.local.toml
+mise.local.lock
+mise.*.local.lock
+.mise.local.lock
+.mise.*.local.lock

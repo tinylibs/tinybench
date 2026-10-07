@@ -20,3 +20,7 @@ overrides:
   tar@<=7.5.2: ^7.5.3
   tar@<=7.5.3: ^7.5.4
   tar@<=7.5.9: ^7.5.10
+
+# Size Limit must not lower Node's listener limit for its browser and spinner.
+patchedDependencies:
+  size-limit@14.1.0: patches/size-limit@14.1.0.patch

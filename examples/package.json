@@ -2,11 +2,7 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@12.3.4",
-  "volta": {
-    "node": "24.21.0",
-    "pnpm": "12.3.4"
-  },
+  "packageManager": "pnpm@12.9.0",
   "scripts": {
     "all": "run-s example:*",
     "example:convert-bencher": "tsx src/convert-bencher.ts",
@@ -22,6 +18,6 @@
   "devDependencies": {
     "@types/bun": "^1.4.2",
     "npm-run-all2": "^9.0.3",
-    "tsx": "^4.23.13"
+    "tsx": "^4.23.15"
   }
 }

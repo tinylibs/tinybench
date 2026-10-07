@@ -1,0 +1,338 @@
+import { expect, test } from 'vitest'
+
+import { studentTCritical } from '../src/student-t'
+
+/**
+ * Logarithm of the gamma function, from the Stirling series after an exact
+ * upward shift. Deliberately not the Lanczos approximation the implementation
+ * uses, so that the two are independent in formula and an error in one cannot
+ * cancel out in the other.
+ * @param z - the gamma argument, at least 0.5
+ * @returns the natural logarithm of gamma at `z`
+ */
+const oracleLogGamma = (z: number): number => {
+  // Stirling coefficients B_2k / (2k(2k-1)).
+  const coefficients = [
+    1 / 12, -1 / 360, 1 / 1260, -1 / 1680, 1 / 1188, -691 / 360360, 1 / 156,
+  ]
+  const stirling = (argument: number): number => {
+    let series = 0
+    for (const [index, c] of coefficients.entries()) {
+      series += c / argument ** (2 * index + 1)
+    }
+    return (
+      (argument - 0.5) * Math.log(argument) -
+      argument +
+      0.5 * Math.log(2 * Math.PI) +
+      series
+    )
+  }
+  // Stirling alone is accurate enough from 30 up. Below it, the exact upward
+  // shift protects the small arguments; it is skipped for large ones because
+  // subtracting a 20-term recurrence would only add cancellation.
+  if (z >= 30) return stirling(z)
+  const shift = 20
+  let recurrence = 0
+  for (let k = 0; k < shift; k++) recurrence += Math.log(z + k)
+  return stirling(z + shift) - recurrence
+}
+
+/**
+ * Probability density of Student's t with `df` degrees of freedom, finite and
+ * smooth at 0 for every `df >= 1`.
+ * @param t - the value at which the density is evaluated
+ * @param df - the degrees of freedom
+ * @returns the probability density
+ */
+const tDensity = (t: number, df: number): number =>
+  Math.exp(
+    oracleLogGamma((df + 1) / 2) -
+      oracleLogGamma(df / 2) -
+      0.5 * Math.log(df * Math.PI) -
+      ((df + 1) / 2) * Math.log1p((t * t) / df)
+  )
+
+/**
+ * One-sided tail probability `P(T > t)`, obtained by integrating the t density
+ * from 0 to t with Simpson's rule: the density integrates to 0.5 over
+ * `[0, infinity)`.
+ *
+ * What this oracle is good for is a formula error, not a precision error. Its
+ * own error on the grid below is around 1.3e-12 of 0.025, which is some four
+ * hundred thousand ULP, so it cannot judge the ULP bounds asserted here and
+ * does not try: that is the reference array's job. What it does buy is that a
+ * wrong integration cannot validate a wrong implementation, and that an error
+ * in the exponent, the scaling or the argument shift of the density --
+ * the mistakes that move the tail by more than 5e-12 rather than by a few
+ * digits -- fails here instead of hiding behind a matching reference.
+ * @param t - the value above which the tail is measured
+ * @param df - the degrees of freedom
+ * @param steps - the number of integration intervals, even
+ * @returns the one-sided tail probability
+ */
+const oneSidedTail = (t: number, df: number, steps = 20_000): number => {
+  const h = t / steps
+  let sum = tDensity(0, df) + tDensity(t, df)
+  for (let i = 1; i < steps; i++) {
+    sum += (i % 2 === 0 ? 2 : 4) * tDensity(i * h, df)
+  }
+  return 0.5 - (sum * h) / 3
+}
+
+// Critical values solved to 50 digits by bisection on
+// `I_u(df/2, 1/2) = 0.05`, with `logGamma` from the Stirling series. They are
+// not the entries of the table this change removes: that table was off by up
+// to 1.9e7 ULP near 39 degrees of freedom.
+//
+// The grid is not a round-number sweep. Two boundaries have to sit inside it,
+// and each was missed once by sampling: the switch to the series at df=24,
+// where 20 and 25 alone left 21 to 23 unguarded, and the region above 1024,
+// where the removed table returned a constant and a round-number grid found
+// nothing to check. The worst measured value on this grid is 80 ULP at df=5773.
+//
+// Degrees of freedom 7 to 9 and 11 to 14 are here for the same reason: the grid
+// used to step from 6 to 10 and from 10 to 15, and every degree of freedom
+// below 24 goes through the branch that subtracts two Lanczos logarithms.
+//
+// This is a sample of the range the implementation's JSDoc promises, not the
+// range itself. Measured over every df from 1 to 6000 against 50-digit
+// references, none reaches 100 ULP and the worst is 80 at df=5773, so the
+// bound the suite states can be looser than the real one; that is why the
+// bounds below are cut under it rather than at it.
+/**
+ * Spacing of consecutive doubles at `x`.
+ *
+ * `Math.ulp` is ES2026 and absent from some supported runtimes. For `x` in
+ * `[2^e, 2^(e+1))` consecutive doubles are `2^(e - 52)` apart. The ratio
+ * of `|x| * Number.EPSILON` to that spacing lies in `[1, 2)`.
+ * @param x - the value whose spacing is wanted
+ * @returns the spacing at `x`
+ */
+const ulpOf = (x: number): number =>
+  2 ** (Math.floor(Math.log2(Math.abs(x))) - 52)
+
+const reference = [
+  [1, 12.706204736174705],
+  [2, 4.302652729749464],
+  [3, 3.1824463052837095],
+  [4, 2.7764451051977943],
+  [5, 2.5705818356363155],
+  [6, 2.44691185114497],
+  [7, 2.3646242515927853],
+  [8, 2.3060041352041667],
+  [9, 2.2621571627982053],
+  [10, 2.228138851986275],
+  [11, 2.2009851600916397],
+  [12, 2.1788128296672289],
+  [13, 2.1603686564627926],
+  [14, 2.1447866879178039],
+  [15, 2.1314495455597755],
+  [16, 2.1199052992212546],
+  [17, 2.109815577833317],
+  [20, 2.085963447265865],
+  [21, 2.0796138447276804],
+  [22, 2.0738730679040263],
+  [23, 2.0686576104190486],
+  [24, 2.063898561628026],
+  [25, 2.0595385527532977],
+  [30, 2.042272456301238],
+  [31, 2.0395134463964086],
+  [40, 2.0210753903062733],
+  [50, 2.008559112100761],
+  [64, 1.997729654317693],
+  [74, 1.9925434951809327],
+  [79, 1.990450210230129],
+  [80, 1.9900634212544461],
+  [100, 1.9839715185235522],
+  [120, 1.979930405082441],
+  [150, 1.9759053308966206],
+  [200, 1.9718962236339095],
+  [1000, 1.9623390808264085],
+  [1024, 1.9622833497895975],
+  [1025, 1.9622810843660599],
+  [1109, 1.9621053897645868],
+  [1740, 1.9613282915517927],
+  [1999, 1.961151420170562],
+  [4838, 1.9604544464543687],
+  [5000, 1.960438551706508],
+  [5125, 1.9604269742101139],
+  [5773, 1.9603749944518272],
+] as const
+
+test('oracle - reproduces the 0.025 one-sided tail at reference critical values', () => {
+  for (const [df, critical] of reference) {
+    expect(
+      oneSidedTail(critical, df),
+      `oracle df=${String(df)}`
+    ).toBeCloseTo(0.025, 11)
+  }
+})
+
+test('studentTCritical - two-sided tail probability is 0.05', () => {
+  for (const df of [1, 2, 3, 4, 7, 15, 40, 120, 400, 1000, 5000]) {
+    const critical = studentTCritical(df)
+    expect(
+      2 * oneSidedTail(critical, df),
+      `df=${String(df)} two-sided tail`
+    ).toBeCloseTo(0.05, 9)
+  }
+})
+
+test('studentTCritical - matches published NIST critical values', () => {
+  const nist = [
+    [1, 12.706], [2, 4.303], [3, 3.182], [4, 2.776], [5, 2.571],
+    [6, 2.447], [7, 2.365], [8, 2.306], [9, 2.262], [10, 2.228],
+    [15, 2.131], [20, 2.086], [25, 2.060], [30, 2.042], [40, 2.021],
+    [50, 2.009], [60, 2.000], [80, 1.990], [100, 1.984], [120, 1.980],
+  ] as const
+  for (const [df, expected] of nist) {
+    expect(studentTCritical(df), `df=${String(df)}`).toBeCloseTo(expected, 3)
+  }
+})
+
+test('studentTCritical - df=1 has the closed form tan(pi * 0.475)', () => {
+  expect(studentTCritical(1)).toBeCloseTo(Math.tan(Math.PI * 0.475), 12)
+})
+
+test('studentTCritical - tracks the 50-digit reference across the grid', () => {
+  // The bound is what is asserted, not the location of the peak. The peak sits
+  // at df=15 on Linux and df=10 on the macOS runners, so where it lands is a
+  // property of the platform's math library rather than of this code, and
+  // pinning it made the suite fail on three CI jobs.
+  for (const [df, expected] of reference) {
+    expect(
+      Math.abs(studentTCritical(df) - expected) / ulpOf(expected),
+      `df=${String(df)}`
+    ).toBeLessThan(100)
+  }
+})
+
+/**
+ * Bounds tighter than the global one, at the degrees of freedom where the
+ * algorithm is essentially exact.
+ *
+ * The global bound has to absorb the algorithm's own error, which reaches
+ * 80 ULP at df=5773, so on its own it cannot separate a 47 ULP baseline from a
+ * 96 ULP regression: four mutants stay between 88 and 98 ULP at every degree of
+ * freedom from 1 to 6500, on all four engines measured, and pass it. At the
+ * three points below the baseline is small enough that the bound can be cut
+ * well under what the global one already tolerates.
+ *
+ * Measured on Node 24 (V8 13.6), Bun 1.4 (JavaScriptCore) and Deno 2.9
+ * (V8 15.0), taking the worst of the three:
+ *
+ * - df=22, still inside the branch that runs to df=23 on the Lanczos
+ *   `logGamma` rather than on the series, sits at 32 ULP; dropping the factor
+ *   0.5 in front of `log(2 * pi)` puts it at 58 on every one of them, so 45
+ *   separates the two with 1.41x of margin below and 1.29x above. This is the
+ *   tightest of the three, and the first to raise if a platform ever
+ *   disagrees.
+ * - df=40 and df=79 are where the iteration lands on the reference value
+ *   exactly, at 1 ULP on all three engines. A Newton seed of 1.96 gives 19 and
+ *   12 ULP there, so 8 separates them by a factor of 8. Those two are an order
+ *   of magnitude narrower in absolute terms than the global bound is anywhere.
+ *
+ * macOS and Windows are not reachable from here and use a different math library;
+ * peak already moves between platforms, so its height there is unknown. Every
+ * bound here is validated on the three engines above plus the global one.
+ * Re-measure these three before changing the algorithm: they encode what it
+ * costs where it costs least, and a change moves them.
+ */
+const perPoint = new Map<number, number>([
+  [22, 45],
+  [40, 8],
+  [79, 8],
+])
+
+test('studentTCritical - is exact where the algorithm can be exact', () => {
+  for (const [df, expected] of reference) {
+    const bound = perPoint.get(df)
+    if (bound === undefined) continue
+    expect(
+      Math.abs(studentTCritical(df) - expected) / ulpOf(expected),
+      `df=${String(df)}, where the algorithm is exact`
+    ).toBeLessThan(bound)
+  }
+})
+
+test('studentTCritical - the series switch sits where it is meant to', () => {
+  // The gamma ratio comes from the Lanczos `logGamma` for df < 24 and from the
+  // series above it, so the error is decided by where that switch sits.
+  // Moving it to 13 puts 96 ULP at df=25, to 16 puts 167 ULP at df=31 and to
+  // 20 puts 225 ULP at df=36. Only the first stays under the 100 ULP global
+  // bound, so this narrower one exists for that case alone; the other two are
+  // already caught globally, and a blanket bound over the whole series region
+  // would not separate them, since legitimate values reach 80 ULP well above
+  // 1024.
+  //
+  // Node only. At df=25 the baseline is 12 ULP on Node and this mutant 96, but
+  // Bun and Deno compute it at 9 and 12 whether or not the switch moves, so
+  // neither catches it here. df=25 is the last grid point where the two differ
+  // by more than 3 ULP on any engine. df=31 is left out because it adds
+  // nothing: every switch position that fails on it also fails at df=25 or is
+  // already caught globally.
+  for (const [df, expected] of reference) {
+    if (df !== 25) continue
+    expect(
+      Math.abs(studentTCritical(df) - expected) / ulpOf(expected),
+      `df=${String(df)}, just above the switch`
+    ).toBeLessThan(60)
+  }
+})
+
+test('studentTCritical - converges to the normal quantile as df grows', () => {
+  // The normal two-sided 95% quantile is 1.959963984540054, approached from
+  // above by the Student critical value for any finite df.
+  const normal = 1.959963984540054
+  // The 1/df asymptotic term is (z^3 + z) / (4 * df) = 2.372e-6 at 1e6.
+  expect(studentTCritical(1e6)).toBeCloseTo(normal + 2.372e-6, 9)
+  expect(studentTCritical(1e8)).toBeCloseTo(normal, 7)
+  let previous = Number.POSITIVE_INFINITY
+  for (const df of [1, 2, 5, 10, 50, 200, 1000, 10_000, 1e6]) {
+    const critical = studentTCritical(df)
+    expect(critical, `df=${String(df)} strictly decreasing`).toBeLessThan(previous)
+    expect(critical, `df=${String(df)} above normal`).toBeGreaterThan(normal)
+    previous = critical
+  }
+})
+
+test('studentTCritical - strictly decreasing in the degrees of freedom', () => {
+  for (const df of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 30, 100, 1000]) {
+    expect(
+      studentTCritical(df + 1),
+      `df=${String(df + 1)} below df=${String(df)}`
+    ).toBeLessThan(studentTCritical(df))
+  }
+})
+
+test('studentTCritical - stays within the historical table bounds', () => {
+  // The largest tabulated value was 12.7062 (df=1) and the limit approached
+  // the normal quantile from above; no degrees of freedom may fall outside.
+  for (const df of [0, 1, 2, 5, 50, 500, 5000, 1e9]) {
+    expect(studentTCritical(df), `df=${String(df)}`).toBeLessThan(12.71)
+    expect(studentTCritical(df), `df=${String(df)}`).toBeGreaterThan(1.9599)
+  }
+})
+
+test('studentTCritical - clamps non-positive degrees of freedom to one', () => {
+  // A single-sample benchmark reports df=0; the value stays defined.
+  const one = studentTCritical(1)
+  expect(studentTCritical(0)).toBe(one)
+  expect(studentTCritical(-5)).toBe(one)
+  expect(one).toBeCloseTo(12.706, 3)
+})
+
+test('studentTCritical - reaches the normal quantile for any finite df', () => {
+  // The complement is formed as t^2 / (df + t^2) rather than as 1 - u, so
+  // the quantile stays accurate far beyond where u would round to 1.
+  for (const df of [1e12, 1e15, Number.MAX_SAFE_INTEGER]) {
+    expect(
+      studentTCritical(df),
+      `df=${String(df)}`
+    ).toBeCloseTo(1.959963984540054, 11)
+  }
+  // At 1e9 the continued fraction still runs on 1e8-magnitude terms, which
+  // costs about three digits; still far better than the removed table, which
+  // returned the normal 1.96 there.
+  expect(studentTCritical(1e9)).toBeCloseTo(1.959963984540054, 8)
+})

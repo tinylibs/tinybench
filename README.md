@@ -604,6 +604,25 @@ the run returns.
 
 Feel free to create issues/discussions and then PRs for the project!
 
+Install [mise](https://mise.jdx.dev/getting-started.html) (2026.2.8 or newer) to
+use the project's Node.js and pnpm versions. Node.js is pinned in `mise.toml`;
+pnpm is read from `packageManager` in `package.json`. The root configuration
+also applies in `examples/`.
+
+Review `mise.toml`, then run from the repository root:
+
+```sh
+mise trust
+mise install
+mise exec -- pnpm install --frozen-lockfile
+mise exec -- pnpm build
+mise exec -- pnpm test
+```
+
+Use `mise exec -- pnpm <script>` without shell activation, or
+[activate mise](https://mise.jdx.dev/getting-started.html#activate-mise) to run
+`pnpm` directly. Bun and Deno remain optional runtimes for their existing checks.
+
 ## Sponsors
 
 Your sponsorship can make a huge difference in continuing our work in open source!

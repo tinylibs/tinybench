@@ -2,7 +2,7 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@12.9.0",
+  "packageManager": "pnpm@12.9.1",
   "scripts": {
     "all": "run-s example:*",
     "example:convert-bencher": "tsx src/convert-bencher.ts",

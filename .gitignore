@@ -36,5 +36,9 @@ yarn-error.log*
 # local mise configuration
 mise.local.toml
 mise.*.local.toml
+.mise.local.toml
+.mise.*.local.toml
 mise.local.lock
 mise.*.local.lock
+.mise.local.lock
+.mise.*.local.lock

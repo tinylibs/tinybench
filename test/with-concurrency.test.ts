@@ -1,7 +1,65 @@
+import { getEventListeners } from 'node:events'
 import { expect, test } from 'vitest'
 
+import { performanceNowTimestampProvider } from '../src/timestamp'
 import { hrtimeNow, withConcurrency } from '../src/utils'
 import { asyncSleep } from './utils'
+
+test.each(['completed', 'errored', 'aborted'])(
+  'removes its abort listener after a %s run',
+  async state => {
+    const controller = new AbortController()
+    const failure = new Error('failure')
+    const runs = state === 'aborted' ? 1 : 3
+
+    for (let i = 0; i < runs; i++) {
+      const run = withConcurrency({
+        fn: async () => {
+          await Promise.resolve()
+          if (state === 'errored') throw failure
+          if (state === 'aborted') controller.abort()
+          return i
+        },
+        iterations: 1,
+        limit: 1,
+        signal: controller.signal,
+      })
+      if (state === 'errored') await expect(run).rejects.toBe(failure)
+      else expect(await run).toEqual(state === 'aborted' ? [] : [i])
+
+      expect(getEventListeners(controller.signal, 'abort')).toEqual([])
+    }
+  }
+)
+
+test.each(['fn', 'fromMs'])(
+  'removes its abort listener when timestamp %s throws during initialization',
+  async method => {
+    const controller = new AbortController()
+    const failure = new Error('timestamp failure')
+    let calls = 0
+
+    await expect(
+      withConcurrency({
+        fn: async () => {
+          calls++
+          await Promise.resolve()
+        },
+        iterations: 1,
+        limit: 1,
+        signal: controller.signal,
+        time: 1,
+        timestampProvider: {
+          ...performanceNowTimestampProvider,
+          [method]: () => { throw failure },
+        },
+      })
+    ).rejects.toBe(failure)
+
+    expect(calls).toBe(0)
+    expect(getEventListeners(controller.signal, 'abort')).toEqual([])
+  }
+)
 
 test('runs all iterations with limited concurrency', async () => {
   let runs = 0

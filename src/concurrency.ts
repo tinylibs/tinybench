@@ -106,12 +106,16 @@ export const withConcurrency = async <R>(
     }
   }
 
-  if (hasTimeLimit) {
-    targetTime =
-      (timestampFn() as number) + (timestampProvider.fromMs(time) as number)
+  try {
+    if (hasTimeLimit) {
+      targetTime =
+        (timestampFn() as number) + (timestampProvider.fromMs(time) as number)
+    }
+    const promises = Array.from({ length: maxWorkers }, () => worker())
+    await Promise.allSettled(promises)
+  } finally {
+    signal?.removeEventListener('abort', onAbort)
   }
-  const promises = Array.from({ length: maxWorkers }, () => worker())
-  await Promise.allSettled(promises)
 
   if (errors.length === 0) return results
   if (errors.length === 1) throw errors[0] // eslint-disable-line @typescript-eslint/only-throw-error

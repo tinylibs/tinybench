@@ -1,7 +1,30 @@
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 
 import { hrtimeNow, withConcurrency } from '../src/utils'
 import { asyncSleep } from './utils'
+
+test.each(['completed', 'errored', 'aborted'])(
+  'removes its abort listener after a %s run',
+  async state => {
+    const controller = new AbortController()
+    const addListener = vi.spyOn(controller.signal, 'addEventListener')
+    const removeListener = vi.spyOn(controller.signal, 'removeEventListener')
+    const run = withConcurrency({
+      fn: async () => {
+        await Promise.resolve()
+        if (state === 'errored') throw new Error('failure')
+        if (state === 'aborted') controller.abort()
+      },
+      iterations: 1,
+      limit: 1,
+      signal: controller.signal,
+    })
+    if (state === 'errored') await expect(run).rejects.toThrow('failure')
+    else await run
+
+    expect(removeListener).toHaveBeenCalledWith('abort', addListener.mock.calls.at(0)?.[1])
+  }
+)
 
 test('runs all iterations with limited concurrency', async () => {
   let runs = 0

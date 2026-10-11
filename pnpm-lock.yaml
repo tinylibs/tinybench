@@ -170,15 +170,12 @@ overrides:
   tar@<=7.5.3: ^7.5.4
   tar@<=7.5.9: ^7.5.10
 
-patchedDependencies:
-  size-limit@14.1.0: 7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c
-
 importers:
 
   .:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^5.20261007.1
+        specifier: ^5.20261008.1
         version: 5.20261009.1
       '@commitlint/cli':
         specifier: ^21.2.3
@@ -193,11 +190,11 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.12.0(jiti@2.7.0))
       '@size-limit/preset-small-lib':
-        specifier: ^14.1.0
-        version: 14.1.0(size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))
+        specifier: ^14.2.0
+        version: 14.2.0(size-limit@14.2.0)
       '@size-limit/time':
-        specifier: ^14.1.0
-        version: 14.1.0(size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))
+        specifier: ^14.2.0
+        version: 14.2.0(size-limit@14.2.0)
       '@types/node':
         specifier: ^24.19.1
         version: 24.19.1
@@ -232,8 +229,8 @@ importers:
         specifier: ^2.14.0
         version: 2.14.0
       size-limit:
-        specifier: ^14.1.0
-        version: 14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
+        specifier: ^14.2.0
+        version: 14.2.0
       tsdown:
         specifier: ^0.23.0
         version: 0.23.0(tsx@4.23.15)(typescript@6.0.3)
@@ -1010,28 +1007,28 @@ packages:
     resolution: {integrity: sha512-dNZafjM93Y+F+sfwTO5gTpsGXlnc/0Q+c2+62ViqP3gkMWvHEMSKkaEHgVJLcLg3i/g19GSIPziiKpgyne07Bw==}
     engines: {node: '>=8'}
 
-  '@size-limit/file@14.1.0':
-    resolution: {integrity: sha512-mR0uVxzdzV31pk8Iz795dDXxhHsrv9RSsyjeCVboUr1Q2+2KL/GpjeMZ44ydFqI2JfXZ22dOsbY28yPeOse1Nw==}
+  '@size-limit/file@14.2.0':
+    resolution: {integrity: sha512-ROqMjC8Pi/ogIIm79Y4u8YieXJb++MaZWbdv/am16l4cS9CxSUXmqP3igIXyv3gK3LMG6DkZdWSM5KVND2ug7g==}
     engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     peerDependencies:
-      size-limit: 14.1.0
+      size-limit: 14.2.0
 
-  '@size-limit/preset-small-lib@14.1.0':
-    resolution: {integrity: sha512-WK3Qvk0TnnLdQsJcA1V+Ci58RSM3iRGV+axML1QQcF4ZpdrDTFVttrBiMgYRc+ay/skpxPI1D7QZbM+Jv1C05w==}
+  '@size-limit/preset-small-lib@14.2.0':
+    resolution: {integrity: sha512-OG0U91dv2eyMIjwnrM+FX37GgpDbLHFScIE30/dQhIK1fcw7LtEhIxPzugScJlwEAIpD/d+r9xCQHkEZEDQiyw==}
     peerDependencies:
-      size-limit: 14.1.0
+      size-limit: 14.2.0
 
-  '@size-limit/rolldown@14.1.0':
-    resolution: {integrity: sha512-N6V0JICm5WryHrHRN7LB5mBdnJMKhfUvyH/myOtj6BIzzJOpTWNbuPfCXC1VPBb3Kdwyl5aiL3k7Owc3m7xz7g==}
+  '@size-limit/rolldown@14.2.0':
+    resolution: {integrity: sha512-FA4DMpy/q8BE/gtGvV0hV2MVR03hPF/PwKxJoB1LUjyj6FnksVGpxuxyh0ZU1eSdrtj6tgFR67NDIcZ9fCGV/A==}
     engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     peerDependencies:
-      size-limit: 14.1.0
+      size-limit: 14.2.0
 
-  '@size-limit/time@14.1.0':
-    resolution: {integrity: sha512-2RLtD3IOEdaqoruIZBXPiEi2RYPRmNrTpozCSlW0eeY5T5lvx7L7G5Pq0vm1fNYB319DCWa4vqlWVvug0fnG+g==}
+  '@size-limit/time@14.2.0':
+    resolution: {integrity: sha512-pse1thw6BGb01Ou4phFcBnOaSOswIOLC45nLo2ETEnaCE30ob56GyU2yHFbFygJqrw4nUeMhggNt9posfRpw1w==}
     engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     peerDependencies:
-      size-limit: 14.1.0
+      size-limit: 14.2.0
 
   '@stylistic/eslint-plugin@5.10.0':
     resolution: {integrity: sha512-nPK52ZHvot8Ju/0A4ucSX1dcPV2/1clx0kLcH5wDmrE4naKso7TUC/voUyU1O9OTKTrR6MYip6LP0ogEMQ9jPQ==}
@@ -2651,8 +2648,8 @@ packages:
     resolution: {integrity: sha512-kkTORPAuxQz2g1QUuN0J8yGWT28tjGBfPOdJ4xT7Vbeu30veKUZQIoID2qGgCDAakaQn59UeZJJ4cFGB8PVP2A==}
     hasBin: true
 
-  size-limit@14.1.0:
-    resolution: {integrity: sha512-ANW8IDwAK3P84y+bElmWqq8ymV/mNS8Jan+otR5XItVVS4AEyAx7MpT+1BsMULbgDaJ1cle3qN/hkOYQS0vF7g==}
+  size-limit@14.2.0:
+    resolution: {integrity: sha512-/h8+T+2TxSdZhKRv70gtjAfMKK72p6+FEJMqEZHjzbLXfACF6esikRT8aHqmVLQvT+9lNlAa8GOAVFC3XeI1VA==}
     engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     hasBin: true
 
@@ -3726,25 +3723,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@size-limit/file@14.1.0(size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))':
+  '@size-limit/file@14.2.0(size-limit@14.2.0)':
     dependencies:
-      size-limit: 14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
+      size-limit: 14.2.0
 
-  '@size-limit/preset-small-lib@14.1.0(size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))':
+  '@size-limit/preset-small-lib@14.2.0(size-limit@14.2.0)':
     dependencies:
-      '@size-limit/file': 14.1.0(size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))
-      '@size-limit/rolldown': 14.1.0(size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))
-      size-limit: 14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
+      '@size-limit/file': 14.2.0(size-limit@14.2.0)
+      '@size-limit/rolldown': 14.2.0(size-limit@14.2.0)
+      size-limit: 14.2.0
 
-  '@size-limit/rolldown@14.1.0(size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))':
+  '@size-limit/rolldown@14.2.0(size-limit@14.2.0)':
     dependencies:
       rolldown: 1.2.12
-      size-limit: 14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
+      size-limit: 14.2.0
 
-  '@size-limit/time@14.1.0(size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c))':
+  '@size-limit/time@14.2.0(size-limit@14.2.0)':
     dependencies:
       estimo: 3.0.5
-      size-limit: 14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c)
+      size-limit: 14.2.0
     transitivePeerDependencies:
       - bare-abort-controller
       - bare-buffer
@@ -5343,7 +5340,7 @@ snapshots:
 
   simple-git-hooks@2.14.0: {}
 
-  size-limit@14.1.0(patch_hash=7c5fe03293aa839e4a51e68f8f5d1a207417e2078756c3ea1d0a57912dbbc47c):
+  size-limit@14.2.0:
     dependencies:
       lilconfig: 3.1.3
       nanospinner: 1.2.2

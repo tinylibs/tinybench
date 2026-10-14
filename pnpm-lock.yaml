@@ -175,7 +175,7 @@ importers:
   .:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^5.20261010.1
+        specifier: ^5.20261011.1
         version: 5.20261012.1
       '@commitlint/cli':
         specifier: ^21.2.3
@@ -214,7 +214,7 @@ importers:
         specifier: ^10.12.0
         version: 10.12.0(jiti@2.7.0)
       eslint-plugin-jsdoc:
-        specifier: ^65.2.4
+        specifier: ^65.3.0
         version: 65.3.1(eslint@10.12.0(jiti@2.7.0))(typescript@6.0.3)
       eslint-plugin-perfectionist:
         specifier: ^5.12.1
@@ -232,7 +232,7 @@ importers:
         specifier: ^14.2.0
         version: 14.2.0
       tsdown:
-        specifier: ^0.23.0
+        specifier: ^0.23.1
         version: 0.23.1(tsx@4.23.15)(typescript@6.0.3)
       typedoc:
         specifier: ^0.28.20

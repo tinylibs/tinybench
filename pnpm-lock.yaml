@@ -175,8 +175,8 @@ importers:
   .:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^5.20261011.1
-        version: 5.20261012.1
+        specifier: ^5.20261013.1
+        version: 5.20261015.1
       '@commitlint/cli':
         specifier: ^21.2.3
         version: 21.2.3(@types/node@24.19.2)(conventional-commits-parser@7.1.3)(typescript@6.0.3)
@@ -199,7 +199,7 @@ importers:
         specifier: ^24.19.2
         version: 24.19.2
       '@vitest/coverage-v8':
-        specifier: ^5.0.3
+        specifier: ^5.0.4
         version: 5.0.4(vitest@5.0.4)
       bumpp:
         specifier: ^12.3.0
@@ -214,8 +214,8 @@ importers:
         specifier: ^10.12.0
         version: 10.12.0(jiti@2.7.0)
       eslint-plugin-jsdoc:
-        specifier: ^65.3.0
-        version: 65.3.1(eslint@10.12.0(jiti@2.7.0))(typescript@6.0.3)
+        specifier: ^65.3.2
+        version: 65.3.4(eslint@10.12.0(jiti@2.7.0))(typescript@6.0.3)
       eslint-plugin-perfectionist:
         specifier: ^5.12.1
         version: 5.12.1(eslint@10.12.0(jiti@2.7.0))(typescript@6.0.3)
@@ -241,14 +241,14 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
       vitest:
-        specifier: ^5.0.3
+        specifier: ^5.0.4
         version: 5.0.4(@types/node@24.19.2)(@vitest/coverage-v8@5.0.4)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
     publishDirectory: package
 
   examples:
     devDependencies:
       '@types/bun':
-        specifier: ^1.4.2
+        specifier: ^1.4.3
         version: 1.4.3
       npm-run-all2:
         specifier: ^9.0.3
@@ -290,8 +290,8 @@ packages:
   '@cacheable/utils@2.5.0':
     resolution: {integrity: sha512-buipgOVDkkPXNR5+xBpDw7Zk2n1EvU7qBJCNUcL7rhQ//kfpOXPAvQ511Os0vpLYJ1pZnvudNytkQt2hst3wqA==}
 
-  '@cloudflare/workers-types@5.20261012.1':
-    resolution: {integrity: sha512-5Y0NrKXG9CZaNUZ6Dt3TLRE4UQe2/DGuxIhTEVYHUl0jAlv1TpQtI59YBAszRpSaZAMzbM8nqGc1n9Z2q4TVyA==}
+  '@cloudflare/workers-types@5.20261015.1':
+    resolution: {integrity: sha512-ef6KOceBMzxf1O/CelPF2ei8Mtlaw+7vQ9cdaUKFG8CC0xAe8/SuPdRpmbogEE18u6JbfFWWAOGQLaav8UTFWg==}
 
   '@commitlint/cli@21.2.3':
     resolution: {integrity: sha512-5yOX6IRjcrIReCxpyAd04hgI/yhUMpVBJ/ouwFV0wk9yx5+fYRDWZWJ5h55Tbedgfol+5m2mU5nqzbB8g3v0vQ==}
@@ -1697,8 +1697,8 @@ packages:
     peerDependencies:
       eslint: '>=8'
 
-  eslint-plugin-jsdoc@65.3.1:
-    resolution: {integrity: sha512-924TDr1T3e2WwikH6ruqH12HSjY4cfF1aYduW/QBX83ZAzbGKU63mJru5FOREOE3lZuzIe3879RJGKBd+1W4uQ==}
+  eslint-plugin-jsdoc@65.3.4:
+    resolution: {integrity: sha512-Z3/ro8sZPqnXKhyAzCNa3F7KCZ3js5xVx/q9BEvTjUGzN6OIQfdb+q3Sc9lJ3zCfyPnN0tI524ulZjYRxAwnAw==}
     engines: {node: ^22.22.2 || >=24.15.0}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
@@ -3023,7 +3023,7 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
-  '@cloudflare/workers-types@5.20261012.1': {}
+  '@cloudflare/workers-types@5.20261015.1': {}
 
   '@commitlint/cli@21.2.3(@types/node@24.19.2)(conventional-commits-parser@7.1.3)(typescript@6.0.3)':
     dependencies:
@@ -4372,7 +4372,7 @@ snapshots:
       eslint: 10.12.0(jiti@2.7.0)
       eslint-compat-utils: 0.5.1(eslint@10.12.0(jiti@2.7.0))
 
-  eslint-plugin-jsdoc@65.3.1(eslint@10.12.0(jiti@2.7.0))(typescript@6.0.3):
+  eslint-plugin-jsdoc@65.3.4(eslint@10.12.0(jiti@2.7.0))(typescript@6.0.3):
     dependencies:
       '@es-joy/jsdoccomment': 0.98.0
       '@es-joy/resolve.exports': 1.2.0

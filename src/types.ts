@@ -448,6 +448,12 @@ export interface FnReturnedObject {
   overriddenIterationCost?: number
 }
 
+export interface GetPlatformMetricsOptions {
+  g?: typeof globalThis
+  runtime?: JSRuntime
+  useCache?: boolean
+}
+
 /**
  * The hook function signature.
  * Called once per task and phase: warmup (if enabled), then run.
@@ -483,10 +489,49 @@ export type JSRuntime =
   | 'v8'
   | 'workerd'
 
+export type Machine = (
+  | 'arm64'
+  | 'arm'
+  | 'ia32'
+  | 'loong64'
+  | 'mips'
+  | 'mipsel'
+  | 'ppc64'
+  | 'riscv64'
+  | 's390x'
+  | 'x64') | (Lowercase<string> & Record<never, never>)
+
 /**
  * A function that returns the current timestamp.
  */
 export type NowFn = () => number
+
+export type OS = (
+  | 'aix'
+  | 'android'
+  | 'cygwin'
+  | 'darwin'
+  | 'freebsd'
+  | 'haiku'
+  | 'linux'
+  | 'netbsd'
+  | 'openbsd'
+  | 'sunos'
+  | 'win32') | (Lowercase<string> & Record<never, never>)
+
+export interface PlatformMetrics {
+  cpuCores: number
+  cpuMachine: Machine
+  cpuModel: string
+  cpuSpeed: number
+  memoryFree: number
+  memoryTotal: number
+  osKernel: string
+  osType: OS
+  priority: null | number
+  runtime: JSRuntime
+  userAgent: string
+}
 
 // @types/node doesn't have these types globally, and we don't want to bring "dom" lib for everyone
 export type RemoveEventListenerOptionsArgument = Parameters<

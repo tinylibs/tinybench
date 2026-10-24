@@ -18,6 +18,7 @@ export default defineConfig([
           autoFix: true,
           cspell: {
             words: [
+              'armv',
               'codegen',
               'evanwashere',
               'fastly',
@@ -26,11 +27,13 @@ export default defineConfig([
               'Lanczos',
               'Lentz',
               'lockdown',
+              'loong',
               'moddable',
               'neostandard',
               'prefactor',
               'quickjs',
               'Quii',
+              'riscv',
               'spidermonkey',
               'workerd',
             ],

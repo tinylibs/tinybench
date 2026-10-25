@@ -2,7 +2,7 @@
   "name": "examples",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@12.14.0",
+  "packageManager": "pnpm@12.15.0",
   "scripts": {
     "all": "run-s example:*",
     "example:convert-bencher": "tsx src/convert-bencher.ts",
@@ -17,7 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/bun": "^1.4.3",
-    "npm-run-all2": "^9.0.3",
+    "npm-run-all2": "^9.0.4",
     "tsx": "^4.23.15"
   }
 }

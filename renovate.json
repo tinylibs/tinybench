@@ -4,11 +4,16 @@
     "config:recommended",
     "abandonments:recommended",
     ":configMigration",
+    "helpers:pinGitHubActionDigests",
     "group:allNonMajor",
     "schedule:daily",
     ":maintainLockFilesWeekly",
     "security:minimumReleaseAgeNpm"
   ],
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "addLabels": ["security"]
+  },
   "packageRules": [
     {
       "matchFileNames": ["**/package.json"],
@@ -28,5 +33,6 @@
     "**/test/**",
     "**/tests/**",
     "**/__fixtures__/**"
-  ]
+  ],
+  "postUpdateOptions": ["pnpmDedupe"]
 }

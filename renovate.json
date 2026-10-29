@@ -5,6 +5,7 @@
     "abandonments:recommended",
     ":configMigration",
     "helpers:pinGitHubActionDigests",
+    ":pinDevDependencies",
     "group:allNonMajor",
     "schedule:daily",
     ":maintainLockFilesWeekly",
@@ -19,7 +20,6 @@
       "matchFileNames": ["**/package.json"],
       "matchDepTypes": [
         "dependencies",
-        "devDependencies",
         "optionalDependencies"
       ],
       "rangeStrategy": "bump"

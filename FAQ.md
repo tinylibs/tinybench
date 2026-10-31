@@ -47,7 +47,7 @@ increase both collection and analysis costs.
 
 `warmup: false` skips warmup, but does not remove these other costs. For synchronous
 functions and hooks, `runSync()` avoids asynchronous scheduling in the measurement
-loop; it still computes statistics. Reducing `time` collects fewer samples and can
+loop; it still computes statistics. Reducing `time` can collect fewer samples and
 reduce analysis work, at the cost of statistical precision.
 
 See [Concurrency](./README.md#concurrency) for the different scheduling limits in

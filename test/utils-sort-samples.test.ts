@@ -64,3 +64,22 @@ test('sorts large samples containing infinities and extreme finite values', () =
     Number.POSITIVE_INFINITY,
   ])
 })
+
+test('preserves finite extremes and precision in large unsorted samples', () => {
+  const repeated = Array<number>(8192).fill(1)
+  const samples: Samples = [
+    Number.MAX_VALUE,
+    ...repeated,
+    Number.MIN_VALUE,
+    0.001,
+  ]
+
+  sortSamples(samples)
+
+  expect(samples).toEqual([
+    Number.MIN_VALUE,
+    0.001,
+    ...repeated,
+    Number.MAX_VALUE,
+  ])
+})

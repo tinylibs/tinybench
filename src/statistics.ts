@@ -1,5 +1,6 @@
 import type { Samples, SortedSamples, Statistics } from './types'
 
+import { nativeSortThreshold } from './constants'
 import { studentTCritical } from './student-t'
 
 /**
@@ -20,7 +21,39 @@ export const isValidSamples = (
 export function sortSamples (
   samples: Samples
 ): asserts samples is SortedSamples {
-  samples.sort(sortFn)
+  const len = samples.length
+  if (len < nativeSortThreshold) {
+    samples.sort(sortFn)
+    return
+  }
+
+  let ascending = true
+  let descending = true
+  let previous = samples[0]
+  for (let i = 0; i < len; i++) {
+    const value = samples[i]! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    // Preserve comparator semantics for non-finite values and negative zero.
+    if (!Number.isFinite(value) || Object.is(value, -0)) {
+      samples.sort(sortFn)
+      return
+    }
+    if (ascending || descending) {
+      ascending &&= value >= previous
+      descending &&= value <= previous
+      previous = value
+    }
+  }
+  if (ascending) return
+  if (descending) {
+    samples.reverse()
+    return
+  }
+
+  // Native numeric sorting avoids a JavaScript callback per comparison.
+  const sorted = new Float64Array(samples).sort()
+  for (let i = 0; i < len; i++) {
+    samples[i] = sorted[i]! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+  }
 }
 
 /**

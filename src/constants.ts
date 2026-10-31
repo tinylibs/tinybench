@@ -24,3 +24,8 @@ export const defaultMinimumWarmupIterations = 16
 export const emptyFunction = Object.freeze(() => {
   /* no op */
 })
+
+/**
+ * Minimum sample count for considering native numeric sorting.
+ */
+export const nativeSortThreshold = 1024

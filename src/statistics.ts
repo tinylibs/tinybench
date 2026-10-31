@@ -1,5 +1,6 @@
 import type { Samples, SortedSamples, Statistics } from './types'
 
+import { nativeSortThreshold } from './constants'
 import { studentTCritical } from './student-t'
 
 /**
@@ -21,7 +22,7 @@ export function sortSamples (
   samples: Samples
 ): asserts samples is SortedSamples {
   const len = samples.length
-  if (len < 1024) {
+  if (len < nativeSortThreshold) {
     samples.sort(sortFn)
     return
   }

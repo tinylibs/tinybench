@@ -34,6 +34,25 @@ Manually looping a fast function to "amplify" its duration can lift a sample
 above the timer resolution, but it adds loop overhead and changes what you
 measure; a more precise timestamp provider is usually the cleaner fix.
 
+## Why does a run take longer than the configured `time`?
+
+`time` is not a wall-clock timeout. In sequential modes, Tinybench accumulates
+per-iteration budget costs and keeps running until both `time` and the minimum
+`iterations` are satisfied. Warmup, hooks, loop bookkeeping and final statistics
+also contribute to the elapsed time.
+
+Very fast functions can produce large sample arrays. Sorting and analyzing these
+samples takes additional time after collection ends. Debugger instrumentation can
+increase both collection and analysis costs.
+
+`warmup: false` skips warmup, but does not remove these other costs. For synchronous
+functions and hooks, `runSync()` avoids asynchronous scheduling in the measurement
+loop; it still computes statistics. Reducing `time` collects fewer samples and can
+reduce analysis work, at the cost of statistical precision.
+
+See [Concurrency](./README.md#concurrency) for the different scheduling limits in
+task-concurrent mode.
+
 ## What is JS JIT de-optimization?
 
 JavaScript engines (V8, SpiderMonkey, JavaScriptCore) compile hot code paths

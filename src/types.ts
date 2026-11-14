@@ -533,17 +533,19 @@ export type SortedSamples = Samples & {
  * `mean`, the percentiles, `min` and `max` locate the individual samples;
  * `variance`, `sd`, `aad` and `mad` describe how the samples spread. These are
  * properties of the collected samples, not guarantees about future runs.
- * Percentiles interpolate linearly between order statistics; upper percentiles
- * are unstable on small samples, where they approach the observed maximum.
+ * Percentiles interpolate linearly between order statistics; on small samples
+ * the upper percentiles interpolate between the few largest observations, so
+ * they are unstable estimates of the tail.
  *
- * `sem`, `moe` and `rme` concern the mean of the sampled process. `moe` is the
- * half-width of a nominal two-sided 95% confidence interval for the mean,
- * computed with the exact Student's t critical value {@link Statistics.critical}
- * for {@link Statistics.df} degrees of freedom. Nominal coverage assumes
- * independent samples from a stable regime and an approximately normal sample
- * mean; it can be optimistic under strong skew or regime shifts, especially on
- * small samples. It covers only the sampled process — run-to-run and
- * process-to-process variation is not included.
+ * `sem`, `moe` and `rme` concern the mean of the sampled process. With at
+ * least two samples, `moe` is the half-width of a nominal two-sided 95%
+ * confidence interval for the mean, computed with the exact Student's t
+ * critical value {@link Statistics.critical} for {@link Statistics.df} degrees
+ * of freedom; with a single sample it is 0 and carries no meaning. Nominal
+ * coverage assumes independent samples from a stable regime and an
+ * approximately normal sample mean; it can be optimistic under strong skew or
+ * regime shifts, especially on small samples. It covers only the sampled
+ * process — run-to-run and process-to-process variation is not included.
  */
 export interface Statistics {
   /**
@@ -559,8 +561,8 @@ export interface Statistics {
   critical: number
 
   /**
-   * degrees of freedom: `samplesCount - 1`, used by
-   * {@link Statistics.critical}
+   * degrees of freedom: `samplesCount - 1`; {@link Statistics.critical}
+   * falls back to one degree of freedom when this is 0
    */
   df: number
 

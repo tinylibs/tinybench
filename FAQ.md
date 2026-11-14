@@ -43,9 +43,13 @@ one of two kinds.
 and `max` locate the individual samples; `sd`, `variance`, `aad` and `mad`
 describe their spread. These are properties of the collected samples, not
 guarantees about future runs. Percentiles interpolate linearly between order
-statistics, and the upper ones are unstable on small samples: at the default
-minimum of 64 samples, `p99` and `p999` are close to the observed maximum.
-Raise `time` before trusting them. The mean and the median answer different
+statistics, and the upper ones are unstable on small samples: with 64 samples
+(the default `iterations` floor), `p99` and `p999` interpolate between the two
+largest observations, weighting the maximum by 37 % and 93.7 % respectively —
+what they say about the tail depends on the gap between those observations.
+Collect more samples before trusting them: `time` raises the sample count in
+the default modes, while with `concurrency: "task"` `iterations` caps the run
+count, so raise `iterations` as well. The mean and the median answer different
 questions and legitimately differ on skewed latency distributions.
 
 `mad` (median absolute deviation) is a robust dispersion figure. It is not
@@ -54,13 +58,16 @@ scaled to a normal distribution and is not an uncertainty estimate: the
 intervals.
 
 **Inferring about the mean.** `sem`, `moe` and `rme` concern the mean of the
-sampled process, not individual samples. `moe` is the half-width of a two-sided
-95% confidence interval computed with the exact Student's t critical value for
-`samplesCount - 1` degrees of freedom, and `rme` is `moe` expressed as a
-percentage of the mean. The interval is nominal: it assumes samples behave
-like independent observations from a stable regime and that the sample mean is
-approximately normally distributed. Strong skew, deopts, GC spikes or warmup
-still in progress make the interval optimistic, especially on small samples.
+sampled process, not individual samples. With at least two samples, `moe` is
+the half-width of a two-sided 95% confidence interval computed with the exact
+Student's t critical value for `samplesCount - 1` degrees of freedom, and
+`rme` is `moe` expressed as a percentage of the mean. With a single sample,
+`df` is 0, the critical value falls back to one degree of freedom and `moe` is
+0: no meaningful interval exists. The interval is nominal: it assumes samples
+behave like independent observations from a stable regime and that the sample
+mean is approximately normally distributed. Strong skew, deopts, GC spikes or
+warmup still in progress can make the interval optimistic, especially on small
+samples.
 The interval covers only the sampled process: run-to-run and process-to-process
 variation (JIT state, environment, machine state) is not included, so compare
 results across repeated runs rather than trusting a single `rme`.

@@ -197,10 +197,10 @@ completes that sequence before the measured phase starts, and hooks receive
 A task's own hooks run outside its timed call and, in sequential modes, outside
 its accumulated iteration budget. They still add wall time and can change the
 state the task observes; with `concurrency: 'bench'`, another task's hooks can
-overlap an asynchronous measurement and affect its samples. If allocating or
-resetting is part of the work being compared, keep it inside the task instead.
-Set [`async`](#async-detection) explicitly so no exploratory call runs before
-your preparation.
+overlap an asynchronous measurement and affect its samples and budget. If
+allocating or resetting is part of the work being compared, keep it inside the
+task instead. Set [`async`](#async-detection) explicitly so no exploratory
+call runs before your preparation.
 
 ### Cold Starts and Warmed-Up Runs
 

@@ -140,9 +140,9 @@ results, keeping warmup enabled (the default; tunable via `warmupIterations` /
 production-like configuration.
 
 A fixed `warmupTime` or `warmupIterations` budget does not establish that
-execution has stabilized: the warmup phase ends on those limits, not on a
-stability check. Repeat measurements and compare runs rather than treating
-warmup completion as proof of a stable regime; see
+execution has stabilized: warmup ends on the configured time and iteration
+rules, not on a stability check. Repeat measurements and compare runs rather
+than treating warmup completion as proof of a stable regime; see
 [Cold Starts and Warmed-Up Runs](./README.md#cold-starts-and-warmed-up-runs)
 for choosing which behavior to measure.
 

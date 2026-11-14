@@ -122,8 +122,9 @@ synchronous task; to measure the synchronous cost of a function that returns a
 
 Detection happens when `add()` creates the task. The exploratory call is not a
 measured iteration, but it runs before `setup` and task hooks and can consume
-input or change mutable state; native `async` functions are recognized without
-it. Set `async` explicitly when the task function has side effects (see
+input or change mutable state; native `async` functions from the same realm are
+recognized without it. Set `async` explicitly for functions from another realm
+or with side effects (see
 [Initializing and Resetting Data](#initializing-and-resetting-data)).
 
 ```ts
@@ -193,12 +194,13 @@ For each enabled phase, hooks run in order: `setup`, `beforeAll`, repeated
 completes that sequence before the measured phase starts, and hooks receive
 `'warmup'` or `'run'` so preparation can tell the phases apart.
 
-Hooks run outside the timed task call, and in sequential modes outside the
-accumulated iteration budget, but they still add wall time and can change the
-state the task observes. If allocating or resetting is part of the work being
-compared, keep it inside the task instead. Set
-[`async`](#async-detection) explicitly so no exploratory call runs before your
-preparation.
+A task's own hooks run outside its timed call and, in sequential modes, outside
+its accumulated iteration budget. They still add wall time and can change the
+state the task observes; with `concurrency: 'bench'`, another task's hooks can
+overlap an asynchronous measurement and affect its samples. If allocating or
+resetting is part of the work being compared, keep it inside the task instead.
+Set [`async`](#async-detection) explicitly so no exploratory call runs before
+your preparation.
 
 ### Cold Starts and Warmed-Up Runs
 
@@ -237,12 +239,12 @@ not make every sample a cold start: later calls can still run warmed-up code.
 ### Consuming Results
 
 Accumulate the values the operation produces and read the accumulator after
-the run, as the `checksum` does in the two examples above: results stay
-observable instead of unused. The accumulation is part of the measured task;
-printing happens afterwards. This reduces the risk that engine optimizations
-eliminate your work, but it never guarantees against them. Avoid logging per
-iteration unless logging is the measured operation. For very short operations,
-see the batching example in
+the run, as the `checksum` does in the mutable-data and cold-start examples
+above: results stay observable instead of unused. The accumulation is part of
+the measured task; printing happens afterwards. This reduces the risk that
+engine optimizations eliminate your work, but it never guarantees against them.
+Avoid logging per iteration unless logging is the measured operation. For very
+short operations, see the batching example in
 [Task-Supplied Measurements](#task-supplied-measurements).
 
 ## Concurrency

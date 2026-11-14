@@ -83,7 +83,7 @@ actually completes at `2 / 0.010 s = 200 ops/s`. In sequential modes,
 and percentiles as variation of the instantaneous rates. With
 `concurrency: "task"`, calls overlap while samples are still summed per call:
 the real wall-clock completion rate can be far above `1000 / period`, so
-divide completed operations by elapsed wall time instead.
+divide completed operations by elapsed wall-clock time instead.
 
 Samples that measure as zero — timer-saturated runs or overhead corrections
 clamping a sample — are not turned into an infinite rate: each is imputed as

@@ -34,6 +34,46 @@ Manually looping a fast function to "amplify" its duration can lift a sample
 above the timer resolution, but it adds loop overhead and changes what you
 measure; a more precise timestamp provider is usually the cleaner fix.
 
+## How do I read the reported statistics?
+
+Latency and throughput results answer different questions. Read each number as
+one of two kinds.
+
+**Describing the samples.** `mean`, `p50`, `p75`, `p99`, `p995`, `p999`, `min`
+and `max` locate the individual samples; `sd`, `variance`, `aad` and `mad`
+describe their spread. These are properties of the collected samples, not
+guarantees about future runs. Percentiles interpolate linearly between order
+statistics, and the upper ones are unstable on small samples: at the default
+minimum of 64 samples, `p99` and `p999` are close to the observed maximum.
+Raise `time` before trusting them. The mean and the median answer different
+questions and legitimately differ on skewed latency distributions.
+
+`mad` (median absolute deviation) is a robust dispersion figure. It is not
+scaled to a normal distribution and is not an uncertainty estimate: the
+`med ± mad` columns of `bench.table()` are descriptive, not confidence
+intervals.
+
+**Inferring about the mean.** `sem`, `moe` and `rme` concern the mean of the
+sampled process, not individual samples. `moe` is the half-width of a two-sided
+95% confidence interval computed with the exact Student's t critical value for
+`samplesCount - 1` degrees of freedom, and `rme` is `moe` expressed as a
+percentage of the mean. The interval is nominal: it assumes samples behave
+like independent observations from a stable regime and that the sample mean is
+approximately normally distributed. Strong skew, deopts, GC spikes or warmup
+still in progress make the interval optimistic, especially on small samples.
+The interval covers only the sampled process: run-to-run and process-to-process
+variation (JIT state, environment, machine state) is not included, so compare
+results across repeated runs rather than trusting a single `rme`.
+
+**Latency versus throughput.** Throughput statistics transform each sample
+independently (`1000 / sample`) before statistics are computed, so they
+describe instantaneous rates. That is why the throughput mean is not the
+reciprocal of the latency mean. With two samples of 1 ms and 9 ms, the average
+instantaneous rate is `(1000 / 1 + 1000 / 9) / 2 ≈ 555.6 ops/s`, while the work
+actually completes at `2 / 0.010 s = 200 ops/s`. For the rate implied by total
+time use `1000 / latency.mean` (equivalently `1000 / period`); read throughput
+dispersion and percentiles as variation of the instantaneous rates.
+
 ## Why does a run take longer than the configured `time`?
 
 `time` is not a wall-clock timeout. In sequential modes, Tinybench accumulates

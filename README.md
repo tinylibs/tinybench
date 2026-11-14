@@ -120,6 +120,12 @@ synchronous task; to measure the synchronous cost of a function that returns a
 `Promise`, record it via `overriddenDuration` instead (see
 [Task-Supplied Measurements](#task-supplied-measurements)).
 
+Detection happens when `add()` creates the task. The exploratory call is not a
+measured iteration, but it runs before `setup` and task hooks and can consume
+input or change mutable state; native `async` functions are recognized without
+it. Set `async` explicitly when the task function has side effects (see
+[Initializing and Resetting Data](#initializing-and-resetting-data)).
+
 ```ts
 const bench = new Bench()
 
@@ -137,6 +143,107 @@ bench.add(
 
 await bench.run()
 ```
+
+## Controlled Benchmark Setup
+
+Decide which work belongs inside the measured task call and which belongs to
+setup. Keep input preparation, state resets and result consumption consistent
+across the tasks you compare.
+
+### Initializing and Resetting Data
+
+Prepare shared inputs outside the task when creating them is not part of the
+work being measured. Use the bench-level `setup` hook to initialize data once
+per task and phase, and `beforeEach` to restore mutable input before each task
+call, warmup calls included:
+
+```ts
+import { Bench } from 'tinybench'
+
+const input = new Uint32Array([3, 1, 2])
+let values = new Uint32Array()
+let checksum = 0
+
+const bench = new Bench({
+  time: 0,
+  iterations: 4,
+  warmupTime: 0,
+  warmupIterations: 2,
+  setup: () => {
+    values = input.slice()
+  },
+})
+
+bench.add('sort mutable data', () => {
+  values.sort()
+  checksum += values[0]
+}, {
+  async: false,
+  beforeEach: () => {
+    values.set(input)
+  },
+})
+
+await bench.run()
+console.log(checksum) // 6: two warmup calls and four measured calls
+```
+
+For each enabled phase, hooks run in order: `setup`, `beforeAll`, repeated
+`beforeEach` / task call / `afterEach`, `afterAll`, then `teardown`. Warmup
+completes that sequence before the measured phase starts, and hooks receive
+`'warmup'` or `'run'` so preparation can tell the phases apart.
+
+Hooks run outside the timed task call, and in sequential modes outside the
+accumulated iteration budget, but they still add wall time and can change the
+state the task observes. If allocating or resetting is part of the work being
+compared, keep it inside the task instead. Set
+[`async`](#async-detection) explicitly so no exploratory call runs before your
+preparation.
+
+### Cold Starts and Warmed-Up Runs
+
+Automatic warmup is on by default: in sequential modes it requires at least
+250 ms of accumulated iteration cost and 16 calls, and its samples are excluded
+from the reported statistics. Set `warmup: false` to measure without it; for a
+synchronous task, `Task.warmupSync()` still warms it explicitly:
+
+```ts
+import { Bench } from 'tinybench'
+
+function createBench () {
+  const input = '{"value":42}'
+  let checksum = 0
+  const bench = new Bench({ warmup: false, time: 0, iterations: 1 })
+  bench.add('parse', () => {
+    checksum += JSON.parse(input).value
+  }, { async: false })
+  return { bench, getChecksum: () => checksum }
+}
+
+const cold = createBench()
+await cold.bench.run() // no warmup: the first task call is measured
+console.log(cold.getChecksum()) // 42
+
+const warmed = createBench()
+warmed.bench.tasks[0].warmupSync() // explicit warmup despite `warmup: false`
+await warmed.bench.run() // no automatic warmup; warmup samples stay excluded
+console.log(warmed.bench.tasks[0].runs) // 1 measured call
+```
+
+A new `Bench` does not start a fresh JavaScript process or reset JIT state;
+for process-cold comparisons, launch separate processes. Removing warmup does
+not make every sample a cold start: later calls can still run warmed-up code.
+
+### Consuming Results
+
+Accumulate the values the operation produces and read the accumulator after
+the run, as the `checksum` does in the two examples above: results stay
+observable instead of unused. The accumulation is part of the measured task;
+printing happens afterwards. This reduces the risk that engine optimizations
+eliminate your work, but it never guarantees against them. Avoid logging per
+iteration unless logging is the measured operation. For very short operations,
+see the batching example in
+[Task-Supplied Measurements](#task-supplied-measurements).
 
 ## Concurrency
 
@@ -381,22 +488,34 @@ the `time` / `warmupTime` budget. Return `overriddenIterationCost`
 (in ms) to declare the whole iteration's wall-clock cost:
 
 ```ts
-import type { FnReturnedObject } from 'tinybench'
+import { Bench, type FnReturnedObject } from 'tinybench'
+
+const input = '{"value":42}'
+const innerCalls = 100
+let checksum = 0
+
+const bench = new Bench({ warmup: false, time: 20, iterations: 4 })
 
 bench.add('batched', () => {
-  const innerCalls = 100
-  const start = process.hrtime.bigint()
-  for (let i = 0; i < innerCalls; i++) parse(input)
-  const elapsedMs = Number(process.hrtime.bigint() - start) / 1e6
+  const start = bench.now()
+  for (let i = 0; i < innerCalls; i++) {
+    checksum += JSON.parse(input).value
+  }
+  const elapsedMs = bench.now() - start
   return {
     overriddenDuration: elapsedMs / innerCalls, // mean per call in this batch
     overriddenIterationCost: elapsedMs, // budget cost of the iteration
   } satisfies FnReturnedObject
-})
+}, { async: false })
+
+await bench.run()
+console.log(checksum) // every batch contributes `innerCalls` parsed values
+console.table(bench.table())
 ```
 
 Each sample is the mean duration per call in one batch. Percentiles and
-dispersion describe these batch means, not the individual calls within a batch.
+dispersion describe these batch means, not the individual calls within a
+batch. The timed loop also includes loop bookkeeping and the accumulation.
 
 Semantics:
 

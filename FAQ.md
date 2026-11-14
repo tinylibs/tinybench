@@ -32,7 +32,10 @@ limitation. The relative margin of error (`rme`) alone is insufficient:
 a saturated task can report either a very high or a very low `rme`.
 Manually looping a fast function to "amplify" its duration can lift a sample
 above the timer resolution, but it adds loop overhead and changes what you
-measure; a more precise timestamp provider is usually the cleaner fix.
+measure; a more precise timestamp provider is usually the cleaner fix. If you
+do batch several calls per task call,
+[Task-Supplied Measurements](./README.md#task-supplied-measurements) shows how
+to record a batch mean while declaring the whole iteration's budget cost.
 
 ## How do I read the reported statistics?
 
@@ -50,7 +53,10 @@ what they say about the tail depends on the gap between those observations.
 Collect more samples before trusting them: `time` raises the sample count in
 the default modes, while with `concurrency: "task"` `iterations` caps the run
 count, so raise `iterations` as well. The mean and the median answer different
-questions and legitimately differ on skewed latency distributions.
+questions and legitimately differ on skewed latency distributions. With
+[batched measurements](./README.md#task-supplied-measurements), each sample is
+a mean duration per call within one batch, so the statistics describe batch
+means, not individual calls.
 
 `mad` (median absolute deviation) is a robust dispersion figure. It is not
 scaled to a normal distribution and is not an uncertainty estimate: the
@@ -132,6 +138,13 @@ you see high variance, try running the benchmark multiple times and comparing
 results, keeping warmup enabled (the default; tunable via `warmupIterations` /
 `warmupTime`), and (in browsers) closing DevTools and running in a
 production-like configuration.
+
+A fixed `warmupTime` or `warmupIterations` budget does not establish that
+execution has stabilized: the warmup phase ends on those limits, not on a
+stability check. Repeat measurements and compare runs rather than treating
+warmup completion as proof of a stable regime; see
+[Cold Starts and Warmed-Up Runs](./README.md#cold-starts-and-warmed-up-runs)
+for choosing which behavior to measure.
 
 ## Why do my results differ from another benchmarking tool?
 

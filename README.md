@@ -522,7 +522,7 @@ Semantics:
 - The sample uses a valid `overriddenDuration`, otherwise the timer-measured
   duration. The sequential budget uses a valid `overriddenIterationCost`,
   otherwise the sample before timer-overhead correction. Returning only
-  `overriddenDuration` therefore keeps the historical behavior.
+  `overriddenDuration` therefore keeps the sample-based budget fallback.
 - Task-concurrent `run()` and `warmup()` use the real clock for their budgets
   and do not inspect `overriddenIterationCost` (neither presence nor value).
   The cost applies per task with `concurrency: 'bench'` and in

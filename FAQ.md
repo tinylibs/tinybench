@@ -65,14 +65,21 @@ The interval covers only the sampled process: run-to-run and process-to-process
 variation (JIT state, environment, machine state) is not included, so compare
 results across repeated runs rather than trusting a single `rme`.
 
-**Latency versus throughput.** Throughput statistics transform each sample
-independently (`1000 / sample`) before statistics are computed, so they
+**Latency versus throughput.** Throughput statistics transform each nonzero
+sample independently (`1000 / sample`) before statistics are computed, so they
 describe instantaneous rates. That is why the throughput mean is not the
 reciprocal of the latency mean. With two samples of 1 ms and 9 ms, the average
 instantaneous rate is `(1000 / 1 + 1000 / 9) / 2 ≈ 555.6 ops/s`, while the work
 actually completes at `2 / 0.010 s = 200 ops/s`. For the rate implied by total
 time use `1000 / latency.mean` (equivalently `1000 / period`); read throughput
 dispersion and percentiles as variation of the instantaneous rates.
+
+Samples that measure as zero — timer-saturated runs or overhead corrections
+clamping a sample — are not turned into an infinite rate: each is imputed as
+`1000 / latency.mean` (`0` when every sample is zero). Throughput figures then
+mix observed and imputed rates; the [measurement precision
+section](#how-do-i-deal-with-measurement-precision-issues) explains how to
+avoid timer-dominated samples.
 
 ## Why does a run take longer than the configured `time`?
 

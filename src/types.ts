@@ -782,11 +782,14 @@ export interface TaskResultWithStatistics {
   period: number
 
   /**
-   * Throughput statistics in operations per second. Each final latency sample
-   * is transformed independently (`1000 / sample`) before statistics are
-   * computed, so these describe instantaneous rates: the throughput mean is
-   * the mean of those rates, generally not the reciprocal of
-   * {@link TaskResultWithStatistics.latency}'s mean.
+   * Throughput statistics in operations per second. Each nonzero final latency
+   * sample is transformed independently (`1000 / sample`) before statistics
+   * are computed, so these describe instantaneous rates: the throughput mean
+   * is the mean of those rates, generally not the reciprocal of
+   * {@link TaskResultWithStatistics.latency}'s mean. Samples measuring as zero
+   * are imputed as `1000 / latency.mean` (`0` when the mean is zero) rather
+   * than transformed to an infinite rate; imputed rates count toward these
+   * statistics.
    */
   throughput: Statistics
 

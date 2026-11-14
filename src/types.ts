@@ -525,13 +525,33 @@ export type SortedSamples = Samples & {
 }
 
 /**
- * Location and dispersion statistics use the samples' units (ms for latency,
- * ops/s for throughput), except variance (squared units). Relative margin of
- * error is a percentage; counts and critical values are dimensionless.
+ * Statistics separate describing the samples from inferring about their mean.
+ * Location and dispersion use the samples' units (ms for latency, ops/s for
+ * throughput), except variance (squared units). Relative margin of error is a
+ * percentage; counts and critical values are dimensionless.
+ *
+ * `mean`, the percentiles, `min` and `max` locate the individual samples;
+ * `variance`, `sd`, `aad` and `mad` describe how the samples spread. These are
+ * properties of the collected samples, not guarantees about future runs.
+ * Percentiles interpolate linearly between order statistics; on small samples
+ * the upper percentiles interpolate between the few largest observations, so
+ * they are unstable estimates of the tail.
+ *
+ * `sem`, `moe` and `rme` concern the mean of the sampled process. With at
+ * least two samples, `moe` is the half-width of a nominal two-sided 95%
+ * confidence interval for the mean, computed with the exact Student's t
+ * critical value {@link Statistics.critical} for {@link Statistics.df} degrees
+ * of freedom; with a single sample, `moe` is 0 and does not define a
+ * meaningful confidence interval. Nominal coverage assumes independent
+ * samples from a stable regime and an approximately normal sample mean; it
+ * can be optimistic under strong skew or regime shifts, especially on small
+ * samples. It covers only the sampled process — run-to-run and
+ * process-to-process variation is not included.
  */
 export interface Statistics {
   /**
-   * mean/average absolute deviation
+   * mean/average absolute deviation from the mean; descriptive dispersion of
+   * the samples
    */
   aad: number
 
@@ -542,12 +562,14 @@ export interface Statistics {
   critical: number
 
   /**
-   * degrees of freedom
+   * degrees of freedom: `samplesCount - 1`; {@link Statistics.critical}
+   * falls back to one degree of freedom when this is 0
    */
   df: number
 
   /**
-   * median absolute deviation, not scaled by the 1.4826 normal-consistency factor
+   * median absolute deviation, not scaled by the 1.4826 normal-consistency
+   * factor; descriptive dispersion of the samples, not an uncertainty estimate
    */
   mad: number
 
@@ -567,7 +589,8 @@ export interface Statistics {
   min: number
 
   /**
-   * margin of error
+   * margin of error: half-width of the nominal two-sided 95% confidence
+   * interval for the mean, `sem * critical`
    */
   moe: number
 
@@ -598,6 +621,7 @@ export interface Statistics {
 
   /**
    * Relative margin of error in percent: `100 * moe / abs(mean)`.
+   * The confidence-interval half-width for the mean, relative to the mean.
    * Infinity when the mean is zero.
    */
   rme: number
@@ -613,7 +637,8 @@ export interface Statistics {
   samplesCount: number
 
   /**
-   * standard deviation
+   * standard deviation of the samples; descriptive dispersion — for the
+   * uncertainty of the mean see {@link Statistics.sem}
    */
   sd: number
 
@@ -760,7 +785,14 @@ export interface TaskResultWithStatistics {
   period: number
 
   /**
-   * Throughput statistics in operations per second.
+   * Throughput statistics in operations per second. Each nonzero final latency
+   * sample is transformed independently (`1000 / sample`) before statistics
+   * are computed, so these describe instantaneous rates: the throughput mean
+   * is the mean of those rates, generally not the reciprocal of
+   * {@link TaskResultWithStatistics.latency}'s mean. Samples measuring as zero
+   * are imputed as `1000 / latency.mean` (`0` when the mean is zero) rather
+   * than transformed to an infinite rate; imputed rates count toward these
+   * statistics.
    */
   throughput: Statistics
 

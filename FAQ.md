@@ -77,9 +77,13 @@ sample independently (`1000 / sample`) before statistics are computed, so they
 describe instantaneous rates. That is why the throughput mean is not the
 reciprocal of the latency mean. With two samples of 1 ms and 9 ms, the average
 instantaneous rate is `(1000 / 1 + 1000 / 9) / 2 ≈ 555.6 ops/s`, while the work
-actually completes at `2 / 0.010 s = 200 ops/s`. For the rate implied by total
-time use `1000 / latency.mean` (equivalently `1000 / period`); read throughput
-dispersion and percentiles as variation of the instantaneous rates.
+actually completes at `2 / 0.010 s = 200 ops/s`. In sequential modes,
+`totalTime` is the sum of the samples, so `1000 / latency.mean` (equivalently
+`1000 / period`) is the implied completion rate; read throughput dispersion
+and percentiles as variation of the instantaneous rates. With
+`concurrency: "task"`, calls overlap while samples are still summed per call:
+the real wall-clock completion rate can be far above `1000 / period`, so
+divide completed operations by elapsed wall time instead.
 
 Samples that measure as zero — timer-saturated runs or overhead corrections
 clamping a sample — are not turned into an infinite rate: each is imputed as

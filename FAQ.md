@@ -87,7 +87,7 @@ divide completed operations by elapsed wall-clock time instead.
 
 Samples that measure as zero — timer-saturated runs or overhead corrections
 clamping a sample — are not turned into an infinite rate: each is imputed as
-`1000 / latency.mean` (`0` when every sample is zero). Throughput figures then
+`1000 / latency.mean` (`0` when the mean is zero). Throughput figures then
 mix observed and imputed rates; the [measurement precision
 section](#how-do-i-deal-with-measurement-precision-issues) explains how to
 avoid timer-dominated samples.

@@ -541,11 +541,12 @@ export type SortedSamples = Samples & {
  * least two samples, `moe` is the half-width of a nominal two-sided 95%
  * confidence interval for the mean, computed with the exact Student's t
  * critical value {@link Statistics.critical} for {@link Statistics.df} degrees
- * of freedom; with a single sample it is 0 and carries no meaning. Nominal
- * coverage assumes independent samples from a stable regime and an
- * approximately normal sample mean; it can be optimistic under strong skew or
- * regime shifts, especially on small samples. It covers only the sampled
- * process — run-to-run and process-to-process variation is not included.
+ * of freedom; with a single sample, `moe` is 0 and does not define a
+ * meaningful confidence interval. Nominal coverage assumes independent
+ * samples from a stable regime and an approximately normal sample mean; it
+ * can be optimistic under strong skew or regime shifts, especially on small
+ * samples. It covers only the sampled process — run-to-run and
+ * process-to-process variation is not included.
  */
 export interface Statistics {
   /**

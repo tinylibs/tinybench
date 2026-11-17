@@ -6,6 +6,53 @@ import { hrtimeNow, withConcurrency } from '../src/utils'
 import { asyncSleep } from './utils'
 
 test.each(['completed', 'errored', 'aborted'])(
+  'removes all abort listeners after a %s run',
+  async state => {
+    const first = new AbortController()
+    const second = new AbortController()
+    const failure = new Error('failure')
+    const run = withConcurrency({
+      fn: async () => {
+        await Promise.resolve()
+        if (state === 'errored') throw failure
+        if (state === 'aborted') second.abort()
+        return 1
+      },
+      iterations: 1,
+      limit: 1,
+      signal: [first.signal, second.signal],
+    })
+
+    if (state === 'errored') await expect(run).rejects.toBe(failure)
+    else expect(await run).toEqual(state === 'aborted' ? [] : [1])
+
+    expect(getEventListeners(first.signal, 'abort')).toEqual([])
+    expect(getEventListeners(second.signal, 'abort')).toEqual([])
+  }
+)
+
+test.each([0, 1])('does not add listeners when signal %i was aborted', async index => {
+  const controllers = [new AbortController(), new AbortController()]
+  controllers[index]?.abort()
+  let calls = 0
+  const results = await withConcurrency({
+    fn: async () => {
+      calls++
+      await Promise.resolve()
+    },
+    iterations: 1,
+    limit: 1,
+    signal: controllers.map(controller => controller.signal),
+  })
+
+  expect(results).toEqual([])
+  expect(calls).toBe(0)
+  for (const controller of controllers) {
+    expect(getEventListeners(controller.signal, 'abort')).toEqual([])
+  }
+})
+
+test.each(['completed', 'errored', 'aborted'])(
   'removes its abort listener after a %s run',
   async state => {
     const controller = new AbortController()

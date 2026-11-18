@@ -18,7 +18,8 @@ interface WithConcurrencyOptions<R> {
    */
   limit: number
   /**
-   * One or more optional AbortSignals to cancel the execution.
+   * An AbortSignal or a list of signals; aborting any of them cancels the
+   * execution.
    */
   signal?: AbortSignal | AbortSignal[] | undefined
   /**

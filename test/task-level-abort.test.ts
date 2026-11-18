@@ -3,6 +3,42 @@ import { expect, test } from 'vitest'
 import { Bench } from '../src'
 import { sleep } from './utils'
 
+test.each([
+  ['bench', 'run'],
+  ['task', 'run'],
+  ['bench', 'warmup'],
+  ['task', 'warmup'],
+])('stops concurrent scheduling on %s abort during %s', async (source, phase) => {
+  const benchController = new AbortController()
+  const taskController = new AbortController()
+  let clockCalls = 0
+  let taskCalls = 0
+  const bench = new Bench({
+    concurrency: 'task',
+    iterations: 0,
+    now: () => ++clockCalls,
+    signal: benchController.signal,
+    threshold: 2,
+    time: 10000,
+    warmup: phase === 'warmup',
+    warmupIterations: 0,
+    warmupTime: 10000,
+  })
+
+  bench.add('task', async () => {
+    taskCalls++
+    const controller = source === 'bench' ? benchController : taskController
+    controller.abort()
+    await Promise.resolve()
+  }, { signal: taskController.signal })
+
+  await bench.run()
+
+  expect(taskCalls).toBe(1)
+  expect(clockCalls).toBeLessThan(20)
+  expect(bench.getTask('task')?.result.state).toMatch(/^aborted/)
+})
+
 test('abort individual task (async)', async () => {
   const controller = new AbortController()
   const bench = new Bench({ iterations: 16, time: 100 })

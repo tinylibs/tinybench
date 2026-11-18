@@ -18,9 +18,10 @@ interface WithConcurrencyOptions<R> {
    */
   limit: number
   /**
-   * An optional AbortSignal to cancel the execution.
+   * An AbortSignal or a list of signals; aborting any of them cancels the
+   * execution.
    */
-  signal?: AbortSignal | undefined
+  signal?: AbortSignal | AbortSignal[] | undefined
   /**
    * Time budget for starting iterations, in milliseconds. Already-started
    * calls are awaited without a completion deadline. Zero disables this
@@ -88,9 +89,10 @@ export const withConcurrency = async <R>(
   }
 
   const onAbort = () => (isRunning = false)
+  const signals = Array.isArray(signal) ? signal : signal ? [signal] : []
 
-  if (signal) {
-    if (signal.aborted) return []
+  if (signals.some(signal => signal.aborted)) return []
+  for (const signal of signals) {
     signal.addEventListener('abort', onAbort)
   }
 
@@ -114,7 +116,9 @@ export const withConcurrency = async <R>(
     const promises = Array.from({ length: maxWorkers }, () => worker())
     await Promise.allSettled(promises)
   } finally {
-    signal?.removeEventListener('abort', onAbort)
+    for (const signal of signals) {
+      signal.removeEventListener('abort', onAbort)
+    }
   }
 
   if (errors.length === 0) return results

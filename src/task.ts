@@ -786,6 +786,14 @@ export class Task extends EventTarget {
 }
 
 /**
+ * Whether a value is a finite, non-negative duration in milliseconds.
+ * @param value - the value to check
+ * @returns whether the value can be used as an overridden duration or cost
+ */
+const isValidDuration = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value) && value >= 0
+
+/**
  * Extracts a finite, non-negative `overriddenDuration`, otherwise undefined.
  * Checks own and inherited properties, reads the value once and propagates
  * presence-check and access errors.
@@ -813,7 +821,7 @@ function getOverriddenDurationFromFnResult (
     }
     return undefined
   }
-  return Number.isFinite(value) && value >= 0 ? value : undefined
+  return isValidDuration(value) ? value : undefined
 }
 
 /**
@@ -839,9 +847,7 @@ function getOverriddenIterationCostFromFnResult (
     if (typeof value !== 'number' && isPromiseLike(value)) {
       markHandled(value)
     }
-    return typeof value === 'number' && Number.isFinite(value) && value >= 0
-      ? value
-      : undefined
+    return isValidDuration(value) ? value : undefined
   } catch {
     return undefined
   }

@@ -1,4 +1,4 @@
-export { isFnAsyncResource, isPromiseLike } from './async'
+export { isFnAsyncResource, isPromiseLike, markHandled } from './async'
 export { withConcurrency } from './concurrency'
 export { defaultConvertTaskResultForConsoleTable } from './console-table'
 export { mToMs, mToNs, mToNsBigint, nToMs } from './conversions'

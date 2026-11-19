@@ -409,30 +409,32 @@ export class Task extends EventTarget {
         }
       }
 
-      if (!sequential) {
-        await withConcurrency({
-          fn: benchmarkTask,
-          iterations,
-          limit: Math.max(1, Math.floor(this.#bench.threshold)),
-          signal: [this.#signal, this.#bench.signal].filter(
-            signal => signal != null
-          ),
-          time,
-          timestampProvider: this.#timestampProvider,
-        })
-        this.#runs = samples.length
-      } else {
-        while (
-          // eslint-disable-next-line no-unmodified-loop-condition
-          (totalTime < time || samples.length < iterations) &&
-          !this.#aborted
-        ) {
-          await benchmarkTask()
+      try {
+        if (!sequential) {
+          await withConcurrency({
+            fn: benchmarkTask,
+            iterations,
+            limit: Math.max(1, Math.floor(this.#bench.threshold)),
+            signal: [this.#signal, this.#bench.signal].filter(
+              signal => signal != null
+            ),
+            time,
+            timestampProvider: this.#timestampProvider,
+          })
+          this.#runs = samples.length
+        } else {
+          while (
+            // eslint-disable-next-line no-unmodified-loop-condition
+            (totalTime < time || samples.length < iterations) &&
+            !this.#aborted
+          ) {
+            await benchmarkTask()
+          }
         }
-      }
-
-      if (this.#fnOpts.afterAll != null) {
-        await this.#fnOpts.afterAll.call(this, mode)
+      } finally {
+        if (this.#fnOpts.afterAll != null) {
+          await this.#fnOpts.afterAll.call(this, mode)
+        }
       }
 
       return isValidSamples(samples) ? { overriddenIndices, samples } : {}
@@ -494,20 +496,22 @@ export class Task extends EventTarget {
         }
       }
 
-      while (
-        // eslint-disable-next-line no-unmodified-loop-condition
-        (totalTime < time || samples.length < iterations) &&
-        !this.#aborted
-      ) {
-        benchmarkTask()
-      }
-
-      if (this.#fnOpts.afterAll) {
-        const afterAllResult = this.#fnOpts.afterAll.call(this, mode)
-        assert(
-          !isPromiseLike(afterAllResult),
-          '`afterAll` function must be sync when using `runSync()`'
-        )
+      try {
+        while (
+          // eslint-disable-next-line no-unmodified-loop-condition
+          (totalTime < time || samples.length < iterations) &&
+          !this.#aborted
+        ) {
+          benchmarkTask()
+        }
+      } finally {
+        if (this.#fnOpts.afterAll) {
+          const afterAllResult = this.#fnOpts.afterAll.call(this, mode)
+          assert(
+            !isPromiseLike(afterAllResult),
+            '`afterAll` function must be sync when using `runSync()`'
+          )
+        }
       }
       return isValidSamples(samples) ? { overriddenIndices, samples } : {}
     } catch (error) {

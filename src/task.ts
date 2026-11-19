@@ -18,6 +18,7 @@ import type {
   TimestampValue,
 } from './types'
 
+import { emptyFunction } from './constants'
 import { BenchEvent } from './event'
 import {
   assert,
@@ -37,6 +38,21 @@ import {
  * The names of all supported task lifecycle hooks.
  */
 const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
+
+/**
+ * Asserts that a value returned during `runSync()` is not a promise.
+ * Promise-like results are marked handled before the assertion throws, so a
+ * rejected task function or hook result cannot surface as an unhandled
+ * rejection.
+ * @param result - the value returned by the task function or a hook
+ * @param message - the assertion message
+ */
+const assertSyncResult = (result: unknown, message: string): void => {
+  if (isPromiseLike(result)) {
+    Promise.resolve(result).catch(emptyFunction)
+  }
+  assert(!isPromiseLike(result), message)
+}
 
 /**
  * Task states that can be aborted.
@@ -298,9 +314,8 @@ export class Task extends EventTarget {
     this.#result = startedTaskResult
     this.dispatchEvent(new BenchEvent('start', this))
 
-    const setupResult = this.#bench.setup(this, 'run')
-    assert(
-      !isPromiseLike(setupResult),
+    assertSyncResult(
+      this.#bench.setup(this, 'run'),
       '`setup` function must be sync when using `runSync()`'
     )
 
@@ -310,9 +325,8 @@ export class Task extends EventTarget {
       samples: latencySamples,
     } = this.#benchmarkSync('run', this.#bench.time, this.#bench.iterations)
 
-    const teardownResult = this.#bench.teardown(this, 'run')
-    assert(
-      !isPromiseLike(teardownResult),
+    assertSyncResult(
+      this.#bench.teardown(this, 'run'),
       '`teardown` function must be sync when using `runSync()`'
     )
 
@@ -350,9 +364,8 @@ export class Task extends EventTarget {
 
     this.dispatchEvent(new BenchEvent('warmup', this))
 
-    const setupResult = this.#bench.setup(this, 'warmup')
-    assert(
-      !isPromiseLike(setupResult),
+    assertSyncResult(
+      this.#bench.setup(this, 'warmup'),
       '`setup` function must be sync when using `runSync()`'
     )
 
@@ -362,9 +375,8 @@ export class Task extends EventTarget {
       this.#bench.warmupIterations
     )
 
-    const teardownResult = this.#bench.teardown(this, 'warmup')
-    assert(
-      !isPromiseLike(teardownResult),
+    assertSyncResult(
+      this.#bench.teardown(this, 'warmup'),
       '`teardown` function must be sync when using `runSync()`'
     )
 
@@ -454,9 +466,8 @@ export class Task extends EventTarget {
   ): BenchmarkResult {
     try {
       if (this.#fnOpts.beforeAll) {
-        const beforeAllResult = this.#fnOpts.beforeAll.call(this, mode)
-        assert(
-          !isPromiseLike(beforeAllResult),
+        assertSyncResult(
+          this.#fnOpts.beforeAll.call(this, mode),
           '`beforeAll` function must be sync when using `runSync()`'
         )
       }
@@ -471,9 +482,8 @@ export class Task extends EventTarget {
         }
         try {
           if (this.#fnOpts.beforeEach) {
-            const beforeEachResult = this.#fnOpts.beforeEach.call(this, mode)
-            assert(
-              !isPromiseLike(beforeEachResult),
+            assertSyncResult(
+              this.#fnOpts.beforeEach.call(this, mode),
               '`beforeEach` function must be sync when using `runSync()`'
             )
           }
@@ -485,9 +495,8 @@ export class Task extends EventTarget {
           totalTime += iterationCost ?? taskTime
         } finally {
           if (this.#fnOpts.afterEach) {
-            const afterEachResult = this.#fnOpts.afterEach.call(this, mode)
-            assert(
-              !isPromiseLike(afterEachResult),
+            assertSyncResult(
+              this.#fnOpts.afterEach.call(this, mode),
               '`afterEach` function must be sync when using `runSync()`'
             )
           }
@@ -503,9 +512,8 @@ export class Task extends EventTarget {
       }
 
       if (this.#fnOpts.afterAll) {
-        const afterAllResult = this.#fnOpts.afterAll.call(this, mode)
-        assert(
-          !isPromiseLike(afterAllResult),
+        assertSyncResult(
+          this.#fnOpts.afterAll.call(this, mode),
           '`afterAll` function must be sync when using `runSync()`'
         )
       }
@@ -565,8 +573,8 @@ export class Task extends EventTarget {
       (this.#timestampFn() as unknown as number) - taskStart
     )
 
-    assert(
-      !isPromiseLike(fnResult),
+    assertSyncResult(
+      fnResult,
       'task function must be sync when using `runSync()`'
     )
     const iterationCost = collectIterationCost

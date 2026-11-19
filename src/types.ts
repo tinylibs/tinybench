@@ -370,8 +370,8 @@ export type FnHook = (this: Task, mode?: HookMode) => Promise<void> | void
  */
 export interface FnOptions {
   /**
-   * Runs once after all iterations of a task phase (warmup or run), including
-   * when an iteration or its `beforeEach` / `afterEach` hooks throw; skipped
+   * Runs once when a task phase (warmup or run) ends: after its last iteration,
+   * or after an iteration or its `beforeEach` / `afterEach` hooks throw; skipped
    * when `beforeAll` throws.
    */
   afterAll?: FnHook

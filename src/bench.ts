@@ -93,7 +93,8 @@ export class Bench extends EventTarget implements BenchLike {
   readonly runtimeVersion: string
 
   /**
-   * A setup function called once per task and phase.
+   * A setup function called once per task and phase. If it throws, the run
+   * fails with its error and the phase's {@link teardown} does not run.
    */
   readonly setup: (task: Task, mode: HookMode) => Promise<void> | void
 
@@ -115,7 +116,8 @@ export class Bench extends EventTarget implements BenchLike {
   readonly subtractTimerOverhead: boolean
 
   /**
-   * A teardown function called once per task and phase.
+   * A teardown function called once per task and phase. It does not run when
+   * the phase's {@link setup} throws.
    */
   readonly teardown: (task: Task, mode: HookMode) => Promise<void> | void
 

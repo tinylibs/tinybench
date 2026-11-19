@@ -98,7 +98,8 @@ export interface BenchLike extends EventTarget {
    */
   runtimeVersion: string
   /**
-   * A setup function called once per task and phase.
+   * A setup function called once per task and phase. If it throws, the run
+   * fails with its error and the phase's {@link teardown} does not run.
    */
   setup: (task: Task, mode: HookMode) => Promise<void> | void
   /**
@@ -106,7 +107,8 @@ export interface BenchLike extends EventTarget {
    */
   signal?: AbortSignal
   /**
-   * A teardown function called once per task and phase.
+   * A teardown function called once per task and phase. It does not run when
+   * the phase's {@link setup} throws.
    */
   teardown: (task: Task, mode: HookMode) => Promise<void> | void
   /**
@@ -186,7 +188,9 @@ export interface BenchOptions {
   retainSamples?: boolean
 
   /**
-   * Setup function to run before each benchmark task (cycle)
+   * Setup function to run before each benchmark task (cycle). If it throws,
+   * the run fails with its error and the phase's {@link teardown} does not
+   * run.
    */
   setup?: Hook
 
@@ -246,7 +250,8 @@ export interface BenchOptions {
   subtractTimerOverhead?: boolean
 
   /**
-   * Teardown function to run after each benchmark task (cycle).
+   * Teardown function to run after each benchmark task (cycle). It does not
+   * run when the phase's {@link setup} throws.
    */
   teardown?: Hook
 

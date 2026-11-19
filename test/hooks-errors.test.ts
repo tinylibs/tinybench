@@ -352,41 +352,43 @@ test.each(['warmup', 'run'])(
   }
 )
 
-test('afterAll runs after in-flight iterations when a task-concurrent iteration errors', async () => {
-  const bench = new Bench({
-    concurrency: 'task',
-    iterations: 16,
-    threshold: 4,
-    warmup: false,
-  })
+test(
+  'afterAll runs after in-flight task-concurrent iterations error',
+  async () => {
+    const bench = new Bench({
+      concurrency: 'task',
+      iterations: 16,
+      threshold: 4,
+      warmup: false,
+    })
 
-  const error = new Error('task')
-  let calls = 0
-  let inFlight = 0
-  let inFlightAtAfterAll: number | undefined
+    const error = new Error('task')
+    let calls = 0
+    let inFlight = 0
+    let inFlightAtAfterAll: number | undefined
 
-  bench.add(
-    'foo',
-    async () => {
-      inFlight++
-      await new Promise(resolve => setTimeout(resolve, 1))
-      inFlight--
-      if (++calls === 2) throw error
-    },
-    {
-      afterAll () {
-        inFlightAtAfterAll = inFlight
+    bench.add(
+      'foo',
+      async () => {
+        inFlight++
+        await new Promise(resolve => setTimeout(resolve, 1))
+        inFlight--
+        if (++calls === 2) throw error
       },
-    }
-  )
-  await bench.run()
+      {
+        afterAll () {
+          inFlightAtAfterAll = inFlight
+        },
+      }
+    )
+    await bench.run()
 
-  expect(inFlightAtAfterAll).toBe(0)
-  expect(bench.getTask('foo')?.result).toMatchObject({
-    error,
-    state: 'errored',
+    expect(inFlightAtAfterAll).toBe(0)
+    expect(bench.getTask('foo')?.result).toMatchObject({
+      error,
+      state: 'errored',
+    })
   })
-})
 
 test('afterAll does not run when beforeAll errors', async () => {
   const bench = new Bench({ warmup: false })
@@ -409,40 +411,42 @@ test('afterAll does not run when beforeAll errors', async () => {
   })
 })
 
-test('an afterAll error replaces the iteration error, as afterEach does', async () => {
-  const error = new Error('task')
-  const AAerror = new Error('AfterAll')
-  const options = {
-    afterAll: () => {
-      throw AAerror
-    },
-  }
+test(
+  'an afterAll error replaces the iteration error, as afterEach does',
+  async () => {
+    const error = new Error('task')
+    const AAerror = new Error('AfterAll')
+    const options = {
+      afterAll: () => {
+        throw AAerror
+      },
+    }
 
-  const bench = new Bench({ warmup: false })
-  bench.add(
-    'foo',
-    () => {
-      throw error
-    },
-    { ...options, async: false }
-  )
-  await bench.run()
-  expect(bench.getTask('foo')?.result).toMatchObject({
-    error: AAerror,
-    state: 'errored',
-  })
+    const bench = new Bench({ warmup: false })
+    bench.add(
+      'foo',
+      () => {
+        throw error
+      },
+      { ...options, async: false }
+    )
+    await bench.run()
+    expect(bench.getTask('foo')?.result).toMatchObject({
+      error: AAerror,
+      state: 'errored',
+    })
 
-  const syncBench = new Bench({ warmup: false })
-  syncBench.add(
-    'foo',
-    () => {
-      throw error
-    },
-    options
-  )
-  syncBench.runSync()
-  expect(syncBench.getTask('foo')?.result).toMatchObject({
-    error: AAerror,
-    state: 'errored',
+    const syncBench = new Bench({ warmup: false })
+    syncBench.add(
+      'foo',
+      () => {
+        throw error
+      },
+      options
+    )
+    syncBench.runSync()
+    expect(syncBench.getTask('foo')?.result).toMatchObject({
+      error: AAerror,
+      state: 'errored',
+    })
   })
-})

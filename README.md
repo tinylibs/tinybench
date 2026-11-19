@@ -192,7 +192,9 @@ console.log(checksum) // 6: two warmup calls and four measured calls
 For each enabled phase, hooks run in order: `setup`, `beforeAll`, repeated
 `beforeEach` / task call / `afterEach`, `afterAll`, then `teardown`. Warmup
 completes that sequence before the measured phase starts, and hooks receive
-`'warmup'` or `'run'` so preparation can tell the phases apart.
+`'warmup'` or `'run'` so preparation can tell the phases apart. If an iteration
+or its `beforeEach` / `afterEach` hooks throw, `afterAll` still runs so it can
+release what `beforeAll` acquired; it is skipped when `beforeAll` throws.
 
 A task's own hooks run outside its timed call and, in sequential modes, outside
 its accumulated iteration budget. They still add wall time and can change the

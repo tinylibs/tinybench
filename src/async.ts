@@ -17,15 +17,14 @@ export const isPromiseLike = <T>(
  * Suppresses rejections of a promise-like value across its rejection channel,
  * the promise its own `then` call returns, and promise-like values it settles
  * with, so none surfaces as an unhandled rejection. Only raw handlers are
- * attached, never assimilated: nesting is followed for `depth` levels and a
- * terminal value only gets one-step native suppression, so a self-nesting
- * thenable cannot generate work endlessly. Each value is attached at most once
- * per probe, so rejection cycles - a native promise rejecting with itself or
- * mutually with another - terminate. A thenable that keeps settling new values
- * on persistent handlers can still keep making work on its own; no probe can
- * detach from it.
+ * attached, never assimilated, so handling is realm-agnostic and bounded:
+ * every value is attached at most once per probe, which ends rejection and
+ * fulfillment cycles of any shape, and settled values are followed with a
+ * budget of `depth` levels only, so a self-nesting thenable cannot generate
+ * work endlessly. A thenable that keeps settling new values on persistent
+ * handlers can still keep making work on its own; no probe can detach from it.
  * @param value - the promise-like value to mark handled
- * @param depth - the remaining nesting depth to handle
+ * @param depth - the remaining budget for following settled values
  * @param seen - values already attached to by this probe
  */
 export const markHandled = (
@@ -38,31 +37,15 @@ export const markHandled = (
       return
     }
     seen.add(value)
-    if (depth <= 0) {
-      const terminal = (settled: unknown): void => {
-        if (
-          settled instanceof Promise ||
-          Object.prototype.toString.call(settled) === '[object Promise]'
-        ) {
-          const promise = settled as Promise<unknown>
-          if (seen.has(promise)) {
-            return
-          }
-          seen.add(promise)
-          promise.then(terminal).catch(terminal)
-        }
-      }
-      terminal((value).then(terminal, terminal))
-      return
-    }
     const settle = (settled: unknown): void => {
-      markHandled(settled, depth - 1, seen)
+      if (depth >= 0) {
+        markHandled(settled, depth - 1, seen)
+      }
     }
-    markHandled(
-      (value).then(settle, settle),
-      depth - 1,
-      seen
-    )
+    const returned = value.then(settle, settle)
+    if (depth > 0) {
+      markHandled(returned, depth - 1, seen)
+    }
   } catch {
     // Treat a throwing `then` as handled
   }

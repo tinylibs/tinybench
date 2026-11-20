@@ -184,8 +184,8 @@ importers:
   .:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 5.20261115.1
-        version: 5.20261115.1
+        specifier: 5.20261117.1
+        version: 5.20261117.1
       '@commitlint/cli':
         specifier: 21.2.4
         version: 21.2.4(conventional-commits-parser@7.1.4)(typescript@6.0.3)
@@ -223,11 +223,11 @@ importers:
         specifier: 10.15.0
         version: 10.15.0(jiti@2.7.0)
       eslint-plugin-jsdoc:
-        specifier: 65.4.7
-        version: 65.4.7(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3)
+        specifier: 65.4.10
+        version: 65.4.10(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3)
       eslint-plugin-perfectionist:
-        specifier: 5.13.0
-        version: 5.13.0(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3)
+        specifier: 5.14.0
+        version: 5.14.0(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3)
       nano-staged:
         specifier: 1.0.2
         version: 1.0.2
@@ -299,8 +299,8 @@ packages:
   '@cacheable/utils@2.5.0':
     resolution: {integrity: sha512-buipgOVDkkPXNR5+xBpDw7Zk2n1EvU7qBJCNUcL7rhQ//kfpOXPAvQ511Os0vpLYJ1pZnvudNytkQt2hst3wqA==}
 
-  '@cloudflare/workers-types@5.20261115.1':
-    resolution: {integrity: sha512-p0i+8isig1e9qK3KJDGxy6Ng3RTONO6DMFrMrLmpt9/KJRAY5gEfgIm9bGrsQhz9p1PkMGwOx9OHA3I8al/5cw==}
+  '@cloudflare/workers-types@5.20261117.1':
+    resolution: {integrity: sha512-0Qg3kAn8DPRQLaT8ZkqCm6+2/ctc61zdWZqN/1JtlrXV+Db1fNwnjHBLz+/GB/yX+/JgdDAFs+fr8vYyC0w9aw==}
 
   '@commitlint/cli@21.2.4':
     resolution: {integrity: sha512-g3M/wrQdElqGH5vROIeL2QiYIxrzqUkhCgsDyDlWfKEyQdCt10OyMB28W2cJtpZ+VNGMvmaN923infr1hOfyrg==}
@@ -1805,8 +1805,8 @@ packages:
     peerDependencies:
       eslint: '>=8'
 
-  eslint-plugin-jsdoc@65.4.7:
-    resolution: {integrity: sha512-0YkgM+tFsOlPL0EOlzvzf2BQIgK1DEgjD1yp5g9KpD3/h8LUqdX9N6i4u3WqU+HdXnsTVyiABTWI4nlxZZTNUQ==}
+  eslint-plugin-jsdoc@65.4.10:
+    resolution: {integrity: sha512-+d+0aEkl8YQLuLxUksewJifoX9R2A/UAVZesFg2awHIs8Og+j4TBusoBfqCy6lbVpGdYAi4PoRVIDeiN1UViUA==}
     engines: {node: ^22.22.2 || >=24.15.0}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
@@ -1828,8 +1828,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-perfectionist@5.13.0:
-    resolution: {integrity: sha512-kPlqE2Kdh0njsad9S9xL/xnq+NNVUsga/uS3yf6axE0RddACM3Q+idJyethC7R+C9b73+NRhAWvKyXPrkl0nFA==}
+  eslint-plugin-perfectionist@5.14.0:
+    resolution: {integrity: sha512-z8mINHD3a4lMwtCuBJ5d5oZjfKwFjWF1gVKXxnUr04beCFwFYQP4TWd+182Mnk038n5Wc+LtSuvQMpbnPvdVSg==}
     engines: {node: ^20.0.0 || >=22.0.0}
     peerDependencies:
       eslint: ^8.45.0 || ^9.0.0 || ^10.0.0
@@ -3129,7 +3129,7 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
-  '@cloudflare/workers-types@5.20261115.1': {}
+  '@cloudflare/workers-types@5.20261117.1': {}
 
   '@commitlint/cli@21.2.4(conventional-commits-parser@7.1.4)(typescript@6.0.3)':
     dependencies:
@@ -4556,7 +4556,7 @@ snapshots:
       eslint: 10.15.0(jiti@2.7.0)
       eslint-compat-utils: 0.5.1(eslint@10.15.0(jiti@2.7.0))
 
-  eslint-plugin-jsdoc@65.4.7(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3):
+  eslint-plugin-jsdoc@65.4.10(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3):
     dependencies:
       '@es-joy/escodegen': 5.0.1
       '@es-joy/jsdoccomment': 1.2.0
@@ -4595,7 +4595,7 @@ snapshots:
     optionalDependencies:
       typescript: 6.0.3
 
-  eslint-plugin-perfectionist@5.13.0(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3):
+  eslint-plugin-perfectionist@5.14.0(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3):
     dependencies:
       '@typescript-eslint/types': 8.72.2
       '@typescript-eslint/utils': 8.72.2(eslint@10.15.0(jiti@2.7.0))(typescript@6.0.3)

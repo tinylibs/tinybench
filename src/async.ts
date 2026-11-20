@@ -1,7 +1,5 @@
 import type { Fn } from './types'
 
-import { emptyFunction } from './constants'
-
 /**
  * Checks whether a value is a promise-like object.
  * @param maybePromiseLike - the value to check
@@ -16,18 +14,39 @@ export const isPromiseLike = <T>(
   typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
 /**
- * Suppresses rejections of a promise-like value, and of the promise its own
- * `then` call returns, so neither surfaces as an unhandled rejection.
+ * Suppresses rejections of a promise-like value across its rejection channel,
+ * the promise its own `then` call returns, and promise-like values it settles
+ * with, so none surfaces as an unhandled rejection. Only raw handlers are
+ * attached, never assimilated, so handling is realm-agnostic and bounded:
+ * every value is attached at most once per probe, so a value reachable
+ * through several channels costs a single attach, and settled values and
+ * returned promises are followed with a budget of `depth` levels only, which
+ * ends rejection and fulfillment cycles of any shape and keeps a self-nesting
+ * thenable from generating work endlessly. A thenable that keeps settling new
+ * values on persistent handlers can still keep making work on its own; no
+ * probe can detach from it.
  * @param value - the promise-like value to mark handled
+ * @param depth - the remaining budget for following settled values
+ * @param seen - values already attached to by this probe
  */
-export const markHandled = (value: unknown): void => {
+export const markHandled = (
+  value: unknown,
+  depth = 2,
+  seen: WeakSet<object> = new WeakSet()
+): void => {
   try {
-    const returned = (value as PromiseLike<unknown>).then(
-      emptyFunction,
-      emptyFunction
-    )
-    if (isPromiseLike(returned)) {
-      Promise.resolve(returned).catch(emptyFunction)
+    if (!isPromiseLike(value) || seen.has(value)) {
+      return
+    }
+    seen.add(value)
+    const settle = (settled: unknown): void => {
+      if (depth >= 0) {
+        markHandled(settled, depth - 1, seen)
+      }
+    }
+    const returned = value.then(settle, settle)
+    if (depth >= 0) {
+      markHandled(returned, depth - 1, seen)
     }
   } catch {
     // Treat a throwing `then` as handled

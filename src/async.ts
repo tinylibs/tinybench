@@ -15,6 +15,25 @@ export const isPromiseLike = <T>(
     typeof maybePromiseLike === 'function') &&
   typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
+/**
+ * Suppresses rejections of a promise-like value, and of the promise its own
+ * `then` call returns, so neither surfaces as an unhandled rejection.
+ * @param value - the promise-like value to mark handled
+ */
+export const markHandled = (value: unknown): void => {
+  try {
+    const returned = (value as PromiseLike<unknown>).then(
+      emptyFunction,
+      emptyFunction
+    )
+    if (isPromiseLike(returned)) {
+      Promise.resolve(returned).catch(emptyFunction)
+    }
+  } catch {
+    // Treat a throwing `then` as handled
+  }
+}
+
 type AsyncFunctionType<A extends unknown[], R> = (...args: A) => PromiseLike<R>
 
 const AsyncFunctionConstructor = (async () => {
@@ -48,11 +67,7 @@ export const isFnAsyncResource = (fn: Fn | null | undefined): boolean => {
     const promiseLike = isPromiseLike(fnCall)
     if (promiseLike) {
       // silence promise rejection
-      try {
-        (fnCall.then(emptyFunction) as Promise<unknown>).catch(emptyFunction)
-      } catch {
-        // ignore
-      }
+      markHandled(fnCall)
     }
     return promiseLike
   } catch {

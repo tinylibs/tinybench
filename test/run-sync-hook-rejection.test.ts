@@ -124,3 +124,31 @@ test.each([
     )
   }
 )
+
+test('a task returning a thenable whose `then` call rejects leaks no unhandled rejection', async () => {
+  const thenable = {
+    then (resolve: (value?: unknown) => void): Promise<void> {
+      resolve(undefined)
+      return Promise.reject(new Error('late'))
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add(
+    'task',
+    () => thenable,
+    { async: false }
+  )
+
+  const { reasons, stop } = listenToUnhandledRejections()
+  await bench.run()
+  await flushTurns(3)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(bench.getTask('task')?.result).toMatchObject({
+    error: {
+      message: 'task function must be sync when using `runSync()`',
+    },
+    state: 'errored',
+  })
+})

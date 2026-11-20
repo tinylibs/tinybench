@@ -18,7 +18,6 @@ import type {
   TimestampValue,
 } from './types'
 
-import { emptyFunction } from './constants'
 import { BenchEvent } from './event'
 import {
   assert,
@@ -28,6 +27,7 @@ import {
   isFnAsyncResource,
   isPromiseLike,
   isValidSamples,
+  markHandled,
   medianAbsoluteDeviation,
   sortSamples,
   toError,
@@ -50,7 +50,7 @@ const hookNames = ['afterAll', 'beforeAll', 'beforeEach', 'afterEach'] as const
 const assertSyncResult = (result: unknown, message: string): void => {
   const isAsync = isPromiseLike(result)
   if (isAsync) {
-    Promise.resolve(result).catch(emptyFunction)
+    markHandled(result)
   }
   assert(!isAsync, message)
 }
@@ -786,6 +786,14 @@ export class Task extends EventTarget {
 }
 
 /**
+ * Whether a value is a finite, non-negative duration in milliseconds.
+ * @param value - the value to check
+ * @returns whether the value can be used as an overridden duration or cost
+ */
+const isValidDuration = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value) && value >= 0
+
+/**
  * Extracts a finite, non-negative `overriddenDuration`, otherwise undefined.
  * Checks own and inherited properties, reads the value once and propagates
  * presence-check and access errors.
@@ -806,14 +814,14 @@ function getOverriddenDurationFromFnResult (
   if (typeof value !== 'number') {
     try {
       if (isPromiseLike(value)) {
-        Promise.resolve(value).catch(emptyFunction)
+        markHandled(value)
       }
     } catch {
       // Treat access errors as absence
     }
     return undefined
   }
-  return Number.isFinite(value) && value >= 0 ? value : undefined
+  return isValidDuration(value) ? value : undefined
 }
 
 /**
@@ -837,11 +845,9 @@ function getOverriddenIterationCostFromFnResult (
     }
     const value = record.overriddenIterationCost
     if (typeof value !== 'number' && isPromiseLike(value)) {
-      Promise.resolve(value).catch(emptyFunction)
+      markHandled(value)
     }
-    return typeof value === 'number' && Number.isFinite(value) && value >= 0
-      ? value
-      : undefined
+    return isValidDuration(value) ? value : undefined
   } catch {
     return undefined
   }

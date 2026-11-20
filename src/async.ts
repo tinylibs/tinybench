@@ -23,9 +23,10 @@ export const isPromiseLike = <T>(
  * returned promises are followed with a budget of `depth` levels, which ends
  * cycles of any shape. A value reached one step past the budget is silenced
  * with a single `catch` call when it has one - native promises included, any
- * realm - without anything else of it being called; anything further surfaces
- * as it is. A thenable settling new values on persistent handlers keeps making
- * work on its own; no probe can detach from it.
+ * realm - without anything else of it being called, its `catch` return value
+ * included; anything further surfaces as it is. A thenable settling new values
+ * on persistent handlers keeps making work on its own; no probe can detach
+ * from it.
  * @param value - the promise-like value to mark handled
  * @param depth - the remaining budget for following settled values
  * @param seen - values already attached to by this probe
@@ -43,6 +44,7 @@ export const markHandled = (
       // one `catch` call, when present, without calling anything else
       // of the value; the returned promise of a native `catch` cannot
       // reject because the handler cannot throw
+      seen.add(value)
       const silencer = value as {
         catch?: (onRejected: (reason: unknown) => unknown) => unknown
       }

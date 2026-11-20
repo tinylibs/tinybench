@@ -540,3 +540,48 @@ test('a rejection reason at the boundary attach leaks nothing', async () => {
   expect(exceptions).toEqual([])
   expect(bench.getTask('task')?.result.state).toBe('errored')
 })
+
+test('a boundary value reached through both channels silences its catch once', async () => {
+  let catchCalls = 0
+  const boundary = {
+    catch (): void {
+      catchCalls++
+    },
+    then (): void {
+      // never reached: the boundary only calls `catch`
+    },
+  }
+  const fourth = {
+    then (resolve: (value: unknown) => unknown): unknown {
+      resolve(boundary)
+      return boundary
+    },
+  }
+  const third = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(fourth)
+    },
+  }
+  const second = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(third)
+    },
+  }
+  const first = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(second)
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => first, { async: false })
+
+  const { exceptions, reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(5)
+  stop()
+
+  expect(catchCalls).toBe(1)
+  expect(reasons).toEqual([])
+  expect(exceptions).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})

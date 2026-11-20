@@ -18,11 +18,13 @@ export const isPromiseLike = <T>(
  * the promise its own `then` call returns, and promise-like values it settles
  * with, so none surfaces as an unhandled rejection. Only raw handlers are
  * attached, never assimilated, so handling is realm-agnostic and bounded:
- * every value is attached at most once per probe, which ends rejection and
- * fulfillment cycles of any shape, and settled values are followed with a
- * budget of `depth` levels only, so a self-nesting thenable cannot generate
- * work endlessly. A thenable that keeps settling new values on persistent
- * handlers can still keep making work on its own; no probe can detach from it.
+ * every value is attached at most once per probe, so a value reachable
+ * through several channels costs a single attach, and settled values and
+ * returned promises are followed with a budget of `depth` levels only, which
+ * ends rejection and fulfillment cycles of any shape and keeps a self-nesting
+ * thenable from generating work endlessly. A thenable that keeps settling new
+ * values on persistent handlers can still keep making work on its own; no
+ * probe can detach from it.
  * @param value - the promise-like value to mark handled
  * @param depth - the remaining budget for following settled values
  * @param seen - values already attached to by this probe
@@ -43,7 +45,7 @@ export const markHandled = (
       }
     }
     const returned = value.then(settle, settle)
-    if (depth > 0) {
+    if (depth >= 0) {
       markHandled(returned, depth - 1, seen)
     }
   } catch {

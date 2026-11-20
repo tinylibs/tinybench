@@ -440,3 +440,34 @@ testForeign(
     expect(bench.getTask('task')?.result.state).toBe('errored')
   }
 )
+
+test('a thenable returning a rejected promise at the last followed depth leaks nothing', async () => {
+  const third = {
+    then (): Promise<unknown> {
+      return Promise.reject(new Error('deep-returned'))
+    },
+  }
+  const second = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(third)
+    },
+  }
+  const first = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(second)
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => first, {
+    async: false,
+  })
+
+  const { exceptions, reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(5)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(exceptions).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})

@@ -19,22 +19,32 @@ const flushTurns = (turns: number): Promise<void> =>
   })
 
 /**
- * Listens for unhandled rejections on the current runtime.
- * @returns the collected rejection reasons and a function to stop listening
+ * Listens for unhandled rejections and uncaught exceptions on the current
+ * runtime.
+ * @returns the collected rejection reasons and exceptions and a function to
+ *   stop listening
  */
-function listenToUnhandledRejections (): {
+function listenToUnhandledEvents (): {
+  exceptions: unknown[]
   reasons: unknown[]
   stop: () => void
 } {
   const reasons: unknown[] = []
-  const listener = (reason: unknown): void => {
+  const exceptions: unknown[] = []
+  const onRejection = (reason: unknown): void => {
     reasons.push(reason)
   }
-  process.on('unhandledRejection', listener)
+  const onException = (error: unknown): void => {
+    exceptions.push(error)
+  }
+  process.on('unhandledRejection', onRejection)
+  process.on('uncaughtException', onException)
   return {
+    exceptions,
     reasons,
     stop: () => {
-      process.off('unhandledRejection', listener)
+      process.off('unhandledRejection', onRejection)
+      process.off('uncaughtException', onException)
     },
   }
 }
@@ -65,7 +75,7 @@ test.each(taskSources)(
       source === 'fn' ? {} : { [source]: () => rejecting() }
     )
 
-    const { reasons, stop } = listenToUnhandledRejections()
+    const { reasons, stop } = listenToUnhandledEvents()
     bench.runSync()
     await flushTurns(3)
     stop()
@@ -106,7 +116,7 @@ test.each([
     })
     bench.add('task', () => 1)
 
-    const { reasons, stop } = listenToUnhandledRejections()
+    const { reasons, stop } = listenToUnhandledEvents()
     let thrown: Error | undefined
     try {
       bench.runSync()
@@ -139,7 +149,7 @@ test('a task returning a thenable whose `then` call rejects leaks no unhandled r
     { async: false }
   )
 
-  const { reasons, stop } = listenToUnhandledRejections()
+  const { reasons, stop } = listenToUnhandledEvents()
   await bench.run()
   await flushTurns(3)
   stop()
@@ -164,7 +174,7 @@ test('a thenable fulfilling with a rejected promise leaks no unhandled rejection
     async: false,
   })
 
-  const { reasons, stop } = listenToUnhandledRejections()
+  const { reasons, stop } = listenToUnhandledEvents()
   await bench.run()
   await flushTurns(3)
   stop()
@@ -189,7 +199,7 @@ test.each(['overriddenDuration', 'overriddenIterationCost'] as const)(
     const bench = new Bench({ time: 5, warmup: false })
     bench.add('task', () => ({ [field]: thenable }))
 
-    const { reasons, stop } = listenToUnhandledRejections()
+    const { reasons, stop } = listenToUnhandledEvents()
     await bench.run()
     await flushTurns(3)
     stop()
@@ -198,3 +208,141 @@ test.each(['overriddenDuration', 'overriddenIterationCost'] as const)(
     expect(bench.getTask('task')?.result.state).toBe('completed')
   }
 )
+
+test('a fulfillment thenable returning a rejected promise leaks no unhandled rejection', async () => {
+  const inner = {
+    then (resolve: (value: unknown) => void): Promise<void> {
+      resolve(1)
+      return Promise.reject(new Error('late'))
+    },
+  }
+  const outer = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(inner)
+    },
+  }
+  const bench = new Bench({ time: 5, warmup: false })
+  bench.add(
+    'task',
+    () => ({ overriddenDuration: outer })
+  )
+
+  const { reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(3)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('completed')
+})
+
+test('a fulfillment value whose `then` getter throws throws no exception', async () => {
+  const boom = new Error('boom')
+  const thenable = {
+    then (resolve: (value: unknown) => void): void {
+      setTimeout(() => {
+        resolve({
+          get then (): never {
+            throw boom
+          },
+        })
+      }, 0)
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => thenable, {
+    async: false,
+  })
+
+  const { exceptions, reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(3)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(exceptions).toEqual([])
+  expect(bench.getTask('task')?.result).toMatchObject({
+    error: {
+      message: 'task function must be sync when using `runSync()`',
+    },
+    state: 'errored',
+  })
+})
+
+test('a self-fulfilling thenable completes the probe without endless work', async () => {
+  const self: { then(resolve: (value: unknown) => void): void } = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(self)
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => self, {
+    async: false,
+  })
+
+  const { reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(3)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})
+
+test('a throwing `then` getter at the terminal depth throws no exception', async () => {
+  const boom = new Error('terminal-boom')
+  const inner = {
+    get then (): never {
+      throw boom
+    },
+  }
+  const mid = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(inner)
+    },
+  }
+  const outer = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(mid)
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => outer, {
+    async: false,
+  })
+
+  const { exceptions, reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(3)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(exceptions).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})
+
+test('a rejected promise returned by a returned thenable leaks no unhandled rejection', async () => {
+  const inner = {
+    then (resolve: (value: unknown) => void): Promise<void> {
+      resolve(1)
+      return Promise.reject(new Error('returned-chain'))
+    },
+  }
+  const outer = {
+    then (): unknown {
+      return inner
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => outer, {
+    async: false,
+  })
+
+  const { reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(3)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})

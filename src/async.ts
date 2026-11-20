@@ -40,9 +40,16 @@ export const markHandled = (
     seen.add(value)
     if (depth <= 0) {
       const terminal = (settled: unknown): void => {
-        if (settled instanceof Promise && !seen.has(settled)) {
-          seen.add(settled)
-          settled.then(terminal).catch(terminal)
+        if (
+          settled instanceof Promise ||
+          Object.prototype.toString.call(settled) === '[object Promise]'
+        ) {
+          const promise = settled as Promise<unknown>
+          if (seen.has(promise)) {
+            return
+          }
+          seen.add(promise)
+          promise.then(terminal).catch(terminal)
         }
       }
       terminal((value).then(terminal, terminal))

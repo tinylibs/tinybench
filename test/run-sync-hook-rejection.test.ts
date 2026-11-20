@@ -388,3 +388,55 @@ test('mutually rejecting native promises terminate without leaks', async () => {
   expect(exceptions).toEqual([])
   expect(bench.getTask('task')?.result.state).toBe('errored')
 })
+
+const foreignRealm = await import('node:vm').catch(() => undefined)
+
+const testForeign = foreignRealm == null ? test.skip : test
+
+testForeign(
+  'a foreign-realm rejected promise at terminal depth leaks no unhandled rejection',
+  async () => {
+    if (foreignRealm == null) {
+      return
+    }
+    const context = foreignRealm.createContext({})
+    const foreign = foreignRealm.runInContext(
+      'new Promise((_resolve, reject) => { globalThis.rejecter = reject })',
+      context
+    ) as Promise<unknown>
+    const rejectForeign = foreignRealm.runInContext(
+      'globalThis.rejecter',
+      context
+    ) as (reason: unknown) => void
+
+    const inner = {
+      then (resolve: (value: unknown) => void): void {
+        resolve(foreign)
+      },
+    }
+    const mid = {
+      then (resolve: (value: unknown) => void): void {
+        resolve(inner)
+      },
+    }
+    const outer = {
+      then (resolve: (value: unknown) => void): void {
+        resolve(mid)
+      },
+    }
+    const bench = new Bench({ warmup: false })
+    bench.add('task', () => outer, {
+      async: false,
+    })
+
+    const { exceptions, reasons, stop } = listenToUnhandledEvents()
+    await bench.run()
+    rejectForeign(new Error('cross-realm'))
+    await flushTurns(5)
+    stop()
+
+    expect(reasons).toEqual([])
+    expect(exceptions).toEqual([])
+    expect(bench.getTask('task')?.result.state).toBe('errored')
+  }
+)

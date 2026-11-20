@@ -152,3 +152,49 @@ test('a task returning a thenable whose `then` call rejects leaks no unhandled r
     state: 'errored',
   })
 })
+
+test('a thenable fulfilling with a rejected promise leaks no unhandled rejection', async () => {
+  const thenable = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(Promise.reject(new Error('nested')))
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => thenable, {
+    async: false,
+  })
+
+  const { reasons, stop } = listenToUnhandledRejections()
+  await bench.run()
+  await flushTurns(3)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(bench.getTask('task')?.result).toMatchObject({
+    error: {
+      message: 'task function must be sync when using `runSync()`',
+    },
+    state: 'errored',
+  })
+})
+
+test.each(['overriddenDuration', 'overriddenIterationCost'] as const)(
+  'a rejected promise in `%s` leaks no unhandled rejection',
+  async (field) => {
+    const thenable = {
+      then (resolve: (value: unknown) => void): void {
+        resolve(Promise.reject(new Error('nested')))
+      },
+    }
+    const bench = new Bench({ time: 5, warmup: false })
+    bench.add('task', () => ({ [field]: thenable }))
+
+    const { reasons, stop } = listenToUnhandledRejections()
+    await bench.run()
+    await flushTurns(3)
+    stop()
+
+    expect(reasons).toEqual([])
+    expect(bench.getTask('task')?.result.state).toBe('completed')
+  }
+)

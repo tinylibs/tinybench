@@ -16,19 +16,29 @@ export const isPromiseLike = <T>(
   typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
 /**
+ * Suppresses rejections of a promise-like value, if any.
+ * @param value - the value to suppress rejections of, when promise-like
+ */
+const suppressRejection = (value: unknown): void => {
+  if (isPromiseLike(value)) {
+    Promise.resolve(value).catch(emptyFunction)
+  }
+}
+
+/**
  * Suppresses rejections of a promise-like value, and of the promise its own
- * `then` call returns, so neither surfaces as an unhandled rejection.
+ * `then` call returns, so neither surfaces as an unhandled rejection. A
+ * fulfillment value that is itself promise-like is assimilated and suppressed
+ * as well.
  * @param value - the promise-like value to mark handled
  */
 export const markHandled = (value: unknown): void => {
   try {
     const returned = (value as PromiseLike<unknown>).then(
-      emptyFunction,
+      suppressRejection,
       emptyFunction
     )
-    if (isPromiseLike(returned)) {
-      Promise.resolve(returned).catch(emptyFunction)
-    }
+    suppressRejection(returned)
   } catch {
     // Treat a throwing `then` as handled
   }

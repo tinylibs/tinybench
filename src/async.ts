@@ -14,56 +14,47 @@ export const isPromiseLike = <T>(
   typeof (maybePromiseLike as PromiseLike<T>).then === 'function'
 
 /**
- * Suppresses rejections of a settled value when it is a native promise,
- * attaching bounded one-step handlers instead of ever assimilating a user
- * thenable, whose own nesting cannot be bounded from the outside.
- * @param value - the settled value to suppress, when a native promise
- */
-const terminalSettled = (value: unknown): void => {
-  if (value instanceof Promise) {
-    value.then(terminalSettled).catch(terminalSettled)
-  }
-}
-
-/**
- * Marks a settled value handled at one nesting level. Extracted so handlers
- * are passed by reference instead of inline.
- * @param depth - the remaining nesting depth to handle
- * @returns a handler marking its settled value handled
- */
-const markSettled =
-  (depth: number) =>
-    (value: unknown): void => {
-      markHandled(value, depth)
-    }
-
-/**
  * Suppresses rejections of a promise-like value across its rejection channel,
  * the promise its own `then` call returns, and promise-like values it settles
  * with, so none surfaces as an unhandled rejection. Only raw handlers are
  * attached, never assimilated: nesting is followed for `depth` levels and a
  * terminal value only gets one-step native suppression, so a self-nesting
- * thenable cannot generate work endlessly. A thenable that keeps settling new
- * values on persistent handlers can still keep making work on its own; no
- * probe can detach from it.
+ * thenable cannot generate work endlessly. Each value is attached at most once
+ * per probe, so rejection cycles - a native promise rejecting with itself or
+ * mutually with another - terminate. A thenable that keeps settling new values
+ * on persistent handlers can still keep making work on its own; no probe can
+ * detach from it.
  * @param value - the promise-like value to mark handled
  * @param depth - the remaining nesting depth to handle
+ * @param seen - values already attached to by this probe
  */
-export const markHandled = (value: unknown, depth = 2): void => {
+export const markHandled = (
+  value: unknown,
+  depth = 2,
+  seen: WeakSet<object> = new WeakSet()
+): void => {
   try {
-    if (!isPromiseLike(value)) {
+    if (!isPromiseLike(value) || seen.has(value)) {
       return
     }
+    seen.add(value)
     if (depth <= 0) {
-      terminalSettled(
-        (value).then(terminalSettled, terminalSettled)
-      )
+      const terminal = (settled: unknown): void => {
+        if (settled instanceof Promise && !seen.has(settled)) {
+          seen.add(settled)
+          settled.then(terminal).catch(terminal)
+        }
+      }
+      terminal((value).then(terminal, terminal))
       return
     }
-    const settle = markSettled(depth - 1)
+    const settle = (settled: unknown): void => {
+      markHandled(settled, depth - 1, seen)
+    }
     markHandled(
       (value).then(settle, settle),
-      depth - 1
+      depth - 1,
+      seen
     )
   } catch {
     // Treat a throwing `then` as handled

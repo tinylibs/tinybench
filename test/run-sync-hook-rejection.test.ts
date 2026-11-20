@@ -346,3 +346,45 @@ test('a rejected promise returned by a returned thenable leaks no unhandled reje
   expect(reasons).toEqual([])
   expect(bench.getTask('task')?.result.state).toBe('errored')
 })
+
+test('a native promise rejecting with itself terminates without leaks', async () => {
+  const selfRejecting: Promise<number> = Promise.resolve().then(() => {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error -- a promise may reject with itself
+    throw selfRejecting
+  })
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => selfRejecting, { async: false })
+
+  const { exceptions, reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(3)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(exceptions).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})
+
+test('mutually rejecting native promises terminate without leaks', async () => {
+  // `b` rejects with `a` (pending); `a` later rejects with `b`: a cycle fully
+  // reachable at probe time.
+  const a = new Promise<number>((_resolve, reject) => {
+    setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- rejection reasons may be promises (cycle test)
+      reject(b)
+    }, 0)
+  })
+  // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- rejection reasons may be promises (cycle test)
+  const b: Promise<number> = Promise.reject(a)
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => b, { async: false })
+
+  const { exceptions, reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(5)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(exceptions).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})

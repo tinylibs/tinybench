@@ -471,3 +471,72 @@ test('a thenable returning a rejected promise at the last followed depth leaks n
   expect(exceptions).toEqual([])
   expect(bench.getTask('task')?.result.state).toBe('errored')
 })
+
+test('a thenable returning a rejected promise at the boundary attach leaks nothing', async () => {
+  const fourth = {
+    then (): Promise<unknown> {
+      return Promise.reject(new Error('boundary-returned'))
+    },
+  }
+  const third = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(fourth)
+    },
+  }
+  const second = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(third)
+    },
+  }
+  const first = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(second)
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => first, { async: false })
+
+  const { exceptions, reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(5)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(exceptions).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})
+
+test('a rejection reason at the boundary attach leaks nothing', async () => {
+  const rejected = Promise.reject(new Error('boundary-reason'))
+  const fourth = {
+    then (_resolve: unknown, reject: (reason: unknown) => void): void {
+      reject(rejected)
+    },
+  }
+  const third = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(fourth)
+    },
+  }
+  const second = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(third)
+    },
+  }
+  const first = {
+    then (resolve: (value: unknown) => void): void {
+      resolve(second)
+    },
+  }
+  const bench = new Bench({ warmup: false })
+  bench.add('task', () => first, { async: false })
+
+  const { exceptions, reasons, stop } = listenToUnhandledEvents()
+  await bench.run()
+  await flushTurns(5)
+  stop()
+
+  expect(reasons).toEqual([])
+  expect(exceptions).toEqual([])
+  expect(bench.getTask('task')?.result.state).toBe('errored')
+})

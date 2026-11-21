@@ -17,7 +17,7 @@ test('defaultConvertTaskResultForConsoleTable - not-started', () => {
         runtimeVersion: 'unknown',
         state: 'not-started',
       },
-    } as Task)
+    } as unknown as Task)
   ).toStrictEqual({
     'Latency avg (ns)': 'N/A',
     'Latency med (ns)': 'N/A',
@@ -37,7 +37,7 @@ test('defaultConvertTaskResultForConsoleTable - not-started', () => {
           runtimeVersion: 'unknown',
           state: 'not-started',
         },
-      } as Task)
+      } as unknown as Task)
     )
   ).toStrictEqual([
     'Task name',
@@ -59,7 +59,7 @@ test('defaultConvertTaskResultForConsoleTable - started', () => {
         runtimeVersion: 'unknown',
         state: 'started',
       },
-    } as Task)
+    } as unknown as Task)
   ).toStrictEqual({
     'Latency avg (ns)': 'N/A',
     'Latency med (ns)': 'N/A',
@@ -79,7 +79,7 @@ test('defaultConvertTaskResultForConsoleTable - started', () => {
           runtimeVersion: 'unknown',
           state: 'started',
         },
-      } as Task)
+      } as unknown as Task)
     )
   ).toStrictEqual([
     'Task name',
@@ -101,7 +101,7 @@ test('defaultConvertTaskResultForConsoleTable - aborted', () => {
         runtimeVersion: 'unknown',
         state: 'aborted',
       },
-    } as Task)
+    } as unknown as Task)
   ).toStrictEqual({
     'Latency avg (ns)': 'N/A',
     'Latency med (ns)': 'N/A',
@@ -121,7 +121,7 @@ test('defaultConvertTaskResultForConsoleTable - aborted', () => {
           runtimeVersion: 'unknown',
           state: 'aborted',
         },
-      } as Task)
+      } as unknown as Task)
     )
   ).toStrictEqual([
     'Task name',
@@ -146,7 +146,7 @@ test('defaultConvertTaskResultForConsoleTable - errored - with stack', () => {
         runtimeVersion: 'unknown',
         state: 'errored',
       },
-    } as Task)
+    } as unknown as Task)
   ).toStrictEqual({
     Error: error.message,
     Stack: error.stack,
@@ -163,7 +163,7 @@ test('defaultConvertTaskResultForConsoleTable - errored - with stack', () => {
           runtimeVersion: 'unknown',
           state: 'errored',
         },
-      } as Task)
+      } as unknown as Task)
     )
   ).toStrictEqual(['Task name', 'Error', 'Stack'])
 })
@@ -180,7 +180,7 @@ test('defaultConvertTaskResultForConsoleTable - errored - without stack', () => 
         runtimeVersion: 'unknown',
         state: 'errored',
       },
-    } as Task)
+    } as unknown as Task)
   ).toStrictEqual({
     Error: error.message,
     Stack: 'N/A',
@@ -197,7 +197,7 @@ test('defaultConvertTaskResultForConsoleTable - errored - without stack', () => 
           runtimeVersion: 'unknown',
           state: 'errored',
         },
-      } as Task)
+      } as unknown as Task)
     )
   ).toStrictEqual(['Task name', 'Error', 'Stack'])
 })

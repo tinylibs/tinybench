@@ -551,6 +551,50 @@ Semantics:
   to the event loop and cannot interrupt `runSync()`; see
   [Abort During Execution](#abort-during-execution).
 
+## Parameterized tasks
+
+`tinybench/each` registers one task per case of a table, with generated
+names. It is a separate entry point: importing it costs nothing to the main
+bundle.
+
+```ts
+import { Bench } from 'tinybench'
+import { each } from 'tinybench/each'
+
+const bench = new Bench()
+
+// primitive table: "foo task", "bar task"
+each(bench, ['foo', 'bar'])('%s task', (param) => doWork(param))
+
+// tuple table: destructure the row; $0, $1… index it
+each(bench, [[1, 1, 2], [1, 2, 3]] as const)('add($0, $1) -> $2', ([a, b, e]) => {
+  if (a + b !== e) throw new Error('wrong')
+})
+
+// object table: $path resolves dotted property paths against the row
+each(bench, [{ a: 1, b: 1 }, { a: 2, b: 1 }])('add($a, $b)', ({ a, b }) => add(a, b))
+
+// a callback gives full control over the name
+each(bench, cases)((c) => `parse ${c.id}`, (c) => parse(c.input))
+```
+
+Name tokens: `%%` and `$$` render literal `%`/`$`; `%#`/`%$` render the
+0/1-based case index; `%s` and `%j` render the row (`%j` as JSON); `$path` is
+resolved against the row (objects and arrays; an unresolvable path renders
+verbatim). Task functions always receive exactly one argument — the whole
+case — destructure it for tuple tables.
+
+Names are validated before anything is registered: a duplicate (inside the
+table or already on the bench) throws and registers nothing. `%#` shifts when
+cases are added or reordered — for stable cross-run names use a callback or
+stable row fields.
+
+Every case is a full task: cost budgets, hooks, `fnOptions` and aborts apply
+per task as with `Bench.add` — one `fnOptions` object is shared by all the
+generated tasks, `beforeAll` runs per task and phase, and bench-level hooks
+cannot see the case. Rows are stored by reference: mutating an input after
+registration changes the work measured under its rendered name.
+
 ## Timer Diagnostics
 
 After `bench.run()` (or `runSync()`), each task exposes

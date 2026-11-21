@@ -53,20 +53,20 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261117.1",
+    "@cloudflare/workers-types": "5.20261118.1",
     "@commitlint/cli": "21.2.4",
     "@commitlint/config-conventional": "21.2.4",
-    "@cspell/eslint-plugin": "10.5.1",
+    "@cspell/eslint-plugin": "10.5.2",
     "@eslint/js": "10.0.1",
     "@size-limit/preset-small-lib": "14.3.0",
     "@size-limit/time": "14.3.0",
     "@types/node": "26.6.6",
-    "@vitest/coverage-v8": "5.1.0",
+    "@vitest/coverage-v8": "5.1.1",
     "bumpp": "12.3.0",
     "changelogithub": "15.0.5",
     "clean-publish": "7.1.0",
     "eslint": "10.15.0",
-    "eslint-plugin-jsdoc": "65.4.10",
+    "eslint-plugin-jsdoc": "65.4.12",
     "eslint-plugin-perfectionist": "5.14.0",
     "nano-staged": "1.0.2",
     "neostandard": "0.14.1",
@@ -75,7 +75,7 @@
     "tsdown": "0.23.7",
     "typedoc": "0.28.20",
     "typescript": "6.0.3",
-    "vitest": "5.1.0"
+    "vitest": "5.1.1"
   },
   "keywords": [
     "benchmark",

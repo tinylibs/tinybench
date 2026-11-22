@@ -53,7 +53,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261118.1",
+    "@cloudflare/workers-types": "5.20261119.1",
     "@commitlint/cli": "21.2.4",
     "@commitlint/config-conventional": "21.2.4",
     "@cspell/eslint-plugin": "10.5.2",
@@ -66,7 +66,7 @@
     "changelogithub": "15.0.5",
     "clean-publish": "7.1.0",
     "eslint": "10.15.0",
-    "eslint-plugin-jsdoc": "65.4.12",
+    "eslint-plugin-jsdoc": "65.5.0",
     "eslint-plugin-perfectionist": "5.14.0",
     "nano-staged": "1.0.2",
     "neostandard": "0.14.1",

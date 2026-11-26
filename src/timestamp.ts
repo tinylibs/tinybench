@@ -28,7 +28,7 @@ export const performanceNowTimestampProvider: TimestampProvider = {
  * @returns the current timestamp in nanoseconds
  */
 const hrtimeBigint =
-  globalThis.process?.hrtime?.bigint.bind(globalThis.process?.hrtime) ?? // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  globalThis.process?.hrtime?.bigint?.bind(globalThis.process?.hrtime) ?? // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   (() => {
     throw new Error('hrtime.bigint() is not supported in this JS environment')
   })

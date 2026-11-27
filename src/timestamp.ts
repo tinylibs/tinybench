@@ -22,16 +22,20 @@ export const performanceNowTimestampProvider: TimestampProvider = {
   toMs: mToMs,
 }
 
+const hrtime = globalThis.process?.hrtime // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+const bigint = hrtime?.bigint // eslint-disable-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/unbound-method -- bound to hrtime below
+
 /* eslint-disable jsdoc/require-returns-check */
 /**
  * Returns the current timestamp in nanoseconds using `process.hrtime.bigint()`.
  * @returns the current timestamp in nanoseconds
  */
 const hrtimeBigint =
-  globalThis.process?.hrtime?.bigint.bind(globalThis.process?.hrtime) ?? // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-  (() => {
-    throw new Error('hrtime.bigint() is not supported in this JS environment')
-  })
+  typeof bigint === 'function'
+    ? bigint.bind(hrtime)
+    : () => {
+        throw new Error('hrtime.bigint() is not supported in this JS environment')
+      }
 /* eslint-enable jsdoc/require-returns-check */
 
 /**

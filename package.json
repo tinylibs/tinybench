@@ -41,6 +41,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./each": {
+      "types": "./dist/each.d.ts",
+      "default": "./dist/each.js"
     }
   },
   "files": [
